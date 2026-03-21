@@ -7,7 +7,7 @@ interface Props {
 }
 
 const ProductGrid = ({ products }: Props) => (
-  <div className="grid grid-cols-2 gap-[1px] bg-border">
+  <div className="grid grid-cols-2 gap-0">
     {products.map((p) => (
       <ProductCard key={p.id} product={p} />
     ))}
