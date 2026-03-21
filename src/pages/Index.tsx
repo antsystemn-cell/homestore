@@ -9,7 +9,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-secondary pb-16">
-      <CategoryNav />
+      <Header />
       <ProductGrid title="🔥 Онцгой хямдрал" products={saleProducts} />
       {newProducts.length > 0 && (
         <ProductGrid title="🆕 Шинэ бараа" products={newProducts} />
