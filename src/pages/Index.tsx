@@ -1,4 +1,4 @@
-import CategoryNav from "@/components/store/CategoryNav";
+import Header from "@/components/store/Header";
 import ProductGrid from "@/components/store/ProductGrid";
 import BottomNav from "@/components/store/BottomNav";
 import { products } from "@/data/products";
