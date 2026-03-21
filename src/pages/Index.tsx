@@ -1,5 +1,3 @@
-import Header from "@/components/store/Header";
-import PromoBanner from "@/components/store/PromoBanner";
 import CategoryNav from "@/components/store/CategoryNav";
 import ProductGrid from "@/components/store/ProductGrid";
 import BottomNav from "@/components/store/BottomNav";
@@ -11,8 +9,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-secondary pb-16">
-      <Header />
-      <PromoBanner />
       <CategoryNav />
       <ProductGrid title="🔥 Онцгой хямдрал" products={saleProducts} />
       {newProducts.length > 0 && (
