@@ -1,32 +1,20 @@
-import { Home, Zap, ChefHat, Sofa, Tag, Grid3X3 } from "lucide-react";
-
-const iconMap: Record<string, React.ReactNode> = {
-  Home: <Home className="h-5 w-5" />,
-  Zap: <Zap className="h-5 w-5" />,
-  ChefHat: <ChefHat className="h-5 w-5" />,
-  Sofa: <Sofa className="h-5 w-5" />,
-  Tag: <Tag className="h-5 w-5" />,
-  Grid3X3: <Grid3X3 className="h-5 w-5" />,
-};
-
 const cats = [
-  { label: "Нүүр", icon: "Home" },
-  { label: "Цахилгаан бараа", icon: "Zap" },
-  { label: "Гал тогоо", icon: "ChefHat" },
-  { label: "Гэр ахуй", icon: "Sofa" },
-  { label: "Хямдрал", icon: "Tag" },
-  { label: "Ангилал", icon: "Grid3X3" },
+  { label: "Нүүр" },
+  { label: "Цахилгаан бараа" },
+  { label: "Гал тогоо" },
+  { label: "Гэр ахуй" },
+  { label: "Хямдрал" },
+  { label: "Ангилал" },
 ];
 
 const CategoryNav = () => (
-  <div className="flex gap-2 overflow-x-auto px-4 py-3 no-scrollbar">
+  <div className="sticky top-0 z-50 flex gap-1 overflow-x-auto px-4 py-3 bg-primary no-scrollbar">
     {cats.map((c) => (
       <button
         key={c.label}
-        className="flex flex-col items-center gap-1 min-w-[60px] rounded-xl bg-accent p-2.5 text-accent-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+        className="rounded-full px-4 py-1.5 text-xs font-semibold whitespace-nowrap text-primary-foreground/70 hover:bg-primary-foreground/10 hover:text-primary-foreground transition-colors"
       >
-        {iconMap[c.icon]}
-        <span className="text-[10px] font-medium whitespace-nowrap">{c.label}</span>
+        {c.label}
       </button>
     ))}
   </div>
