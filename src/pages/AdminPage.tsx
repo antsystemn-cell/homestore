@@ -503,6 +503,8 @@ const AdminPage = () => {
               {tab === "products" && `Нийт ${products.length} бараа`}
               {tab === "orders" && `Нийт ${orders.length} захиалга`}
               {tab === "users" && `Нийт ${users.length} хэрэглэгч`}
+              {tab === "categories" && `Нийт ${dbCategories.length} ангилал`}
+              {tab === "brands" && `Нийт ${dbBrands.length} брэнд`}
             </p>
           </div>
           {tab === "products" && (
