@@ -1,4 +1,4 @@
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/data/products";
@@ -11,75 +11,89 @@ const CartPage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-secondary pb-16">
+    <div className="min-h-screen bg-secondary pb-16 md:pb-0">
       <Header />
-      <div className="p-4">
-        <h1 className="text-lg font-bold text-foreground mb-4">Миний сагс</h1>
+      <div className="max-w-6xl mx-auto p-4 md:px-8 md:py-8">
+        <h1 className="text-lg md:text-2xl font-bold text-foreground mb-4 md:mb-6">Миний сагс</h1>
 
         {items.length === 0 ? (
           <div className="text-center py-20 text-muted-foreground">
+            <ShoppingBag className="h-16 w-16 mx-auto mb-4 text-muted-foreground/40" />
             <p className="text-lg">Сагс хоосон байна</p>
             <Button className="mt-4" onClick={() => navigate("/")}>
               Дэлгүүр үзэх
             </Button>
           </div>
         ) : (
-          <div className="space-y-3">
-            {items.map(({ product, quantity }) => (
-              <div key={product.id} className="bg-card rounded-xl p-3 flex gap-3 border border-border">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-20 h-20 rounded-lg object-cover bg-secondary"
-                />
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-medium text-foreground truncate">{product.name}</h3>
-                  <p className="text-primary font-bold text-sm mt-1">{formatPrice(product.price)}</p>
-                  <div className="flex items-center justify-between mt-2">
-                    <div className="flex items-center gap-2 bg-secondary rounded-full">
-                      <button
-                        className="p-1.5 rounded-full hover:bg-accent"
-                        onClick={() => updateQuantity(product.id, quantity - 1)}
-                      >
-                        <Minus className="h-3 w-3" />
-                      </button>
-                      <span className="text-sm font-medium w-6 text-center">{quantity}</span>
-                      <button
-                        className="p-1.5 rounded-full hover:bg-accent"
-                        onClick={() => updateQuantity(product.id, quantity + 1)}
-                      >
-                        <Plus className="h-3 w-3" />
+          <div className="md:grid md:grid-cols-3 md:gap-8">
+            {/* Cart items */}
+            <div className="md:col-span-2 space-y-3">
+              {items.map(({ product, quantity }) => (
+                <div key={product.id} className="bg-card rounded-xl p-3 md:p-4 flex gap-3 md:gap-5 border border-border">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-20 h-20 md:w-28 md:h-28 rounded-lg object-cover bg-secondary cursor-pointer"
+                    onClick={() => navigate(`/product/${product.id}`)}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h3
+                      className="text-sm md:text-base font-medium text-foreground truncate cursor-pointer hover:underline"
+                      onClick={() => navigate(`/product/${product.id}`)}
+                    >
+                      {product.name}
+                    </h3>
+                    <p className="text-foreground font-bold text-sm md:text-lg mt-1">{formatPrice(product.price)}</p>
+                    <div className="flex items-center justify-between mt-2 md:mt-4">
+                      <div className="flex items-center gap-2 bg-secondary rounded-full">
+                        <button
+                          className="p-1.5 md:p-2 rounded-full hover:bg-accent"
+                          onClick={() => updateQuantity(product.id, quantity - 1)}
+                        >
+                          <Minus className="h-3 w-3 md:h-4 md:w-4" />
+                        </button>
+                        <span className="text-sm font-medium w-6 text-center">{quantity}</span>
+                        <button
+                          className="p-1.5 md:p-2 rounded-full hover:bg-accent"
+                          onClick={() => updateQuantity(product.id, quantity + 1)}
+                        >
+                          <Plus className="h-3 w-3 md:h-4 md:w-4" />
+                        </button>
+                      </div>
+                      <button onClick={() => removeFromCart(product.id)} className="text-sale p-1 hover:bg-sale/10 rounded-full transition-colors">
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
-                    <button onClick={() => removeFromCart(product.id)} className="text-sale p-1">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
                   </div>
                 </div>
-              </div>
-            ))}
-
-            <div className="bg-card rounded-xl p-4 border border-border space-y-2 mt-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Нийт дүн</span>
-                <span className="font-bold text-foreground">{formatPrice(cartTotal)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Хүргэлт</span>
-                <span className="text-primary font-medium">Үнэгүй</span>
-              </div>
-              <div className="border-t border-border pt-2 flex justify-between">
-                <span className="font-bold text-foreground">Төлөх дүн</span>
-                <span className="font-bold text-primary text-lg">{formatPrice(cartTotal)}</span>
-              </div>
+              ))}
             </div>
 
-            <Button
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-base"
-              onClick={() => navigate("/checkout")}
-            >
-              Захиалга өгөх
-            </Button>
+            {/* Order summary sidebar */}
+            <div className="md:col-span-1 mt-4 md:mt-0">
+              <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-3 md:sticky md:top-20">
+                <h2 className="font-bold text-foreground md:text-lg">Захиалгын дүн</h2>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Нийт дүн</span>
+                  <span className="font-bold text-foreground">{formatPrice(cartTotal)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Хүргэлт</span>
+                  <span className="text-primary font-medium">Үнэгүй</span>
+                </div>
+                <div className="border-t border-border pt-3 flex justify-between">
+                  <span className="font-bold text-foreground">Төлөх дүн</span>
+                  <span className="font-extrabold text-foreground text-lg">{formatPrice(cartTotal)}</span>
+                </div>
+
+                <Button
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-base rounded-xl mt-2"
+                  onClick={() => navigate("/checkout")}
+                >
+                  Захиалга өгөх
+                </Button>
+              </div>
+            </div>
           </div>
         )}
       </div>
