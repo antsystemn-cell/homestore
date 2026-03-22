@@ -57,5 +57,6 @@ export function mapDbProduct(row: any): Product {
     discount: row.discount,
     productCode: row.product_code,
     specifications: Array.isArray(row.specifications) ? row.specifications : [],
+    detailMedia: Array.isArray(row.detail_media) ? row.detail_media : [],
   };
 }
