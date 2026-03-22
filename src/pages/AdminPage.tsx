@@ -287,6 +287,7 @@ const AdminPage = () => {
       product_code: form.product_code || null,
       specifications: form.specifications.filter(s => s.key.trim() && s.value.trim()),
       detail_media: form.detail_media.filter(m => m.url.trim()),
+      brand_id: form.brand_id || null,
     };
     let productId = editId;
     if (editId) {
