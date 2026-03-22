@@ -33,6 +33,9 @@ const AdminPage = () => {
     is_new: false, is_on_sale: false,
   });
 
+  // Multiple images
+  const [extraImages, setExtraImages] = useState<string[]>([]);
+
   // Search & filter
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
@@ -43,6 +46,7 @@ const AdminPage = () => {
 
   // Image upload
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const extraFileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,8 +68,32 @@ const AdminPage = () => {
       toast.error("Зураг уншихад алдаа гарлаа");
     };
     reader.readAsDataURL(file);
-    // Reset input so same file can be re-selected
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleExtraImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    const newImages: string[] = [];
+    let hasError = false;
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!file.type.startsWith("image/")) { hasError = true; continue; }
+      if (file.size > 5 * 1024 * 1024) { hasError = true; continue; }
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = (ev) => resolve(ev.target?.result as string);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+      newImages.push(dataUrl);
+    }
+    if (hasError) toast.error("Зарим зураг оруулж чадсангүй (5MB-ээс бага, зураг файл байх ёстой)");
+    if (newImages.length > 0) {
+      setExtraImages((prev) => [...prev, ...newImages]);
+      toast.success(`${newImages.length} зураг нэмэгдлээ`);
+    }
+    if (extraFileInputRef.current) extraFileInputRef.current.value = "";
   };
 
   useEffect(() => {
