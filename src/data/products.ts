@@ -24,6 +24,7 @@ export interface Product {
   discount?: number | null;
   productCode?: string | null;
   specifications?: ProductSpec[];
+  detailMedia?: DetailMedia[];
 }
 
 export const categories = [
