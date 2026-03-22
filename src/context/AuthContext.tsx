@@ -12,10 +12,10 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const withTimeout = async <T,>(promise: PromiseLike<T>, fallback: T, ms = 4000): Promise<T> => {
+const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 4000): Promise<T | null> => {
   return await Promise.race([
     promise,
-    new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms)),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
   ]);
 };
 
@@ -33,12 +33,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .select("role")
           .eq("user_id", userId)
           .eq("role", "admin")
-          .maybeSingle(),
-        { data: null, error: null }
+          .maybeSingle()
       );
 
-      if (result.error) {
-        console.error("Failed to check admin role", result.error);
+      if (!result || result.error) {
+        if (result?.error) console.error("Failed to check admin role", result.error);
         setIsAdmin(false);
         return;
       }
@@ -73,13 +72,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const loadSession = async () => {
       try {
-        const result = await withTimeout(
-          supabase.auth.getSession(),
-          { data: { session: null }, error: null }
-        );
+        const result = await withTimeout(supabase.auth.getSession());
 
-        if (result.error) {
-          console.error("Failed to restore session", result.error);
+        if (!result || result.error) {
+          if (result?.error) console.error("Failed to restore session", result.error);
           await applySession(null);
           return;
         }
