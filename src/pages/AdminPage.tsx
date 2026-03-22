@@ -24,7 +24,17 @@ const AdminPage = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [dbCategories, setDbCategories] = useState<any[]>([]);
+  const [dbBrands, setDbBrands] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Category/Brand form state
+  const [catName, setCatName] = useState("");
+  const [catIcon, setCatIcon] = useState("");
+  const [editCatId, setEditCatId] = useState<string | null>(null);
+  const [brandName, setBrandName] = useState("");
+  const [brandLogo, setBrandLogo] = useState("");
+  const [editBrandId, setEditBrandId] = useState<string | null>(null);
 
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
