@@ -228,11 +228,14 @@ const AdminPage = () => {
   };
 
   const handleEditProduct = async (p: any) => {
+    const specs = Array.isArray(p.specifications) ? p.specifications : [];
     setForm({
       name: p.name, description: p.description || "", price: p.price,
       original_price: p.original_price || 0, image_url: p.image_url || "",
       category: p.category, discount: p.discount || 0,
       is_new: p.is_new, is_on_sale: p.is_on_sale,
+      product_code: p.product_code || "",
+      specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
     });
     setEditId(p.id);
     setShowForm(true);
