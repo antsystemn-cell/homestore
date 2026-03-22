@@ -360,6 +360,8 @@ const AdminPage = () => {
   const sidebarItems: { id: Tab; label: string; icon: any }[] = [
     { id: "stats", label: "Статистик", icon: BarChart3 },
     { id: "products", label: "Бараа", icon: Package },
+    { id: "categories", label: "Ангилал", icon: Layers },
+    { id: "brands", label: "Брэнд", icon: Tag },
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
     { id: "users", label: "Хэрэглэгч", icon: Users },
   ];
