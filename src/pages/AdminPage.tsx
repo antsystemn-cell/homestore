@@ -2,22 +2,21 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
-import { ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package, BarChart3 } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package, BarChart3, LayoutDashboard } from "lucide-react";
 import { toast } from "sonner";
 import { formatPrice } from "@/data/products";
 
-type Tab = "products" | "orders" | "users" | "stats";
+type Tab = "stats" | "products" | "orders" | "users";
 
 const AdminPage = () => {
   const navigate = useNavigate();
   const { isAdmin, loading: authLoading } = useAuth();
-  const [tab, setTab] = useState<Tab>("products");
+  const [tab, setTab] = useState<Tab>("stats");
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Product form
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -34,10 +33,10 @@ const AdminPage = () => {
   }, [isAdmin, authLoading]);
 
   useEffect(() => {
-    if (tab === "products") fetchProducts();
-    if (tab === "orders") fetchOrders();
-    if (tab === "users") fetchUsers();
-  }, [tab]);
+    fetchProducts();
+    fetchOrders();
+    fetchUsers();
+  }, []);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -47,17 +46,13 @@ const AdminPage = () => {
   };
 
   const fetchOrders = async () => {
-    setLoading(true);
     const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
     setOrders(data || []);
-    setLoading(false);
   };
 
   const fetchUsers = async () => {
-    setLoading(true);
     const { data } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
     setUsers(data || []);
-    setLoading(false);
   };
 
   const resetForm = () => {
@@ -67,19 +62,14 @@ const AdminPage = () => {
   };
 
   const handleSaveProduct = async () => {
-    if (!form.name || !form.price) {
-      toast.error("Нэр, үнэ заавал бөглөнө");
-      return;
-    }
+    if (!form.name || !form.price) { toast.error("Нэр, үнэ заавал бөглөнө"); return; }
     setLoading(true);
     if (editId) {
       const { error } = await supabase.from("products").update(form).eq("id", editId);
-      if (error) toast.error(error.message);
-      else toast.success("Бараа шинэчлэгдлээ");
+      if (error) toast.error(error.message); else toast.success("Бараа шинэчлэгдлээ");
     } else {
       const { error } = await supabase.from("products").insert(form);
-      if (error) toast.error(error.message);
-      else toast.success("Бараа нэмэгдлээ");
+      if (error) toast.error(error.message); else toast.success("Бараа нэмэгдлээ");
     }
     resetForm();
     fetchProducts();
@@ -89,10 +79,7 @@ const AdminPage = () => {
   const handleDeleteProduct = async (id: string) => {
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) toast.error(error.message);
-    else {
-      toast.success("Бараа устгагдлаа");
-      fetchProducts();
-    }
+    else { toast.success("Бараа устгагдлаа"); fetchProducts(); }
   };
 
   const handleEditProduct = (p: any) => {
@@ -106,180 +93,371 @@ const AdminPage = () => {
     setShowForm(true);
   };
 
-  const tabs: { id: Tab; label: string; icon: any }[] = [
+  const sidebarItems: { id: Tab; label: string; icon: any }[] = [
+    { id: "stats", label: "Статистик", icon: BarChart3 },
     { id: "products", label: "Бараа", icon: Package },
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
     { id: "users", label: "Хэрэглэгч", icon: Users },
-    { id: "stats", label: "Статистик", icon: BarChart3 },
   ];
+
+  const totalRevenue = orders.reduce((s: number, o: any) => s + o.total, 0);
 
   if (authLoading) return <div className="min-h-screen flex items-center justify-center">Уншиж байна...</div>;
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 bg-background px-4 py-3 flex items-center gap-3 border-b border-border">
-        <button onClick={() => navigate("/")} className="p-2 rounded-full bg-secondary">
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <h1 className="text-lg font-bold">Админ удирдлага</h1>
-      </header>
+    <div className="min-h-screen bg-background flex flex-col md:flex-row">
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex md:flex-col md:w-64 bg-card border-r border-border min-h-screen sticky top-0">
+        <div className="p-6 border-b border-border">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
+              <LayoutDashboard className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="font-bold text-sm">HomeStore</h1>
+              <p className="text-[11px] text-muted-foreground">Админ удирдлага</p>
+            </div>
+          </div>
+        </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-border">
-        {tabs.map((t) => {
-          const Icon = t.icon;
-          return (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors ${
-                tab === t.id ? "text-foreground border-b-2 border-foreground" : "text-muted-foreground"
-              }`}
-            >
-              <Icon className="h-4 w-4" />
-              {t.label}
-            </button>
-          );
-        })}
+        <nav className="flex-1 p-4 space-y-1">
+          {sidebarItems.map((item) => {
+            const Icon = item.icon;
+            const active = tab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setTab(item.id)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                  active
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {item.label}
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="p-4 border-t border-border">
+          <button
+            onClick={() => navigate("/")}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Нүүр хуудас
+          </button>
+        </div>
+      </aside>
+
+      {/* Mobile Header + Tabs */}
+      <div className="md:hidden">
+        <header className="sticky top-0 z-50 bg-background px-4 py-3 flex items-center gap-3 border-b border-border">
+          <button onClick={() => navigate("/")} className="p-2 rounded-full bg-secondary">
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <h1 className="text-lg font-bold">Админ удирдлага</h1>
+        </header>
+        <div className="flex border-b border-border">
+          {sidebarItems.map((t) => {
+            const Icon = t.icon;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors ${
+                  tab === t.id ? "text-foreground border-b-2 border-foreground" : "text-muted-foreground"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <div className="p-4">
-        {/* Products Tab */}
-        {tab === "products" && (
+      {/* Main Content */}
+      <main className="flex-1 min-h-screen">
+        {/* Desktop Header */}
+        <div className="hidden md:flex items-center justify-between px-8 py-6 border-b border-border bg-card">
           <div>
+            <h2 className="text-xl font-bold">
+              {sidebarItems.find(s => s.id === tab)?.label}
+            </h2>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {tab === "stats" && "Дэлгүүрийн ерөнхий мэдээлэл"}
+              {tab === "products" && `Нийт ${products.length} бараа`}
+              {tab === "orders" && `Нийт ${orders.length} захиалга`}
+              {tab === "users" && `Нийт ${users.length} хэрэглэгч`}
+            </p>
+          </div>
+          {tab === "products" && (
             <button
               onClick={() => { resetForm(); setShowForm(true); }}
-              className="flex items-center gap-2 bg-primary text-primary-foreground rounded-xl px-4 py-2.5 text-xs font-bold mb-4"
+              className="flex items-center gap-2 bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors"
             >
               <Plus className="h-4 w-4" /> Бараа нэмэх
             </button>
+          )}
+        </div>
 
-            {showForm && (
-              <div className="bg-card rounded-xl p-4 border border-border mb-4 space-y-3">
-                <input placeholder="Нэр *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full rounded-lg bg-secondary px-3 py-2.5 text-sm focus:outline-none" />
-                <textarea placeholder="Тайлбар" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="w-full rounded-lg bg-secondary px-3 py-2.5 text-sm focus:outline-none" rows={2} />
-                <div className="grid grid-cols-2 gap-2">
-                  <input type="number" placeholder="Үнэ *" value={form.price || ""} onChange={(e) => setForm({ ...form, price: +e.target.value })}
-                    className="rounded-lg bg-secondary px-3 py-2.5 text-sm focus:outline-none" />
-                  <input type="number" placeholder="Хуучин үнэ" value={form.original_price || ""} onChange={(e) => setForm({ ...form, original_price: +e.target.value })}
-                    className="rounded-lg bg-secondary px-3 py-2.5 text-sm focus:outline-none" />
+        <div className="p-4 md:p-8 max-w-5xl">
+          {/* Stats */}
+          {tab === "stats" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { label: "Нийт бараа", value: products.length, icon: Package, color: "bg-blue-500/10 text-blue-600" },
+                { label: "Нийт захиалга", value: orders.length, icon: ShoppingBag, color: "bg-green-500/10 text-green-600" },
+                { label: "Нийт хэрэглэгч", value: users.length, icon: Users, color: "bg-purple-500/10 text-purple-600" },
+                { label: "Нийт орлого", value: formatPrice(totalRevenue), icon: BarChart3, color: "bg-amber-500/10 text-amber-600" },
+              ].map((stat, i) => {
+                const Icon = stat.icon;
+                return (
+                  <div key={i} className="bg-card rounded-2xl p-6 border border-border">
+                    <div className={`h-10 w-10 rounded-xl ${stat.color} flex items-center justify-center mb-4`}>
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
+                    <p className="text-2xl font-extrabold">{stat.value}</p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Products */}
+          {tab === "products" && (
+            <div>
+              {/* Mobile add button */}
+              <button
+                onClick={() => { resetForm(); setShowForm(true); }}
+                className="md:hidden flex items-center gap-2 bg-primary text-primary-foreground rounded-xl px-4 py-2.5 text-xs font-bold mb-4"
+              >
+                <Plus className="h-4 w-4" /> Бараа нэмэх
+              </button>
+
+              {showForm && (
+                <div className="bg-card rounded-2xl p-4 md:p-6 border border-border mb-4 space-y-3">
+                  <h3 className="font-bold text-sm mb-2">{editId ? "Бараа засах" : "Шинэ бараа"}</h3>
+                  <input placeholder="Нэр *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <textarea placeholder="Тайлбар" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" rows={3} />
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <input type="number" placeholder="Үнэ *" value={form.price || ""} onChange={(e) => setForm({ ...form, price: +e.target.value })}
+                      className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                    <input type="number" placeholder="Хуучин үнэ" value={form.original_price || ""} onChange={(e) => setForm({ ...form, original_price: +e.target.value })}
+                      className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                    <input type="number" placeholder="Хямдрал %" value={form.discount || ""} onChange={(e) => setForm({ ...form, discount: +e.target.value })}
+                      className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                    <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
+                      className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+                      <option value="general">Ерөнхий</option>
+                      <option value="electronics">Цахилгаан бараа</option>
+                      <option value="kitchen">Гал тогоо</option>
+                      <option value="home">Гэр ахуй</option>
+                    </select>
+                  </div>
+                  <input placeholder="Зургийн URL" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+                    className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_new} onChange={(e) => setForm({ ...form, is_new: e.target.checked })} className="rounded" /> Шинэ</label>
+                    <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_on_sale} onChange={(e) => setForm({ ...form, is_on_sale: e.target.checked })} className="rounded" /> Хямдрал</label>
+                  </div>
+                  <div className="flex gap-3">
+                    <button onClick={handleSaveProduct} disabled={loading}
+                      className="flex-1 bg-primary text-primary-foreground rounded-xl py-3 text-sm font-bold disabled:opacity-50 hover:bg-primary/90 transition-colors">
+                      {editId ? "Шинэчлэх" : "Хадгалах"}
+                    </button>
+                    <button onClick={resetForm} className="flex-1 bg-secondary rounded-xl py-3 text-sm font-medium hover:bg-secondary/80 transition-colors">
+                      Болих
+                    </button>
+                  </div>
                 </div>
-                <input placeholder="Зургийн URL" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-                  className="w-full rounded-lg bg-secondary px-3 py-2.5 text-sm focus:outline-none" />
-                <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  className="w-full rounded-lg bg-secondary px-3 py-2.5 text-sm focus:outline-none">
-                  <option value="general">Ерөнхий</option>
-                  <option value="electronics">Цахилгаан бараа</option>
-                  <option value="kitchen">Гал тогоо</option>
-                  <option value="home">Гэр ахуй</option>
-                </select>
-                <div className="flex gap-3">
-                  <button onClick={handleSaveProduct} disabled={loading}
-                    className="flex-1 bg-primary text-primary-foreground rounded-lg py-2.5 text-xs font-bold disabled:opacity-50">
-                    {editId ? "Шинэчлэх" : "Хадгалах"}
-                  </button>
-                  <button onClick={resetForm} className="flex-1 bg-secondary rounded-lg py-2.5 text-xs font-medium">
-                    Болих
-                  </button>
+              )}
+
+              {/* Desktop table view */}
+              <div className="hidden md:block">
+                <div className="bg-card rounded-2xl border border-border overflow-hidden">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border text-left">
+                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Бараа</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Ангилал</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Үнэ</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground text-right">Үйлдэл</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {products.map((p) => (
+                        <tr key={p.id} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              {p.image_url && <img src={p.image_url} alt="" className="h-10 w-10 rounded-lg object-cover bg-secondary" />}
+                              <span className="text-sm font-medium">{p.name}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-muted-foreground">{p.category}</td>
+                          <td className="px-6 py-4 text-sm font-semibold">{formatPrice(p.price)}</td>
+                          <td className="px-6 py-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <button onClick={() => handleEditProduct(p)} className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors">
+                                <Pencil className="h-3.5 w-3.5" />
+                              </button>
+                              <button onClick={() => handleDeleteProduct(p.id)} className="p-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {products.length === 0 && !loading && (
+                    <p className="text-center text-sm text-muted-foreground py-12">Бараа байхгүй</p>
+                  )}
                 </div>
               </div>
-            )}
 
-            {products.map((p) => (
-              <div key={p.id} className="flex items-center gap-3 bg-card rounded-xl p-3 border border-border mb-2">
-                {p.image_url && <img src={p.image_url} alt="" className="h-12 w-12 rounded-lg object-cover bg-secondary" />}
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold truncate">{p.name}</p>
-                  <p className="text-xs text-muted-foreground">{formatPrice(p.price)}</p>
-                </div>
-                <button onClick={() => handleEditProduct(p)} className="p-2 rounded-lg bg-secondary">
-                  <Pencil className="h-3.5 w-3.5" />
-                </button>
-                <button onClick={() => handleDeleteProduct(p.id)} className="p-2 rounded-lg bg-destructive/10 text-destructive">
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
+              {/* Mobile card view */}
+              <div className="md:hidden space-y-2">
+                {products.map((p) => (
+                  <div key={p.id} className="flex items-center gap-3 bg-card rounded-xl p-3 border border-border">
+                    {p.image_url && <img src={p.image_url} alt="" className="h-12 w-12 rounded-lg object-cover bg-secondary" />}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold truncate">{p.name}</p>
+                      <p className="text-xs text-muted-foreground">{formatPrice(p.price)}</p>
+                    </div>
+                    <button onClick={() => handleEditProduct(p)} className="p-2 rounded-lg bg-secondary"><Pencil className="h-3.5 w-3.5" /></button>
+                    <button onClick={() => handleDeleteProduct(p.id)} className="p-2 rounded-lg bg-destructive/10 text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
+                  </div>
+                ))}
+                {products.length === 0 && !loading && (
+                  <p className="text-center text-sm text-muted-foreground py-8">Бараа байхгүй</p>
+                )}
               </div>
-            ))}
-            {products.length === 0 && !loading && (
-              <p className="text-center text-sm text-muted-foreground py-8">Бараа байхгүй</p>
-            )}
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* Orders Tab */}
-        {tab === "orders" && (
-          <div>
-            {orders.map((o) => (
-              <div key={o.id} className="bg-card rounded-xl p-4 border border-border mb-2">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-bold">#{o.id.slice(0, 8)}</span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    o.status === "pending" ? "bg-warning/10 text-warning" :
-                    o.status === "completed" ? "bg-green-100 text-green-700" :
-                    "bg-secondary text-muted-foreground"
-                  }`}>{o.status}</span>
+          {/* Orders */}
+          {tab === "orders" && (
+            <div>
+              <div className="hidden md:block">
+                <div className="bg-card rounded-2xl border border-border overflow-hidden">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border text-left">
+                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Захиалгын ID</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Дүн</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Огноо</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Төлөв</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orders.map((o) => (
+                        <tr key={o.id} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
+                          <td className="px-6 py-4 text-sm font-medium">#{o.id.slice(0, 8)}</td>
+                          <td className="px-6 py-4 text-sm font-semibold">{formatPrice(o.total)}</td>
+                          <td className="px-6 py-4 text-sm text-muted-foreground">{new Date(o.created_at).toLocaleDateString("mn-MN")}</td>
+                          <td className="px-6 py-4">
+                            <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                              o.status === "pending" ? "bg-amber-500/10 text-amber-600" :
+                              o.status === "completed" ? "bg-green-500/10 text-green-600" :
+                              "bg-secondary text-muted-foreground"
+                            }`}>{o.status}</span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {orders.length === 0 && !loading && (
+                    <p className="text-center text-sm text-muted-foreground py-12">Захиалга байхгүй</p>
+                  )}
                 </div>
-                <p className="text-xs text-muted-foreground">{formatPrice(o.total)}</p>
-                <p className="text-[10px] text-muted-foreground mt-1">
-                  {new Date(o.created_at).toLocaleDateString("mn-MN")}
-                </p>
               </div>
-            ))}
-            {orders.length === 0 && !loading && (
-              <p className="text-center text-sm text-muted-foreground py-8">Захиалга байхгүй</p>
-            )}
-          </div>
-        )}
 
-        {/* Users Tab */}
-        {tab === "users" && (
-          <div>
-            {users.map((u) => (
-              <div key={u.id} className="flex items-center gap-3 bg-card rounded-xl p-3 border border-border mb-2">
-                <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold">
-                  {(u.full_name || "?")[0].toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold truncate">{u.full_name || "Нэргүй"}</p>
-                  <p className="text-[10px] text-muted-foreground">{u.phone || "Утас байхгүй"}</p>
-                </div>
-                <span className="text-[10px] text-muted-foreground">
-                  {new Date(u.created_at).toLocaleDateString("mn-MN")}
-                </span>
+              <div className="md:hidden space-y-2">
+                {orders.map((o) => (
+                  <div key={o.id} className="bg-card rounded-xl p-4 border border-border">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-xs font-bold">#{o.id.slice(0, 8)}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        o.status === "pending" ? "bg-amber-500/10 text-amber-600" :
+                        o.status === "completed" ? "bg-green-500/10 text-green-600" :
+                        "bg-secondary text-muted-foreground"
+                      }`}>{o.status}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{formatPrice(o.total)}</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">{new Date(o.created_at).toLocaleDateString("mn-MN")}</p>
+                  </div>
+                ))}
+                {orders.length === 0 && !loading && (
+                  <p className="text-center text-sm text-muted-foreground py-8">Захиалга байхгүй</p>
+                )}
               </div>
-            ))}
-            {users.length === 0 && !loading && (
-              <p className="text-center text-sm text-muted-foreground py-8">Хэрэглэгч байхгүй</p>
-            )}
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* Stats Tab */}
-        {tab === "stats" && (
-          <div className="space-y-3">
-            <div className="bg-card rounded-xl p-4 border border-border">
-              <p className="text-xs text-muted-foreground">Нийт бараа</p>
-              <p className="text-2xl font-extrabold">{products.length}</p>
+          {/* Users */}
+          {tab === "users" && (
+            <div>
+              <div className="hidden md:block">
+                <div className="bg-card rounded-2xl border border-border overflow-hidden">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border text-left">
+                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Хэрэглэгч</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Утас</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Бүртгүүлсэн</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {users.map((u) => (
+                        <tr key={u.id} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="h-9 w-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold">
+                                {(u.full_name || "?")[0].toUpperCase()}
+                              </div>
+                              <span className="text-sm font-medium">{u.full_name || "Нэргүй"}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-muted-foreground">{u.phone || "—"}</td>
+                          <td className="px-6 py-4 text-sm text-muted-foreground">{new Date(u.created_at).toLocaleDateString("mn-MN")}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {users.length === 0 && !loading && (
+                    <p className="text-center text-sm text-muted-foreground py-12">Хэрэглэгч байхгүй</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="md:hidden space-y-2">
+                {users.map((u) => (
+                  <div key={u.id} className="flex items-center gap-3 bg-card rounded-xl p-3 border border-border">
+                    <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold">
+                      {(u.full_name || "?")[0].toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold truncate">{u.full_name || "Нэргүй"}</p>
+                      <p className="text-[10px] text-muted-foreground">{u.phone || "Утас байхгүй"}</p>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">{new Date(u.created_at).toLocaleDateString("mn-MN")}</span>
+                  </div>
+                ))}
+                {users.length === 0 && !loading && (
+                  <p className="text-center text-sm text-muted-foreground py-8">Хэрэглэгч байхгүй</p>
+                )}
+              </div>
             </div>
-            <div className="bg-card rounded-xl p-4 border border-border">
-              <p className="text-xs text-muted-foreground">Нийт захиалга</p>
-              <p className="text-2xl font-extrabold">{orders.length}</p>
-            </div>
-            <div className="bg-card rounded-xl p-4 border border-border">
-              <p className="text-xs text-muted-foreground">Нийт хэрэглэгч</p>
-              <p className="text-2xl font-extrabold">{users.length}</p>
-            </div>
-            <div className="bg-card rounded-xl p-4 border border-border">
-              <p className="text-xs text-muted-foreground">Нийт орлого</p>
-              <p className="text-2xl font-extrabold">
-                {formatPrice(orders.reduce((s: number, o: any) => s + o.total, 0))}
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 };
