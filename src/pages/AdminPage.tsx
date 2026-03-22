@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
-  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye
+  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2
 } from "lucide-react";
+import { useRef } from "react";
 import { toast } from "sonner";
 import { formatPrice } from "@/data/products";
 import {
@@ -39,6 +40,33 @@ const AdminPage = () => {
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Image upload
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Зөвхөн зураг оруулна уу"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Зураг 5MB-ээс бага байх ёстой"); return; }
+
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result as string;
+      setForm((prev) => ({ ...prev, image_url: dataUrl }));
+      setUploading(false);
+      toast.success("Зураг амжилттай оруулагдлаа");
+    };
+    reader.onerror = () => {
+      setUploading(false);
+      toast.error("Зураг уншихад алдаа гарлаа");
+    };
+    reader.readAsDataURL(file);
+    // Reset input so same file can be re-selected
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   useEffect(() => {
     if (!authLoading && !isAdmin) {
@@ -321,21 +349,51 @@ const AdminPage = () => {
                     </button>
                   </div>
 
-                  {/* Image preview */}
+                  {/* Image upload */}
                   <div className="flex items-start gap-4">
-                    <div className="h-24 w-24 rounded-xl bg-secondary border-2 border-dashed border-border flex items-center justify-center overflow-hidden shrink-0">
-                      {form.image_url ? (
-                        <img src={form.image_url} alt="Preview" className="h-full w-full object-cover rounded-xl"
-                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                    <div
+                      className="h-24 w-24 rounded-xl bg-secondary border-2 border-dashed border-border flex items-center justify-center overflow-hidden shrink-0 cursor-pointer hover:border-primary/40 transition-colors relative group"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      {uploading ? (
+                        <Loader2 className="h-6 w-6 text-muted-foreground animate-spin" />
+                      ) : form.image_url ? (
+                        <>
+                          <img src={form.image_url} alt="Preview" className="h-full w-full object-cover rounded-xl"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
+                            <Upload className="h-5 w-5 text-white" />
+                          </div>
+                        </>
                       ) : (
-                        <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
+                        <div className="flex flex-col items-center gap-1">
+                          <Upload className="h-5 w-5 text-muted-foreground/60" />
+                          <span className="text-[9px] text-muted-foreground/60">Зураг</span>
+                        </div>
                       )}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleImageUpload}
+                      />
                     </div>
                     <div className="flex-1 space-y-3">
                       <input placeholder="Барааны нэр *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
                         className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                      <input placeholder="Зургийн URL" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                      <div className="flex gap-2">
+                        <input placeholder="Зургийн URL (эсвэл дээр дарж upload хийнэ)" value={form.image_url?.startsWith("data:") ? "📷 Зураг оруулсан" : form.image_url}
+                          onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+                          readOnly={form.image_url?.startsWith("data:")}
+                          className="flex-1 rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                        {form.image_url && (
+                          <button type="button" onClick={() => setForm({ ...form, image_url: "" })}
+                            className="px-3 rounded-xl bg-secondary hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                            <X className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
 
