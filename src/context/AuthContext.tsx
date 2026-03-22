@@ -12,6 +12,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 4000): Promise<T | null> => {
+  return await Promise.race([
+    promise,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+  ]);
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -20,13 +27,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const checkAdmin = async (userId: string) => {
     try {
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .eq("role", "admin")
-        .maybeSingle();
-      setIsAdmin(!!data);
+      const result = await withTimeout(
+        supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId)
+          .eq("role", "admin")
+          .maybeSingle()
+      );
+
+      if (!result || result.error) {
+        if (result?.error) console.error("Failed to check admin role", result.error);
+        setIsAdmin(false);
+        return;
+      }
+
+      setIsAdmin(!!result.data);
     } catch (error) {
       console.error("Failed to check admin role", error);
       setIsAdmin(false);
@@ -35,57 +51,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     let mounted = true;
-    const timeout = setTimeout(() => {
-      if (mounted && loading) {
-        console.warn("Auth session load timed out");
-        setLoading(false);
-      }
-    }, 5000);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        if (!mounted) return;
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await checkAdmin(session.user.id);
-        } else {
-          setIsAdmin(false);
-        }
-        setLoading(false);
-        clearTimeout(timeout);
+    const applySession = async (nextSession: Session | null) => {
+      if (!mounted) return;
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+
+      if (nextSession?.user) {
+        await checkAdmin(nextSession.user.id);
+      } else {
+        setIsAdmin(false);
       }
-    );
+
+      if (mounted) setLoading(false);
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      void applySession(nextSession);
+    });
 
     const loadSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!mounted) return;
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await checkAdmin(session.user.id);
-        } else {
-          setIsAdmin(false);
+        const result = await withTimeout(supabase.auth.getSession());
+
+        if (!result || result.error) {
+          if (result?.error) console.error("Failed to restore session", result.error);
+          await applySession(null);
+          return;
         }
+
+        await applySession(result.data.session);
       } catch (error) {
         console.error("Failed to restore session", error);
-        if (!mounted) return;
-        setSession(null);
-        setUser(null);
-        setIsAdmin(false);
-      } finally {
-        if (mounted) {
-          setLoading(false);
-          clearTimeout(timeout);
-        }
+        await applySession(null);
       }
     };
 
-    loadSession();
+    void loadSession();
+
     return () => {
       mounted = false;
-      clearTimeout(timeout);
       subscription.unsubscribe();
     };
   }, []);
