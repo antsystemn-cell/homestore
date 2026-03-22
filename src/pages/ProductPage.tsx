@@ -7,6 +7,7 @@ import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
 import BottomNav from "@/components/store/BottomNav";
 import ProductCard from "@/components/store/ProductCard";
+import ProductReviews from "@/components/store/ProductReviews";
 
 const ProductPage = () => {
   const { id } = useParams();
@@ -244,6 +245,11 @@ const ProductPage = () => {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Reviews */}
+        <div className="mt-10 md:mt-16 px-4 md:px-0">
+          <ProductReviews productId={product.id} />
         </div>
 
         {related.length > 0 && (
