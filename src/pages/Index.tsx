@@ -25,14 +25,21 @@ const Index = () => {
 
   useEffect(() => {
     const fetchAll = async () => {
-      const { data } = await supabase
-        .from("products")
-        .select("*");
-      const shuffled = shuffle((data || []).map(mapDbProduct));
-      setAllProducts(shuffled);
-      setVisible(shuffled.slice(0, PAGE_SIZE));
-      setHasMore(shuffled.length > PAGE_SIZE);
-      setLoading(false);
+      try {
+        const { data, error } = await supabase.from("products").select("*");
+        if (error) throw error;
+        const shuffled = shuffle((data || []).map(mapDbProduct));
+        setAllProducts(shuffled);
+        setVisible(shuffled.slice(0, PAGE_SIZE));
+        setHasMore(shuffled.length > PAGE_SIZE);
+      } catch (error) {
+        console.error("Failed to load products", error);
+        setAllProducts([]);
+        setVisible([]);
+        setHasMore(false);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchAll();
   }, []);

@@ -21,30 +21,41 @@ const ProductPage = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       setLoading(true);
-      const { data } = await supabase.from("products").select("*").eq("id", id).maybeSingle();
-      if (data) {
-        const p = mapDbProduct(data);
-        setProduct(p);
+      try {
+        const { data, error } = await supabase.from("products").select("*").eq("id", id).maybeSingle();
+        if (error) throw error;
 
-        // Fetch extra images
-        const { data: imgs } = await supabase
-          .from("product_images")
-          .select("image_url")
-          .eq("product_id", data.id)
-          .order("position");
-        const extras = (imgs || []).map((r: any) => r.image_url);
-        setAllImages([p.image, ...extras]);
-        setActiveImg(0);
+        if (data) {
+          const p = mapDbProduct(data);
+          setProduct(p);
 
-        const { data: rel } = await supabase
-          .from("products")
-          .select("*")
-          .eq("category", data.category)
-          .neq("id", data.id)
-          .limit(4);
-        setRelated((rel || []).map(mapDbProduct));
+          const { data: imgs } = await supabase
+            .from("product_images")
+            .select("image_url")
+            .eq("product_id", data.id)
+            .order("position");
+          const extras = (imgs || []).map((r: any) => r.image_url);
+          setAllImages([p.image, ...extras]);
+          setActiveImg(0);
+
+          const { data: rel } = await supabase
+            .from("products")
+            .select("*")
+            .eq("category", data.category)
+            .neq("id", data.id)
+            .limit(4);
+          setRelated((rel || []).map(mapDbProduct));
+        } else {
+          setProduct(null);
+        }
+      } catch (error) {
+        console.error("Failed to load product", error);
+        setProduct(null);
+        setAllImages([]);
+        setRelated([]);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     fetchProduct();
   }, [id]);

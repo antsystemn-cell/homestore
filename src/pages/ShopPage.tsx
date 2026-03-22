@@ -11,12 +11,19 @@ const ShopPage = () => {
 
   useEffect(() => {
     const fetch = async () => {
-      const { data } = await supabase
-        .from("products")
-        .select("*")
-        .order("created_at", { ascending: false });
-      setProducts((data || []).map(mapDbProduct));
-      setLoading(false);
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        setProducts((data || []).map(mapDbProduct));
+      } catch (error) {
+        console.error("Failed to load shop products", error);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
     };
     fetch();
   }, []);
