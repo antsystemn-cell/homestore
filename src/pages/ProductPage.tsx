@@ -213,6 +213,36 @@ const ProductPage = () => {
                 </div>
               </div>
             )}
+
+            {product.detailMedia && product.detailMedia.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="font-semibold text-foreground">Дэлгэрэнгүй</h2>
+                {product.detailMedia.map((media, idx) => (
+                  <div key={idx} className="space-y-1.5">
+                    {media.type === "image" ? (
+                      <img src={media.url} alt={media.caption || ""} className="w-full rounded-xl object-cover" />
+                    ) : (
+                      <div className="w-full aspect-video rounded-xl overflow-hidden bg-secondary">
+                        {media.url.includes("youtube.com") || media.url.includes("youtu.be") ? (
+                          <iframe
+                            src={media.url.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/")}
+                            className="w-full h-full"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            title={media.caption || "Video"}
+                          />
+                        ) : (
+                          <video src={media.url} controls className="w-full h-full" />
+                        )}
+                      </div>
+                    )}
+                    {media.caption && (
+                      <p className="text-xs text-muted-foreground px-1">{media.caption}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
