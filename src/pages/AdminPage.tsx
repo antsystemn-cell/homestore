@@ -44,6 +44,7 @@ const AdminPage = () => {
     is_new: false, is_on_sale: false,
     product_code: "", specifications: [] as { key: string; value: string }[],
     detail_media: [] as { type: "image" | "video"; url: string; caption: string }[],
+    brand_id: "",
   });
 
   // Detail media file input
@@ -268,7 +269,7 @@ const AdminPage = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, product_code: "", specifications: [], detail_media: [] });
+    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, product_code: "", specifications: [], detail_media: [], brand_id: "" });
     setEditId(null);
     setShowForm(false);
     setExtraImages([]);
@@ -286,6 +287,7 @@ const AdminPage = () => {
       product_code: form.product_code || null,
       specifications: form.specifications.filter(s => s.key.trim() && s.value.trim()),
       detail_media: form.detail_media.filter(m => m.url.trim()),
+      brand_id: form.brand_id || null,
     };
     let productId = editId;
     if (editId) {
@@ -335,6 +337,7 @@ const AdminPage = () => {
       product_code: p.product_code || "",
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
       detail_media: media.map((m: any) => ({ type: m.type || "image", url: m.url || "", caption: m.caption || "" })),
+      brand_id: p.brand_id || "",
     });
     setEditId(p.id);
     setShowForm(true);
@@ -861,6 +864,16 @@ const AdminPage = () => {
                         className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
                         {dbCategories.map((c) => (
                           <option key={c.id} value={c.name}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-muted-foreground mb-1 block">Брэнд</label>
+                      <select value={form.brand_id} onChange={(e) => setForm({ ...form, brand_id: e.target.value })}
+                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+                        <option value="">Брэндгүй</option>
+                        {dbBrands.map((b) => (
+                          <option key={b.id} value={b.id}>{b.name}</option>
                         ))}
                       </select>
                     </div>
