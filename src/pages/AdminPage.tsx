@@ -154,18 +154,35 @@ const AdminPage = () => {
     setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false });
     setEditId(null);
     setShowForm(false);
+    setExtraImages([]);
   };
 
   const handleSaveProduct = async () => {
     if (!form.name.trim()) { toast.error("Барааны нэр заавал бөглөнө"); return; }
     if (!form.price || form.price <= 0) { toast.error("Зөв үнэ оруулна уу"); return; }
     setLoading(true);
+    let productId = editId;
     if (editId) {
       const { error } = await supabase.from("products").update(form).eq("id", editId);
-      if (error) toast.error(error.message); else toast.success("Бараа амжилттай шинэчлэгдлээ");
+      if (error) { toast.error(error.message); setLoading(false); return; }
+      // Delete old extra images and re-insert
+      await supabase.from("product_images").delete().eq("product_id", editId);
+      toast.success("Бараа амжилттай шинэчлэгдлээ");
     } else {
-      const { error } = await supabase.from("products").insert(form);
-      if (error) toast.error(error.message); else toast.success("Бараа амжилттай нэмэгдлээ");
+      const { data, error } = await supabase.from("products").insert(form).select("id").single();
+      if (error) { toast.error(error.message); setLoading(false); return; }
+      productId = data.id;
+      toast.success("Бараа амжилттай нэмэгдлээ");
+    }
+    // Save extra images
+    if (productId && extraImages.length > 0) {
+      const rows = extraImages.map((url, i) => ({
+        product_id: productId!,
+        image_url: url,
+        position: i,
+      }));
+      const { error: imgErr } = await supabase.from("product_images").insert(rows);
+      if (imgErr) toast.error("Нэмэлт зураг хадгалахад алдаа: " + imgErr.message);
     }
     resetForm();
     fetchProducts();
@@ -182,7 +199,7 @@ const AdminPage = () => {
     setDeleting(false);
   };
 
-  const handleEditProduct = (p: any) => {
+  const handleEditProduct = async (p: any) => {
     setForm({
       name: p.name, description: p.description || "", price: p.price,
       original_price: p.original_price || 0, image_url: p.image_url || "",
@@ -191,6 +208,13 @@ const AdminPage = () => {
     });
     setEditId(p.id);
     setShowForm(true);
+    // Load extra images
+    const { data } = await supabase
+      .from("product_images")
+      .select("image_url")
+      .eq("product_id", p.id)
+      .order("position");
+    setExtraImages((data || []).map((r: any) => r.image_url));
   };
 
   // Filtered products
