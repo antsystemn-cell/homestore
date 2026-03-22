@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Heart, ShoppingCart, Truck, Shield, RotateCcw } from "lucide-react";
+import { ArrowLeft, Heart, ShoppingCart, Truck, Shield, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
 import { Product, formatPrice, mapDbProduct } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/context/CartContext";
@@ -15,6 +15,8 @@ const ProductPage = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [related, setRelated] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [allImages, setAllImages] = useState<string[]>([]);
+  const [activeImg, setActiveImg] = useState(0);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -23,7 +25,17 @@ const ProductPage = () => {
       if (data) {
         const p = mapDbProduct(data);
         setProduct(p);
-        // Fetch related
+
+        // Fetch extra images
+        const { data: imgs } = await supabase
+          .from("product_images")
+          .select("image_url")
+          .eq("product_id", data.id)
+          .order("position");
+        const extras = (imgs || []).map((r: any) => r.image_url);
+        setAllImages([p.image, ...extras]);
+        setActiveImg(0);
+
         const { data: rel } = await supabase
           .from("products")
           .select("*")
@@ -74,10 +86,26 @@ const ProductPage = () => {
         <div className="md:grid md:grid-cols-2 md:gap-10">
           <div className="relative md:sticky md:top-20 md:self-start">
             <img
-              src={product.image}
+              src={allImages[activeImg] || product.image}
               alt={product.name}
               className="w-full aspect-square object-cover bg-secondary md:rounded-2xl"
             />
+            {allImages.length > 1 && (
+              <>
+                <button
+                  onClick={() => setActiveImg((i) => (i - 1 + allImages.length) % allImages.length)}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
+                >
+                  <ChevronLeft className="h-4 w-4 text-foreground" />
+                </button>
+                <button
+                  onClick={() => setActiveImg((i) => (i + 1) % allImages.length)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
+                >
+                  <ChevronRight className="h-4 w-4 text-foreground" />
+                </button>
+              </>
+            )}
             <button
               onClick={() => toggleWishlist(product)}
               className="absolute top-4 right-4 p-2.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
@@ -88,6 +116,22 @@ const ProductPage = () => {
               <span className="absolute bottom-4 left-4 bg-sale text-sale-foreground text-xs font-bold px-3 py-1.5 rounded-full">
                 -{product.discount}% хямдрал
               </span>
+            )}
+            {/* Thumbnails */}
+            {allImages.length > 1 && (
+              <div className="flex gap-2 mt-3 px-4 md:px-0 overflow-x-auto pb-1">
+                {allImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveImg(idx)}
+                    className={`h-14 w-14 rounded-lg overflow-hidden shrink-0 border-2 transition-colors ${
+                      idx === activeImg ? "border-primary" : "border-transparent"
+                    }`}
+                  >
+                    <img src={img} alt="" className="h-full w-full object-cover" />
+                  </button>
+                ))}
+              </div>
             )}
           </div>
 

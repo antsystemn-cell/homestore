@@ -33,6 +33,9 @@ const AdminPage = () => {
     is_new: false, is_on_sale: false,
   });
 
+  // Multiple images
+  const [extraImages, setExtraImages] = useState<string[]>([]);
+
   // Search & filter
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
@@ -43,6 +46,7 @@ const AdminPage = () => {
 
   // Image upload
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const extraFileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,8 +68,32 @@ const AdminPage = () => {
       toast.error("Зураг уншихад алдаа гарлаа");
     };
     reader.readAsDataURL(file);
-    // Reset input so same file can be re-selected
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleExtraImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    const newImages: string[] = [];
+    let hasError = false;
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!file.type.startsWith("image/")) { hasError = true; continue; }
+      if (file.size > 5 * 1024 * 1024) { hasError = true; continue; }
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = (ev) => resolve(ev.target?.result as string);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+      newImages.push(dataUrl);
+    }
+    if (hasError) toast.error("Зарим зураг оруулж чадсангүй (5MB-ээс бага, зураг файл байх ёстой)");
+    if (newImages.length > 0) {
+      setExtraImages((prev) => [...prev, ...newImages]);
+      toast.success(`${newImages.length} зураг нэмэгдлээ`);
+    }
+    if (extraFileInputRef.current) extraFileInputRef.current.value = "";
   };
 
   useEffect(() => {
@@ -126,18 +154,35 @@ const AdminPage = () => {
     setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false });
     setEditId(null);
     setShowForm(false);
+    setExtraImages([]);
   };
 
   const handleSaveProduct = async () => {
     if (!form.name.trim()) { toast.error("Барааны нэр заавал бөглөнө"); return; }
     if (!form.price || form.price <= 0) { toast.error("Зөв үнэ оруулна уу"); return; }
     setLoading(true);
+    let productId = editId;
     if (editId) {
       const { error } = await supabase.from("products").update(form).eq("id", editId);
-      if (error) toast.error(error.message); else toast.success("Бараа амжилттай шинэчлэгдлээ");
+      if (error) { toast.error(error.message); setLoading(false); return; }
+      // Delete old extra images and re-insert
+      await supabase.from("product_images").delete().eq("product_id", editId);
+      toast.success("Бараа амжилттай шинэчлэгдлээ");
     } else {
-      const { error } = await supabase.from("products").insert(form);
-      if (error) toast.error(error.message); else toast.success("Бараа амжилттай нэмэгдлээ");
+      const { data, error } = await supabase.from("products").insert(form).select("id").single();
+      if (error) { toast.error(error.message); setLoading(false); return; }
+      productId = data.id;
+      toast.success("Бараа амжилттай нэмэгдлээ");
+    }
+    // Save extra images
+    if (productId && extraImages.length > 0) {
+      const rows = extraImages.map((url, i) => ({
+        product_id: productId!,
+        image_url: url,
+        position: i,
+      }));
+      const { error: imgErr } = await supabase.from("product_images").insert(rows);
+      if (imgErr) toast.error("Нэмэлт зураг хадгалахад алдаа: " + imgErr.message);
     }
     resetForm();
     fetchProducts();
@@ -154,7 +199,7 @@ const AdminPage = () => {
     setDeleting(false);
   };
 
-  const handleEditProduct = (p: any) => {
+  const handleEditProduct = async (p: any) => {
     setForm({
       name: p.name, description: p.description || "", price: p.price,
       original_price: p.original_price || 0, image_url: p.image_url || "",
@@ -163,6 +208,13 @@ const AdminPage = () => {
     });
     setEditId(p.id);
     setShowForm(true);
+    // Load extra images
+    const { data } = await supabase
+      .from("product_images")
+      .select("image_url")
+      .eq("product_id", p.id)
+      .order("position");
+    setExtraImages((data || []).map((r: any) => r.image_url));
   };
 
   // Filtered products
@@ -418,6 +470,41 @@ const AdminPage = () => {
                           </button>
                         )}
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Extra images */}
+                  <div>
+                    <label className="text-[11px] text-muted-foreground mb-2 block">Нэмэлт зургууд ({extraImages.length})</label>
+                    <div className="flex flex-wrap gap-2">
+                      {extraImages.map((img, idx) => (
+                        <div key={idx} className="relative h-16 w-16 rounded-lg bg-secondary overflow-hidden group">
+                          <img src={img} alt="" className="h-full w-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setExtraImages((prev) => prev.filter((_, i) => i !== idx))}
+                            className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                          >
+                            <X className="h-4 w-4 text-white" />
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => extraFileInputRef.current?.click()}
+                        className="h-16 w-16 rounded-lg border-2 border-dashed border-border bg-secondary flex flex-col items-center justify-center hover:border-primary/40 transition-colors"
+                      >
+                        <Plus className="h-4 w-4 text-muted-foreground/60" />
+                        <span className="text-[8px] text-muted-foreground/60">Нэмэх</span>
+                      </button>
+                      <input
+                        ref={extraFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="hidden"
+                        onChange={handleExtraImageUpload}
+                      />
                     </div>
                   </div>
 
