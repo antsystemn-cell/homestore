@@ -119,7 +119,7 @@ const AdminPage = () => {
     let hasError = false;
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      if (!file.type.startsWith("image/")) { hasError = true; continue; }
+      if (!file.type.startsWith("image/") && !/\.(png|jpe?g|gif|webp|bmp|svg|heic|heif|avif|tiff?)$/i.test(file.name)) { hasError = true; continue; }
       if (file.size > 5 * 1024 * 1024) { hasError = true; continue; }
       const dataUrl = await new Promise<string>((resolve, reject) => {
         const r = new FileReader();
