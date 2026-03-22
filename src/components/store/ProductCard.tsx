@@ -10,27 +10,27 @@ const ProductCard = ({ product }: Props) => {
 
   return (
     <div
-      className="bg-card overflow-hidden cursor-pointer active:scale-[0.98] transition-transform duration-150"
+      className="bg-card overflow-hidden cursor-pointer group transition-all duration-200 hover:shadow-lg rounded-none md:rounded-xl"
       onClick={() => navigate(`/product/${product.id}`)}
     >
       <div className="relative aspect-square bg-secondary overflow-hidden">
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
         />
       </div>
-      <div className="px-3 py-2.5">
-        <h3 className="text-xs text-foreground line-clamp-2 leading-snug font-medium">
+      <div className="px-3 py-2.5 md:px-4 md:py-3">
+        <h3 className="text-xs md:text-sm text-foreground line-clamp-2 leading-snug font-medium">
           {product.name}
         </h3>
         <div className="mt-2 flex items-baseline gap-1.5">
-          <span className="text-foreground font-extrabold text-sm">
+          <span className="text-foreground font-extrabold text-sm md:text-base">
             {formatPrice(product.price)}
           </span>
           {product.originalPrice && (
-            <span className="text-muted-foreground text-[10px] line-through">
+            <span className="text-muted-foreground text-[10px] md:text-xs line-through">
               {formatPrice(product.originalPrice)}
             </span>
           )}

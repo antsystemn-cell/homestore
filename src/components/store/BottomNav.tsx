@@ -16,7 +16,7 @@ const BottomNav = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border safe-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border safe-bottom md:hidden">
       <div className="flex justify-around items-center h-16 max-w-lg mx-auto px-2">
         {tabs.map((t) => {
           const active = pathname === t.path;
