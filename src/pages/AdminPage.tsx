@@ -112,14 +112,27 @@ const AdminPage = () => {
 
   const fetchProducts = async () => {
     setLoading(true);
-    const { data } = await supabase.from("products").select("*").order("created_at", { ascending: false });
-    setProducts(data || []);
-    setLoading(false);
+    try {
+      const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (error) {
+      console.error("Failed to load admin products", error);
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchOrders = async () => {
-    const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
-    setOrders(data || []);
+    try {
+      const { data, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      setOrders(data || []);
+    } catch (error) {
+      console.error("Failed to load admin orders", error);
+      setOrders([]);
+    }
   };
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
@@ -147,8 +160,14 @@ const AdminPage = () => {
   };
 
   const fetchUsers = async () => {
-    const { data } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
-    setUsers(data || []);
+    try {
+      const { data, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      setUsers(data || []);
+    } catch (error) {
+      console.error("Failed to load admin users", error);
+      setUsers([]);
+    }
   };
 
   const resetForm = () => {
