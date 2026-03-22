@@ -56,7 +56,7 @@ const AdminPage = () => {
     const newMedia: { type: "image" | "video"; url: string; caption: string }[] = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      if (!file.type.startsWith("image/")) continue;
+      if (!file.type.startsWith("image/") && !/\.(png|jpe?g|gif|webp|bmp|svg|heic|heif|avif|tiff?)$/i.test(file.name)) continue;
       if (file.size > 5 * 1024 * 1024) continue;
       const dataUrl = await new Promise<string>((resolve, reject) => {
         const r = new FileReader();
