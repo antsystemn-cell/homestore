@@ -24,9 +24,15 @@ const Index = () => {
   const loaderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let cancelled = false;
+    const timeout = setTimeout(() => {
+      if (!cancelled) setLoading(false);
+    }, 8000);
+
     const fetchAll = async () => {
       try {
         const { data, error } = await supabase.from("products").select("*");
+        if (cancelled) return;
         if (error) throw error;
         const shuffled = shuffle((data || []).map(mapDbProduct));
         setAllProducts(shuffled);
@@ -34,14 +40,18 @@ const Index = () => {
         setHasMore(shuffled.length > PAGE_SIZE);
       } catch (error) {
         console.error("Failed to load products", error);
-        setAllProducts([]);
-        setVisible([]);
-        setHasMore(false);
+        if (!cancelled) {
+          setAllProducts([]);
+          setVisible([]);
+          setHasMore(false);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
+        clearTimeout(timeout);
       }
     };
     fetchAll();
+    return () => { cancelled = true; clearTimeout(timeout); };
   }, []);
 
   const loadMore = useCallback(() => {
