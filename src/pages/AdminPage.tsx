@@ -673,7 +673,7 @@ const AdminPage = () => {
                       <input
                         ref={fileInputRef}
                         type="file"
-                        accept="image/*"
+                         accept="image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff"
                         className="hidden"
                         onChange={handleImageUpload}
                       />
