@@ -723,7 +723,7 @@ const AdminPage = () => {
                       <input
                         ref={extraFileInputRef}
                         type="file"
-                        accept="image/*"
+                         accept="image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff"
                         multiple
                         className="hidden"
                         onChange={handleExtraImageUpload}
