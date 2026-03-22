@@ -44,6 +44,7 @@ const AdminPage = () => {
     is_new: false, is_on_sale: false,
     product_code: "", specifications: [] as { key: string; value: string }[],
     detail_media: [] as { type: "image" | "video"; url: string; caption: string }[],
+    brand_id: "",
   });
 
   // Detail media file input
