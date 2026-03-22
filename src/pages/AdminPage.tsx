@@ -93,6 +93,30 @@ const AdminPage = () => {
     setOrders(data || []);
   };
 
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    const { error } = await supabase.from("orders").update({ status: newStatus }).eq("id", orderId);
+    if (error) {
+      toast.error("Төлөв өөрчлөхөд алдаа гарлаа");
+    } else {
+      toast.success(`Захиалгын төлөв "${statusLabels[newStatus]}" болж өөрчлөгдлөө`);
+      setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status: newStatus } : o));
+    }
+  };
+
+  const statusLabels: Record<string, string> = {
+    pending: "Хүлээгдэж буй",
+    processing: "Боловсруулж буй",
+    completed: "Дууссан",
+    cancelled: "Цуцлагдсан",
+  };
+
+  const statusColors: Record<string, string> = {
+    pending: "bg-amber-500/10 text-amber-600",
+    processing: "bg-blue-500/10 text-blue-600",
+    completed: "bg-green-500/10 text-green-600",
+    cancelled: "bg-red-500/10 text-red-600",
+  };
+
   const fetchUsers = async () => {
     const { data } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
     setUsers(data || []);
