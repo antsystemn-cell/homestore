@@ -247,6 +247,11 @@ const ProductPage = () => {
           </div>
         </div>
 
+        {/* Reviews */}
+        <div className="mt-10 md:mt-16 px-4 md:px-0">
+          <ProductReviews productId={product.id} />
+        </div>
+
         {related.length > 0 && (
           <div className="mt-10 md:mt-16 px-4 md:px-0 pb-4">
             <h2 className="text-lg font-bold text-foreground mb-4">Төстэй бараа</h2>
