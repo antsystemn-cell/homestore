@@ -12,7 +12,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const withTimeout = async <T,>(promise: Promise<T>, fallback: T, ms = 4000): Promise<T> => {
+const withTimeout = async <T,>(promise: PromiseLike<T>, fallback: T, ms = 4000): Promise<T> => {
   return await Promise.race([
     promise,
     new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms)),
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .eq("user_id", userId)
           .eq("role", "admin")
           .maybeSingle(),
-        { data: null, error: new Error("admin role check timeout") }
+        { data: null, error: null }
       );
 
       if (result.error) {
@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const result = await withTimeout(
           supabase.auth.getSession(),
-          { data: { session: null }, error: new Error("session timeout") }
+          { data: { session: null }, error: null }
         );
 
         if (result.error) {
