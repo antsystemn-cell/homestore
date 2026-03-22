@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      brands: {
+        Row: {
+          created_at: string
+          id: string
+          logo_url: string | null
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+          position: number | null
+        }
+        Insert: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+          position?: number | null
+        }
+        Update: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          position?: number | null
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           created_at: string
@@ -84,6 +129,7 @@ export type Database = {
       }
       products: {
         Row: {
+          brand_id: string | null
           category: string
           created_at: string
           description: string | null
@@ -102,6 +148,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          brand_id?: string | null
           category?: string
           created_at?: string
           description?: string | null
@@ -120,6 +167,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          brand_id?: string | null
           category?: string
           created_at?: string
           description?: string | null
@@ -137,7 +185,15 @@ export type Database = {
           specifications?: Json | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

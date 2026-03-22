@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
-  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown
+  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers
 } from "lucide-react";
 import { useRef } from "react";
 import { toast } from "sonner";
@@ -15,7 +15,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-type Tab = "stats" | "products" | "orders" | "users";
+type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands";
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -24,7 +24,17 @@ const AdminPage = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [dbCategories, setDbCategories] = useState<any[]>([]);
+  const [dbBrands, setDbBrands] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Category/Brand form state
+  const [catName, setCatName] = useState("");
+  const [catIcon, setCatIcon] = useState("");
+  const [editCatId, setEditCatId] = useState<string | null>(null);
+  const [brandName, setBrandName] = useState("");
+  const [brandLogo, setBrandLogo] = useState("");
+  const [editBrandId, setEditBrandId] = useState<string | null>(null);
 
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -136,6 +146,8 @@ const AdminPage = () => {
     fetchProducts();
     fetchOrders();
     fetchUsers();
+    fetchCategories();
+    fetchBrands();
   }, []);
 
   const fetchProducts = async () => {
@@ -185,6 +197,63 @@ const AdminPage = () => {
     processing: "bg-blue-500/10 text-blue-600",
     completed: "bg-green-500/10 text-green-600",
     cancelled: "bg-red-500/10 text-red-600",
+  };
+
+  // Categories & Brands CRUD
+  const fetchCategories = async () => {
+    try {
+      const { data } = await supabase.from("categories").select("*").order("position");
+      setDbCategories(data || []);
+    } catch { setDbCategories([]); }
+  };
+
+  const fetchBrands = async () => {
+    try {
+      const { data } = await supabase.from("brands").select("*").order("name");
+      setDbBrands(data || []);
+    } catch { setDbBrands([]); }
+  };
+
+  const handleSaveCategory = async () => {
+    if (!catName.trim()) { toast.error("Ангилалын нэр оруулна уу"); return; }
+    if (editCatId) {
+      const { error } = await supabase.from("categories").update({ name: catName, icon: catIcon || null }).eq("id", editCatId);
+      if (error) toast.error(error.message);
+      else toast.success("Ангилал шинэчлэгдлээ");
+    } else {
+      const { error } = await supabase.from("categories").insert({ name: catName, icon: catIcon || null, position: dbCategories.length } as any);
+      if (error) toast.error(error.message);
+      else toast.success("Ангилал нэмэгдлээ");
+    }
+    setCatName(""); setCatIcon(""); setEditCatId(null);
+    fetchCategories();
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    const { error } = await supabase.from("categories").delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success("Ангилал устгагдлаа"); fetchCategories(); }
+  };
+
+  const handleSaveBrand = async () => {
+    if (!brandName.trim()) { toast.error("Брэндийн нэр оруулна уу"); return; }
+    if (editBrandId) {
+      const { error } = await supabase.from("brands").update({ name: brandName, logo_url: brandLogo || null }).eq("id", editBrandId);
+      if (error) toast.error(error.message);
+      else toast.success("Брэнд шинэчлэгдлээ");
+    } else {
+      const { error } = await supabase.from("brands").insert({ name: brandName, logo_url: brandLogo || null } as any);
+      if (error) toast.error(error.message);
+      else toast.success("Брэнд нэмэгдлээ");
+    }
+    setBrandName(""); setBrandLogo(""); setEditBrandId(null);
+    fetchBrands();
+  };
+
+  const handleDeleteBrand = async (id: string) => {
+    const { error } = await supabase.from("brands").delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success("Брэнд устгагдлаа"); fetchBrands(); }
   };
 
   const fetchUsers = async () => {
@@ -291,6 +360,8 @@ const AdminPage = () => {
   const sidebarItems: { id: Tab; label: string; icon: any }[] = [
     { id: "stats", label: "Статистик", icon: BarChart3 },
     { id: "products", label: "Бараа", icon: Package },
+    { id: "categories", label: "Ангилал", icon: Layers },
+    { id: "brands", label: "Брэнд", icon: Tag },
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
     { id: "users", label: "Хэрэглэгч", icon: Users },
   ];
@@ -432,6 +503,8 @@ const AdminPage = () => {
               {tab === "products" && `Нийт ${products.length} бараа`}
               {tab === "orders" && `Нийт ${orders.length} захиалга`}
               {tab === "users" && `Нийт ${users.length} хэрэглэгч`}
+              {tab === "categories" && `Нийт ${dbCategories.length} ангилал`}
+              {tab === "brands" && `Нийт ${dbBrands.length} брэнд`}
             </p>
           </div>
           {tab === "products" && (
@@ -786,10 +859,9 @@ const AdminPage = () => {
                       <label className="text-[11px] text-muted-foreground mb-1 block">Ангилал</label>
                       <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
                         className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
-                        <option value="general">Ерөнхий</option>
-                        <option value="electronics">Цахилгаан бараа</option>
-                        <option value="kitchen">Гал тогоо</option>
-                        <option value="home">Гэр ахуй</option>
+                        {dbCategories.map((c) => (
+                          <option key={c.id} value={c.name}>{c.name}</option>
+                        ))}
                       </select>
                     </div>
                   </div>
@@ -1045,6 +1117,117 @@ const AdminPage = () => {
                 ))}
                 {users.length === 0 && !loading && (
                   <p className="text-center text-sm text-muted-foreground py-8">Хэрэглэгч байхгүй</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Categories Tab */}
+          {tab === "categories" && (
+            <div className="space-y-4">
+              <div className="bg-card rounded-2xl p-4 md:p-6 border border-border space-y-4">
+                <h3 className="font-bold text-sm">{editCatId ? "Ангилал засах" : "Шинэ ангилал нэмэх"}</h3>
+                <div className="flex gap-2">
+                  <input placeholder="Ангилалын нэр *" value={catName} onChange={(e) => setCatName(e.target.value)}
+                    className="flex-1 rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <input placeholder="Icon нэр (жишээ: Zap)" value={catIcon} onChange={(e) => setCatIcon(e.target.value)}
+                    className="w-40 rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={handleSaveCategory}
+                    className="bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors">
+                    {editCatId ? "Шинэчлэх" : "Нэмэх"}
+                  </button>
+                  {editCatId && (
+                    <button onClick={() => { setCatName(""); setCatIcon(""); setEditCatId(null); }}
+                      className="bg-secondary rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors">
+                      Болих
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-2">
+                {dbCategories.map((c) => (
+                  <div key={c.id} className="flex items-center justify-between bg-card rounded-xl p-4 border border-border">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center">
+                        <Layers className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold">{c.name}</p>
+                        {c.icon && <p className="text-[10px] text-muted-foreground">Icon: {c.icon}</p>}
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <button onClick={() => { setCatName(c.name); setCatIcon(c.icon || ""); setEditCatId(c.id); }}
+                        className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => handleDeleteCategory(c.id)}
+                        className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {dbCategories.length === 0 && (
+                  <p className="text-center text-sm text-muted-foreground py-8">Ангилал байхгүй</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Brands Tab */}
+          {tab === "brands" && (
+            <div className="space-y-4">
+              <div className="bg-card rounded-2xl p-4 md:p-6 border border-border space-y-4">
+                <h3 className="font-bold text-sm">{editBrandId ? "Брэнд засах" : "Шинэ брэнд нэмэх"}</h3>
+                <div className="flex gap-2">
+                  <input placeholder="Брэндийн нэр *" value={brandName} onChange={(e) => setBrandName(e.target.value)}
+                    className="flex-1 rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <input placeholder="Лого URL (заавал биш)" value={brandLogo} onChange={(e) => setBrandLogo(e.target.value)}
+                    className="flex-1 rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={handleSaveBrand}
+                    className="bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors">
+                    {editBrandId ? "Шинэчлэх" : "Нэмэх"}
+                  </button>
+                  {editBrandId && (
+                    <button onClick={() => { setBrandName(""); setBrandLogo(""); setEditBrandId(null); }}
+                      className="bg-secondary rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors">
+                      Болих
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-2">
+                {dbBrands.map((b) => (
+                  <div key={b.id} className="flex items-center justify-between bg-card rounded-xl p-4 border border-border">
+                    <div className="flex items-center gap-3">
+                      {b.logo_url ? (
+                        <img src={b.logo_url} alt={b.name} className="h-10 w-10 rounded-lg object-contain bg-secondary p-1" />
+                      ) : (
+                        <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center">
+                          <Tag className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      )}
+                      <p className="text-sm font-semibold">{b.name}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <button onClick={() => { setBrandName(b.name); setBrandLogo(b.logo_url || ""); setEditBrandId(b.id); }}
+                        className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => handleDeleteBrand(b.id)}
+                        className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {dbBrands.length === 0 && (
+                  <p className="text-center text-sm text-muted-foreground py-8">Брэнд байхгүй</p>
                 )}
               </div>
             </div>
