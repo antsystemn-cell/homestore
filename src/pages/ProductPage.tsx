@@ -1,6 +1,8 @@
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Heart, ShoppingCart, Truck, Shield, RotateCcw } from "lucide-react";
-import { products, formatPrice } from "@/data/products";
+import { Product, formatPrice, mapDbProduct } from "@/data/products";
+import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
 import BottomNav from "@/components/store/BottomNav";
@@ -10,7 +12,34 @@ const ProductPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
-  const product = products.find((p) => p.id === id);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [related, setRelated] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      setLoading(true);
+      const { data } = await supabase.from("products").select("*").eq("id", id).maybeSingle();
+      if (data) {
+        const p = mapDbProduct(data);
+        setProduct(p);
+        // Fetch related
+        const { data: rel } = await supabase
+          .from("products")
+          .select("*")
+          .eq("category", data.category)
+          .neq("id", data.id)
+          .limit(4);
+        setRelated((rel || []).map(mapDbProduct));
+      }
+      setLoading(false);
+    };
+    fetchProduct();
+  }, [id]);
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Уншиж байна...</div>;
+  }
 
   if (!product) {
     return (
@@ -21,11 +50,9 @@ const ProductPage = () => {
   }
 
   const liked = isInWishlist(product.id);
-  const related = products.filter((p) => p.id !== product.id).slice(0, 4);
 
   return (
     <div className="min-h-screen bg-background pb-32 md:pb-12">
-      {/* Back button - mobile */}
       <div className="md:hidden sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border px-4 py-3 flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="p-1.5 rounded-full hover:bg-secondary">
           <ArrowLeft className="h-5 w-5 text-foreground" />
@@ -33,7 +60,6 @@ const ProductPage = () => {
         <span className="text-sm font-semibold text-foreground truncate">{product.name}</span>
       </div>
 
-      {/* Desktop back */}
       <div className="hidden md:block max-w-6xl mx-auto px-8 pt-6">
         <button
           onClick={() => navigate(-1)}
@@ -44,10 +70,8 @@ const ProductPage = () => {
         </button>
       </div>
 
-      {/* Main content */}
       <div className="max-w-6xl mx-auto md:px-8">
         <div className="md:grid md:grid-cols-2 md:gap-10">
-          {/* Image */}
           <div className="relative md:sticky md:top-20 md:self-start">
             <img
               src={product.image}
@@ -67,11 +91,10 @@ const ProductPage = () => {
             )}
           </div>
 
-          {/* Details sidebar */}
           <div className="p-4 md:p-0 space-y-6">
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-foreground leading-tight">{product.name}</h1>
-              <p className="text-muted-foreground text-sm mt-1">{product.sales} борлуулалт</p>
+              {product.sales && <p className="text-muted-foreground text-sm mt-1">{product.sales} борлуулалт</p>}
             </div>
 
             <div className="flex items-baseline gap-3">
@@ -81,30 +104,20 @@ const ProductPage = () => {
               )}
             </div>
 
-            {/* Desktop action buttons */}
             <div className="hidden md:flex gap-3">
-              <Button
-                variant="outline"
-                size="lg"
-                className="flex-1 gap-2 rounded-xl h-12"
-                onClick={() => addToCart(product)}
-              >
+              <Button variant="outline" size="lg" className="flex-1 gap-2 rounded-xl h-12" onClick={() => addToCart(product)}>
                 <ShoppingCart className="h-4 w-4" />
                 Сагсанд нэмэх
               </Button>
               <Button
                 size="lg"
                 className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl h-12"
-                onClick={() => {
-                  addToCart(product);
-                  navigate("/cart");
-                }}
+                onClick={() => { addToCart(product); navigate("/cart"); }}
               >
                 Худалдаж авах
               </Button>
             </div>
 
-            {/* Features */}
             <div className="grid grid-cols-3 gap-3">
               <div className="flex flex-col items-center gap-1.5 bg-secondary rounded-xl p-3 md:p-4">
                 <Truck className="h-5 w-5 text-muted-foreground" />
@@ -120,15 +133,15 @@ const ProductPage = () => {
               </div>
             </div>
 
-            {/* Description */}
-            <div className="bg-secondary rounded-xl p-4 md:p-5">
-              <h2 className="font-semibold text-foreground mb-2">Тайлбар</h2>
-              <p className="text-sm text-muted-foreground leading-relaxed">{product.description}</p>
-            </div>
+            {product.description && (
+              <div className="bg-secondary rounded-xl p-4 md:p-5">
+                <h2 className="font-semibold text-foreground mb-2">Тайлбар</h2>
+                <p className="text-sm text-muted-foreground leading-relaxed">{product.description}</p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Related products */}
         {related.length > 0 && (
           <div className="mt-10 md:mt-16 px-4 md:px-0 pb-4">
             <h2 className="text-lg font-bold text-foreground mb-4">Төстэй бараа</h2>
@@ -141,7 +154,6 @@ const ProductPage = () => {
         )}
       </div>
 
-      {/* Mobile fixed bottom */}
       <div className="fixed bottom-14 left-0 right-0 bg-card border-t border-border p-3 flex gap-3 md:hidden">
         <Button variant="outline" className="flex-1 gap-2" onClick={() => addToCart(product)}>
           <ShoppingCart className="h-4 w-4" />
@@ -149,10 +161,7 @@ const ProductPage = () => {
         </Button>
         <Button
           className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
-          onClick={() => {
-            addToCart(product);
-            navigate("/cart");
-          }}
+          onClick={() => { addToCart(product); navigate("/cart"); }}
         >
           Худалдаж авах
         </Button>
