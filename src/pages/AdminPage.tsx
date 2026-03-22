@@ -765,6 +765,8 @@ const AdminPage = () => {
                       <input ref={detailMediaFileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleDetailMediaImageUpload} />
                     </div>
                   </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div>
                       <label className="text-[11px] text-muted-foreground mb-1 block">Үнэ *</label>
                       <input type="number" placeholder="0" value={form.price || ""} onChange={(e) => setForm({ ...form, price: +e.target.value })}
