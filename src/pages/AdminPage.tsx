@@ -199,6 +199,63 @@ const AdminPage = () => {
     cancelled: "bg-red-500/10 text-red-600",
   };
 
+  // Categories & Brands CRUD
+  const fetchCategories = async () => {
+    try {
+      const { data } = await supabase.from("categories").select("*").order("position");
+      setDbCategories(data || []);
+    } catch { setDbCategories([]); }
+  };
+
+  const fetchBrands = async () => {
+    try {
+      const { data } = await supabase.from("brands").select("*").order("name");
+      setDbBrands(data || []);
+    } catch { setDbBrands([]); }
+  };
+
+  const handleSaveCategory = async () => {
+    if (!catName.trim()) { toast.error("Ангилалын нэр оруулна уу"); return; }
+    if (editCatId) {
+      const { error } = await supabase.from("categories").update({ name: catName, icon: catIcon || null }).eq("id", editCatId);
+      if (error) toast.error(error.message);
+      else toast.success("Ангилал шинэчлэгдлээ");
+    } else {
+      const { error } = await supabase.from("categories").insert({ name: catName, icon: catIcon || null, position: dbCategories.length } as any);
+      if (error) toast.error(error.message);
+      else toast.success("Ангилал нэмэгдлээ");
+    }
+    setCatName(""); setCatIcon(""); setEditCatId(null);
+    fetchCategories();
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    const { error } = await supabase.from("categories").delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success("Ангилал устгагдлаа"); fetchCategories(); }
+  };
+
+  const handleSaveBrand = async () => {
+    if (!brandName.trim()) { toast.error("Брэндийн нэр оруулна уу"); return; }
+    if (editBrandId) {
+      const { error } = await supabase.from("brands").update({ name: brandName, logo_url: brandLogo || null }).eq("id", editBrandId);
+      if (error) toast.error(error.message);
+      else toast.success("Брэнд шинэчлэгдлээ");
+    } else {
+      const { error } = await supabase.from("brands").insert({ name: brandName, logo_url: brandLogo || null } as any);
+      if (error) toast.error(error.message);
+      else toast.success("Брэнд нэмэгдлээ");
+    }
+    setBrandName(""); setBrandLogo(""); setEditBrandId(null);
+    fetchBrands();
+  };
+
+  const handleDeleteBrand = async (id: string) => {
+    const { error } = await supabase.from("brands").delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success("Брэнд устгагдлаа"); fetchBrands(); }
+  };
+
   const fetchUsers = async () => {
     try {
       const { data, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
