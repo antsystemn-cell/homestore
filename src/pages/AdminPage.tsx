@@ -250,7 +250,8 @@ const AdminPage = () => {
 
   // Filtered products
   const filteredProducts = products.filter((p) => {
-    const matchSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.toLowerCase();
+    const matchSearch = !searchQuery || p.name.toLowerCase().includes(q) || (p.product_code && p.product_code.toLowerCase().includes(q));
     const matchCategory = filterCategory === "all" || p.category === filterCategory;
     return matchSearch && matchCategory;
   });

@@ -16,7 +16,7 @@ const Header = () => {
       const { data } = await supabase
         .from("products")
         .select("*")
-        .ilike("name", `%${value}%`)
+        .or(`name.ilike.%${value}%,product_code.ilike.%${value}%`)
         .limit(8);
       setResults((data || []).map(mapDbProduct));
       setShowResults(true);
