@@ -1,21 +1,24 @@
 import { Search, Bell } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { products } from "@/data/products";
+import { Product, mapDbProduct } from "@/data/products";
+import { supabase } from "@/integrations/supabase/client";
 
 const Header = () => {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<typeof products>([]);
+  const [results, setResults] = useState<Product[]>([]);
   const [showResults, setShowResults] = useState(false);
   const navigate = useNavigate();
 
-  const handleSearch = (value: string) => {
+  const handleSearch = async (value: string) => {
     setQuery(value);
     if (value.trim().length > 0) {
-      const filtered = products.filter((p) =>
-        p.name.toLowerCase().includes(value.toLowerCase())
-      );
-      setResults(filtered);
+      const { data } = await supabase
+        .from("products")
+        .select("*")
+        .ilike("name", `%${value}%`)
+        .limit(8);
+      setResults((data || []).map(mapDbProduct));
       setShowResults(true);
     } else {
       setResults([]);
