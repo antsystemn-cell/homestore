@@ -859,10 +859,9 @@ const AdminPage = () => {
                       <label className="text-[11px] text-muted-foreground mb-1 block">Ангилал</label>
                       <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
                         className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
-                        <option value="general">Ерөнхий</option>
-                        <option value="electronics">Цахилгаан бараа</option>
-                        <option value="kitchen">Гал тогоо</option>
-                        <option value="home">Гэр ахуй</option>
+                        {dbCategories.map((c) => (
+                          <option key={c.id} value={c.name}>{c.name}</option>
+                        ))}
                       </select>
                     </div>
                   </div>
