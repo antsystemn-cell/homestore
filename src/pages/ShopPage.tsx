@@ -33,7 +33,7 @@ const ShopPage = () => {
 
   const filtered = selectedBrand === "all"
     ? products
-    : products.filter((p) => (p as any).brand_id === selectedBrand);
+    : products.filter((p) => p.brand_id === selectedBrand);
 
   return (
     <div className="min-h-screen bg-secondary pb-16 md:pb-0">
