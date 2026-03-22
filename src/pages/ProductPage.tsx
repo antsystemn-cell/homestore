@@ -7,6 +7,7 @@ import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
 import BottomNav from "@/components/store/BottomNav";
 import ProductCard from "@/components/store/ProductCard";
+import ProductReviews from "@/components/store/ProductReviews";
 
 const ProductPage = () => {
   const { id } = useParams();
