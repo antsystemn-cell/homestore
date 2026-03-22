@@ -33,7 +33,34 @@ const AdminPage = () => {
     image_url: "", category: "general", discount: 0,
     is_new: false, is_on_sale: false,
     product_code: "", specifications: [] as { key: string; value: string }[],
+    detail_media: [] as { type: "image" | "video"; url: string; caption: string }[],
   });
+
+  // Detail media file input
+  const detailMediaFileRef = useRef<HTMLInputElement>(null);
+
+  const handleDetailMediaImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    const newMedia: { type: "image" | "video"; url: string; caption: string }[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!file.type.startsWith("image/")) continue;
+      if (file.size > 5 * 1024 * 1024) continue;
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = (ev) => resolve(ev.target?.result as string);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+      newMedia.push({ type: "image", url: dataUrl, caption: "" });
+    }
+    if (newMedia.length > 0) {
+      setForm((prev) => ({ ...prev, detail_media: [...prev.detail_media, ...newMedia] }));
+      toast.success(`${newMedia.length} зураг нэмэгдлээ`);
+    }
+    if (detailMediaFileRef.current) detailMediaFileRef.current.value = "";
+  };
 
   // Multiple images
   const [extraImages, setExtraImages] = useState<string[]>([]);
@@ -172,7 +199,7 @@ const AdminPage = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, product_code: "", specifications: [] });
+    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, product_code: "", specifications: [], detail_media: [] });
     setEditId(null);
     setShowForm(false);
     setExtraImages([]);
@@ -189,6 +216,7 @@ const AdminPage = () => {
       is_new: form.is_new, is_on_sale: form.is_on_sale,
       product_code: form.product_code || null,
       specifications: form.specifications.filter(s => s.key.trim() && s.value.trim()),
+      detail_media: form.detail_media.filter(m => m.url.trim()),
     };
     let productId = editId;
     if (editId) {
@@ -229,6 +257,7 @@ const AdminPage = () => {
 
   const handleEditProduct = async (p: any) => {
     const specs = Array.isArray(p.specifications) ? p.specifications : [];
+    const media = Array.isArray(p.detail_media) ? p.detail_media : [];
     setForm({
       name: p.name, description: p.description || "", price: p.price,
       original_price: p.original_price || 0, image_url: p.image_url || "",
@@ -236,6 +265,7 @@ const AdminPage = () => {
       is_new: p.is_new, is_on_sale: p.is_on_sale,
       product_code: p.product_code || "",
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
+      detail_media: media.map((m: any) => ({ type: m.type || "image", url: m.url || "", caption: m.caption || "" })),
     });
     setEditId(p.id);
     setShowForm(true);
@@ -667,6 +697,72 @@ const AdminPage = () => {
                         className="flex items-center gap-1.5 text-xs text-primary font-medium hover:text-primary/80 transition-colors py-1">
                         <Plus className="h-3.5 w-3.5" /> Үзүүлэлт нэмэх
                       </button>
+                    </div>
+                  </div>
+
+                  {/* Detail Media (images & videos) */}
+                  <div>
+                    <label className="text-[11px] text-muted-foreground mb-2 block">Дэлгэрэнгүй зураг & бичлэг ({form.detail_media.length})</label>
+                    <div className="space-y-2">
+                      {form.detail_media.map((media, idx) => (
+                        <div key={idx} className="flex gap-2 items-start bg-secondary/50 rounded-xl p-3">
+                          <div className="h-14 w-14 rounded-lg bg-secondary overflow-hidden shrink-0">
+                            {media.type === "image" ? (
+                              <img src={media.url} alt="" className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center text-muted-foreground">
+                                <Eye className="h-5 w-5" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <select value={media.type}
+                                onChange={(e) => {
+                                  const dm = [...form.detail_media];
+                                  dm[idx] = { ...dm[idx], type: e.target.value as "image" | "video" };
+                                  setForm({ ...form, detail_media: dm });
+                                }}
+                                className="rounded-lg bg-secondary px-2 py-1 text-xs focus:outline-none">
+                                <option value="image">Зураг</option>
+                                <option value="video">Бичлэг</option>
+                              </select>
+                              <input placeholder={media.type === "video" ? "YouTube/видео URL" : "Зураг URL"} value={media.url.startsWith("data:") ? "📷 Зураг оруулсан" : media.url}
+                                readOnly={media.url.startsWith("data:")}
+                                onChange={(e) => {
+                                  const dm = [...form.detail_media];
+                                  dm[idx] = { ...dm[idx], url: e.target.value };
+                                  setForm({ ...form, detail_media: dm });
+                                }}
+                                className="flex-1 rounded-lg bg-secondary px-3 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-primary/20" />
+                            </div>
+                            <input placeholder="Тайлбар (заавал биш)" value={media.caption}
+                              onChange={(e) => {
+                                const dm = [...form.detail_media];
+                                dm[idx] = { ...dm[idx], caption: e.target.value };
+                                setForm({ ...form, detail_media: dm });
+                              }}
+                              className="w-full rounded-lg bg-secondary px-3 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-primary/20" />
+                          </div>
+                          <button type="button" onClick={() => setForm({ ...form, detail_media: form.detail_media.filter((_, i) => i !== idx) })}
+                            className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors shrink-0">
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                      <div className="flex gap-2">
+                        <button type="button"
+                          onClick={() => detailMediaFileRef.current?.click()}
+                          className="flex items-center gap-1.5 text-xs text-primary font-medium hover:text-primary/80 transition-colors py-1">
+                          <ImageIcon className="h-3.5 w-3.5" /> Зураг оруулах
+                        </button>
+                        <button type="button"
+                          onClick={() => setForm({ ...form, detail_media: [...form.detail_media, { type: "video", url: "", caption: "" }] })}
+                          className="flex items-center gap-1.5 text-xs text-primary font-medium hover:text-primary/80 transition-colors py-1">
+                          <Plus className="h-3.5 w-3.5" /> Бичлэг URL нэмэх
+                        </button>
+                      </div>
+                      <input ref={detailMediaFileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleDetailMediaImageUpload} />
                     </div>
                   </div>
 
