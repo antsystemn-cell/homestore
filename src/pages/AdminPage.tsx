@@ -700,7 +700,71 @@ const AdminPage = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {/* Detail Media (images & videos) */}
+                  <div>
+                    <label className="text-[11px] text-muted-foreground mb-2 block">Дэлгэрэнгүй зураг & бичлэг ({form.detail_media.length})</label>
+                    <div className="space-y-2">
+                      {form.detail_media.map((media, idx) => (
+                        <div key={idx} className="flex gap-2 items-start bg-secondary/50 rounded-xl p-3">
+                          <div className="h-14 w-14 rounded-lg bg-secondary overflow-hidden shrink-0">
+                            {media.type === "image" ? (
+                              <img src={media.url} alt="" className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center text-muted-foreground">
+                                <Eye className="h-5 w-5" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <select value={media.type}
+                                onChange={(e) => {
+                                  const dm = [...form.detail_media];
+                                  dm[idx] = { ...dm[idx], type: e.target.value as "image" | "video" };
+                                  setForm({ ...form, detail_media: dm });
+                                }}
+                                className="rounded-lg bg-secondary px-2 py-1 text-xs focus:outline-none">
+                                <option value="image">Зураг</option>
+                                <option value="video">Бичлэг</option>
+                              </select>
+                              <input placeholder={media.type === "video" ? "YouTube/видео URL" : "Зураг URL"} value={media.url.startsWith("data:") ? "📷 Зураг оруулсан" : media.url}
+                                readOnly={media.url.startsWith("data:")}
+                                onChange={(e) => {
+                                  const dm = [...form.detail_media];
+                                  dm[idx] = { ...dm[idx], url: e.target.value };
+                                  setForm({ ...form, detail_media: dm });
+                                }}
+                                className="flex-1 rounded-lg bg-secondary px-3 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-primary/20" />
+                            </div>
+                            <input placeholder="Тайлбар (заавал биш)" value={media.caption}
+                              onChange={(e) => {
+                                const dm = [...form.detail_media];
+                                dm[idx] = { ...dm[idx], caption: e.target.value };
+                                setForm({ ...form, detail_media: dm });
+                              }}
+                              className="w-full rounded-lg bg-secondary px-3 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-primary/20" />
+                          </div>
+                          <button type="button" onClick={() => setForm({ ...form, detail_media: form.detail_media.filter((_, i) => i !== idx) })}
+                            className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors shrink-0">
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                      <div className="flex gap-2">
+                        <button type="button"
+                          onClick={() => detailMediaFileRef.current?.click()}
+                          className="flex items-center gap-1.5 text-xs text-primary font-medium hover:text-primary/80 transition-colors py-1">
+                          <ImageIcon className="h-3.5 w-3.5" /> Зураг оруулах
+                        </button>
+                        <button type="button"
+                          onClick={() => setForm({ ...form, detail_media: [...form.detail_media, { type: "video", url: "", caption: "" }] })}
+                          className="flex items-center gap-1.5 text-xs text-primary font-medium hover:text-primary/80 transition-colors py-1">
+                          <Plus className="h-3.5 w-3.5" /> Бичлэг URL нэмэх
+                        </button>
+                      </div>
+                      <input ref={detailMediaFileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleDetailMediaImageUpload} />
+                    </div>
+                  </div>
                     <div>
                       <label className="text-[11px] text-muted-foreground mb-1 block">Үнэ *</label>
                       <input type="number" placeholder="0" value={form.price || ""} onChange={(e) => setForm({ ...form, price: +e.target.value })}
