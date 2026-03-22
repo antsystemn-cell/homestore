@@ -384,78 +384,77 @@ const AdminPage = () => {
         <div className="p-4 md:p-8 max-w-5xl">
           {/* Stats */}
           {tab === "stats" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { label: "Нийт бараа", value: products.length, icon: Package, color: "bg-blue-500/10 text-blue-600" },
-                { label: "Нийт захиалга", value: orders.length, icon: ShoppingBag, color: "bg-green-500/10 text-green-600" },
-                { label: "Нийт хэрэглэгч", value: users.length, icon: Users, color: "bg-purple-500/10 text-purple-600" },
-                { label: "Нийт орлого", value: formatPrice(totalRevenue), icon: BarChart3, color: "bg-amber-500/10 text-amber-600" },
-              ].map((stat, i) => {
-                const Icon = stat.icon;
-                return (
-                  <div key={i} className="bg-card rounded-2xl p-6 border border-border">
-                    <div className={`h-10 w-10 rounded-xl ${stat.color} flex items-center justify-center mb-4`}>
-                      <Icon className="h-5 w-5" />
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  { label: "Нийт бараа", value: products.length, icon: Package, color: "bg-blue-500/10 text-blue-600" },
+                  { label: "Нийт захиалга", value: orders.length, icon: ShoppingBag, color: "bg-green-500/10 text-green-600" },
+                  { label: "Нийт хэрэглэгч", value: users.length, icon: Users, color: "bg-purple-500/10 text-purple-600" },
+                  { label: "Нийт орлого", value: formatPrice(totalRevenue), icon: BarChart3, color: "bg-amber-500/10 text-amber-600" },
+                ].map((stat, i) => {
+                  const Icon = stat.icon;
+                  return (
+                    <div key={i} className="bg-card rounded-2xl p-6 border border-border">
+                      <div className={`h-10 w-10 rounded-xl ${stat.color} flex items-center justify-center mb-4`}>
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
+                      <p className="text-2xl font-extrabold">{stat.value}</p>
                     </div>
-                    <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
-                    <p className="text-2xl font-extrabold">{stat.value}</p>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
-              {/* Revenue bar chart */}
-              <div className="bg-card rounded-2xl p-5 border border-border">
-                <h3 className="text-sm font-bold mb-4">Сарын орлого</h3>
-                <div className="h-52">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={monthlyData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                      <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : String(v)} />
-                      <Tooltip formatter={(v: number) => [formatPrice(v), "Орлого"]} contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }} />
-                      <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
+                  );
+                })}
               </div>
 
-              {/* Category pie chart */}
-              <div className="bg-card rounded-2xl p-5 border border-border">
-                <h3 className="text-sm font-bold mb-4">Ангилалын тархалт</h3>
-                <div className="h-52">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={categoryData} cx="50%" cy="50%" outerRadius={70} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={10}>
-                        {categoryData.map((_, i) => (
-                          <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              {/* Order status */}
-              {orderStatusData.length > 0 && (
-                <div className="bg-card rounded-2xl p-5 border border-border lg:col-span-2">
-                  <h3 className="text-sm font-bold mb-4">Захиалгын төлөв</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+                <div className="bg-card rounded-2xl p-5 border border-border">
+                  <h3 className="text-sm font-bold mb-4">Сарын орлого</h3>
                   <div className="h-52">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={orderStatusData} layout="vertical">
+                      <BarChart data={monthlyData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                        <XAxis type="number" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                        <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" width={110} />
-                        <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }} />
-                        <Bar dataKey="value" fill="hsl(var(--chart-2))" radius={[0, 6, 6, 0]} />
+                        <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                        <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : String(v)} />
+                        <Tooltip formatter={(v: number) => [formatPrice(v), "Орлого"]} contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }} />
+                        <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
-              )}
-            </div>
+
+                <div className="bg-card rounded-2xl p-5 border border-border">
+                  <h3 className="text-sm font-bold mb-4">Ангилалын тархалт</h3>
+                  <div className="h-52">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={categoryData} cx="50%" cy="50%" outerRadius={70} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={10}>
+                          {categoryData.map((_, i) => (
+                            <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {orderStatusData.length > 0 && (
+                  <div className="bg-card rounded-2xl p-5 border border-border lg:col-span-2">
+                    <h3 className="text-sm font-bold mb-4">Захиалгын төлөв</h3>
+                    <div className="h-52">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={orderStatusData} layout="vertical">
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis type="number" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                          <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" width={110} />
+                          <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }} />
+                          <Bar dataKey="value" fill="hsl(var(--chart-2))" radius={[0, 6, 6, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
           )}
 
           {/* Products */}
