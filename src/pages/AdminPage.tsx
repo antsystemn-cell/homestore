@@ -216,6 +216,7 @@ const AdminPage = () => {
       is_new: form.is_new, is_on_sale: form.is_on_sale,
       product_code: form.product_code || null,
       specifications: form.specifications.filter(s => s.key.trim() && s.value.trim()),
+      detail_media: form.detail_media.filter(m => m.url.trim()),
     };
     let productId = editId;
     if (editId) {
