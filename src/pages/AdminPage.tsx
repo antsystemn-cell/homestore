@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
@@ -9,6 +9,7 @@ import {
 import { useRef } from "react";
 import { toast } from "sonner";
 import { formatPrice } from "@/data/products";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -235,6 +236,39 @@ const AdminPage = () => {
 
   const totalRevenue = orders.reduce((s: number, o: any) => s + o.total, 0);
 
+  const monthlyData = useMemo(() => {
+    const months: Record<string, number> = {};
+    orders.forEach((o: any) => {
+      const d = new Date(o.created_at);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      months[key] = (months[key] || 0) + (o.total || 0);
+    });
+    const result = [];
+    const now = new Date();
+    const monthNames = ["1-р сар","2-р сар","3-р сар","4-р сар","5-р сар","6-р сар","7-р сар","8-р сар","9-р сар","10-р сар","11-р сар","12-р сар"];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      result.push({ name: monthNames[d.getMonth()], revenue: months[key] || 0 });
+    }
+    return result;
+  }, [orders]);
+
+  const categoryData = useMemo(() => {
+    const cats: Record<string, number> = {};
+    products.forEach((p: any) => { cats[p.category] = (cats[p.category] || 0) + 1; });
+    return Object.entries(cats).map(([name, value]) => ({ name, value }));
+  }, [products]);
+
+  const orderStatusData = useMemo(() => {
+    const statuses: Record<string, number> = {};
+    orders.forEach((o: any) => { statuses[o.status] = (statuses[o.status] || 0) + 1; });
+    const labels: Record<string, string> = { pending: "Хүлээгдэж буй", processing: "Боловсруулж буй", completed: "Дууссан", cancelled: "Цуцлагдсан" };
+    return Object.entries(statuses).map(([key, value]) => ({ name: labels[key] || key, value }));
+  }, [orders]);
+
+  const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
+
   if (authLoading) return <div className="min-h-screen flex items-center justify-center">Уншиж байна...</div>;
 
   return (
@@ -350,25 +384,77 @@ const AdminPage = () => {
         <div className="p-4 md:p-8 max-w-5xl">
           {/* Stats */}
           {tab === "stats" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { label: "Нийт бараа", value: products.length, icon: Package, color: "bg-blue-500/10 text-blue-600" },
-                { label: "Нийт захиалга", value: orders.length, icon: ShoppingBag, color: "bg-green-500/10 text-green-600" },
-                { label: "Нийт хэрэглэгч", value: users.length, icon: Users, color: "bg-purple-500/10 text-purple-600" },
-                { label: "Нийт орлого", value: formatPrice(totalRevenue), icon: BarChart3, color: "bg-amber-500/10 text-amber-600" },
-              ].map((stat, i) => {
-                const Icon = stat.icon;
-                return (
-                  <div key={i} className="bg-card rounded-2xl p-6 border border-border">
-                    <div className={`h-10 w-10 rounded-xl ${stat.color} flex items-center justify-center mb-4`}>
-                      <Icon className="h-5 w-5" />
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  { label: "Нийт бараа", value: products.length, icon: Package, color: "bg-blue-500/10 text-blue-600" },
+                  { label: "Нийт захиалга", value: orders.length, icon: ShoppingBag, color: "bg-green-500/10 text-green-600" },
+                  { label: "Нийт хэрэглэгч", value: users.length, icon: Users, color: "bg-purple-500/10 text-purple-600" },
+                  { label: "Нийт орлого", value: formatPrice(totalRevenue), icon: BarChart3, color: "bg-amber-500/10 text-amber-600" },
+                ].map((stat, i) => {
+                  const Icon = stat.icon;
+                  return (
+                    <div key={i} className="bg-card rounded-2xl p-6 border border-border">
+                      <div className={`h-10 w-10 rounded-xl ${stat.color} flex items-center justify-center mb-4`}>
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
+                      <p className="text-2xl font-extrabold">{stat.value}</p>
                     </div>
-                    <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
-                    <p className="text-2xl font-extrabold">{stat.value}</p>
+                  );
+                })}
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+                <div className="bg-card rounded-2xl p-5 border border-border">
+                  <h3 className="text-sm font-bold mb-4">Сарын орлого</h3>
+                  <div className="h-52">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={monthlyData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                        <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : String(v)} />
+                        <Tooltip formatter={(v: number) => [formatPrice(v), "Орлого"]} contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }} />
+                        <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+
+                <div className="bg-card rounded-2xl p-5 border border-border">
+                  <h3 className="text-sm font-bold mb-4">Ангилалын тархалт</h3>
+                  <div className="h-52">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={categoryData} cx="50%" cy="50%" outerRadius={70} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={10}>
+                          {categoryData.map((_, i) => (
+                            <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {orderStatusData.length > 0 && (
+                  <div className="bg-card rounded-2xl p-5 border border-border lg:col-span-2">
+                    <h3 className="text-sm font-bold mb-4">Захиалгын төлөв</h3>
+                    <div className="h-52">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={orderStatusData} layout="vertical">
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis type="number" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                          <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" width={110} />
+                          <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }} />
+                          <Bar dataKey="value" fill="hsl(var(--chart-2))" radius={[0, 6, 6, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
           )}
 
           {/* Products */}
