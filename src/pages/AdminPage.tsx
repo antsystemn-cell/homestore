@@ -473,6 +473,41 @@ const AdminPage = () => {
                     </div>
                   </div>
 
+                  {/* Extra images */}
+                  <div>
+                    <label className="text-[11px] text-muted-foreground mb-2 block">Нэмэлт зургууд ({extraImages.length})</label>
+                    <div className="flex flex-wrap gap-2">
+                      {extraImages.map((img, idx) => (
+                        <div key={idx} className="relative h-16 w-16 rounded-lg bg-secondary overflow-hidden group">
+                          <img src={img} alt="" className="h-full w-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setExtraImages((prev) => prev.filter((_, i) => i !== idx))}
+                            className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                          >
+                            <X className="h-4 w-4 text-white" />
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => extraFileInputRef.current?.click()}
+                        className="h-16 w-16 rounded-lg border-2 border-dashed border-border bg-secondary flex flex-col items-center justify-center hover:border-primary/40 transition-colors"
+                      >
+                        <Plus className="h-4 w-4 text-muted-foreground/60" />
+                        <span className="text-[8px] text-muted-foreground/60">Нэмэх</span>
+                      </button>
+                      <input
+                        ref={extraFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="hidden"
+                        onChange={handleExtraImageUpload}
+                      />
+                    </div>
+                  </div>
+
                   <textarea placeholder="Тайлбар" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
                     className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" rows={3} />
 
