@@ -32,6 +32,7 @@ const AdminPage = () => {
     name: "", description: "", price: 0, original_price: 0,
     image_url: "", category: "general", discount: 0,
     is_new: false, is_on_sale: false,
+    product_code: "", specifications: [] as { key: string; value: string }[],
   });
 
   // Multiple images
@@ -171,7 +172,7 @@ const AdminPage = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false });
+    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, product_code: "", specifications: [] });
     setEditId(null);
     setShowForm(false);
     setExtraImages([]);
@@ -181,15 +182,22 @@ const AdminPage = () => {
     if (!form.name.trim()) { toast.error("Барааны нэр заавал бөглөнө"); return; }
     if (!form.price || form.price <= 0) { toast.error("Зөв үнэ оруулна уу"); return; }
     setLoading(true);
+    const payload = {
+      name: form.name, description: form.description, price: form.price,
+      original_price: form.original_price, image_url: form.image_url,
+      category: form.category, discount: form.discount,
+      is_new: form.is_new, is_on_sale: form.is_on_sale,
+      product_code: form.product_code || null,
+      specifications: form.specifications.filter(s => s.key.trim() && s.value.trim()),
+    };
     let productId = editId;
     if (editId) {
-      const { error } = await supabase.from("products").update(form).eq("id", editId);
+      const { error } = await supabase.from("products").update(payload).eq("id", editId);
       if (error) { toast.error(error.message); setLoading(false); return; }
-      // Delete old extra images and re-insert
       await supabase.from("product_images").delete().eq("product_id", editId);
       toast.success("Бараа амжилттай шинэчлэгдлээ");
     } else {
-      const { data, error } = await supabase.from("products").insert(form).select("id").single();
+      const { data, error } = await supabase.from("products").insert(payload).select("id").single();
       if (error) { toast.error(error.message); setLoading(false); return; }
       productId = data.id;
       toast.success("Бараа амжилттай нэмэгдлээ");
@@ -220,11 +228,14 @@ const AdminPage = () => {
   };
 
   const handleEditProduct = async (p: any) => {
+    const specs = Array.isArray(p.specifications) ? p.specifications : [];
     setForm({
       name: p.name, description: p.description || "", price: p.price,
       original_price: p.original_price || 0, image_url: p.image_url || "",
       category: p.category, discount: p.discount || 0,
       is_new: p.is_new, is_on_sale: p.is_on_sale,
+      product_code: p.product_code || "",
+      specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
     });
     setEditId(p.id);
     setShowForm(true);
@@ -613,8 +624,50 @@ const AdminPage = () => {
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[11px] text-muted-foreground mb-1 block">Бүтээгдэхүүний код</label>
+                      <input placeholder="SKU-001" value={form.product_code} onChange={(e) => setForm({ ...form, product_code: e.target.value })}
+                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                    </div>
+                  </div>
+
                   <textarea placeholder="Тайлбар" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
                     className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" rows={3} />
+
+                  {/* Specifications */}
+                  <div>
+                    <label className="text-[11px] text-muted-foreground mb-2 block">Үзүүлэлтүүд ({form.specifications.length})</label>
+                    <div className="space-y-2">
+                      {form.specifications.map((spec, idx) => (
+                        <div key={idx} className="flex gap-2 items-center">
+                          <input placeholder="Нэр (жишээ: Өнгө)" value={spec.key}
+                            onChange={(e) => {
+                              const specs = [...form.specifications];
+                              specs[idx] = { ...specs[idx], key: e.target.value };
+                              setForm({ ...form, specifications: specs });
+                            }}
+                            className="flex-1 rounded-xl bg-secondary px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                          <input placeholder="Утга (жишээ: Хар)" value={spec.value}
+                            onChange={(e) => {
+                              const specs = [...form.specifications];
+                              specs[idx] = { ...specs[idx], value: e.target.value };
+                              setForm({ ...form, specifications: specs });
+                            }}
+                            className="flex-1 rounded-xl bg-secondary px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                          <button type="button" onClick={() => setForm({ ...form, specifications: form.specifications.filter((_, i) => i !== idx) })}
+                            className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                      <button type="button"
+                        onClick={() => setForm({ ...form, specifications: [...form.specifications, { key: "", value: "" }] })}
+                        className="flex items-center gap-1.5 text-xs text-primary font-medium hover:text-primary/80 transition-colors py-1">
+                        <Plus className="h-3.5 w-3.5" /> Үзүүлэлт нэмэх
+                      </button>
+                    </div>
+                  </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div>
