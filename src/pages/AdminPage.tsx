@@ -867,6 +867,16 @@ const AdminPage = () => {
                         ))}
                       </select>
                     </div>
+                    <div>
+                      <label className="text-[11px] text-muted-foreground mb-1 block">Брэнд</label>
+                      <select value={form.brand_id} onChange={(e) => setForm({ ...form, brand_id: e.target.value })}
+                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+                        <option value="">Брэндгүй</option>
+                        {dbBrands.map((b) => (
+                          <option key={b.id} value={b.id}>{b.name}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
                   <div className="flex gap-6">
