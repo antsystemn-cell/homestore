@@ -33,7 +33,34 @@ const AdminPage = () => {
     image_url: "", category: "general", discount: 0,
     is_new: false, is_on_sale: false,
     product_code: "", specifications: [] as { key: string; value: string }[],
+    detail_media: [] as { type: "image" | "video"; url: string; caption: string }[],
   });
+
+  // Detail media file input
+  const detailMediaFileRef = useRef<HTMLInputElement>(null);
+
+  const handleDetailMediaImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    const newMedia: { type: "image" | "video"; url: string; caption: string }[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!file.type.startsWith("image/")) continue;
+      if (file.size > 5 * 1024 * 1024) continue;
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = (ev) => resolve(ev.target?.result as string);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+      newMedia.push({ type: "image", url: dataUrl, caption: "" });
+    }
+    if (newMedia.length > 0) {
+      setForm((prev) => ({ ...prev, detail_media: [...prev.detail_media, ...newMedia] }));
+      toast.success(`${newMedia.length} зураг нэмэгдлээ`);
+    }
+    if (detailMediaFileRef.current) detailMediaFileRef.current.value = "";
+  };
 
   // Multiple images
   const [extraImages, setExtraImages] = useState<string[]>([]);
