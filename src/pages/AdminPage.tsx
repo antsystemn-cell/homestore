@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
-  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2
+  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown
 } from "lucide-react";
 import { useRef } from "react";
 import { toast } from "sonner";
@@ -91,6 +91,30 @@ const AdminPage = () => {
   const fetchOrders = async () => {
     const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
     setOrders(data || []);
+  };
+
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    const { error } = await supabase.from("orders").update({ status: newStatus }).eq("id", orderId);
+    if (error) {
+      toast.error("Төлөв өөрчлөхөд алдаа гарлаа");
+    } else {
+      toast.success(`Захиалгын төлөв "${statusLabels[newStatus]}" болж өөрчлөгдлөө`);
+      setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status: newStatus } : o));
+    }
+  };
+
+  const statusLabels: Record<string, string> = {
+    pending: "Хүлээгдэж буй",
+    processing: "Боловсруулж буй",
+    completed: "Дууссан",
+    cancelled: "Цуцлагдсан",
+  };
+
+  const statusColors: Record<string, string> = {
+    pending: "bg-amber-500/10 text-amber-600",
+    processing: "bg-blue-500/10 text-blue-600",
+    completed: "bg-green-500/10 text-green-600",
+    cancelled: "bg-red-500/10 text-red-600",
   };
 
   const fetchUsers = async () => {
@@ -571,6 +595,7 @@ const AdminPage = () => {
                       <tr className="border-b border-border text-left">
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Захиалгын ID</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Дүн</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Утас</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Огноо</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Төлөв</th>
                       </tr>
@@ -580,13 +605,18 @@ const AdminPage = () => {
                         <tr key={o.id} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
                           <td className="px-6 py-4 text-sm font-medium">#{o.id.slice(0, 8)}</td>
                           <td className="px-6 py-4 text-sm font-semibold">{formatPrice(o.total)}</td>
+                          <td className="px-6 py-4 text-sm text-muted-foreground">{o.phone || "—"}</td>
                           <td className="px-6 py-4 text-sm text-muted-foreground">{new Date(o.created_at).toLocaleDateString("mn-MN")}</td>
                           <td className="px-6 py-4">
-                            <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                              o.status === "pending" ? "bg-amber-500/10 text-amber-600" :
-                              o.status === "completed" ? "bg-green-500/10 text-green-600" :
-                              "bg-secondary text-muted-foreground"
-                            }`}>{o.status}</span>
+                            <select
+                              value={o.status}
+                              onChange={(e) => updateOrderStatus(o.id, e.target.value)}
+                              className={`text-xs font-bold px-3 py-1.5 rounded-full border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 ${statusColors[o.status] || "bg-secondary text-muted-foreground"}`}
+                            >
+                              {Object.entries(statusLabels).map(([value, label]) => (
+                                <option key={value} value={value}>{label}</option>
+                              ))}
+                            </select>
                           </td>
                         </tr>
                       ))}
@@ -602,14 +632,18 @@ const AdminPage = () => {
                   <div key={o.id} className="bg-card rounded-xl p-4 border border-border">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-xs font-bold">#{o.id.slice(0, 8)}</span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        o.status === "pending" ? "bg-amber-500/10 text-amber-600" :
-                        o.status === "completed" ? "bg-green-500/10 text-green-600" :
-                        "bg-secondary text-muted-foreground"
-                      }`}>{o.status}</span>
+                      <select
+                        value={o.status}
+                        onChange={(e) => updateOrderStatus(o.id, e.target.value)}
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border-0 cursor-pointer focus:outline-none ${statusColors[o.status] || "bg-secondary text-muted-foreground"}`}
+                      >
+                        {Object.entries(statusLabels).map(([value, label]) => (
+                          <option key={value} value={value}>{label}</option>
+                        ))}
+                      </select>
                     </div>
                     <p className="text-xs text-muted-foreground">{formatPrice(o.total)}</p>
-                    <p className="text-[10px] text-muted-foreground mt-1">{new Date(o.created_at).toLocaleDateString("mn-MN")}</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">{o.phone || "Утас байхгүй"} · {new Date(o.created_at).toLocaleDateString("mn-MN")}</p>
                   </div>
                 ))}
                 {orders.length === 0 && !loading && (
