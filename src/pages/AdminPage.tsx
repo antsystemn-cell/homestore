@@ -369,6 +369,107 @@ const AdminPage = () => {
                 );
               })}
             </div>
+
+            {/* Revenue Chart by Month */}
+            {(() => {
+              const monthlyData = useMemo(() => {
+                const months: Record<string, number> = {};
+                orders.forEach((o: any) => {
+                  const d = new Date(o.created_at);
+                  const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+                  months[key] = (months[key] || 0) + (o.total || 0);
+                });
+                // Last 6 months
+                const result = [];
+                const now = new Date();
+                for (let i = 5; i >= 0; i--) {
+                  const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                  const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+                  const monthNames = ["1-р сар","2-р сар","3-р сар","4-р сар","5-р сар","6-р сар","7-р сар","8-р сар","9-р сар","10-р сар","11-р сар","12-р сар"];
+                  result.push({ name: monthNames[d.getMonth()], revenue: months[key] || 0 });
+                }
+                return result;
+              }, [orders]);
+
+              const categoryData = useMemo(() => {
+                const cats: Record<string, number> = {};
+                products.forEach((p: any) => {
+                  cats[p.category] = (cats[p.category] || 0) + 1;
+                });
+                return Object.entries(cats).map(([name, value]) => ({ name, value }));
+              }, [products]);
+
+              const orderStatusData = useMemo(() => {
+                const statuses: Record<string, number> = {};
+                orders.forEach((o: any) => {
+                  statuses[o.status] = (statuses[o.status] || 0) + 1;
+                });
+                const labels: Record<string, string> = {
+                  pending: "Хүлээгдэж буй", processing: "Боловсруулж буй",
+                  completed: "Дууссан", cancelled: "Цуцлагдсан",
+                };
+                return Object.entries(statuses).map(([key, value]) => ({
+                  name: labels[key] || key, value,
+                }));
+              }, [orders]);
+
+              const COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
+
+              return (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+                  {/* Revenue bar chart */}
+                  <div className="bg-card rounded-2xl p-5 border border-border">
+                    <h3 className="text-sm font-bold mb-4">Сарын орлого</h3>
+                    <div className="h-52">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={monthlyData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                          <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : v} />
+                          <Tooltip formatter={(v: number) => [formatPrice(v), "Орлого"]} contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }} />
+                          <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {/* Category pie chart */}
+                  <div className="bg-card rounded-2xl p-5 border border-border">
+                    <h3 className="text-sm font-bold mb-4">Ангилалын тархалт</h3>
+                    <div className="h-52">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={categoryData} cx="50%" cy="50%" outerRadius={70} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={10}>
+                            {categoryData.map((_, i) => (
+                              <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {/* Order status */}
+                  {orderStatusData.length > 0 && (
+                    <div className="bg-card rounded-2xl p-5 border border-border lg:col-span-2">
+                      <h3 className="text-sm font-bold mb-4">Захиалгын төлөв</h3>
+                      <div className="h-52">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={orderStatusData} layout="vertical">
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                            <XAxis type="number" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                            <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" width={110} />
+                            <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }} />
+                            <Bar dataKey="value" fill="hsl(var(--chart-2))" radius={[0, 6, 6, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           )}
 
           {/* Products */}
