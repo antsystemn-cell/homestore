@@ -24,9 +24,15 @@ const Index = () => {
   const loaderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let cancelled = false;
+    const timeout = setTimeout(() => {
+      if (!cancelled) setLoading(false);
+    }, 8000);
+
     const fetchAll = async () => {
       try {
         const { data, error } = await supabase.from("products").select("*");
+        if (cancelled) return;
         if (error) throw error;
         const shuffled = shuffle((data || []).map(mapDbProduct));
         setAllProducts(shuffled);
@@ -34,14 +40,18 @@ const Index = () => {
         setHasMore(shuffled.length > PAGE_SIZE);
       } catch (error) {
         console.error("Failed to load products", error);
-        setAllProducts([]);
-        setVisible([]);
-        setHasMore(false);
+        if (!cancelled) {
+          setAllProducts([]);
+          setVisible([]);
+          setHasMore(false);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
+        clearTimeout(timeout);
       }
     };
     fetchAll();
+    return () => { cancelled = true; clearTimeout(timeout); };
   }, []);
 
   const loadMore = useCallback(() => {
@@ -70,6 +80,11 @@ const Index = () => {
       <Header />
       {loading ? (
         <div className="flex items-center justify-center py-20 text-sm text-muted-foreground">Уншиж байна...</div>
+      ) : visible.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+          <p className="text-lg font-medium">Бараа байхгүй байна</p>
+          <p className="text-sm mt-1">Удахгүй шинэ бараа нэмэгдэнэ</p>
+        </div>
       ) : (
         <>
           <ProductGrid products={visible} />
