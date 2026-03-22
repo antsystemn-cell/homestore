@@ -236,6 +236,39 @@ const AdminPage = () => {
 
   const totalRevenue = orders.reduce((s: number, o: any) => s + o.total, 0);
 
+  const monthlyData = useMemo(() => {
+    const months: Record<string, number> = {};
+    orders.forEach((o: any) => {
+      const d = new Date(o.created_at);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      months[key] = (months[key] || 0) + (o.total || 0);
+    });
+    const result = [];
+    const now = new Date();
+    const monthNames = ["1-р сар","2-р сар","3-р сар","4-р сар","5-р сар","6-р сар","7-р сар","8-р сар","9-р сар","10-р сар","11-р сар","12-р сар"];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      result.push({ name: monthNames[d.getMonth()], revenue: months[key] || 0 });
+    }
+    return result;
+  }, [orders]);
+
+  const categoryData = useMemo(() => {
+    const cats: Record<string, number> = {};
+    products.forEach((p: any) => { cats[p.category] = (cats[p.category] || 0) + 1; });
+    return Object.entries(cats).map(([name, value]) => ({ name, value }));
+  }, [products]);
+
+  const orderStatusData = useMemo(() => {
+    const statuses: Record<string, number> = {};
+    orders.forEach((o: any) => { statuses[o.status] = (statuses[o.status] || 0) + 1; });
+    const labels: Record<string, string> = { pending: "Хүлээгдэж буй", processing: "Боловсруулж буй", completed: "Дууссан", cancelled: "Цуцлагдсан" };
+    return Object.entries(statuses).map(([key, value]) => ({ name: labels[key] || key, value }));
+  }, [orders]);
+
+  const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
+
   if (authLoading) return <div className="min-h-screen flex items-center justify-center">Уншиж байна...</div>;
 
   return (
