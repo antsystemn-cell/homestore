@@ -1121,6 +1121,117 @@ const AdminPage = () => {
               </div>
             </div>
           )}
+
+          {/* Categories Tab */}
+          {tab === "categories" && (
+            <div className="space-y-4">
+              <div className="bg-card rounded-2xl p-4 md:p-6 border border-border space-y-4">
+                <h3 className="font-bold text-sm">{editCatId ? "Ангилал засах" : "Шинэ ангилал нэмэх"}</h3>
+                <div className="flex gap-2">
+                  <input placeholder="Ангилалын нэр *" value={catName} onChange={(e) => setCatName(e.target.value)}
+                    className="flex-1 rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <input placeholder="Icon нэр (жишээ: Zap)" value={catIcon} onChange={(e) => setCatIcon(e.target.value)}
+                    className="w-40 rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={handleSaveCategory}
+                    className="bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors">
+                    {editCatId ? "Шинэчлэх" : "Нэмэх"}
+                  </button>
+                  {editCatId && (
+                    <button onClick={() => { setCatName(""); setCatIcon(""); setEditCatId(null); }}
+                      className="bg-secondary rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors">
+                      Болих
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-2">
+                {dbCategories.map((c) => (
+                  <div key={c.id} className="flex items-center justify-between bg-card rounded-xl p-4 border border-border">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center">
+                        <Layers className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold">{c.name}</p>
+                        {c.icon && <p className="text-[10px] text-muted-foreground">Icon: {c.icon}</p>}
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <button onClick={() => { setCatName(c.name); setCatIcon(c.icon || ""); setEditCatId(c.id); }}
+                        className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => handleDeleteCategory(c.id)}
+                        className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {dbCategories.length === 0 && (
+                  <p className="text-center text-sm text-muted-foreground py-8">Ангилал байхгүй</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Brands Tab */}
+          {tab === "brands" && (
+            <div className="space-y-4">
+              <div className="bg-card rounded-2xl p-4 md:p-6 border border-border space-y-4">
+                <h3 className="font-bold text-sm">{editBrandId ? "Брэнд засах" : "Шинэ брэнд нэмэх"}</h3>
+                <div className="flex gap-2">
+                  <input placeholder="Брэндийн нэр *" value={brandName} onChange={(e) => setBrandName(e.target.value)}
+                    className="flex-1 rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <input placeholder="Лого URL (заавал биш)" value={brandLogo} onChange={(e) => setBrandLogo(e.target.value)}
+                    className="flex-1 rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={handleSaveBrand}
+                    className="bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors">
+                    {editBrandId ? "Шинэчлэх" : "Нэмэх"}
+                  </button>
+                  {editBrandId && (
+                    <button onClick={() => { setBrandName(""); setBrandLogo(""); setEditBrandId(null); }}
+                      className="bg-secondary rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors">
+                      Болих
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-2">
+                {dbBrands.map((b) => (
+                  <div key={b.id} className="flex items-center justify-between bg-card rounded-xl p-4 border border-border">
+                    <div className="flex items-center gap-3">
+                      {b.logo_url ? (
+                        <img src={b.logo_url} alt={b.name} className="h-10 w-10 rounded-lg object-contain bg-secondary p-1" />
+                      ) : (
+                        <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center">
+                          <Tag className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      )}
+                      <p className="text-sm font-semibold">{b.name}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <button onClick={() => { setBrandName(b.name); setBrandLogo(b.logo_url || ""); setEditBrandId(b.id); }}
+                        className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => handleDeleteBrand(b.id)}
+                        className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {dbBrands.length === 0 && (
+                  <p className="text-center text-sm text-muted-foreground py-8">Брэнд байхгүй</p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>
