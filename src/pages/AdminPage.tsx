@@ -257,6 +257,7 @@ const AdminPage = () => {
 
   const handleEditProduct = async (p: any) => {
     const specs = Array.isArray(p.specifications) ? p.specifications : [];
+    const media = Array.isArray(p.detail_media) ? p.detail_media : [];
     setForm({
       name: p.name, description: p.description || "", price: p.price,
       original_price: p.original_price || 0, image_url: p.image_url || "",
@@ -264,6 +265,7 @@ const AdminPage = () => {
       is_new: p.is_new, is_on_sale: p.is_on_sale,
       product_code: p.product_code || "",
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
+      detail_media: media.map((m: any) => ({ type: m.type || "image", url: m.url || "", caption: m.caption || "" })),
     });
     setEditId(p.id);
     setShowForm(true);
