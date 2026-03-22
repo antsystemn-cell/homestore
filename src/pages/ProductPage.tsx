@@ -149,7 +149,12 @@ const ProductPage = () => {
           <div className="p-4 md:p-0 space-y-6">
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-foreground leading-tight">{product.name}</h1>
-              {product.sales && <p className="text-muted-foreground text-sm mt-1">{product.sales} борлуулалт</p>}
+              <div className="flex items-center gap-3 mt-1">
+                {product.productCode && (
+                  <span className="text-xs font-mono text-muted-foreground bg-secondary px-2 py-0.5 rounded">#{product.productCode}</span>
+                )}
+                {product.sales && <p className="text-muted-foreground text-sm">{product.sales} борлуулалт</p>}
+              </div>
             </div>
 
             <div className="flex items-baseline gap-3">
@@ -192,6 +197,20 @@ const ProductPage = () => {
               <div className="bg-secondary rounded-xl p-4 md:p-5">
                 <h2 className="font-semibold text-foreground mb-2">Тайлбар</h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">{product.description}</p>
+              </div>
+            )}
+
+            {product.specifications && product.specifications.length > 0 && (
+              <div className="bg-secondary rounded-xl p-4 md:p-5">
+                <h2 className="font-semibold text-foreground mb-3">Үзүүлэлтүүд</h2>
+                <div className="space-y-0 divide-y divide-border">
+                  {product.specifications.map((spec, idx) => (
+                    <div key={idx} className="flex justify-between py-2.5 first:pt-0 last:pb-0">
+                      <span className="text-sm text-muted-foreground">{spec.key}</span>
+                      <span className="text-sm font-medium text-foreground">{spec.value}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
