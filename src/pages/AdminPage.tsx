@@ -838,7 +838,7 @@ const AdminPage = () => {
                           <Plus className="h-3.5 w-3.5" /> Бичлэг URL нэмэх
                         </button>
                       </div>
-                      <input ref={detailMediaFileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleDetailMediaImageUpload} />
+                      <input ref={detailMediaFileRef} type="file" accept="image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff" multiple className="hidden" onChange={handleDetailMediaImageUpload} />
                     </div>
                   </div>
 
