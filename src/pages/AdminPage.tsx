@@ -15,7 +15,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-type Tab = "stats" | "products" | "orders" | "users";
+type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands";
 
 const AdminPage = () => {
   const navigate = useNavigate();
