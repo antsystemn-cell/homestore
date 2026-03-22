@@ -182,15 +182,22 @@ const AdminPage = () => {
     if (!form.name.trim()) { toast.error("Барааны нэр заавал бөглөнө"); return; }
     if (!form.price || form.price <= 0) { toast.error("Зөв үнэ оруулна уу"); return; }
     setLoading(true);
+    const payload = {
+      name: form.name, description: form.description, price: form.price,
+      original_price: form.original_price, image_url: form.image_url,
+      category: form.category, discount: form.discount,
+      is_new: form.is_new, is_on_sale: form.is_on_sale,
+      product_code: form.product_code || null,
+      specifications: form.specifications.filter(s => s.key.trim() && s.value.trim()),
+    };
     let productId = editId;
     if (editId) {
-      const { error } = await supabase.from("products").update(form).eq("id", editId);
+      const { error } = await supabase.from("products").update(payload).eq("id", editId);
       if (error) { toast.error(error.message); setLoading(false); return; }
-      // Delete old extra images and re-insert
       await supabase.from("product_images").delete().eq("product_id", editId);
       toast.success("Бараа амжилттай шинэчлэгдлээ");
     } else {
-      const { data, error } = await supabase.from("products").insert(form).select("id").single();
+      const { data, error } = await supabase.from("products").insert(payload).select("id").single();
       if (error) { toast.error(error.message); setLoading(false); return; }
       productId = data.id;
       toast.success("Бараа амжилттай нэмэгдлээ");
