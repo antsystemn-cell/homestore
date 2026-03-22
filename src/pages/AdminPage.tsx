@@ -2,9 +2,16 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
-import { ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package, BarChart3, LayoutDashboard } from "lucide-react";
+import {
+  ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
+  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye
+} from "lucide-react";
 import { toast } from "sonner";
 import { formatPrice } from "@/data/products";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Tab = "stats" | "products" | "orders" | "users";
 
@@ -24,6 +31,14 @@ const AdminPage = () => {
     image_url: "", category: "general", discount: 0,
     is_new: false, is_on_sale: false,
   });
+
+  // Search & filter
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterCategory, setFilterCategory] = useState("all");
+
+  // Delete confirmation
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !isAdmin) {
@@ -62,24 +77,29 @@ const AdminPage = () => {
   };
 
   const handleSaveProduct = async () => {
-    if (!form.name || !form.price) { toast.error("Нэр, үнэ заавал бөглөнө"); return; }
+    if (!form.name.trim()) { toast.error("Барааны нэр заавал бөглөнө"); return; }
+    if (!form.price || form.price <= 0) { toast.error("Зөв үнэ оруулна уу"); return; }
     setLoading(true);
     if (editId) {
       const { error } = await supabase.from("products").update(form).eq("id", editId);
-      if (error) toast.error(error.message); else toast.success("Бараа шинэчлэгдлээ");
+      if (error) toast.error(error.message); else toast.success("Бараа амжилттай шинэчлэгдлээ");
     } else {
       const { error } = await supabase.from("products").insert(form);
-      if (error) toast.error(error.message); else toast.success("Бараа нэмэгдлээ");
+      if (error) toast.error(error.message); else toast.success("Бараа амжилттай нэмэгдлээ");
     }
     resetForm();
     fetchProducts();
     setLoading(false);
   };
 
-  const handleDeleteProduct = async (id: string) => {
-    const { error } = await supabase.from("products").delete().eq("id", id);
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const { error } = await supabase.from("products").delete().eq("id", deleteTarget.id);
     if (error) toast.error(error.message);
-    else { toast.success("Бараа устгагдлаа"); fetchProducts(); }
+    else { toast.success(`"${deleteTarget.name}" амжилттай устгагдлаа`); fetchProducts(); }
+    setDeleteTarget(null);
+    setDeleting(false);
   };
 
   const handleEditProduct = (p: any) => {
@@ -92,6 +112,15 @@ const AdminPage = () => {
     setEditId(p.id);
     setShowForm(true);
   };
+
+  // Filtered products
+  const filteredProducts = products.filter((p) => {
+    const matchSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchCategory = filterCategory === "all" || p.category === filterCategory;
+    return matchSearch && matchCategory;
+  });
+
+  const categories = [...new Set(products.map((p) => p.category))];
 
   const sidebarItems: { id: Tab; label: string; icon: any }[] = [
     { id: "stats", label: "Статистик", icon: BarChart3 },
@@ -106,6 +135,31 @@ const AdminPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col md:flex-row">
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Бараа устгах
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              <span className="font-semibold text-foreground">"{deleteTarget?.name}"</span> барааг устгахдаа итгэлтэй байна уу? Энэ үйлдлийг буцаах боломжгүй.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Болих</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Устгаж байна..." : "Устгах"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex md:flex-col md:w-64 bg-card border-r border-border min-h-screen sticky top-0">
         <div className="p-6 border-b border-border">
@@ -119,33 +173,25 @@ const AdminPage = () => {
             </div>
           </div>
         </div>
-
         <nav className="flex-1 p-4 space-y-1">
           {sidebarItems.map((item) => {
             const Icon = item.icon;
             const active = tab === item.id;
             return (
-              <button
-                key={item.id}
-                onClick={() => setTab(item.id)}
+              <button key={item.id} onClick={() => setTab(item.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                  active
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-                }`}
-              >
+                  active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                }`}>
                 <Icon className="h-4 w-4" />
                 {item.label}
+                {item.id === "products" && <span className="ml-auto text-xs opacity-70">{products.length}</span>}
               </button>
             );
           })}
         </nav>
-
         <div className="p-4 border-t border-border">
-          <button
-            onClick={() => navigate("/")}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-          >
+          <button onClick={() => navigate("/")}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4" />
             Нүүр хуудас
           </button>
@@ -164,13 +210,10 @@ const AdminPage = () => {
           {sidebarItems.map((t) => {
             const Icon = t.icon;
             return (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
+              <button key={t.id} onClick={() => setTab(t.id)}
                 className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors ${
                   tab === t.id ? "text-foreground border-b-2 border-foreground" : "text-muted-foreground"
-                }`}
-              >
+                }`}>
                 <Icon className="h-4 w-4" />
                 {t.label}
               </button>
@@ -184,9 +227,7 @@ const AdminPage = () => {
         {/* Desktop Header */}
         <div className="hidden md:flex items-center justify-between px-8 py-6 border-b border-border bg-card">
           <div>
-            <h2 className="text-xl font-bold">
-              {sidebarItems.find(s => s.id === tab)?.label}
-            </h2>
+            <h2 className="text-xl font-bold">{sidebarItems.find(s => s.id === tab)?.label}</h2>
             <p className="text-sm text-muted-foreground mt-0.5">
               {tab === "stats" && "Дэлгүүрийн ерөнхий мэдээлэл"}
               {tab === "products" && `Нийт ${products.length} бараа`}
@@ -195,10 +236,8 @@ const AdminPage = () => {
             </p>
           </div>
           {tab === "products" && (
-            <button
-              onClick={() => { resetForm(); setShowForm(true); }}
-              className="flex items-center gap-2 bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors"
-            >
+            <button onClick={() => { resetForm(); setShowForm(true); }}
+              className="flex items-center gap-2 bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors">
               <Plus className="h-4 w-4" /> Бараа нэмэх
             </button>
           )}
@@ -232,45 +271,120 @@ const AdminPage = () => {
           {tab === "products" && (
             <div>
               {/* Mobile add button */}
-              <button
-                onClick={() => { resetForm(); setShowForm(true); }}
-                className="md:hidden flex items-center gap-2 bg-primary text-primary-foreground rounded-xl px-4 py-2.5 text-xs font-bold mb-4"
-              >
+              <button onClick={() => { resetForm(); setShowForm(true); }}
+                className="md:hidden flex items-center gap-2 bg-primary text-primary-foreground rounded-xl px-4 py-2.5 text-xs font-bold mb-4">
                 <Plus className="h-4 w-4" /> Бараа нэмэх
               </button>
 
+              {/* Search & Filter */}
+              <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Бараа хайх..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full rounded-xl bg-secondary pl-10 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  {searchQuery && (
+                    <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                    </button>
+                  )}
+                </div>
+                <select
+                  value={filterCategory}
+                  onChange={(e) => setFilterCategory(e.target.value)}
+                  className="rounded-xl bg-secondary px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 min-w-[140px]"
+                >
+                  <option value="all">Бүх ангилал</option>
+                  {categories.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+
+              {searchQuery || filterCategory !== "all" ? (
+                <p className="text-xs text-muted-foreground mb-3">
+                  {filteredProducts.length} бараа олдлоо
+                </p>
+              ) : null}
+
+              {/* Product Form */}
               {showForm && (
-                <div className="bg-card rounded-2xl p-4 md:p-6 border border-border mb-4 space-y-3">
-                  <h3 className="font-bold text-sm mb-2">{editId ? "Бараа засах" : "Шинэ бараа"}</h3>
-                  <input placeholder="Нэр *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                <div className="bg-card rounded-2xl p-4 md:p-6 border border-border mb-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-sm">{editId ? "Бараа засах" : "Шинэ бараа нэмэх"}</h3>
+                    <button onClick={resetForm} className="p-1.5 rounded-lg hover:bg-secondary">
+                      <X className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  </div>
+
+                  {/* Image preview */}
+                  <div className="flex items-start gap-4">
+                    <div className="h-24 w-24 rounded-xl bg-secondary border-2 border-dashed border-border flex items-center justify-center overflow-hidden shrink-0">
+                      {form.image_url ? (
+                        <img src={form.image_url} alt="Preview" className="h-full w-full object-cover rounded-xl"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                      ) : (
+                        <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
+                      )}
+                    </div>
+                    <div className="flex-1 space-y-3">
+                      <input placeholder="Барааны нэр *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                      <input placeholder="Зургийн URL" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                    </div>
+                  </div>
+
                   <textarea placeholder="Тайлбар" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
                     className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" rows={3} />
+
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <input type="number" placeholder="Үнэ *" value={form.price || ""} onChange={(e) => setForm({ ...form, price: +e.target.value })}
-                      className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                    <input type="number" placeholder="Хуучин үнэ" value={form.original_price || ""} onChange={(e) => setForm({ ...form, original_price: +e.target.value })}
-                      className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                    <input type="number" placeholder="Хямдрал %" value={form.discount || ""} onChange={(e) => setForm({ ...form, discount: +e.target.value })}
-                      className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                    <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
-                      className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
-                      <option value="general">Ерөнхий</option>
-                      <option value="electronics">Цахилгаан бараа</option>
-                      <option value="kitchen">Гал тогоо</option>
-                      <option value="home">Гэр ахуй</option>
-                    </select>
+                    <div>
+                      <label className="text-[11px] text-muted-foreground mb-1 block">Үнэ *</label>
+                      <input type="number" placeholder="0" value={form.price || ""} onChange={(e) => setForm({ ...form, price: +e.target.value })}
+                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-muted-foreground mb-1 block">Хуучин үнэ</label>
+                      <input type="number" placeholder="0" value={form.original_price || ""} onChange={(e) => setForm({ ...form, original_price: +e.target.value })}
+                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-muted-foreground mb-1 block">Хямдрал %</label>
+                      <input type="number" placeholder="0" value={form.discount || ""} onChange={(e) => setForm({ ...form, discount: +e.target.value })}
+                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-muted-foreground mb-1 block">Ангилал</label>
+                      <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
+                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+                        <option value="general">Ерөнхий</option>
+                        <option value="electronics">Цахилгаан бараа</option>
+                        <option value="kitchen">Гал тогоо</option>
+                        <option value="home">Гэр ахуй</option>
+                      </select>
+                    </div>
                   </div>
-                  <input placeholder="Зургийн URL" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-                    className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                  <div className="flex gap-4">
-                    <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_new} onChange={(e) => setForm({ ...form, is_new: e.target.checked })} className="rounded" /> Шинэ</label>
-                    <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_on_sale} onChange={(e) => setForm({ ...form, is_on_sale: e.target.checked })} className="rounded" /> Хямдрал</label>
+
+                  <div className="flex gap-6">
+                    <label className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input type="checkbox" checked={form.is_new} onChange={(e) => setForm({ ...form, is_new: e.target.checked })} className="rounded" />
+                      Шинэ бараа
+                    </label>
+                    <label className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input type="checkbox" checked={form.is_on_sale} onChange={(e) => setForm({ ...form, is_on_sale: e.target.checked })} className="rounded" />
+                      Хямдралтай
+                    </label>
                   </div>
-                  <div className="flex gap-3">
+
+                  <div className="flex gap-3 pt-2">
                     <button onClick={handleSaveProduct} disabled={loading}
                       className="flex-1 bg-primary text-primary-foreground rounded-xl py-3 text-sm font-bold disabled:opacity-50 hover:bg-primary/90 transition-colors">
-                      {editId ? "Шинэчлэх" : "Хадгалах"}
+                      {loading ? "Хадгалж байна..." : editId ? "Шинэчлэх" : "Хадгалах"}
                     </button>
                     <button onClick={resetForm} className="flex-1 bg-secondary rounded-xl py-3 text-sm font-medium hover:bg-secondary/80 transition-colors">
                       Болих
@@ -288,26 +402,58 @@ const AdminPage = () => {
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Бараа</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Ангилал</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Үнэ</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Хямдрал</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground text-right">Үйлдэл</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {products.map((p) => (
+                      {filteredProducts.map((p) => (
                         <tr key={p.id} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              {p.image_url && <img src={p.image_url} alt="" className="h-10 w-10 rounded-lg object-cover bg-secondary" />}
-                              <span className="text-sm font-medium">{p.name}</span>
+                              <div className="h-10 w-10 rounded-lg bg-secondary overflow-hidden shrink-0">
+                                {p.image_url ? (
+                                  <img src={p.image_url} alt="" className="h-full w-full object-cover" />
+                                ) : (
+                                  <div className="h-full w-full flex items-center justify-center">
+                                    <ImageIcon className="h-4 w-4 text-muted-foreground/40" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="min-w-0">
+                                <span className="text-sm font-medium block truncate max-w-[200px]">{p.name}</span>
+                                {p.is_new && <span className="text-[10px] bg-blue-500/10 text-blue-600 px-1.5 py-0.5 rounded-full font-medium">Шинэ</span>}
+                              </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-muted-foreground">{p.category}</td>
-                          <td className="px-6 py-4 text-sm font-semibold">{formatPrice(p.price)}</td>
+                          <td className="px-6 py-4">
+                            <span className="text-xs bg-secondary px-2.5 py-1 rounded-full font-medium text-muted-foreground">{p.category}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-sm font-semibold">{formatPrice(p.price)}</span>
+                            {p.original_price > 0 && (
+                              <span className="text-xs text-muted-foreground line-through ml-2">{formatPrice(p.original_price)}</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4">
+                            {p.discount ? (
+                              <span className="text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded-full font-bold">-{p.discount}%</span>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">—</span>
+                            )}
+                          </td>
                           <td className="px-6 py-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <button onClick={() => handleEditProduct(p)} className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors">
-                                <Pencil className="h-3.5 w-3.5" />
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button onClick={() => navigate(`/product/${p.id}`)}
+                                className="p-2 rounded-lg hover:bg-secondary transition-colors" title="Харах">
+                                <Eye className="h-3.5 w-3.5 text-muted-foreground" />
                               </button>
-                              <button onClick={() => handleDeleteProduct(p.id)} className="p-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
+                              <button onClick={() => handleEditProduct(p)}
+                                className="p-2 rounded-lg hover:bg-secondary transition-colors" title="Засах">
+                                <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                              </button>
+                              <button onClick={() => setDeleteTarget({ id: p.id, name: p.name })}
+                                className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors" title="Устгах">
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
                             </div>
@@ -316,27 +462,42 @@ const AdminPage = () => {
                       ))}
                     </tbody>
                   </table>
-                  {products.length === 0 && !loading && (
-                    <p className="text-center text-sm text-muted-foreground py-12">Бараа байхгүй</p>
+                  {filteredProducts.length === 0 && !loading && (
+                    <p className="text-center text-sm text-muted-foreground py-12">
+                      {searchQuery || filterCategory !== "all" ? "Хайлтад тохирох бараа олдсонгүй" : "Бараа байхгүй"}
+                    </p>
                   )}
                 </div>
               </div>
 
               {/* Mobile card view */}
               <div className="md:hidden space-y-2">
-                {products.map((p) => (
+                {filteredProducts.map((p) => (
                   <div key={p.id} className="flex items-center gap-3 bg-card rounded-xl p-3 border border-border">
-                    {p.image_url && <img src={p.image_url} alt="" className="h-12 w-12 rounded-lg object-cover bg-secondary" />}
+                    <div className="h-12 w-12 rounded-lg bg-secondary overflow-hidden shrink-0">
+                      {p.image_url ? (
+                        <img src={p.image_url} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center">
+                          <ImageIcon className="h-5 w-5 text-muted-foreground/40" />
+                        </div>
+                      )}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold truncate">{p.name}</p>
-                      <p className="text-xs text-muted-foreground">{formatPrice(p.price)}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-xs font-bold">{formatPrice(p.price)}</p>
+                        {p.discount > 0 && <span className="text-[10px] text-destructive font-bold">-{p.discount}%</span>}
+                      </div>
                     </div>
                     <button onClick={() => handleEditProduct(p)} className="p-2 rounded-lg bg-secondary"><Pencil className="h-3.5 w-3.5" /></button>
-                    <button onClick={() => handleDeleteProduct(p.id)} className="p-2 rounded-lg bg-destructive/10 text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
+                    <button onClick={() => setDeleteTarget({ id: p.id, name: p.name })} className="p-2 rounded-lg bg-destructive/10 text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
                 ))}
-                {products.length === 0 && !loading && (
-                  <p className="text-center text-sm text-muted-foreground py-8">Бараа байхгүй</p>
+                {filteredProducts.length === 0 && !loading && (
+                  <p className="text-center text-sm text-muted-foreground py-8">
+                    {searchQuery || filterCategory !== "all" ? "Хайлтад тохирох бараа олдсонгүй" : "Бараа байхгүй"}
+                  </p>
                 )}
               </div>
             </div>
@@ -378,7 +539,6 @@ const AdminPage = () => {
                   )}
                 </div>
               </div>
-
               <div className="md:hidden space-y-2">
                 {orders.map((o) => (
                   <div key={o.id} className="bg-card rounded-xl p-4 border border-border">
@@ -436,7 +596,6 @@ const AdminPage = () => {
                   )}
                 </div>
               </div>
-
               <div className="md:hidden space-y-2">
                 {users.map((u) => (
                   <div key={u.id} className="flex items-center gap-3 bg-card rounded-xl p-3 border border-border">
