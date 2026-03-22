@@ -3,6 +3,12 @@ export interface ProductSpec {
   value: string;
 }
 
+export interface DetailMedia {
+  type: "image" | "video";
+  url: string;
+  caption?: string;
+}
+
 export interface Product {
   id: string;
   name: string;
