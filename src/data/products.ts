@@ -1,3 +1,8 @@
+export interface ProductSpec {
+  key: string;
+  value: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -11,6 +16,8 @@ export interface Product {
   isNew?: boolean | null;
   isOnSale?: boolean | null;
   discount?: number | null;
+  productCode?: string | null;
+  specifications?: ProductSpec[];
 }
 
 export const categories = [
@@ -41,5 +48,7 @@ export function mapDbProduct(row: any): Product {
     isNew: row.is_new,
     isOnSale: row.is_on_sale,
     discount: row.discount,
+    productCode: row.product_code,
+    specifications: Array.isArray(row.specifications) ? row.specifications : [],
   };
 }
