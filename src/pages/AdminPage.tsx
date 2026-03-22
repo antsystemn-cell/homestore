@@ -56,7 +56,7 @@ const AdminPage = () => {
     const newMedia: { type: "image" | "video"; url: string; caption: string }[] = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      if (!file.type.startsWith("image/")) continue;
+      if (!file.type.startsWith("image/") && !/\.(png|jpe?g|gif|webp|bmp|svg|heic|heif|avif|tiff?)$/i.test(file.name)) continue;
       if (file.size > 5 * 1024 * 1024) continue;
       const dataUrl = await new Promise<string>((resolve, reject) => {
         const r = new FileReader();
@@ -92,7 +92,8 @@ const AdminPage = () => {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) { toast.error("Зөвхөн зураг оруулна уу"); return; }
+    const validExt = /\.(png|jpe?g|gif|webp|bmp|svg|heic|heif|avif|tiff?)$/i;
+    if (!file.type.startsWith("image/") && !validExt.test(file.name)) { toast.error("Зөвхөн зураг оруулна уу"); return; }
     if (file.size > 5 * 1024 * 1024) { toast.error("Зураг 5MB-ээс бага байх ёстой"); return; }
 
     setUploading(true);
@@ -118,7 +119,7 @@ const AdminPage = () => {
     let hasError = false;
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      if (!file.type.startsWith("image/")) { hasError = true; continue; }
+      if (!file.type.startsWith("image/") && !/\.(png|jpe?g|gif|webp|bmp|svg|heic|heif|avif|tiff?)$/i.test(file.name)) { hasError = true; continue; }
       if (file.size > 5 * 1024 * 1024) { hasError = true; continue; }
       const dataUrl = await new Promise<string>((resolve, reject) => {
         const r = new FileReader();
@@ -673,7 +674,7 @@ const AdminPage = () => {
                       <input
                         ref={fileInputRef}
                         type="file"
-                        accept="image/*"
+                         accept="image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff"
                         className="hidden"
                         onChange={handleImageUpload}
                       />
@@ -723,7 +724,7 @@ const AdminPage = () => {
                       <input
                         ref={extraFileInputRef}
                         type="file"
-                        accept="image/*"
+                         accept="image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff"
                         multiple
                         className="hidden"
                         onChange={handleExtraImageUpload}
@@ -838,7 +839,7 @@ const AdminPage = () => {
                           <Plus className="h-3.5 w-3.5" /> Бичлэг URL нэмэх
                         </button>
                       </div>
-                      <input ref={detailMediaFileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleDetailMediaImageUpload} />
+                      <input ref={detailMediaFileRef} type="file" accept="image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff" multiple className="hidden" onChange={handleDetailMediaImageUpload} />
                     </div>
                   </div>
 
