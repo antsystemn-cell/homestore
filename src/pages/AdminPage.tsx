@@ -41,6 +41,7 @@ const AdminPage = () => {
   const [deliveryForm, setDeliveryForm] = useState({
     name: "", description: "", price: 0,
     estimated_days_min: 1, estimated_days_max: 3, is_active: true,
+    address: "", phone: "", payment_terms: "",
   });
   const [editDeliveryId, setEditDeliveryId] = useState<string | null>(null);
 
