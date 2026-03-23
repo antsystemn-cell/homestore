@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Heart, ShoppingCart, Truck, Shield, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
 import { Product, formatPrice, mapDbProduct } from "@/data/products";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
