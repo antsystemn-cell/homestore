@@ -15,8 +15,8 @@ const VideoWithThumbnail = ({ media }: { media: DetailMedia }) => {
 
   if (!playing && media.thumbnail) {
     return (
-      <div className="w-full aspect-video rounded-xl overflow-hidden bg-secondary relative cursor-pointer group" onClick={() => setPlaying(true)}>
-        <img src={media.thumbnail} alt={media.caption || "Video thumbnail"} className="w-full h-full object-cover" />
+      <div className="w-full rounded-xl overflow-hidden bg-secondary relative cursor-pointer group" onClick={() => setPlaying(true)}>
+        <img src={media.thumbnail} alt={media.caption || "Video thumbnail"} className="w-full h-auto object-cover" />
         <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/40 transition-colors">
           <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
             <Play className="h-7 w-7 text-foreground ml-1" fill="currentColor" />
@@ -26,34 +26,43 @@ const VideoWithThumbnail = ({ media }: { media: DetailMedia }) => {
     );
   }
 
+  const isYoutube = media.url.includes("youtube.com") || media.url.includes("youtu.be");
+  const isFacebook = media.url.includes("facebook.com") || media.url.includes("fb.watch");
+
+  if (isYoutube || isFacebook) {
+    return (
+      <div className="w-full aspect-video rounded-xl overflow-hidden bg-secondary">
+        {isYoutube ? (
+          <iframe
+            src={media.url.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/") + (playing ? "?autoplay=1" : "")}
+            className="w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowFullScreen
+            title={media.caption || "Video"}
+          />
+        ) : (
+          <iframe
+            src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(media.url)}&show_text=false${playing ? "&autoplay=true" : ""}`}
+            className="w-full h-full"
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; fullscreen"
+            allowFullScreen
+            title={media.caption || "Facebook Video"}
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full aspect-video rounded-xl overflow-hidden bg-secondary">
-      {media.url.includes("youtube.com") || media.url.includes("youtu.be") ? (
-        <iframe
-          src={media.url.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/") + (playing ? "?autoplay=1" : "")}
-          className="w-full h-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-          allowFullScreen
-          title={media.caption || "Video"}
-        />
-      ) : media.url.includes("facebook.com") || media.url.includes("fb.watch") ? (
-        <iframe
-          src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(media.url)}&show_text=false${playing ? "&autoplay=true" : ""}`}
-          className="w-full h-full"
-          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; fullscreen"
-          allowFullScreen
-          title={media.caption || "Facebook Video"}
-        />
-      ) : (
-        <video
-          src={media.url}
-          controls
-          autoPlay={playing}
-          className="w-full h-full"
-          controlsList="nodownload"
-          playsInline
-        />
-      )}
+    <div className="w-full rounded-xl overflow-hidden bg-secondary">
+      <video
+        src={media.url}
+        controls
+        autoPlay={playing}
+        className="w-full h-auto"
+        controlsList="nodownload"
+        playsInline
+      />
     </div>
   );
 };
