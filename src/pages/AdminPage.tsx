@@ -901,6 +901,7 @@ const AdminPage = () => {
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div>
                       <label className="text-[11px] text-muted-foreground mb-1 block">Үнэ *</label>
                       <input type="number" placeholder="0" value={form.price || ""} onChange={(e) => setForm({ ...form, price: +e.target.value })}
                         className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
