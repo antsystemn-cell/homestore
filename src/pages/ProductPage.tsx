@@ -298,7 +298,7 @@ const ProductPage = () => {
               </div>
             </div>
 
-              <Button variant="outline" size="lg" className="flex-1 gap-2 rounded-xl h-12" onClick={() => handleAddToCart()}>
+              <div className="hidden md:flex gap-3">
                 <ShoppingCart className="h-4 w-4" />
                 Сагсанд нэмэх
               </Button>
