@@ -74,7 +74,8 @@ const ProductPage = () => {
       toast.error("Хэмжээгээ сонгоно уу");
       return;
     }
-    addToCart(product!, selectedColor, selectedSize);
+    addToCart(product!, selectedColor, selectedSize, quantity);
+    setQuantity(1);
     if (andNavigate) navigate("/cart");
   };
 
