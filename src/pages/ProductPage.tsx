@@ -317,7 +317,7 @@ const ProductPage = () => {
         </Button>
         <Button
           className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
-          onClick={() => { addToCart(product); navigate("/cart"); }}
+          onClick={() => { addToCart(product, selectedColor, selectedSize); navigate("/cart"); }}
         >
           Худалдаж авах
         </Button>
