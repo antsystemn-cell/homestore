@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
-import BottomNav from "@/components/store/BottomNav";
 import ProductCard from "@/components/store/ProductCard";
 import ProductReviews from "@/components/store/ProductReviews";
 
@@ -411,20 +410,26 @@ const ProductPage = () => {
         )}
       </div>
 
-      <div className="fixed bottom-14 left-0 right-0 bg-card border-t border-border p-3 flex gap-3 md:hidden">
-        <Button variant="outline" className="flex-1 gap-2" onClick={() => handleAddToCart()}>
+      <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border p-3 safe-bottom flex gap-2 md:hidden z-50">
+        <button
+          onClick={() => toggleWishlist(product)}
+          className={`flex items-center justify-center w-12 h-12 rounded-2xl border-2 transition-all ${
+            liked ? "border-sale bg-sale/10" : "border-border bg-secondary hover:border-primary/40"
+          }`}
+        >
+          <Heart className={`h-5 w-5 ${liked ? "fill-sale text-sale" : "text-muted-foreground"}`} />
+        </button>
+        <Button variant="outline" className="flex-1 gap-2 rounded-2xl h-12 font-bold text-xs border-2" onClick={() => handleAddToCart()}>
           <ShoppingCart className="h-4 w-4" />
-          Сагсанд нэмэх
+          Сагсанд
         </Button>
         <Button
-          className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+          className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl h-12 font-bold text-xs shadow-lg"
           onClick={() => handleAddToCart(true)}
         >
-          Худалдаж авах
+          Шууд авах
         </Button>
       </div>
-
-      <BottomNav />
     </div>
   );
 };
