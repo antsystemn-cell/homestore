@@ -35,7 +35,7 @@ const ProductPage = () => {
     if (andNavigate) navigate("/cart");
   };
 
-
+  useEffect(() => {
     const fetchProduct = async () => {
       setLoading(true);
       try {
