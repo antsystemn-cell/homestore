@@ -1510,6 +1510,18 @@ const AdminPage = () => {
                   onChange={(e) => setDeliveryForm(f => ({ ...f, description: e.target.value }))}
                   rows={2}
                   className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <input placeholder="Хаяг (жишээ: Хан-Уул дүүрэг, 3-р хороо)" value={deliveryForm.address}
+                    onChange={(e) => setDeliveryForm(f => ({ ...f, address: e.target.value }))}
+                    className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <input placeholder="Утасны дугаар" value={deliveryForm.phone}
+                    onChange={(e) => setDeliveryForm(f => ({ ...f, phone: e.target.value }))}
+                    className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <textarea placeholder="Төлбөрийн нөхцөл (жишээ: Бэлэн мөнгө, Дансаар, Хүргэлтийн үед төлөх...)" value={deliveryForm.payment_terms}
+                  onChange={(e) => setDeliveryForm(f => ({ ...f, payment_terms: e.target.value }))}
+                  rows={2}
+                  className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none" />
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
                     <label className="text-xs text-muted-foreground mb-1 block">Хамгийн бага хоног</label>
