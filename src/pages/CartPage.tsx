@@ -34,7 +34,11 @@ const CartPage = () => {
                 return (
                 <div key={key} className="bg-card rounded-xl p-3 md:p-4 flex gap-3 md:gap-5 border border-border">
                   <img
-                    src={product.image}
+                    src={
+                      selectedColor && product.colors?.find(c => c.name === selectedColor)?.image
+                        ? product.colors.find(c => c.name === selectedColor)!.image
+                        : product.image
+                    }
                     alt={product.name}
                     className="w-20 h-20 md:w-28 md:h-28 rounded-lg object-cover bg-secondary cursor-pointer"
                     onClick={() => navigate(`/product/${product.id}`)}
@@ -56,24 +60,31 @@ const CartPage = () => {
                         )}
                       </div>
                     )}
-                    <p className="text-foreground font-bold text-sm md:text-lg mt-1">{formatPrice(product.price)}</p>
-                    <div className="flex items-center justify-between mt-2 md:mt-4">
-                      <div className="flex items-center gap-2 bg-secondary rounded-full">
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-foreground font-bold text-sm md:text-lg">{formatPrice(product.price)}</span>
+                      {quantity > 1 && (
+                        <span className="text-xs text-muted-foreground">× {quantity} = {formatPrice(product.price * quantity)}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between mt-2 md:mt-3">
+                      <div className="flex items-center gap-0">
                         <button
-                          className="p-1.5 md:p-2 rounded-full hover:bg-accent"
+                          className="w-8 h-8 md:w-9 md:h-9 rounded-l-xl border-2 border-border bg-secondary text-foreground flex items-center justify-center hover:bg-accent transition-colors"
                           onClick={() => updateQuantity(key, quantity - 1)}
                         >
-                          <Minus className="h-3 w-3 md:h-4 md:w-4" />
+                          <Minus className="h-3.5 w-3.5" />
                         </button>
-                        <span className="text-sm font-medium w-6 text-center">{quantity}</span>
+                        <span className="w-10 h-8 md:h-9 flex items-center justify-center text-sm font-semibold border-y-2 border-border bg-card text-foreground">
+                          {quantity}
+                        </span>
                         <button
-                          className="p-1.5 md:p-2 rounded-full hover:bg-accent"
+                          className="w-8 h-8 md:w-9 md:h-9 rounded-r-xl border-2 border-border bg-secondary text-foreground flex items-center justify-center hover:bg-accent transition-colors"
                           onClick={() => updateQuantity(key, quantity + 1)}
                         >
-                          <Plus className="h-3 w-3 md:h-4 md:w-4" />
+                          <Plus className="h-3.5 w-3.5" />
                         </button>
                       </div>
-                      <button onClick={() => removeFromCart(key)} className="text-sale p-1 hover:bg-sale/10 rounded-full transition-colors">
+                      <button onClick={() => removeFromCart(key)} className="p-2 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-xl transition-colors">
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
