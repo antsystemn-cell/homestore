@@ -32,7 +32,7 @@ const ProductCard = ({ product }: Props) => {
         )}
       </div>
       <div className="px-3 py-2.5 md:px-4 md:py-3">
-        <h3 className="text-xs md:text-sm text-foreground line-clamp-2 leading-snug font-medium">
+        <h3 className="text-xs md:text-sm text-foreground line-clamp-2 leading-snug font-medium min-h-[2.5em]">
           {product.name}
         </h3>
         <div className="mt-2 flex items-baseline gap-1.5 flex-nowrap">
