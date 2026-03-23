@@ -78,7 +78,30 @@ const AdminPage = () => {
     if (detailMediaFileRef.current) detailMediaFileRef.current.value = "";
   };
 
-  // Multiple images
+  const handleDetailVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    const newMedia: { type: "image" | "video"; url: string; caption: string }[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!file.type.startsWith("video/")) continue;
+      if (file.size > 50 * 1024 * 1024) { toast.error("Видео 50MB-ээс бага байх ёстой"); continue; }
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = (ev) => resolve(ev.target?.result as string);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+      newMedia.push({ type: "video", url: dataUrl, caption: "" });
+    }
+    if (newMedia.length > 0) {
+      setForm((prev) => ({ ...prev, detail_media: [...prev.detail_media, ...newMedia] }));
+      toast.success(`${newMedia.length} бичлэг нэмэгдлээ`);
+    }
+    if (detailVideoFileRef.current) detailVideoFileRef.current.value = "";
+  };
+
+
   const [extraImages, setExtraImages] = useState<string[]>([]);
 
   // Search & filter
