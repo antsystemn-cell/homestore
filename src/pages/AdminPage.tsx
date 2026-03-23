@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
-  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers
+  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video
 } from "lucide-react";
 import { useRef } from "react";
 import { toast } from "sonner";
@@ -53,6 +53,7 @@ const AdminPage = () => {
 
   // Detail media file input
   const detailMediaFileRef = useRef<HTMLInputElement>(null);
+  const detailVideoFileRef = useRef<HTMLInputElement>(null);
 
   const handleDetailMediaImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -77,7 +78,30 @@ const AdminPage = () => {
     if (detailMediaFileRef.current) detailMediaFileRef.current.value = "";
   };
 
-  // Multiple images
+  const handleDetailVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    const newMedia: { type: "image" | "video"; url: string; caption: string }[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!file.type.startsWith("video/")) continue;
+      if (file.size > 50 * 1024 * 1024) { toast.error("Видео 50MB-ээс бага байх ёстой"); continue; }
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = (ev) => resolve(ev.target?.result as string);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+      newMedia.push({ type: "video", url: dataUrl, caption: "" });
+    }
+    if (newMedia.length > 0) {
+      setForm((prev) => ({ ...prev, detail_media: [...prev.detail_media, ...newMedia] }));
+      toast.success(`${newMedia.length} бичлэг нэмэгдлээ`);
+    }
+    if (detailVideoFileRef.current) detailVideoFileRef.current.value = "";
+  };
+
+
   const [extraImages, setExtraImages] = useState<string[]>([]);
 
   // Search & filter
@@ -813,7 +837,7 @@ const AdminPage = () => {
                                 <option value="image">Зураг</option>
                                 <option value="video">Бичлэг</option>
                               </select>
-                              <input placeholder={media.type === "video" ? "YouTube/видео URL" : "Зураг URL"} value={media.url.startsWith("data:") ? "📷 Зураг оруулсан" : media.url}
+                              <input placeholder={media.type === "video" ? "YouTube/Facebook/видео URL" : "Зураг URL"} value={media.url.startsWith("data:") ? (media.type === "video" ? "🎬 Бичлэг оруулсан" : "📷 Зураг оруулсан") : media.url}
                                 readOnly={media.url.startsWith("data:")}
                                 onChange={(e) => {
                                   const dm = [...form.detail_media];
@@ -836,19 +860,25 @@ const AdminPage = () => {
                           </button>
                         </div>
                       ))}
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         <button type="button"
                           onClick={() => detailMediaFileRef.current?.click()}
                           className="flex items-center gap-1.5 text-xs text-primary font-medium hover:text-primary/80 transition-colors py-1">
                           <ImageIcon className="h-3.5 w-3.5" /> Зураг оруулах
                         </button>
                         <button type="button"
+                          onClick={() => detailVideoFileRef.current?.click()}
+                          className="flex items-center gap-1.5 text-xs text-primary font-medium hover:text-primary/80 transition-colors py-1">
+                          <Video className="h-3.5 w-3.5" /> Бичлэг оруулах
+                        </button>
+                        <button type="button"
                           onClick={() => setForm({ ...form, detail_media: [...form.detail_media, { type: "video", url: "", caption: "" }] })}
                           className="flex items-center gap-1.5 text-xs text-primary font-medium hover:text-primary/80 transition-colors py-1">
-                          <Plus className="h-3.5 w-3.5" /> Бичлэг URL нэмэх
+                          <Plus className="h-3.5 w-3.5" /> Бичлэг URL нэмэх (YouTube, Facebook)
                         </button>
                       </div>
                       <input ref={detailMediaFileRef} type="file" accept="image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff" multiple className="hidden" onChange={handleDetailMediaImageUpload} />
+                      <input ref={detailVideoFileRef} type="file" accept="video/*,.mp4,.mov,.avi,.webm,.mkv" multiple className="hidden" onChange={handleDetailVideoUpload} />
                     </div>
                   </div>
 

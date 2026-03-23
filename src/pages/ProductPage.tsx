@@ -301,6 +301,14 @@ const ProductPage = () => {
                             allowFullScreen
                             title={media.caption || "Video"}
                           />
+                        ) : media.url.includes("facebook.com") || media.url.includes("fb.watch") ? (
+                          <iframe
+                            src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(media.url)}&show_text=false`}
+                            className="w-full h-full"
+                            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                            allowFullScreen
+                            title={media.caption || "Facebook Video"}
+                          />
                         ) : (
                           <video src={media.url} controls className="w-full h-full" />
                         )}
