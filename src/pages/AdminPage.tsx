@@ -43,7 +43,6 @@ const AdminPage = () => {
     estimated_days_min: 1, estimated_days_max: 3, is_active: true,
   });
   const [editDeliveryId, setEditDeliveryId] = useState<string | null>(null);
-  const [editBrandId, setEditBrandId] = useState<string | null>(null);
 
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
