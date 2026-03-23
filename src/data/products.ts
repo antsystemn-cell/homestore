@@ -1,3 +1,8 @@
+export interface ProductColor {
+  name: string;
+  image: string;
+}
+
 export interface ProductSpec {
   key: string;
   value: string;
