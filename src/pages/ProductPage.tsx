@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Heart, ShoppingCart, Truck, Shield, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
 import { Product, formatPrice, mapDbProduct } from "@/data/products";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,19 @@ const ProductPage = () => {
   const [activeImg, setActiveImg] = useState(0);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+
+  const handleAddToCart = (andNavigate?: boolean) => {
+    if (product?.colors && product.colors.length > 0 && !selectedColor) {
+      toast.error("Өнгөө сонгоно уу");
+      return;
+    }
+    if (product?.sizes && product.sizes.length > 0 && !selectedSize) {
+      toast.error("Хэмжээгээ сонгоно уу");
+      return;
+    }
+    addToCart(product!, selectedColor, selectedSize);
+    if (andNavigate) navigate("/cart");
+  };
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -221,14 +235,14 @@ const ProductPage = () => {
             )}
 
             <div className="hidden md:flex gap-3">
-              <Button variant="outline" size="lg" className="flex-1 gap-2 rounded-xl h-12" onClick={() => addToCart(product, selectedColor, selectedSize)}>
+              <Button variant="outline" size="lg" className="flex-1 gap-2 rounded-xl h-12" onClick={() => handleAddToCart()}>
                 <ShoppingCart className="h-4 w-4" />
                 Сагсанд нэмэх
               </Button>
               <Button
                 size="lg"
                 className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl h-12"
-                onClick={() => { addToCart(product, selectedColor, selectedSize); navigate("/cart"); }}
+                onClick={() => handleAddToCart(true)}
               >
                 Худалдаж авах
               </Button>
@@ -320,13 +334,13 @@ const ProductPage = () => {
       </div>
 
       <div className="fixed bottom-14 left-0 right-0 bg-card border-t border-border p-3 flex gap-3 md:hidden">
-        <Button variant="outline" className="flex-1 gap-2" onClick={() => addToCart(product, selectedColor, selectedSize)}>
+        <Button variant="outline" className="flex-1 gap-2" onClick={() => handleAddToCart()}>
           <ShoppingCart className="h-4 w-4" />
           Сагсанд нэмэх
         </Button>
         <Button
           className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
-          onClick={() => { addToCart(product, selectedColor, selectedSize); navigate("/cart"); }}
+          onClick={() => handleAddToCart(true)}
         >
           Худалдаж авах
         </Button>
