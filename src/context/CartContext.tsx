@@ -11,7 +11,7 @@ interface CartItem {
 interface CartContextType {
   items: CartItem[];
   wishlist: Product[];
-  addToCart: (product: Product, color?: string | null, size?: string | null) => void;
+  addToCart: (product: Product, color?: string | null, size?: string | null, quantity?: number) => void;
   removeFromCart: (cartKey: string) => void;
   updateQuantity: (cartKey: string, quantity: number) => void;
   toggleWishlist: (product: Product) => void;
