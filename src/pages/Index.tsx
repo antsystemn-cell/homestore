@@ -31,10 +31,19 @@ const Index = () => {
 
     const fetchAll = async () => {
       try {
-        const { data, error } = await supabase.from("products").select("*");
+        const [prodRes, brandRes] = await Promise.all([
+          supabase.from("products").select("*"),
+          supabase.from("brands").select("id, name, logo_url"),
+        ]);
         if (cancelled) return;
-        if (error) throw error;
-        const shuffled = shuffle((data || []).map(mapDbProduct));
+        if (prodRes.error) throw prodRes.error;
+        const brandMap = new Map((brandRes.data || []).map((b: any) => [b.id, b]));
+        const shuffled = shuffle((prodRes.data || []).map((row: any) => {
+          const p = mapDbProduct(row);
+          const brand = brandMap.get(p.brand_id || "");
+          if (brand) { p.brandName = brand.name; p.brandLogo = brand.logo_url; }
+          return p;
+        }));
         setAllProducts(shuffled);
         setVisible(shuffled.slice(0, PAGE_SIZE));
         setHasMore(shuffled.length > PAGE_SIZE);

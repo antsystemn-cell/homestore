@@ -26,6 +26,8 @@ export interface Product {
   specifications?: ProductSpec[];
   detailMedia?: DetailMedia[];
   brand_id?: string | null;
+  brandName?: string | null;
+  brandLogo?: string | null;
 }
 
 export const categories = [
