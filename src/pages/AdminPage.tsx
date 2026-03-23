@@ -45,7 +45,7 @@ const AdminPage = () => {
     product_code: "", specifications: [] as { key: string; value: string }[],
     detail_media: [] as { type: "image" | "video"; url: string; caption: string }[],
     brand_id: "",
-    colors: [] as string[],
+    colors: [] as { name: string; image: string }[],
     sizes: [] as string[],
   });
   const [newColor, setNewColor] = useState("");
@@ -294,7 +294,7 @@ const AdminPage = () => {
       specifications: form.specifications.filter(s => s.key.trim() && s.value.trim()),
       detail_media: form.detail_media.filter(m => m.url.trim()),
       brand_id: form.brand_id || null,
-      colors: form.colors.filter(c => c.trim()),
+      colors: form.colors.filter(c => c.name.trim()),
       sizes: form.sizes.filter(s => s.trim()),
     };
     let productId = editId;
@@ -346,7 +346,7 @@ const AdminPage = () => {
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
       detail_media: media.map((m: any) => ({ type: m.type || "image", url: m.url || "", caption: m.caption || "" })),
       brand_id: p.brand_id || "",
-      colors: Array.isArray(p.colors) ? p.colors : [],
+      colors: Array.isArray(p.colors) ? p.colors.map((c: any) => typeof c === 'string' ? { name: c, image: '' } : { name: c.name || '', image: c.image || '' }) : [],
       sizes: Array.isArray(p.sizes) ? p.sizes : [],
     });
     setEditId(p.id);
@@ -855,25 +855,55 @@ const AdminPage = () => {
                   {/* Colors */}
                   <div>
                     <label className="text-[11px] text-muted-foreground mb-2 block">Өнгө ({form.colors.length})</label>
-                    <div className="flex flex-wrap gap-2 mb-2">
+                    <div className="space-y-2 mb-2">
                       {form.colors.map((color, idx) => (
-                        <span key={idx} className="inline-flex items-center gap-1 bg-secondary rounded-lg px-3 py-1.5 text-xs font-medium">
-                          {color}
+                        <div key={idx} className="flex items-center gap-2 bg-secondary/50 rounded-xl p-2">
+                          <div
+                            className="h-12 w-12 rounded-lg bg-secondary border-2 border-dashed border-border overflow-hidden shrink-0 cursor-pointer hover:border-primary/40 transition-colors flex items-center justify-center"
+                            onClick={() => {
+                              const input = document.createElement("input");
+                              input.type = "file";
+                              input.accept = "image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff";
+                              input.onchange = (e: any) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                if (file.size > 5 * 1024 * 1024) { toast.error("5MB-ээс бага байх ёстой"); return; }
+                                const reader = new FileReader();
+                                reader.onload = (ev) => {
+                                  const updated = [...form.colors];
+                                  updated[idx] = { ...updated[idx], image: ev.target?.result as string };
+                                  setForm({ ...form, colors: updated });
+                                };
+                                reader.readAsDataURL(file);
+                              };
+                              input.click();
+                            }}
+                          >
+                            {color.image ? (
+                              <img src={color.image} alt="" className="h-full w-full object-cover rounded-lg" />
+                            ) : (
+                              <Upload className="h-4 w-4 text-muted-foreground/60" />
+                            )}
+                          </div>
+                          <input placeholder="Өнгөний нэр" value={color.name}
+                            onChange={(e) => {
+                              const updated = [...form.colors];
+                              updated[idx] = { ...updated[idx], name: e.target.value };
+                              setForm({ ...form, colors: updated });
+                            }}
+                            className="flex-1 rounded-lg bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary/20" />
                           <button type="button" onClick={() => setForm({ ...form, colors: form.colors.filter((_, i) => i !== idx) })}
-                            className="ml-1 hover:text-destructive"><X className="h-3 w-3" /></button>
-                        </span>
+                            className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
                       ))}
                     </div>
-                    <div className="flex gap-2">
-                      <input placeholder="Өнгө нэмэх (жишээ: Хар)" value={newColor}
-                        onChange={(e) => setNewColor(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === "Enter" && newColor.trim()) { e.preventDefault(); setForm({ ...form, colors: [...form.colors, newColor.trim()] }); setNewColor(""); } }}
-                        className="flex-1 rounded-xl bg-secondary px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                      <button type="button" onClick={() => { if (newColor.trim()) { setForm({ ...form, colors: [...form.colors, newColor.trim()] }); setNewColor(""); } }}
-                        className="px-3 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90">
-                        <Plus className="h-4 w-4" />
-                      </button>
-                    </div>
+                    <button type="button"
+                      onClick={() => setForm({ ...form, colors: [...form.colors, { name: "", image: "" }] })}
+                      className="flex items-center gap-1.5 text-xs text-primary font-medium hover:text-primary/80 transition-colors py-1">
+                      <Plus className="h-3.5 w-3.5" /> Өнгө нэмэх
+                    </button>
                   </div>
 
                   {/* Sizes */}
