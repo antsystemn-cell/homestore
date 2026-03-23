@@ -10,7 +10,6 @@ const BottomNav = () => {
   const tabs = [
     { path: "/", label: "Нүүр", icon: Home },
     { path: "/wishlist", label: "Таалагдсан", icon: Heart },
-    { path: "/shop", label: "Ангилал", icon: Grid3X3, center: true },
     { path: "/cart", label: "Сагс", icon: ShoppingCart, badge: cartCount },
     { path: "/profile", label: "Профайл", icon: User },
   ];
