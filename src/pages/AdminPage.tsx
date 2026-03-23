@@ -295,6 +295,54 @@ const AdminPage = () => {
     else { toast.success("Брэнд устгагдлаа"); fetchBrands(); }
   };
 
+  // Delivery Options CRUD
+  const fetchDeliveryOptions = async () => {
+    try {
+      const { data } = await supabase.from("delivery_options").select("*").order("position");
+      setDeliveryOptions(data || []);
+    } catch { setDeliveryOptions([]); }
+  };
+
+  const resetDeliveryForm = () => {
+    setDeliveryForm({ name: "", description: "", price: 0, estimated_days_min: 1, estimated_days_max: 3, is_active: true });
+    setEditDeliveryId(null);
+  };
+
+  const handleSaveDelivery = async () => {
+    if (!deliveryForm.name.trim()) { toast.error("Хүргэлтийн нэр оруулна уу"); return; }
+    const payload = {
+      name: deliveryForm.name,
+      description: deliveryForm.description || null,
+      price: deliveryForm.price,
+      estimated_days_min: deliveryForm.estimated_days_min,
+      estimated_days_max: deliveryForm.estimated_days_max,
+      is_active: deliveryForm.is_active,
+    };
+    if (editDeliveryId) {
+      const { error } = await supabase.from("delivery_options").update(payload).eq("id", editDeliveryId);
+      if (error) toast.error(error.message);
+      else toast.success("Хүргэлт шинэчлэгдлээ");
+    } else {
+      const { error } = await supabase.from("delivery_options").insert({ ...payload, position: deliveryOptions.length } as any);
+      if (error) toast.error(error.message);
+      else toast.success("Хүргэлт нэмэгдлээ");
+    }
+    resetDeliveryForm();
+    fetchDeliveryOptions();
+  };
+
+  const handleDeleteDelivery = async (id: string) => {
+    const { error } = await supabase.from("delivery_options").delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success("Хүргэлт устгагдлаа"); fetchDeliveryOptions(); }
+  };
+
+  const toggleDeliveryActive = async (id: string, currentActive: boolean) => {
+    const { error } = await supabase.from("delivery_options").update({ is_active: !currentActive }).eq("id", id);
+    if (error) toast.error(error.message);
+    else { fetchDeliveryOptions(); }
+  };
+
   const fetchUsers = async () => {
     try {
       const { data, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
