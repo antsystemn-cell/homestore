@@ -900,7 +900,7 @@ const AdminPage = () => {
                           <Video className="h-3.5 w-3.5" /> Бичлэг оруулах
                         </button>
                         <button type="button"
-                          onClick={() => setForm({ ...form, detail_media: [...form.detail_media, { type: "video", url: "", caption: "" }] })}
+                          onClick={() => setForm({ ...form, detail_media: [...form.detail_media, { type: "video", url: "", caption: "", thumbnail: "" }] })}
                           className="flex items-center gap-1.5 text-xs text-primary font-medium hover:text-primary/80 transition-colors py-1">
                           <Plus className="h-3.5 w-3.5" /> Бичлэг URL нэмэх (YouTube, Facebook)
                         </button>
