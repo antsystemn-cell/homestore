@@ -61,6 +61,7 @@ export type Database = {
       }
       delivery_options: {
         Row: {
+          address: string | null
           created_at: string
           description: string | null
           estimated_days_max: number | null
@@ -68,11 +69,14 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          payment_terms: string | null
+          phone: string | null
           position: number | null
           price: number
           updated_at: string
         }
         Insert: {
+          address?: string | null
           created_at?: string
           description?: string | null
           estimated_days_max?: number | null
@@ -80,11 +84,14 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
+          payment_terms?: string | null
+          phone?: string | null
           position?: number | null
           price?: number
           updated_at?: string
         }
         Update: {
+          address?: string | null
           created_at?: string
           description?: string | null
           estimated_days_max?: number | null
@@ -92,6 +99,8 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          payment_terms?: string | null
+          phone?: string | null
           position?: number | null
           price?: number
           updated_at?: string
@@ -101,8 +110,10 @@ export type Database = {
       orders: {
         Row: {
           created_at: string
+          delivery_completed_photo: string | null
           delivery_fee: number | null
           delivery_option_id: string | null
+          delivery_pickup_photo: string | null
           id: string
           items: Json
           phone: string | null
@@ -114,8 +125,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          delivery_completed_photo?: string | null
           delivery_fee?: number | null
           delivery_option_id?: string | null
+          delivery_pickup_photo?: string | null
           id?: string
           items?: Json
           phone?: string | null
@@ -127,8 +140,10 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          delivery_completed_photo?: string | null
           delivery_fee?: number | null
           delivery_option_id?: string | null
+          delivery_pickup_photo?: string | null
           id?: string
           items?: Json
           phone?: string | null
