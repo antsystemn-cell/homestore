@@ -32,7 +32,7 @@ const VideoWithThumbnail = ({ media }: { media: DetailMedia }) => {
         <iframe
           src={media.url.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/") + (playing ? "?autoplay=1" : "")}
           className="w-full h-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
           allowFullScreen
           title={media.caption || "Video"}
         />
@@ -40,12 +40,19 @@ const VideoWithThumbnail = ({ media }: { media: DetailMedia }) => {
         <iframe
           src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(media.url)}&show_text=false${playing ? "&autoplay=true" : ""}`}
           className="w-full h-full"
-          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; fullscreen"
           allowFullScreen
           title={media.caption || "Facebook Video"}
         />
       ) : (
-        <video src={media.url} controls autoPlay={playing} className="w-full h-full" />
+        <video
+          src={media.url}
+          controls
+          autoPlay={playing}
+          className="w-full h-full"
+          controlsList="nodownload"
+          playsInline
+        />
       )}
     </div>
   );
