@@ -305,7 +305,7 @@ const AdminPage = () => {
   };
 
   const resetDeliveryForm = () => {
-    setDeliveryForm({ name: "", description: "", price: 0, estimated_days_min: 1, estimated_days_max: 3, is_active: true });
+    setDeliveryForm({ name: "", description: "", price: 0, estimated_days_min: 1, estimated_days_max: 3, is_active: true, address: "", phone: "", payment_terms: "" });
     setEditDeliveryId(null);
   };
 
