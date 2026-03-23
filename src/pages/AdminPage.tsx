@@ -346,7 +346,7 @@ const AdminPage = () => {
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
       detail_media: media.map((m: any) => ({ type: m.type || "image", url: m.url || "", caption: m.caption || "" })),
       brand_id: p.brand_id || "",
-      colors: Array.isArray(p.colors) ? p.colors : [],
+      colors: Array.isArray(p.colors) ? p.colors.map((c: any) => typeof c === 'string' ? { name: c, image: '' } : { name: c.name || '', image: c.image || '' }) : [],
       sizes: Array.isArray(p.sizes) ? p.sizes : [],
     });
     setEditId(p.id);
