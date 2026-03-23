@@ -28,6 +28,8 @@ export interface Product {
   brand_id?: string | null;
   brandName?: string | null;
   brandLogo?: string | null;
+  colors?: string[];
+  sizes?: string[];
 }
 
 export const categories = [
