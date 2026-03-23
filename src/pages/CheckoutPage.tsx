@@ -2,8 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/data/products";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Lock, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { CheckCircle, Lock, Loader2, Truck } from "lucide-react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
@@ -20,9 +20,35 @@ const CheckoutPage = () => {
   const [address, setAddress] = useState("");
   const [name, setName] = useState("");
 
+  // Delivery options
+  const [deliveryOptions, setDeliveryOptions] = useState<any[]>([]);
+  const [selectedDelivery, setSelectedDelivery] = useState<string | null>(null);
+  const [loadingDelivery, setLoadingDelivery] = useState(true);
+
+  useEffect(() => {
+    const fetchDelivery = async () => {
+      const { data } = await supabase
+        .from("delivery_options")
+        .select("*")
+        .eq("is_active", true)
+        .order("position");
+      setDeliveryOptions(data || []);
+      if (data && data.length > 0) {
+        setSelectedDelivery(data[0].id);
+      }
+      setLoadingDelivery(false);
+    };
+    fetchDelivery();
+  }, []);
+
+  const selectedDeliveryOption = deliveryOptions.find(d => d.id === selectedDelivery);
+  const deliveryFee = selectedDeliveryOption?.price || 0;
+  const grandTotal = cartTotal + deliveryFee;
+
   const handleOrder = async () => {
     if (!user) { toast.error("Нэвтэрсэн байх шаардлагатай"); navigate("/auth"); return; }
     if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return; }
+    if (deliveryOptions.length > 0 && !selectedDelivery) { toast.error("Хүргэлтийн сонголт хийнэ үү"); return; }
     setSubmitting(true);
     const orderItems = items.map((item) => ({
       product_id: item.product.id,
@@ -36,10 +62,12 @@ const CheckoutPage = () => {
     const { error } = await supabase.from("orders").insert({
       user_id: user.id,
       items: orderItems as any,
-      total: cartTotal,
+      total: grandTotal,
       phone: phone,
       shipping_address: address,
       status: "pending",
+      delivery_option_id: selectedDelivery || null,
+      delivery_fee: deliveryFee,
     });
     if (error) {
       toast.error("Захиалга өгөхөд алдаа гарлаа");
@@ -101,6 +129,51 @@ const CheckoutPage = () => {
                 className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
               />
             </div>
+
+            {/* Delivery Options */}
+            {!loadingDelivery && deliveryOptions.length > 0 && (
+              <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-3">
+                <h2 className="font-semibold text-foreground md:text-lg flex items-center gap-2">
+                  <Truck className="h-5 w-5 text-primary" />
+                  Хүргэлтийн сонголт
+                </h2>
+                <div className="space-y-2">
+                  {deliveryOptions.map((opt) => (
+                    <label
+                      key={opt.id}
+                      className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                        selectedDelivery === opt.id
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-muted-foreground/30"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="delivery"
+                        value={opt.id}
+                        checked={selectedDelivery === opt.id}
+                        onChange={() => setSelectedDelivery(opt.id)}
+                        className="w-4 h-4 text-primary accent-[hsl(var(--primary))]"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-semibold text-foreground">{opt.name}</p>
+                          <span className="text-sm font-bold text-primary shrink-0 ml-2">
+                            {opt.price > 0 ? formatPrice(opt.price) : "Үнэгүй"}
+                          </span>
+                        </div>
+                        {opt.description && (
+                          <p className="text-xs text-muted-foreground mt-0.5">{opt.description}</p>
+                        )}
+                        <p className="text-[11px] text-muted-foreground mt-1">
+                          Хүргэх хугацаа: {opt.estimated_days_min}-{opt.estimated_days_max} хоног
+                        </p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Order summary sidebar */}
@@ -128,12 +201,23 @@ const CheckoutPage = () => {
               })}
               <div className="border-t border-border pt-3 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Хүргэлт</span>
-                  <span className="text-primary font-medium">Үнэгүй</span>
+                  <span className="text-muted-foreground">Барааны дүн</span>
+                  <span className="text-foreground font-medium">{formatPrice(cartTotal)}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Хүргэлт</span>
+                  <span className={`font-medium ${deliveryFee > 0 ? 'text-foreground' : 'text-primary'}`}>
+                    {deliveryFee > 0 ? formatPrice(deliveryFee) : "Үнэгүй"}
+                  </span>
+                </div>
+                {selectedDeliveryOption && (
+                  <p className="text-[10px] text-muted-foreground">
+                    {selectedDeliveryOption.name} · {selectedDeliveryOption.estimated_days_min}-{selectedDeliveryOption.estimated_days_max} хоног
+                  </p>
+                )}
+                <div className="flex justify-between border-t border-border pt-2">
                   <span className="font-bold text-foreground">Нийт</span>
-                  <span className="font-extrabold text-foreground text-lg">{formatPrice(cartTotal)}</span>
+                  <span className="font-extrabold text-foreground text-lg">{formatPrice(grandTotal)}</span>
                 </div>
               </div>
 
@@ -143,7 +227,7 @@ const CheckoutPage = () => {
                 onClick={handleOrder}
               >
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
-                {submitting ? "Илгээж байна..." : `Захиалга өгөх — ${formatPrice(cartTotal)}`}
+                {submitting ? "Илгээж байна..." : `Захиалга өгөх — ${formatPrice(grandTotal)}`}
               </Button>
 
               <p className="text-[10px] text-muted-foreground text-center mt-2">
