@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Heart, ShoppingCart, Truck, Shield, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
-import { Product, formatPrice, mapDbProduct } from "@/data/products";
+import { ArrowLeft, Heart, ShoppingCart, Truck, Shield, RotateCcw, ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { Product, formatPrice, mapDbProduct, DetailMedia } from "@/data/products";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/context/CartContext";
@@ -9,6 +9,48 @@ import { Button } from "@/components/ui/button";
 import BottomNav from "@/components/store/BottomNav";
 import ProductCard from "@/components/store/ProductCard";
 import ProductReviews from "@/components/store/ProductReviews";
+
+const VideoWithThumbnail = ({ media }: { media: DetailMedia }) => {
+  const [playing, setPlaying] = useState(false);
+
+  if (!playing && media.thumbnail) {
+    return (
+      <div className="w-full aspect-video rounded-xl overflow-hidden bg-secondary relative cursor-pointer group" onClick={() => setPlaying(true)}>
+        <img src={media.thumbnail} alt={media.caption || "Video thumbnail"} className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/40 transition-colors">
+          <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
+            <Play className="h-7 w-7 text-foreground ml-1" fill="currentColor" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full aspect-video rounded-xl overflow-hidden bg-secondary">
+      {media.url.includes("youtube.com") || media.url.includes("youtu.be") ? (
+        <iframe
+          src={media.url.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/") + (playing ? "?autoplay=1" : "")}
+          className="w-full h-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          title={media.caption || "Video"}
+        />
+      ) : media.url.includes("facebook.com") || media.url.includes("fb.watch") ? (
+        <iframe
+          src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(media.url)}&show_text=false${playing ? "&autoplay=true" : ""}`}
+          className="w-full h-full"
+          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+          allowFullScreen
+          title={media.caption || "Facebook Video"}
+        />
+      ) : (
+        <video src={media.url} controls autoPlay={playing} className="w-full h-full" />
+      )}
+    </div>
+  );
+};
+
 
 const ProductPage = () => {
   const { id } = useParams();
@@ -292,27 +334,7 @@ const ProductPage = () => {
                     {media.type === "image" ? (
                       <img src={media.url} alt={media.caption || ""} className="w-full rounded-xl object-cover" />
                     ) : (
-                      <div className="w-full aspect-video rounded-xl overflow-hidden bg-secondary">
-                        {media.url.includes("youtube.com") || media.url.includes("youtu.be") ? (
-                          <iframe
-                            src={media.url.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/")}
-                            className="w-full h-full"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                            title={media.caption || "Video"}
-                          />
-                        ) : media.url.includes("facebook.com") || media.url.includes("fb.watch") ? (
-                          <iframe
-                            src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(media.url)}&show_text=false`}
-                            className="w-full h-full"
-                            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                            allowFullScreen
-                            title={media.caption || "Facebook Video"}
-                          />
-                        ) : (
-                          <video src={media.url} controls className="w-full h-full" />
-                        )}
-                      </div>
+                      <VideoWithThumbnail media={media} />
                     )}
                     {media.caption && (
                       <p className="text-xs text-muted-foreground px-1">{media.caption}</p>
