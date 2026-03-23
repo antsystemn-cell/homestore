@@ -44,6 +44,7 @@ const AdminPage = () => {
     address: "", phone: "", payment_terms: "",
   });
   const [editDeliveryId, setEditDeliveryId] = useState<string | null>(null);
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
