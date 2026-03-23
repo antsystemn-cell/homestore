@@ -318,6 +318,9 @@ const AdminPage = () => {
       estimated_days_min: deliveryForm.estimated_days_min,
       estimated_days_max: deliveryForm.estimated_days_max,
       is_active: deliveryForm.is_active,
+      address: deliveryForm.address || null,
+      phone: deliveryForm.phone || null,
+      payment_terms: deliveryForm.payment_terms || null,
     };
     if (editDeliveryId) {
       const { error } = await supabase.from("delivery_options").update(payload).eq("id", editDeliveryId);
