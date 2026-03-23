@@ -165,14 +165,16 @@ const ProductPage = () => {
         <span className="text-sm font-semibold text-foreground truncate">{product.name}</span>
       </div>
 
-      <div className="hidden md:block max-w-6xl mx-auto px-8 pt-6">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Буцах
-        </button>
+      <div className="hidden md:block sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border">
+        <div className="max-w-6xl mx-auto px-8 py-3">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Буцах
+          </button>
+        </div>
       </div>
 
       <div className="max-w-6xl mx-auto md:px-8">
