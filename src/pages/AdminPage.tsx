@@ -226,6 +226,21 @@ const AdminPage = () => {
     }
   };
 
+  const handleDeliveryPhotoUpload = async (orderId: string, field: "delivery_pickup_photo" | "delivery_completed_photo", file: File) => {
+    if (!file.type.startsWith("image/")) { toast.error("Зөвхөн зураг оруулна уу"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Зураг 5MB-ээс бага байх ёстой"); return; }
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = (ev) => resolve(ev.target?.result as string);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+    const { error } = await supabase.from("orders").update({ [field]: dataUrl }).eq("id", orderId);
+    if (error) { toast.error("Зураг хадгалахад алдаа гарлаа"); return; }
+    setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, [field]: dataUrl } : o));
+    toast.success("Зураг амжилттай хадгалагдлаа");
+  };
+
   const statusLabels: Record<string, string> = {
     pending: "Хүлээгдэж буй",
     processing: "Боловсруулж буй",
