@@ -35,12 +35,12 @@ const ProductCard = ({ product }: Props) => {
         <h3 className="text-xs md:text-sm text-foreground line-clamp-2 leading-snug font-medium">
           {product.name}
         </h3>
-        <div className="mt-2 flex items-baseline gap-1.5">
-          <span className="text-foreground font-extrabold text-sm md:text-base">
+        <div className="mt-2 flex items-baseline gap-1.5 flex-nowrap">
+          <span className="text-foreground font-extrabold text-sm md:text-base whitespace-nowrap">
             {formatPrice(product.price)}
           </span>
           {product.originalPrice != null && product.originalPrice > product.price && (
-            <span className="text-muted-foreground text-[10px] md:text-xs line-through">
+            <span className="text-muted-foreground text-[10px] md:text-xs line-through whitespace-nowrap">
               {formatPrice(product.originalPrice)}
             </span>
           )}
