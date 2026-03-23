@@ -12,6 +12,7 @@ export interface DetailMedia {
   type: "image" | "video";
   url: string;
   caption?: string;
+  thumbnail?: string;
 }
 
 export interface Product {

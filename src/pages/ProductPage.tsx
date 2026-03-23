@@ -292,27 +292,7 @@ const ProductPage = () => {
                     {media.type === "image" ? (
                       <img src={media.url} alt={media.caption || ""} className="w-full rounded-xl object-cover" />
                     ) : (
-                      <div className="w-full aspect-video rounded-xl overflow-hidden bg-secondary">
-                        {media.url.includes("youtube.com") || media.url.includes("youtu.be") ? (
-                          <iframe
-                            src={media.url.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/")}
-                            className="w-full h-full"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                            title={media.caption || "Video"}
-                          />
-                        ) : media.url.includes("facebook.com") || media.url.includes("fb.watch") ? (
-                          <iframe
-                            src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(media.url)}&show_text=false`}
-                            className="w-full h-full"
-                            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                            allowFullScreen
-                            title={media.caption || "Facebook Video"}
-                          />
-                        ) : (
-                          <video src={media.url} controls className="w-full h-full" />
-                        )}
-                      </div>
+                      <VideoWithThumbnail media={media} />
                     )}
                     {media.caption && (
                       <p className="text-xs text-muted-foreground px-1">{media.caption}</p>

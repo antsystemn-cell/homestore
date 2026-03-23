@@ -816,12 +816,40 @@ const AdminPage = () => {
                     <div className="space-y-2">
                       {form.detail_media.map((media, idx) => (
                         <div key={idx} className="flex gap-2 items-start bg-secondary/50 rounded-xl p-3">
-                          <div className="h-14 w-14 rounded-lg bg-secondary overflow-hidden shrink-0">
+                          <div className="h-14 w-14 rounded-lg bg-secondary overflow-hidden shrink-0 cursor-pointer relative group"
+                            onClick={() => {
+                              if (media.type !== "video") return;
+                              const input = document.createElement("input");
+                              input.type = "file";
+                              input.accept = "image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff";
+                              input.onchange = (ev: any) => {
+                                const file = ev.target.files?.[0];
+                                if (!file) return;
+                                if (file.size > 5 * 1024 * 1024) { toast.error("5MB-ээс бага байх ёстой"); return; }
+                                const reader = new FileReader();
+                                reader.onload = (e) => {
+                                  const dm = [...form.detail_media];
+                                  dm[idx] = { ...dm[idx], thumbnail: e.target?.result as string };
+                                  setForm({ ...form, detail_media: dm });
+                                };
+                                reader.readAsDataURL(file);
+                              };
+                              input.click();
+                            }}
+                            title={media.type === "video" ? "Thumbnail зураг оруулах" : ""}
+                          >
                             {media.type === "image" ? (
                               <img src={media.url} alt="" className="h-full w-full object-cover" />
+                            ) : media.thumbnail ? (
+                              <img src={media.thumbnail} alt="thumbnail" className="h-full w-full object-cover" />
                             ) : (
                               <div className="h-full w-full flex items-center justify-center text-muted-foreground">
                                 <Eye className="h-5 w-5" />
+                              </div>
+                            )}
+                            {media.type === "video" && (
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <ImageIcon className="h-4 w-4 text-white" />
                               </div>
                             )}
                           </div>
