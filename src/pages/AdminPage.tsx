@@ -26,6 +26,7 @@ const AdminPage = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [dbCategories, setDbCategories] = useState<any[]>([]);
   const [dbBrands, setDbBrands] = useState<any[]>([]);
+  const [deliveryOptions, setDeliveryOptions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Category/Brand form state
@@ -34,6 +35,14 @@ const AdminPage = () => {
   const [editCatId, setEditCatId] = useState<string | null>(null);
   const [brandName, setBrandName] = useState("");
   const [brandLogo, setBrandLogo] = useState("");
+  const [editBrandId, setEditBrandId] = useState<string | null>(null);
+
+  // Delivery form state
+  const [deliveryForm, setDeliveryForm] = useState({
+    name: "", description: "", price: 0,
+    estimated_days_min: 1, estimated_days_max: 3, is_active: true,
+  });
+  const [editDeliveryId, setEditDeliveryId] = useState<string | null>(null);
   const [editBrandId, setEditBrandId] = useState<string | null>(null);
 
   const [showForm, setShowForm] = useState(false);
