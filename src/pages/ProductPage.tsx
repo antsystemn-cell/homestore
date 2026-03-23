@@ -278,7 +278,26 @@ const ProductPage = () => {
               </div>
             )}
 
-            <div className="hidden md:flex gap-3">
+            {/* Quantity selector */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-2">Тоо ширхэг</h3>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="w-10 h-10 rounded-xl border-2 border-border bg-secondary text-foreground flex items-center justify-center text-lg font-bold hover:border-primary/40 transition-colors"
+                >
+                  −
+                </button>
+                <span className="w-12 h-10 flex items-center justify-center text-sm font-semibold text-foreground">{quantity}</span>
+                <button
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="w-10 h-10 rounded-xl border-2 border-border bg-secondary text-foreground flex items-center justify-center text-lg font-bold hover:border-primary/40 transition-colors"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
               <Button variant="outline" size="lg" className="flex-1 gap-2 rounded-xl h-12" onClick={() => handleAddToCart()}>
                 <ShoppingCart className="h-4 w-4" />
                 Сагсанд нэмэх

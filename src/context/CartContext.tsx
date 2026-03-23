@@ -31,16 +31,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<Product[]>([]);
 
-  const addToCart = (product: Product, color?: string | null, size?: string | null) => {
+  const addToCart = (product: Product, color?: string | null, size?: string | null, quantity: number = 1) => {
     setItems((prev) => {
       const key = cartKey(product.id, color, size);
       const existing = prev.find((i) => cartKey(i.product.id, i.selectedColor, i.selectedSize) === key);
       if (existing) {
         return prev.map((i) =>
-          cartKey(i.product.id, i.selectedColor, i.selectedSize) === key ? { ...i, quantity: i.quantity + 1 } : i
+          cartKey(i.product.id, i.selectedColor, i.selectedSize) === key ? { ...i, quantity: i.quantity + quantity } : i
         );
       }
-      return [...prev, { product, quantity: 1, selectedColor: color || null, selectedSize: size || null }];
+      return [...prev, { product, quantity, selectedColor: color || null, selectedSize: size || null }];
     });
   };
 
