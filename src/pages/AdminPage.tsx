@@ -600,6 +600,7 @@ const AdminPage = () => {
               {tab === "users" && `Нийт ${users.length} хэрэглэгч`}
               {tab === "categories" && `Нийт ${dbCategories.length} ангилал`}
               {tab === "brands" && `Нийт ${dbBrands.length} брэнд`}
+              {tab === "delivery" && `Нийт ${deliveryOptions.length} хүргэлтийн сонголт`}
             </p>
           </div>
           {tab === "products" && (
