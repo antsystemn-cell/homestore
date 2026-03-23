@@ -33,7 +33,7 @@ export interface Product {
   brand_id?: string | null;
   brandName?: string | null;
   brandLogo?: string | null;
-  colors?: string[];
+  colors?: ProductColor[];
   sizes?: string[];
 }
 
