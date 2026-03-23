@@ -852,7 +852,54 @@ const AdminPage = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {/* Colors */}
+                  <div>
+                    <label className="text-[11px] text-muted-foreground mb-2 block">Өнгө ({form.colors.length})</label>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {form.colors.map((color, idx) => (
+                        <span key={idx} className="inline-flex items-center gap-1 bg-secondary rounded-lg px-3 py-1.5 text-xs font-medium">
+                          {color}
+                          <button type="button" onClick={() => setForm({ ...form, colors: form.colors.filter((_, i) => i !== idx) })}
+                            className="ml-1 hover:text-destructive"><X className="h-3 w-3" /></button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <input placeholder="Өнгө нэмэх (жишээ: Хар)" value={newColor}
+                        onChange={(e) => setNewColor(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter" && newColor.trim()) { e.preventDefault(); setForm({ ...form, colors: [...form.colors, newColor.trim()] }); setNewColor(""); } }}
+                        className="flex-1 rounded-xl bg-secondary px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                      <button type="button" onClick={() => { if (newColor.trim()) { setForm({ ...form, colors: [...form.colors, newColor.trim()] }); setNewColor(""); } }}
+                        className="px-3 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90">
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Sizes */}
+                  <div>
+                    <label className="text-[11px] text-muted-foreground mb-2 block">Хэмжээ ({form.sizes.length})</label>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {form.sizes.map((size, idx) => (
+                        <span key={idx} className="inline-flex items-center gap-1 bg-secondary rounded-lg px-3 py-1.5 text-xs font-medium">
+                          {size}
+                          <button type="button" onClick={() => setForm({ ...form, sizes: form.sizes.filter((_, i) => i !== idx) })}
+                            className="ml-1 hover:text-destructive"><X className="h-3 w-3" /></button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <input placeholder="Хэмжээ нэмэх (жишээ: XL)" value={newSize}
+                        onChange={(e) => setNewSize(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter" && newSize.trim()) { e.preventDefault(); setForm({ ...form, sizes: [...form.sizes, newSize.trim()] }); setNewSize(""); } }}
+                        className="flex-1 rounded-xl bg-secondary px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                      <button type="button" onClick={() => { if (newSize.trim()) { setForm({ ...form, sizes: [...form.sizes, newSize.trim()] }); setNewSize(""); } }}
+                        className="px-3 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90">
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+
                     <div>
                       <label className="text-[11px] text-muted-foreground mb-1 block">Үнэ *</label>
                       <input type="number" placeholder="0" value={form.price || ""} onChange={(e) => setForm({ ...form, price: +e.target.value })}
