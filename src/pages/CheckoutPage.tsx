@@ -78,15 +78,21 @@ const CheckoutPage = () => {
               <div className="md:grid md:grid-cols-2 md:gap-4 space-y-3 md:space-y-0">
                 <input
                   placeholder="Нэр"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 />
                 <input
                   placeholder="Утасны дугаар"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
               <input
                 placeholder="Хаяг"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
                 className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               />
               <textarea
