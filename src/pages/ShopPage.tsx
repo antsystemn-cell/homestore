@@ -16,11 +16,17 @@ const ShopPage = () => {
       try {
         const [prodRes, brandRes] = await Promise.all([
           supabase.from("products").select("*").order("created_at", { ascending: false }),
-          supabase.from("brands").select("id, name").order("name"),
+          supabase.from("brands").select("id, name, logo_url").order("name"),
         ]);
         if (prodRes.error) throw prodRes.error;
-        setProducts((prodRes.data || []).map(mapDbProduct));
-        setBrands(brandRes.data || []);
+        const brandMap = new Map((brandRes.data || []).map((b: any) => [b.id, b]));
+        setProducts((prodRes.data || []).map((row: any) => {
+          const p = mapDbProduct(row);
+          const brand = brandMap.get(p.brand_id || "");
+          if (brand) { p.brandName = brand.name; p.brandLogo = brand.logo_url; }
+          return p;
+        }));
+        setBrands((brandRes.data || []).map((b: any) => ({ id: b.id, name: b.name })));
       } catch (error) {
         console.error("Failed to load shop products", error);
         setProducts([]);
