@@ -707,7 +707,7 @@ const AdminPage = () => {
                       <input
                         ref={fileInputRef}
                         type="file"
-                         accept="image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff"
+                         accept="image/*,.png,.jpg,.jpeg,.jfif,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff,.ico,.dng,.raw,.cr2,.nef,.psd"
                         className="hidden"
                         onChange={handleImageUpload}
                       />
@@ -757,7 +757,7 @@ const AdminPage = () => {
                       <input
                         ref={extraFileInputRef}
                         type="file"
-                         accept="image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff"
+                         accept="image/*,.png,.jpg,.jpeg,.jfif,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff,.ico,.dng,.raw,.cr2,.nef,.psd"
                         multiple
                         className="hidden"
                         onChange={handleExtraImageUpload}
@@ -905,7 +905,7 @@ const AdminPage = () => {
                           <Plus className="h-3.5 w-3.5" /> Бичлэг URL нэмэх (YouTube, Facebook)
                         </button>
                       </div>
-                      <input ref={detailMediaFileRef} type="file" accept="image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff" multiple className="hidden" onChange={handleDetailMediaImageUpload} />
+                      <input ref={detailMediaFileRef} type="file" accept="image/*,.png,.jpg,.jpeg,.jfif,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff,.ico,.dng,.raw,.cr2,.nef,.psd" multiple className="hidden" onChange={handleDetailMediaImageUpload} />
                       <input ref={detailVideoFileRef} type="file" accept="video/*,.mp4,.mov,.avi,.webm,.mkv" multiple className="hidden" onChange={handleDetailVideoUpload} />
                     </div>
                   </div>
@@ -1351,7 +1351,7 @@ const AdminPage = () => {
                     <label className="cursor-pointer bg-secondary hover:bg-secondary/80 transition-colors rounded-xl px-4 py-2.5 text-sm font-medium">
                       {brandLogo ? "Лого солих" : "Лого оруулах"}
                       <input type="file" className="hidden"
-                        accept="image/*,.png,.jpg,.jpeg,.gif,.webp,.svg,.heic,.heif,.avif"
+                        accept="image/*,.png,.jpg,.jpeg,.jfif,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff,.ico,.dng,.raw,.cr2,.nef,.psd"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (!file) return;
