@@ -1573,14 +1573,17 @@ const AdminPage = () => {
                           )}
                         </div>
                         {d.description && <p className="text-xs text-muted-foreground truncate">{d.description}</p>}
-                        <div className="flex items-center gap-3 mt-1">
+                        <div className="flex items-center gap-3 mt-1 flex-wrap">
                           <span className="text-xs font-bold text-primary">
                             {d.price > 0 ? formatPrice(d.price) : "Үнэгүй"}
                           </span>
                           <span className="text-[10px] text-muted-foreground">
                             {d.estimated_days_min}-{d.estimated_days_max} хоног
                           </span>
+                          {d.phone && <span className="text-[10px] text-muted-foreground">📞 {d.phone}</span>}
                         </div>
+                        {d.address && <p className="text-[10px] text-muted-foreground mt-0.5">📍 {d.address}</p>}
+                        {d.payment_terms && <p className="text-[10px] text-muted-foreground">💳 {d.payment_terms}</p>}
                       </div>
                     </div>
                     <div className="flex gap-1 shrink-0">
