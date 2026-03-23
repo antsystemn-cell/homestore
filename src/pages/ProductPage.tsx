@@ -376,23 +376,6 @@ const ProductPage = () => {
               </div>
             )}
 
-            {product.detailMedia && product.detailMedia.length > 0 && (
-              <div className="space-y-4">
-                <h2 className="font-semibold text-foreground">Дэлгэрэнгүй</h2>
-                {product.detailMedia.map((media, idx) => (
-                  <div key={idx} className="space-y-1.5">
-                    {media.type === "image" ? (
-                      <img src={media.url} alt={media.caption || ""} className="w-full rounded-xl object-cover" />
-                    ) : (
-                      <VideoWithThumbnail media={media} />
-                    )}
-                    {media.caption && (
-                      <p className="text-xs text-muted-foreground px-1">{media.caption}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </div>
 
