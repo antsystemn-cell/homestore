@@ -242,7 +242,7 @@ const ProductPage = () => {
               <Button
                 size="lg"
                 className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl h-12"
-                onClick={() => { addToCart(product, selectedColor, selectedSize); navigate("/cart"); }}
+                onClick={() => handleAddToCart(true)}
               >
                 Худалдаж авах
               </Button>
