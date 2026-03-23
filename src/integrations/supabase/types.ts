@@ -59,9 +59,50 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_options: {
+        Row: {
+          created_at: string
+          description: string | null
+          estimated_days_max: number | null
+          estimated_days_min: number | null
+          id: string
+          is_active: boolean
+          name: string
+          position: number | null
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          estimated_days_max?: number | null
+          estimated_days_min?: number | null
+          id?: string
+          is_active?: boolean
+          name: string
+          position?: number | null
+          price?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          estimated_days_max?: number | null
+          estimated_days_min?: number | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          position?: number | null
+          price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           created_at: string
+          delivery_fee: number | null
+          delivery_option_id: string | null
           id: string
           items: Json
           phone: string | null
@@ -73,6 +114,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          delivery_fee?: number | null
+          delivery_option_id?: string | null
           id?: string
           items?: Json
           phone?: string | null
@@ -84,6 +127,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          delivery_fee?: number | null
+          delivery_option_id?: string | null
           id?: string
           items?: Json
           phone?: string | null
@@ -93,7 +138,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_delivery_option_id_fkey"
+            columns: ["delivery_option_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_options"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_images: {
         Row: {
