@@ -21,19 +21,6 @@ const BottomNav = () => {
           const active = pathname === t.path;
           const Icon = t.icon;
 
-          if (t.center) {
-            return (
-              <button
-                key={t.path}
-                onClick={() => navigate(t.path)}
-                className="flex items-center justify-center gap-1.5 bg-primary text-primary-foreground rounded-full px-5 py-2.5 -mt-5 shadow-lg font-bold text-xs transition-transform active:scale-95"
-              >
-                <Icon className="h-4 w-4" />
-                {t.label}
-              </button>
-            );
-          }
-
           return (
             <button
               key={t.path}
