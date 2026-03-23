@@ -61,7 +61,9 @@ const VideoWithThumbnail = ({ media }: { media: DetailMedia }) => {
       <video
         src={media.url}
         controls
-        autoPlay={playing}
+        autoPlay
+        muted
+        loop
         className="w-full h-auto"
         controlsList="nodownload"
         playsInline
