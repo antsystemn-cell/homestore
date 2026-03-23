@@ -45,7 +45,11 @@ const AdminPage = () => {
     product_code: "", specifications: [] as { key: string; value: string }[],
     detail_media: [] as { type: "image" | "video"; url: string; caption: string }[],
     brand_id: "",
+    colors: [] as string[],
+    sizes: [] as string[],
   });
+  const [newColor, setNewColor] = useState("");
+  const [newSize, setNewSize] = useState("");
 
   // Detail media file input
   const detailMediaFileRef = useRef<HTMLInputElement>(null);
