@@ -131,6 +131,7 @@ export type Database = {
         Row: {
           brand_id: string | null
           category: string
+          colors: Json | null
           created_at: string
           description: string | null
           detail_media: Json | null
@@ -144,12 +145,14 @@ export type Database = {
           price: number
           product_code: string | null
           sales: number | null
+          sizes: Json | null
           specifications: Json | null
           updated_at: string
         }
         Insert: {
           brand_id?: string | null
           category?: string
+          colors?: Json | null
           created_at?: string
           description?: string | null
           detail_media?: Json | null
@@ -163,12 +166,14 @@ export type Database = {
           price: number
           product_code?: string | null
           sales?: number | null
+          sizes?: Json | null
           specifications?: Json | null
           updated_at?: string
         }
         Update: {
           brand_id?: string | null
           category?: string
+          colors?: Json | null
           created_at?: string
           description?: string | null
           detail_media?: Json | null
@@ -182,6 +187,7 @@ export type Database = {
           price?: number
           product_code?: string | null
           sales?: number | null
+          sizes?: Json | null
           specifications?: Json | null
           updated_at?: string
         }

@@ -45,7 +45,11 @@ const AdminPage = () => {
     product_code: "", specifications: [] as { key: string; value: string }[],
     detail_media: [] as { type: "image" | "video"; url: string; caption: string }[],
     brand_id: "",
+    colors: [] as string[],
+    sizes: [] as string[],
   });
+  const [newColor, setNewColor] = useState("");
+  const [newSize, setNewSize] = useState("");
 
   // Detail media file input
   const detailMediaFileRef = useRef<HTMLInputElement>(null);
@@ -270,7 +274,8 @@ const AdminPage = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, product_code: "", specifications: [], detail_media: [], brand_id: "" });
+    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, product_code: "", specifications: [], detail_media: [], brand_id: "", colors: [], sizes: [] });
+    setNewColor(""); setNewSize("");
     setEditId(null);
     setShowForm(false);
     setExtraImages([]);
@@ -289,6 +294,8 @@ const AdminPage = () => {
       specifications: form.specifications.filter(s => s.key.trim() && s.value.trim()),
       detail_media: form.detail_media.filter(m => m.url.trim()),
       brand_id: form.brand_id || null,
+      colors: form.colors.filter(c => c.trim()),
+      sizes: form.sizes.filter(s => s.trim()),
     };
     let productId = editId;
     if (editId) {
@@ -339,6 +346,8 @@ const AdminPage = () => {
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
       detail_media: media.map((m: any) => ({ type: m.type || "image", url: m.url || "", caption: m.caption || "" })),
       brand_id: p.brand_id || "",
+      colors: Array.isArray(p.colors) ? p.colors : [],
+      sizes: Array.isArray(p.sizes) ? p.sizes : [],
     });
     setEditId(p.id);
     setShowForm(true);
@@ -840,6 +849,54 @@ const AdminPage = () => {
                         </button>
                       </div>
                       <input ref={detailMediaFileRef} type="file" accept="image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff" multiple className="hidden" onChange={handleDetailMediaImageUpload} />
+                    </div>
+                  </div>
+
+                  {/* Colors */}
+                  <div>
+                    <label className="text-[11px] text-muted-foreground mb-2 block">Өнгө ({form.colors.length})</label>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {form.colors.map((color, idx) => (
+                        <span key={idx} className="inline-flex items-center gap-1 bg-secondary rounded-lg px-3 py-1.5 text-xs font-medium">
+                          {color}
+                          <button type="button" onClick={() => setForm({ ...form, colors: form.colors.filter((_, i) => i !== idx) })}
+                            className="ml-1 hover:text-destructive"><X className="h-3 w-3" /></button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <input placeholder="Өнгө нэмэх (жишээ: Хар)" value={newColor}
+                        onChange={(e) => setNewColor(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter" && newColor.trim()) { e.preventDefault(); setForm({ ...form, colors: [...form.colors, newColor.trim()] }); setNewColor(""); } }}
+                        className="flex-1 rounded-xl bg-secondary px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                      <button type="button" onClick={() => { if (newColor.trim()) { setForm({ ...form, colors: [...form.colors, newColor.trim()] }); setNewColor(""); } }}
+                        className="px-3 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90">
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Sizes */}
+                  <div>
+                    <label className="text-[11px] text-muted-foreground mb-2 block">Хэмжээ ({form.sizes.length})</label>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {form.sizes.map((size, idx) => (
+                        <span key={idx} className="inline-flex items-center gap-1 bg-secondary rounded-lg px-3 py-1.5 text-xs font-medium">
+                          {size}
+                          <button type="button" onClick={() => setForm({ ...form, sizes: form.sizes.filter((_, i) => i !== idx) })}
+                            className="ml-1 hover:text-destructive"><X className="h-3 w-3" /></button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <input placeholder="Хэмжээ нэмэх (жишээ: XL)" value={newSize}
+                        onChange={(e) => setNewSize(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter" && newSize.trim()) { e.preventDefault(); setForm({ ...form, sizes: [...form.sizes, newSize.trim()] }); setNewSize(""); } }}
+                        className="flex-1 rounded-xl bg-secondary px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                      <button type="button" onClick={() => { if (newSize.trim()) { setForm({ ...form, sizes: [...form.sizes, newSize.trim()] }); setNewSize(""); } }}
+                        className="px-3 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90">
+                        <Plus className="h-4 w-4" />
+                      </button>
                     </div>
                   </div>
 

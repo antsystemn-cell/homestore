@@ -18,6 +18,8 @@ const ProductPage = () => {
   const [loading, setLoading] = useState(true);
   const [allImages, setAllImages] = useState<string[]>([]);
   const [activeImg, setActiveImg] = useState(0);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -164,6 +166,50 @@ const ProductPage = () => {
                 <span className="text-muted-foreground line-through text-lg">{formatPrice(product.originalPrice)}</span>
               )}
             </div>
+
+            {/* Color selector */}
+            {product.colors && product.colors.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-foreground mb-2">Өнгө</h3>
+                <div className="flex flex-wrap gap-2">
+                  {product.colors.map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => setSelectedColor(selectedColor === color ? null : color)}
+                      className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-colors ${
+                        selectedColor === color
+                          ? "border-primary bg-primary/10 text-foreground"
+                          : "border-border bg-secondary text-muted-foreground hover:border-primary/40"
+                      }`}
+                    >
+                      {color}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Size selector */}
+            {product.sizes && product.sizes.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-foreground mb-2">Хэмжээ</h3>
+                <div className="flex flex-wrap gap-2">
+                  {product.sizes.map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(selectedSize === size ? null : size)}
+                      className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-colors ${
+                        selectedSize === size
+                          ? "border-primary bg-primary/10 text-foreground"
+                          : "border-border bg-secondary text-muted-foreground hover:border-primary/40"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="hidden md:flex gap-3">
               <Button variant="outline" size="lg" className="flex-1 gap-2 rounded-xl h-12" onClick={() => addToCart(product)}>
