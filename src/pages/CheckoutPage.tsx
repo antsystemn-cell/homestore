@@ -2,15 +2,54 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/data/products";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Lock } from "lucide-react";
+import { CheckCircle, Lock, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 import Header from "@/components/store/Header";
 import BottomNav from "@/components/store/BottomNav";
 
 const CheckoutPage = () => {
   const { items, cartTotal, clearCart } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [ordered, setOrdered] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [name, setName] = useState("");
+
+  const handleOrder = async () => {
+    if (!user) { toast.error("Нэвтэрсэн байх шаардлагатай"); navigate("/auth"); return; }
+    if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return; }
+    setSubmitting(true);
+    const orderItems = items.map((item) => ({
+      product_id: item.product.id,
+      name: item.product.name,
+      price: item.product.price,
+      quantity: item.quantity,
+      color: item.selectedColor || null,
+      size: item.selectedSize || null,
+      image: item.product.image,
+    }));
+    const { error } = await supabase.from("orders").insert({
+      user_id: user.id,
+      items: orderItems as any,
+      total: cartTotal,
+      phone: phone,
+      shipping_address: address,
+      status: "pending",
+    });
+    if (error) {
+      toast.error("Захиалга өгөхөд алдаа гарлаа");
+      setSubmitting(false);
+      return;
+    }
+    clearCart();
+    setOrdered(true);
+    setSubmitting(false);
+  };
 
   if (ordered) {
     return (
