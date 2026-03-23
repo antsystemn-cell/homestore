@@ -28,8 +28,11 @@ const CartPage = () => {
           <div className="md:grid md:grid-cols-3 md:gap-8">
             {/* Cart items */}
             <div className="md:col-span-2 space-y-3">
-              {items.map(({ product, quantity }) => (
-                <div key={product.id} className="bg-card rounded-xl p-3 md:p-4 flex gap-3 md:gap-5 border border-border">
+              {items.map((item) => {
+                const { product, quantity, selectedColor, selectedSize } = item;
+                const key = `${product.id}__${selectedColor || ""}__${selectedSize || ""}`;
+                return (
+                <div key={key} className="bg-card rounded-xl p-3 md:p-4 flex gap-3 md:gap-5 border border-border">
                   <img
                     src={product.image}
                     alt={product.name}
@@ -43,30 +46,41 @@ const CartPage = () => {
                     >
                       {product.name}
                     </h3>
+                    {(selectedColor || selectedSize) && (
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {selectedColor && (
+                          <span className="text-[11px] bg-secondary text-muted-foreground px-2 py-0.5 rounded-md">Өнгө: {selectedColor}</span>
+                        )}
+                        {selectedSize && (
+                          <span className="text-[11px] bg-secondary text-muted-foreground px-2 py-0.5 rounded-md">Хэмжээ: {selectedSize}</span>
+                        )}
+                      </div>
+                    )}
                     <p className="text-foreground font-bold text-sm md:text-lg mt-1">{formatPrice(product.price)}</p>
                     <div className="flex items-center justify-between mt-2 md:mt-4">
                       <div className="flex items-center gap-2 bg-secondary rounded-full">
                         <button
                           className="p-1.5 md:p-2 rounded-full hover:bg-accent"
-                          onClick={() => updateQuantity(product.id, quantity - 1)}
+                          onClick={() => updateQuantity(key, quantity - 1)}
                         >
                           <Minus className="h-3 w-3 md:h-4 md:w-4" />
                         </button>
                         <span className="text-sm font-medium w-6 text-center">{quantity}</span>
                         <button
                           className="p-1.5 md:p-2 rounded-full hover:bg-accent"
-                          onClick={() => updateQuantity(product.id, quantity + 1)}
+                          onClick={() => updateQuantity(key, quantity + 1)}
                         >
                           <Plus className="h-3 w-3 md:h-4 md:w-4" />
                         </button>
                       </div>
-                      <button onClick={() => removeFromCart(product.id)} className="text-sale p-1 hover:bg-sale/10 rounded-full transition-colors">
+                      <button onClick={() => removeFromCart(key)} className="text-sale p-1 hover:bg-sale/10 rounded-full transition-colors">
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Order summary sidebar */}

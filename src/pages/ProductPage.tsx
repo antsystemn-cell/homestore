@@ -212,14 +212,14 @@ const ProductPage = () => {
             )}
 
             <div className="hidden md:flex gap-3">
-              <Button variant="outline" size="lg" className="flex-1 gap-2 rounded-xl h-12" onClick={() => addToCart(product)}>
+              <Button variant="outline" size="lg" className="flex-1 gap-2 rounded-xl h-12" onClick={() => addToCart(product, selectedColor, selectedSize)}>
                 <ShoppingCart className="h-4 w-4" />
                 Сагсанд нэмэх
               </Button>
               <Button
                 size="lg"
                 className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl h-12"
-                onClick={() => { addToCart(product); navigate("/cart"); }}
+                onClick={() => { addToCart(product, selectedColor, selectedSize); navigate("/cart"); }}
               >
                 Худалдаж авах
               </Button>
@@ -311,13 +311,13 @@ const ProductPage = () => {
       </div>
 
       <div className="fixed bottom-14 left-0 right-0 bg-card border-t border-border p-3 flex gap-3 md:hidden">
-        <Button variant="outline" className="flex-1 gap-2" onClick={() => addToCart(product)}>
+        <Button variant="outline" className="flex-1 gap-2" onClick={() => addToCart(product, selectedColor, selectedSize)}>
           <ShoppingCart className="h-4 w-4" />
           Сагсанд нэмэх
         </Button>
         <Button
           className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
-          onClick={() => { addToCart(product); navigate("/cart"); }}
+          onClick={() => { addToCart(product, selectedColor, selectedSize); navigate("/cart"); }}
         >
           Худалдаж авах
         </Button>
