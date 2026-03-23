@@ -15,7 +15,7 @@ const ShopPage = () => {
     const fetchData = async () => {
       try {
         const [prodRes, brandRes] = await Promise.all([
-          supabase.from("products").select("*").order("created_at", { ascending: false }),
+          supabase.from("products").select("id, name, price, original_price, image_url, category, description, sales, is_new, is_on_sale, discount, product_code, brand_id").order("created_at", { ascending: false }),
           supabase.from("brands").select("id, name, logo_url").order("name"),
         ]);
         if (prodRes.error) throw prodRes.error;
