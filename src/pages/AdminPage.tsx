@@ -368,7 +368,7 @@ const AdminPage = () => {
       is_new: p.is_new, is_on_sale: p.is_on_sale,
       product_code: p.product_code || "",
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
-      detail_media: media.map((m: any) => ({ type: m.type || "image", url: m.url || "", caption: m.caption || "" })),
+      detail_media: media.map((m: any) => ({ type: m.type || "image", url: m.url || "", caption: m.caption || "", thumbnail: m.thumbnail || "" })),
       brand_id: p.brand_id || "",
       colors: Array.isArray(p.colors) ? p.colors.map((c: any) => typeof c === 'string' ? { name: c, image: '' } : { name: c.name || '', image: c.image || '' }) : [],
       sizes: Array.isArray(p.sizes) ? p.sizes : [],
