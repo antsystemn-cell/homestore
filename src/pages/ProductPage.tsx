@@ -164,24 +164,6 @@ const ProductPage = () => {
       <div className="max-w-6xl mx-auto md:px-8">
         <div className="md:grid md:grid-cols-2 md:gap-10">
           <div className="relative md:sticky md:top-20 md:self-start space-y-4">
-            {/* Detail Media (videos/images) above main image */}
-            {product.detailMedia && product.detailMedia.length > 0 && (
-              <div className="space-y-3 px-4 md:px-0">
-                {product.detailMedia.map((media, idx) => (
-                  <div key={idx} className="space-y-1.5">
-                    {media.type === "image" ? (
-                      <img src={media.url} alt={media.caption || ""} className="w-full rounded-xl object-cover" />
-                    ) : (
-                      <VideoWithThumbnail media={media} />
-                    )}
-                    {media.caption && (
-                      <p className="text-xs text-muted-foreground px-1">{media.caption}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
             {/* Main product image */}
             <div className="relative">
               {(() => {
@@ -373,6 +355,30 @@ const ProductPage = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Detail Media: Videos first, then images - below product info */}
+            {product.detailMedia && product.detailMedia.length > 0 && (
+              <div className="space-y-3">
+                {[...product.detailMedia]
+                  .sort((a, b) => {
+                    if (a.type === "video" && b.type !== "video") return -1;
+                    if (a.type !== "video" && b.type === "video") return 1;
+                    return 0;
+                  })
+                  .map((media, idx) => (
+                    <div key={idx} className="space-y-1.5">
+                      {media.type === "image" ? (
+                        <img src={media.url} alt={media.caption || ""} className="w-full rounded-xl object-cover" />
+                      ) : (
+                        <VideoWithThumbnail media={media} />
+                      )}
+                      {media.caption && (
+                        <p className="text-xs text-muted-foreground px-1">{media.caption}</p>
+                      )}
+                    </div>
+                  ))}
               </div>
             )}
 
