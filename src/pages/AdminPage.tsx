@@ -1227,16 +1227,34 @@ const AdminPage = () => {
                       <tr className="border-b border-border text-left">
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Захиалгын ID</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Дүн</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Хүргэлт</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Утас</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Огноо</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Төлөв</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {orders.map((o) => (
+                      {orders.map((o) => {
+                        const delOpt = deliveryOptions.find((d: any) => d.id === o.delivery_option_id);
+                        return (
                         <tr key={o.id} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
                           <td className="px-6 py-4 text-sm font-medium">#{o.id.slice(0, 8)}</td>
-                          <td className="px-6 py-4 text-sm font-semibold">{formatPrice(o.total)}</td>
+                          <td className="px-6 py-4">
+                            <span className="text-sm font-semibold">{formatPrice(o.total)}</span>
+                            {o.delivery_fee > 0 && (
+                              <span className="text-[10px] text-muted-foreground block">Хүргэлт: {formatPrice(o.delivery_fee)}</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4">
+                            {delOpt ? (
+                              <div>
+                                <span className="text-xs font-medium text-foreground">{delOpt.name}</span>
+                                <span className="text-[10px] text-muted-foreground block">{delOpt.estimated_days_min}-{delOpt.estimated_days_max} хоног</span>
+                              </div>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">—</span>
+                            )}
+                          </td>
                           <td className="px-6 py-4 text-sm text-muted-foreground">{o.phone || "—"}</td>
                           <td className="px-6 py-4 text-sm text-muted-foreground">{new Date(o.created_at).toLocaleDateString("mn-MN")}</td>
                           <td className="px-6 py-4">
@@ -1251,7 +1269,8 @@ const AdminPage = () => {
                             </select>
                           </td>
                         </tr>
-                      ))}
+                        );
+                      })}
                     </tbody>
                   </table>
                   {orders.length === 0 && !loading && (
@@ -1260,7 +1279,9 @@ const AdminPage = () => {
                 </div>
               </div>
               <div className="md:hidden space-y-2">
-                {orders.map((o) => (
+                {orders.map((o) => {
+                  const delOpt = deliveryOptions.find((d: any) => d.id === o.delivery_option_id);
+                  return (
                   <div key={o.id} className="bg-card rounded-xl p-4 border border-border">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-xs font-bold">#{o.id.slice(0, 8)}</span>
@@ -1275,9 +1296,18 @@ const AdminPage = () => {
                       </select>
                     </div>
                     <p className="text-xs text-muted-foreground">{formatPrice(o.total)}</p>
+                    {delOpt && (
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <Truck className="h-3 w-3 text-primary" />
+                        <span className="text-[10px] text-muted-foreground">
+                          {delOpt.name} · {o.delivery_fee > 0 ? formatPrice(o.delivery_fee) : "Үнэгүй"} · {delOpt.estimated_days_min}-{delOpt.estimated_days_max} хоног
+                        </span>
+                      </div>
+                    )}
                     <p className="text-[10px] text-muted-foreground mt-1">{o.phone || "Утас байхгүй"} · {new Date(o.created_at).toLocaleDateString("mn-MN")}</p>
                   </div>
-                ))}
+                  );
+                })}
                 {orders.length === 0 && !loading && (
                   <p className="text-center text-sm text-muted-foreground py-8">Захиалга байхгүй</p>
                 )}
