@@ -10,7 +10,6 @@ const BottomNav = () => {
   const tabs = [
     { path: "/", label: "Нүүр", icon: Home },
     { path: "/wishlist", label: "Таалагдсан", icon: Heart },
-    { path: "/shop", label: "Ангилал", icon: Grid3X3, center: true },
     { path: "/cart", label: "Сагс", icon: ShoppingCart, badge: cartCount },
     { path: "/profile", label: "Профайл", icon: User },
   ];
@@ -21,19 +20,6 @@ const BottomNav = () => {
         {tabs.map((t) => {
           const active = pathname === t.path;
           const Icon = t.icon;
-
-          if (t.center) {
-            return (
-              <button
-                key={t.path}
-                onClick={() => navigate(t.path)}
-                className="flex items-center justify-center gap-1.5 bg-primary text-primary-foreground rounded-full px-5 py-2.5 -mt-5 shadow-lg font-bold text-xs transition-transform active:scale-95"
-              >
-                <Icon className="h-4 w-4" />
-                {t.label}
-              </button>
-            );
-          }
 
           return (
             <button
