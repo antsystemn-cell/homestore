@@ -186,6 +186,7 @@ const AdminPage = () => {
     fetchUsers();
     fetchCategories();
     fetchBrands();
+    fetchDeliveryOptions();
   }, []);
 
   const fetchProducts = async () => {
