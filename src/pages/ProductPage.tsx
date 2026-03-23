@@ -163,42 +163,63 @@ const ProductPage = () => {
 
       <div className="max-w-6xl mx-auto md:px-8">
         <div className="md:grid md:grid-cols-2 md:gap-10">
-          <div className="relative md:sticky md:top-20 md:self-start">
-            {(() => {
-              const colorImg = selectedColor && product.colors?.find(c => c.name === selectedColor)?.image;
-              const displayImg = colorImg || allImages[activeImg] || product.image;
-              return <img src={displayImg} alt={product.name} className="w-full aspect-square object-cover bg-secondary md:rounded-2xl" />;
-            })()}
-            {allImages.length > 1 && (
-              <>
-                <button
-                  onClick={() => setActiveImg((i) => (i - 1 + allImages.length) % allImages.length)}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
-                >
-                  <ChevronLeft className="h-4 w-4 text-foreground" />
-                </button>
-                <button
-                  onClick={() => setActiveImg((i) => (i + 1) % allImages.length)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
-                >
-                  <ChevronRight className="h-4 w-4 text-foreground" />
-                </button>
-              </>
+          <div className="relative md:sticky md:top-20 md:self-start space-y-4">
+            {/* Detail Media (videos/images) above main image */}
+            {product.detailMedia && product.detailMedia.length > 0 && (
+              <div className="space-y-3 px-4 md:px-0">
+                {product.detailMedia.map((media, idx) => (
+                  <div key={idx} className="space-y-1.5">
+                    {media.type === "image" ? (
+                      <img src={media.url} alt={media.caption || ""} className="w-full rounded-xl object-cover" />
+                    ) : (
+                      <VideoWithThumbnail media={media} />
+                    )}
+                    {media.caption && (
+                      <p className="text-xs text-muted-foreground px-1">{media.caption}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
             )}
-            <button
-              onClick={() => toggleWishlist(product)}
-              className="absolute top-4 right-4 p-2.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
-            >
-              <Heart className={`h-5 w-5 ${liked ? "fill-sale text-sale" : "text-foreground"}`} />
-            </button>
-            {product.discount && (
-              <span className="absolute bottom-4 left-4 bg-sale text-sale-foreground text-xs font-bold px-3 py-1.5 rounded-full">
-                -{product.discount}% хямдрал
-              </span>
-            )}
+
+            {/* Main product image */}
+            <div className="relative">
+              {(() => {
+                const colorImg = selectedColor && product.colors?.find(c => c.name === selectedColor)?.image;
+                const displayImg = colorImg || allImages[activeImg] || product.image;
+                return <img src={displayImg} alt={product.name} className="w-full aspect-square object-cover bg-secondary md:rounded-2xl" />;
+              })()}
+              {allImages.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setActiveImg((i) => (i - 1 + allImages.length) % allImages.length)}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
+                  >
+                    <ChevronLeft className="h-4 w-4 text-foreground" />
+                  </button>
+                  <button
+                    onClick={() => setActiveImg((i) => (i + 1) % allImages.length)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
+                  >
+                    <ChevronRight className="h-4 w-4 text-foreground" />
+                  </button>
+                </>
+              )}
+              <button
+                onClick={() => toggleWishlist(product)}
+                className="absolute top-4 right-4 p-2.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
+              >
+                <Heart className={`h-5 w-5 ${liked ? "fill-sale text-sale" : "text-foreground"}`} />
+              </button>
+              {product.discount && (
+                <span className="absolute bottom-4 left-4 bg-sale text-sale-foreground text-xs font-bold px-3 py-1.5 rounded-full">
+                  -{product.discount}% хямдрал
+                </span>
+              )}
+            </div>
             {/* Thumbnails */}
             {allImages.length > 1 && (
-              <div className="flex gap-2 mt-3 px-4 md:px-0 overflow-x-auto pb-1">
+              <div className="flex gap-2 px-4 md:px-0 overflow-x-auto pb-1">
                 {allImages.map((img, idx) => (
                   <button
                     key={idx}
