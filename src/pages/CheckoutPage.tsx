@@ -139,13 +139,11 @@ const CheckoutPage = () => {
 
               <Button
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-base rounded-xl mt-2 gap-2"
-                onClick={() => {
-                  clearCart();
-                  setOrdered(true);
-                }}
+                disabled={submitting}
+                onClick={handleOrder}
               >
-                <Lock className="h-4 w-4" />
-                Захиалга өгөх — {formatPrice(cartTotal)}
+                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
+                {submitting ? "Илгээж байна..." : `Захиалга өгөх — ${formatPrice(cartTotal)}`}
               </Button>
 
               <p className="text-[10px] text-muted-foreground text-center mt-2">
