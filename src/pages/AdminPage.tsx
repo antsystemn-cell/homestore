@@ -43,7 +43,7 @@ const AdminPage = () => {
     image_url: "", category: "general", discount: 0,
     is_new: false, is_on_sale: false,
     product_code: "", specifications: [] as { key: string; value: string }[],
-    detail_media: [] as { type: "image" | "video"; url: string; caption: string }[],
+    detail_media: [] as { type: "image" | "video"; url: string; caption: string; thumbnail?: string }[],
     brand_id: "",
     colors: [] as { name: string; image: string }[],
     sizes: [] as string[],
