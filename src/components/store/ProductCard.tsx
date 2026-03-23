@@ -20,6 +20,11 @@ const ProductCard = ({ product }: Props) => {
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
         />
+        {product.brandLogo && (
+          <div className="absolute top-2 left-2 bg-background/80 backdrop-blur-sm rounded-md p-1">
+            <img src={product.brandLogo} alt={product.brandName || ""} className="h-5 w-auto object-contain" />
+          </div>
+        )}
       </div>
       <div className="px-3 py-2.5 md:px-4 md:py-3">
         <h3 className="text-xs md:text-sm text-foreground line-clamp-2 leading-snug font-medium">
