@@ -22,7 +22,20 @@ const ProductPage = () => {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
-  useEffect(() => {
+  const handleAddToCart = (andNavigate?: boolean) => {
+    if (product?.colors && product.colors.length > 0 && !selectedColor) {
+      toast.error("Өнгөө сонгоно уу");
+      return;
+    }
+    if (product?.sizes && product.sizes.length > 0 && !selectedSize) {
+      toast.error("Хэмжээгээ сонгоно уу");
+      return;
+    }
+    addToCart(product!, selectedColor, selectedSize);
+    if (andNavigate) navigate("/cart");
+  };
+
+
     const fetchProduct = async () => {
       setLoading(true);
       try {
