@@ -18,6 +18,8 @@ const ProductPage = () => {
   const [loading, setLoading] = useState(true);
   const [allImages, setAllImages] = useState<string[]>([]);
   const [activeImg, setActiveImg] = useState(0);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
