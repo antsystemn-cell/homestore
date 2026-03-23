@@ -99,9 +99,11 @@ const ProductPage = () => {
       <div className="max-w-6xl mx-auto md:px-8">
         <div className="md:grid md:grid-cols-2 md:gap-10">
           <div className="relative md:sticky md:top-20 md:self-start">
-            <img
-              src={allImages[activeImg] || product.image}
-              alt={product.name}
+            {(() => {
+              const colorImg = selectedColor && product.colors?.find(c => c.name === selectedColor)?.image;
+              const displayImg = colorImg || allImages[activeImg] || product.image;
+              return <img src={displayImg} alt={product.name} className="w-full aspect-square object-cover bg-secondary md:rounded-2xl" />;
+            })()}
               className="w-full aspect-square object-cover bg-secondary md:rounded-2xl"
             />
             {allImages.length > 1 && (
