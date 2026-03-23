@@ -860,19 +860,25 @@ const AdminPage = () => {
                           </button>
                         </div>
                       ))}
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         <button type="button"
                           onClick={() => detailMediaFileRef.current?.click()}
                           className="flex items-center gap-1.5 text-xs text-primary font-medium hover:text-primary/80 transition-colors py-1">
                           <ImageIcon className="h-3.5 w-3.5" /> Зураг оруулах
                         </button>
                         <button type="button"
+                          onClick={() => detailVideoFileRef.current?.click()}
+                          className="flex items-center gap-1.5 text-xs text-primary font-medium hover:text-primary/80 transition-colors py-1">
+                          <Video className="h-3.5 w-3.5" /> Бичлэг оруулах
+                        </button>
+                        <button type="button"
                           onClick={() => setForm({ ...form, detail_media: [...form.detail_media, { type: "video", url: "", caption: "" }] })}
                           className="flex items-center gap-1.5 text-xs text-primary font-medium hover:text-primary/80 transition-colors py-1">
-                          <Plus className="h-3.5 w-3.5" /> Бичлэг URL нэмэх
+                          <Plus className="h-3.5 w-3.5" /> Бичлэг URL нэмэх (YouTube, Facebook)
                         </button>
                       </div>
                       <input ref={detailMediaFileRef} type="file" accept="image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff" multiple className="hidden" onChange={handleDetailMediaImageUpload} />
+                      <input ref={detailVideoFileRef} type="file" accept="video/*,.mp4,.mov,.avi,.webm,.mkv" multiple className="hidden" onChange={handleDetailVideoUpload} />
                     </div>
                   </div>
 
