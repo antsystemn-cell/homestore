@@ -1239,99 +1239,159 @@ const AdminPage = () => {
 
           {/* Orders */}
           {tab === "orders" && (
-            <div>
-              <div className="hidden md:block">
-                <div className="bg-card rounded-2xl border border-border overflow-hidden">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-border text-left">
-                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Захиалгын ID</th>
-                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Дүн</th>
-                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Хүргэлт</th>
-                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Утас</th>
-                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Огноо</th>
-                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Төлөв</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {orders.map((o) => {
-                        const delOpt = deliveryOptions.find((d: any) => d.id === o.delivery_option_id);
-                        return (
-                        <tr key={o.id} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
-                          <td className="px-6 py-4 text-sm font-medium">#{o.id.slice(0, 8)}</td>
-                          <td className="px-6 py-4">
-                            <span className="text-sm font-semibold">{formatPrice(o.total)}</span>
-                            {o.delivery_fee > 0 && (
-                              <span className="text-[10px] text-muted-foreground block">Хүргэлт: {formatPrice(o.delivery_fee)}</span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4">
-                            {delOpt ? (
-                              <div>
-                                <span className="text-xs font-medium text-foreground">{delOpt.name}</span>
-                                <span className="text-[10px] text-muted-foreground block">{delOpt.estimated_days_min}-{delOpt.estimated_days_max} хоног</span>
+            <div className="space-y-3">
+              {orders.map((o) => {
+                const delOpt = deliveryOptions.find((d: any) => d.id === o.delivery_option_id);
+                const isExpanded = expandedOrderId === o.id;
+                const orderItems = Array.isArray(o.items) ? o.items : [];
+                return (
+                  <div key={o.id} className="bg-card rounded-xl border border-border overflow-hidden">
+                    {/* Order header - clickable */}
+                    <button
+                      onClick={() => setExpandedOrderId(isExpanded ? null : o.id)}
+                      className="w-full flex items-center gap-3 p-4 text-left hover:bg-secondary/30 transition-colors"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-bold">#{o.id.slice(0, 8)}</span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusColors[o.status] || "bg-secondary text-muted-foreground"}`}>
+                            {statusLabels[o.status] || o.status}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                          <span className="font-semibold text-foreground">{formatPrice(o.total)}</span>
+                          <span>{o.phone || "—"}</span>
+                          <span>{new Date(o.created_at).toLocaleDateString("mn-MN")}</span>
+                        </div>
+                        {delOpt && (
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <Truck className="h-3 w-3 text-primary" />
+                            <span className="text-[10px] text-muted-foreground">
+                              {delOpt.name} · {o.delivery_fee > 0 ? formatPrice(o.delivery_fee) : "Үнэгүй"}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                    </button>
+
+                    {/* Expanded details */}
+                    {isExpanded && (
+                      <div className="border-t border-border p-4 space-y-4">
+                        {/* Order items */}
+                        <div>
+                          <h4 className="text-xs font-bold text-muted-foreground mb-2">Захиалсан бараанууд</h4>
+                          <div className="space-y-2">
+                            {orderItems.map((item: any, idx: number) => (
+                              <div key={idx} className="flex items-center gap-3">
+                                {item.image && <img src={item.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-secondary" />}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-medium truncate">{item.name}</p>
+                                  <p className="text-[10px] text-muted-foreground">
+                                    {[item.color && `Өнгө: ${item.color}`, item.size && `Хэмжээ: ${item.size}`].filter(Boolean).join(" · ")}
+                                    {item.color || item.size ? " · " : ""}x{item.quantity}
+                                  </p>
+                                </div>
+                                <span className="text-xs font-bold">{formatPrice(item.price * item.quantity)}</span>
                               </div>
-                            ) : (
-                              <span className="text-xs text-muted-foreground">—</span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-muted-foreground">{o.phone || "—"}</td>
-                          <td className="px-6 py-4 text-sm text-muted-foreground">{new Date(o.created_at).toLocaleDateString("mn-MN")}</td>
-                          <td className="px-6 py-4">
-                            <select
-                              value={o.status}
-                              onChange={(e) => updateOrderStatus(o.id, e.target.value)}
-                              className={`text-xs font-bold px-3 py-1.5 rounded-full border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 ${statusColors[o.status] || "bg-secondary text-muted-foreground"}`}
-                            >
-                              {Object.entries(statusLabels).map(([value, label]) => (
-                                <option key={value} value={value}>{label}</option>
-                              ))}
-                            </select>
-                          </td>
-                        </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                  {orders.length === 0 && !loading && (
-                    <p className="text-center text-sm text-muted-foreground py-12">Захиалга байхгүй</p>
-                  )}
-                </div>
-              </div>
-              <div className="md:hidden space-y-2">
-                {orders.map((o) => {
-                  const delOpt = deliveryOptions.find((d: any) => d.id === o.delivery_option_id);
-                  return (
-                  <div key={o.id} className="bg-card rounded-xl p-4 border border-border">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-xs font-bold">#{o.id.slice(0, 8)}</span>
-                      <select
-                        value={o.status}
-                        onChange={(e) => updateOrderStatus(o.id, e.target.value)}
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border-0 cursor-pointer focus:outline-none ${statusColors[o.status] || "bg-secondary text-muted-foreground"}`}
-                      >
-                        {Object.entries(statusLabels).map(([value, label]) => (
-                          <option key={value} value={value}>{label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{formatPrice(o.total)}</p>
-                    {delOpt && (
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <Truck className="h-3 w-3 text-primary" />
-                        <span className="text-[10px] text-muted-foreground">
-                          {delOpt.name} · {o.delivery_fee > 0 ? formatPrice(o.delivery_fee) : "Үнэгүй"} · {delOpt.estimated_days_min}-{delOpt.estimated_days_max} хоног
-                        </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Delivery info */}
+                        {delOpt && (
+                          <div>
+                            <h4 className="text-xs font-bold text-muted-foreground mb-2">Хүргэлтийн мэдээлэл</h4>
+                            <div className="bg-secondary/50 rounded-lg p-3 text-xs space-y-1">
+                              <p><span className="text-muted-foreground">Хүргэлт:</span> <span className="font-medium">{delOpt.name}</span></p>
+                              <p><span className="text-muted-foreground">Төлбөр:</span> <span className="font-medium">{o.delivery_fee > 0 ? formatPrice(o.delivery_fee) : "Үнэгүй"}</span></p>
+                              <p><span className="text-muted-foreground">Хугацаа:</span> <span className="font-medium">{delOpt.estimated_days_min}-{delOpt.estimated_days_max} хоног</span></p>
+                              {delOpt.address && <p><span className="text-muted-foreground">Хаяг:</span> <span className="font-medium">{delOpt.address}</span></p>}
+                              {delOpt.phone && <p><span className="text-muted-foreground">Утас:</span> <span className="font-medium">{delOpt.phone}</span></p>}
+                              {delOpt.payment_terms && <p><span className="text-muted-foreground">Төлбөрийн нөхцөл:</span> <span className="font-medium">{delOpt.payment_terms}</span></p>}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Shipping address */}
+                        {o.shipping_address && (
+                          <div>
+                            <h4 className="text-xs font-bold text-muted-foreground mb-1">Хүлээн авагчийн хаяг</h4>
+                            <p className="text-xs">{o.shipping_address}</p>
+                          </div>
+                        )}
+
+                        {/* Status change */}
+                        <div>
+                          <h4 className="text-xs font-bold text-muted-foreground mb-2">Төлөв өөрчлөх</h4>
+                          <select
+                            value={o.status}
+                            onChange={(e) => updateOrderStatus(o.id, e.target.value)}
+                            className={`text-xs font-bold px-3 py-2 rounded-xl border border-border cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 ${statusColors[o.status] || "bg-secondary text-muted-foreground"}`}
+                          >
+                            {Object.entries(statusLabels).map(([value, label]) => (
+                              <option key={value} value={value}>{label}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Delivery Photos */}
+                        <div>
+                          <h4 className="text-xs font-bold text-muted-foreground mb-2">Хүргэлтийн зургууд</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Pickup photo */}
+                            <div className="space-y-2">
+                              <p className="text-[11px] font-medium text-foreground">📦 Авч явсан зураг</p>
+                              {o.delivery_pickup_photo ? (
+                                <div className="relative group">
+                                  <img src={o.delivery_pickup_photo} alt="Авч явсан" className="w-full h-40 object-cover rounded-xl border border-border" />
+                                  <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 rounded-xl cursor-pointer transition-opacity">
+                                    <span className="text-white text-xs font-medium">Солих</span>
+                                    <input type="file" accept="image/*" className="hidden"
+                                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleDeliveryPhotoUpload(o.id, "delivery_pickup_photo", f); }} />
+                                  </label>
+                                </div>
+                              ) : (
+                                <label className="flex flex-col items-center justify-center h-32 rounded-xl border-2 border-dashed border-border hover:border-primary/40 cursor-pointer transition-colors bg-secondary/30">
+                                  <Upload className="h-5 w-5 text-muted-foreground mb-1" />
+                                  <span className="text-[10px] text-muted-foreground">Зураг оруулах</span>
+                                  <input type="file" accept="image/*" className="hidden"
+                                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleDeliveryPhotoUpload(o.id, "delivery_pickup_photo", f); }} />
+                                </label>
+                              )}
+                            </div>
+
+                            {/* Completed photo */}
+                            <div className="space-y-2">
+                              <p className="text-[11px] font-medium text-foreground">✅ Хүргэлт дууссан зураг</p>
+                              {o.delivery_completed_photo ? (
+                                <div className="relative group">
+                                  <img src={o.delivery_completed_photo} alt="Дууссан" className="w-full h-40 object-cover rounded-xl border border-border" />
+                                  <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 rounded-xl cursor-pointer transition-opacity">
+                                    <span className="text-white text-xs font-medium">Солих</span>
+                                    <input type="file" accept="image/*" className="hidden"
+                                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleDeliveryPhotoUpload(o.id, "delivery_completed_photo", f); }} />
+                                  </label>
+                                </div>
+                              ) : (
+                                <label className="flex flex-col items-center justify-center h-32 rounded-xl border-2 border-dashed border-border hover:border-primary/40 cursor-pointer transition-colors bg-secondary/30">
+                                  <Upload className="h-5 w-5 text-muted-foreground mb-1" />
+                                  <span className="text-[10px] text-muted-foreground">Зураг оруулах</span>
+                                  <input type="file" accept="image/*" className="hidden"
+                                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleDeliveryPhotoUpload(o.id, "delivery_completed_photo", f); }} />
+                                </label>
+                              )}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     )}
-                    <p className="text-[10px] text-muted-foreground mt-1">{o.phone || "Утас байхгүй"} · {new Date(o.created_at).toLocaleDateString("mn-MN")}</p>
                   </div>
-                  );
-                })}
-                {orders.length === 0 && !loading && (
-                  <p className="text-center text-sm text-muted-foreground py-8">Захиалга байхгүй</p>
-                )}
-              </div>
+                );
+              })}
+              {orders.length === 0 && !loading && (
+                <p className="text-center text-sm text-muted-foreground py-12">Захиалга байхгүй</p>
+              )}
             </div>
           )}
 
