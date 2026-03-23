@@ -1582,6 +1582,8 @@ const AdminPage = () => {
                           name: d.name, description: d.description || "",
                           price: d.price, estimated_days_min: d.estimated_days_min,
                           estimated_days_max: d.estimated_days_max, is_active: d.is_active,
+                          address: d.address || "", phone: d.phone || "",
+                          payment_terms: d.payment_terms || "",
                         });
                         setEditDeliveryId(d.id);
                       }}
