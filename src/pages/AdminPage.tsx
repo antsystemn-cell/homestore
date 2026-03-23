@@ -1458,6 +1458,115 @@ const AdminPage = () => {
               </div>
             </div>
           )}
+
+          {/* Delivery Tab */}
+          {tab === "delivery" && (
+            <div className="space-y-4">
+              <div className="bg-card rounded-2xl p-4 md:p-6 border border-border space-y-4">
+                <h3 className="font-bold text-sm">{editDeliveryId ? "Хүргэлт засах" : "Шинэ хүргэлтийн сонголт нэмэх"}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <input placeholder="Хүргэлтийн нэр *" value={deliveryForm.name}
+                    onChange={(e) => setDeliveryForm(f => ({ ...f, name: e.target.value }))}
+                    className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <input placeholder="Үнэ (₮)" type="number" value={deliveryForm.price || ""}
+                    onChange={(e) => setDeliveryForm(f => ({ ...f, price: Number(e.target.value) }))}
+                    className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <textarea placeholder="Тайлбар (заавал биш)" value={deliveryForm.description}
+                  onChange={(e) => setDeliveryForm(f => ({ ...f, description: e.target.value }))}
+                  rows={2}
+                  className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none" />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">Хамгийн бага хоног</label>
+                    <input type="number" min={0} value={deliveryForm.estimated_days_min}
+                      onChange={(e) => setDeliveryForm(f => ({ ...f, estimated_days_min: Number(e.target.value) }))}
+                      className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">Хамгийн их хоног</label>
+                    <input type="number" min={0} value={deliveryForm.estimated_days_max}
+                      onChange={(e) => setDeliveryForm(f => ({ ...f, estimated_days_max: Number(e.target.value) }))}
+                      className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  </div>
+                  <div className="flex items-end">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={deliveryForm.is_active}
+                        onChange={(e) => setDeliveryForm(f => ({ ...f, is_active: e.target.checked }))}
+                        className="w-4 h-4 rounded border-border" />
+                      <span className="text-sm">Идэвхтэй</span>
+                    </label>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={handleSaveDelivery}
+                    className="bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors">
+                    {editDeliveryId ? "Шинэчлэх" : "Нэмэх"}
+                  </button>
+                  {editDeliveryId && (
+                    <button onClick={resetDeliveryForm}
+                      className="bg-secondary rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors">
+                      Болих
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                {deliveryOptions.map((d) => (
+                  <div key={d.id} className="flex items-center justify-between bg-card rounded-xl p-4 border border-border">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${d.is_active ? 'bg-primary/10' : 'bg-secondary'}`}>
+                        <Truck className={`h-5 w-5 ${d.is_active ? 'text-primary' : 'text-muted-foreground'}`} />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold truncate">{d.name}</p>
+                          {!d.is_active && (
+                            <span className="text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full">Идэвхгүй</span>
+                          )}
+                        </div>
+                        {d.description && <p className="text-xs text-muted-foreground truncate">{d.description}</p>}
+                        <div className="flex items-center gap-3 mt-1">
+                          <span className="text-xs font-bold text-primary">
+                            {d.price > 0 ? formatPrice(d.price) : "Үнэгүй"}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">
+                            {d.estimated_days_min}-{d.estimated_days_max} хоног
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-1 shrink-0">
+                      <button onClick={() => toggleDeliveryActive(d.id, d.is_active)}
+                        className={`p-2 rounded-lg transition-colors ${d.is_active ? 'hover:bg-amber-500/10 text-amber-600' : 'hover:bg-green-500/10 text-green-600'}`}
+                        title={d.is_active ? "Идэвхгүй болгох" : "Идэвхтэй болгох"}>
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => {
+                        setDeliveryForm({
+                          name: d.name, description: d.description || "",
+                          price: d.price, estimated_days_min: d.estimated_days_min,
+                          estimated_days_max: d.estimated_days_max, is_active: d.is_active,
+                        });
+                        setEditDeliveryId(d.id);
+                      }}
+                        className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => handleDeleteDelivery(d.id)}
+                        className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {deliveryOptions.length === 0 && (
+                  <p className="text-center text-sm text-muted-foreground py-8">Хүргэлтийн сонголт байхгүй</p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>
