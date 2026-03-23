@@ -104,8 +104,6 @@ const ProductPage = () => {
               const displayImg = colorImg || allImages[activeImg] || product.image;
               return <img src={displayImg} alt={product.name} className="w-full aspect-square object-cover bg-secondary md:rounded-2xl" />;
             })()}
-              className="w-full aspect-square object-cover bg-secondary md:rounded-2xl"
-            />
             {allImages.length > 1 && (
               <>
                 <button
