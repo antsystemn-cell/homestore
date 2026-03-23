@@ -28,26 +28,30 @@ const VideoWithThumbnail = ({ media }: { media: DetailMedia }) => {
   const isYoutube = media.url.includes("youtube.com") || media.url.includes("youtu.be");
   const isFacebook = media.url.includes("facebook.com") || media.url.includes("fb.watch");
 
-  if (isYoutube || isFacebook) {
+  if (isYoutube) {
     return (
       <div className="w-full aspect-video rounded-xl overflow-hidden bg-secondary">
-        {isYoutube ? (
-          <iframe
-            src={media.url.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/") + (playing ? "?autoplay=1" : "")}
-            className="w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-            allowFullScreen
-            title={media.caption || "Video"}
-          />
-        ) : (
-          <iframe
-            src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(media.url)}&show_text=false${playing ? "&autoplay=true" : ""}`}
-            className="w-full h-full"
-            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; fullscreen"
-            allowFullScreen
-            title={media.caption || "Facebook Video"}
-          />
-        )}
+        <iframe
+          src={media.url.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/") + (playing ? "?autoplay=1" : "")}
+          className="w-full h-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+          allowFullScreen
+          title={media.caption || "Video"}
+        />
+      </div>
+    );
+  }
+
+  if (isFacebook) {
+    return (
+      <div className="w-full rounded-xl overflow-hidden bg-secondary" style={{ aspectRatio: "9/16" }}>
+        <iframe
+          src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(media.url)}&show_text=false${playing ? "&autoplay=true" : ""}&width=0`}
+          className="w-full h-full"
+          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; fullscreen"
+          allowFullScreen
+          title={media.caption || "Facebook Video"}
+        />
       </div>
     );
   }
