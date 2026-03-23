@@ -62,16 +62,25 @@ const CheckoutPage = () => {
           <div className="md:col-span-1 mt-4 md:mt-0">
             <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-3 md:sticky md:top-20">
               <h2 className="font-bold text-foreground md:text-lg">Захиалгын мэдээлэл</h2>
-              {items.map(({ product, quantity }) => (
-                <div key={product.id} className="flex items-center gap-3 py-2">
+              {items.map((item) => {
+                const { product, quantity, selectedColor, selectedSize } = item;
+                const key = `${product.id}__${selectedColor || ""}__${selectedSize || ""}`;
+                return (
+                <div key={key} className="flex items-center gap-3 py-2">
                   <img src={product.image} alt="" className="w-12 h-12 rounded-lg object-cover bg-secondary" />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-foreground truncate">{product.name}</p>
+                    {(selectedColor || selectedSize) && (
+                      <p className="text-[10px] text-muted-foreground">
+                        {[selectedColor && `Өнгө: ${selectedColor}`, selectedSize && `Хэмжээ: ${selectedSize}`].filter(Boolean).join(" · ")}
+                      </p>
+                    )}
                     <p className="text-[10px] text-muted-foreground">x{quantity}</p>
                   </div>
                   <span className="text-xs font-bold text-foreground shrink-0">{formatPrice(product.price * quantity)}</span>
                 </div>
-              ))}
+                );
+              })}
               <div className="border-t border-border pt-3 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Хүргэлт</span>
