@@ -837,7 +837,7 @@ const AdminPage = () => {
                                 <option value="image">Зураг</option>
                                 <option value="video">Бичлэг</option>
                               </select>
-                              <input placeholder={media.type === "video" ? "YouTube/видео URL" : "Зураг URL"} value={media.url.startsWith("data:") ? "📷 Зураг оруулсан" : media.url}
+                              <input placeholder={media.type === "video" ? "YouTube/Facebook/видео URL" : "Зураг URL"} value={media.url.startsWith("data:") ? (media.type === "video" ? "🎬 Бичлэг оруулсан" : "📷 Зураг оруулсан") : media.url}
                                 readOnly={media.url.startsWith("data:")}
                                 onChange={(e) => {
                                   const dm = [...form.detail_media];
