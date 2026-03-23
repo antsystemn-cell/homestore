@@ -45,7 +45,7 @@ const AdminPage = () => {
     product_code: "", specifications: [] as { key: string; value: string }[],
     detail_media: [] as { type: "image" | "video"; url: string; caption: string }[],
     brand_id: "",
-    colors: [] as string[],
+    colors: [] as { name: string; image: string }[],
     sizes: [] as string[],
   });
   const [newColor, setNewColor] = useState("");
