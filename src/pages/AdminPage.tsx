@@ -1344,27 +1344,12 @@ const AdminPage = () => {
                 <div className="flex flex-col gap-3">
                   <input placeholder="Брэндийн нэр *" value={brandName} onChange={(e) => setBrandName(e.target.value)}
                     className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <input placeholder="Логоны URL (https://...)" value={brandLogo} onChange={(e) => setBrandLogo(e.target.value)}
+                    className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
                   <div className="flex items-center gap-3">
                     {brandLogo && (
                       <img src={brandLogo} alt="Лого" className="h-12 w-12 rounded-lg object-contain border border-border bg-background" />
                     )}
-                    <label className="cursor-pointer bg-secondary hover:bg-secondary/80 transition-colors rounded-xl px-4 py-2.5 text-sm font-medium">
-                      {brandLogo ? "Лого солих" : "Лого оруулах"}
-                      <input type="file" className="hidden"
-                        accept="image/*,.png,.jpg,.jpeg,.jfif,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff,.ico,.dng,.raw,.cr2,.nef,.psd"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          if (!file.type.startsWith("image/") && !/\.(png|jpe?g|gif|webp|svg|heic|heif|avif)$/i.test(file.name)) {
-                            toast.error("Зөвхөн зургийн файл оруулна уу");
-                            return;
-                          }
-                          const reader = new FileReader();
-                          reader.onload = (ev) => setBrandLogo(ev.target?.result as string);
-                          reader.readAsDataURL(file);
-                        }}
-                      />
-                    </label>
                     {brandLogo && (
                       <button type="button" onClick={() => setBrandLogo("")} className="text-destructive text-xs hover:underline">Устгах</button>
                     )}
