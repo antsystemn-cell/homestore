@@ -29,7 +29,7 @@ const ProductCard = ({ product }: Props) => {
           <span className="text-foreground font-extrabold text-sm md:text-base">
             {formatPrice(product.price)}
           </span>
-          {product.originalPrice && (
+          {product.originalPrice != null && product.originalPrice > product.price && (
             <span className="text-muted-foreground text-[10px] md:text-xs line-through">
               {formatPrice(product.originalPrice)}
             </span>
