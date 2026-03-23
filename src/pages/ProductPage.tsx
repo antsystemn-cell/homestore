@@ -174,15 +174,24 @@ const ProductPage = () => {
                 <div className="flex flex-wrap gap-2">
                   {product.colors.map((color) => (
                     <button
-                      key={color}
-                      onClick={() => setSelectedColor(selectedColor === color ? null : color)}
-                      className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-colors ${
-                        selectedColor === color
+                      key={color.name}
+                      onClick={() => {
+                        const newColor = selectedColor === color.name ? null : color.name;
+                        setSelectedColor(newColor);
+                        if (newColor && color.image) {
+                          setActiveImg(0);
+                        }
+                      }}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border-2 transition-colors ${
+                        selectedColor === color.name
                           ? "border-primary bg-primary/10 text-foreground"
                           : "border-border bg-secondary text-muted-foreground hover:border-primary/40"
                       }`}
                     >
-                      {color}
+                      {color.image && (
+                        <img src={color.image} alt={color.name} className="h-6 w-6 rounded-md object-cover" />
+                      )}
+                      {color.name}
                     </button>
                   ))}
                 </div>
