@@ -183,7 +183,7 @@ const AdminPage = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("products").select("id, name, price, original_price, image_url, category, description, sales, is_new, is_on_sale, discount, product_code, brand_id, created_at").order("created_at", { ascending: false });
       if (error) throw error;
       setProducts(data || []);
     } catch (error) {
