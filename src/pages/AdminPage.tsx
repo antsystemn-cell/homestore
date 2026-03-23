@@ -53,6 +53,7 @@ const AdminPage = () => {
 
   // Detail media file input
   const detailMediaFileRef = useRef<HTMLInputElement>(null);
+  const detailVideoFileRef = useRef<HTMLInputElement>(null);
 
   const handleDetailMediaImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
