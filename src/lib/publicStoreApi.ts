@@ -251,7 +251,7 @@ export const fetchPublicProductImages = async (productId: string) => {
 export const fetchRelatedPublicProducts = async (category: string, excludeId: string) => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "*",
+      select: "id,name,price,original_price,image_url,category,is_on_sale,discount,brand_id",
       category: `eq.${category}`,
       id: `neq.${excludeId}`,
       limit: 4,

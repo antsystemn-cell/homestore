@@ -1,18 +1,19 @@
 import { Search, Bell } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Product, mapDbProduct } from "@/data/products";
 import { searchPublicProducts } from "@/lib/publicStoreApi";
 
+const DEBOUNCE_MS = 300;
 
 const Header = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Product[]>([]);
   const [showResults, setShowResults] = useState(false);
   const navigate = useNavigate();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const handleSearch = async (value: string) => {
-    setQuery(value);
+  const doSearch = useCallback(async (value: string) => {
     if (value.trim().length > 0) {
       try {
         const data = await searchPublicProducts(value);
@@ -25,6 +26,12 @@ const Header = () => {
       setResults([]);
       setShowResults(false);
     }
+  }, []);
+
+  const handleSearch = (value: string) => {
+    setQuery(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => doSearch(value), DEBOUNCE_MS);
   };
 
   return (
@@ -68,7 +75,13 @@ const Header = () => {
                   }}
                   className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary transition-colors text-left"
                 >
-                  <img src={p.image} alt="" className="h-10 w-10 rounded-lg object-cover bg-secondary" />
+                  <img
+                    src={p.image}
+                    alt=""
+                    className="h-10 w-10 rounded-lg object-cover bg-secondary"
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <div>
                     <p className="text-xs font-semibold">{p.name}</p>
                     <p className="text-[10px] text-muted-foreground">{p.price.toLocaleString("mn-MN")}₮</p>
