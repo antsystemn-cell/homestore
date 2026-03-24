@@ -68,10 +68,9 @@ Deno.serve(async (req: Request) => {
     }
 
     const data = await checkRes.json();
-    const isConfirmed =
-      data.status === "success" ||
-      data.isConfirmed === true ||
-      data.confirmed === true;
+    console.log("Webhook check response:", JSON.stringify(data));
+    // API returns: { "value": true/false, "status": "Success" }
+    const isConfirmed = data.status === "Success" && data.value === true;
 
     if (!isConfirmed) {
       return new Response(JSON.stringify({ status: "not_confirmed" }), {

@@ -92,21 +92,30 @@ async function handleEligibility(body: any) {
     body: JSON.stringify({ mobileNumber: phone }),
   });
 
-  if (!res.ok) {
-    const text = await res.text();
-    // User not registered or error
-    if (res.status === 404 || text.includes("not found")) {
-      return json({
-        eligible: false,
-        reason: "NOT_REGISTERED",
-        message: "Энэ утасны дугаар Storepay-д бүртгэлгүй байна",
-      });
-    }
-    return err(`Storepay API алдаа: ${text}`, 502);
+  const responseText = await res.text();
+  let data: any;
+  try {
+    data = JSON.parse(responseText);
+  } catch {
+    return err(`Storepay API хариу буруу: ${responseText}`, 502);
   }
 
-  const data = await res.json();
-  const possibleAmount = data.possibleAmount || data.possible_amount || 0;
+  console.log("Storepay eligibility response:", JSON.stringify(data));
+
+  // API returns: { "value": 500000.0, "msgList": [], "attrs": {}, "status": "Success" }
+  // value = 0 means no credit, value > 0 means eligible
+  if (data.status !== "Success") {
+    // Check msgList for error messages
+    const msg = data.msgList?.[0]?.code || data.msgList?.[0]?.text || "Storepay API алдаа";
+    return json({
+      eligible: false,
+      possibleAmount: 0,
+      reason: "API_ERROR",
+      message: msg,
+    });
+  }
+
+  const possibleAmount = typeof data.value === "number" ? data.value : 0;
 
   return json({
     eligible: possibleAmount > 0,
@@ -202,22 +211,23 @@ async function handleCreateLoan(body: any, req: Request) {
     responseData = { raw: responseText };
   }
 
-  if (!res.ok) {
-    // Update intent to FAILED
+  console.log("Storepay create-loan response:", JSON.stringify(responseData));
+
+  // API returns: { "value": 9272, "msgList": [], "attrs": {}, "status": "Success" }
+  // On failure: { "value": null, "msgList": [{...}], "attrs": {}, "status": "Failed" }
+  if (!res.ok || responseData?.status === "Failed") {
+    const errorMsg = responseData?.msgList?.[0]?.code || responseData?.msgList?.[0]?.text || "Storepay нэхэмжлэл үүсгэхэд алдаа гарлаа";
     await supabaseAdmin
       .from("payment_intents")
       .update({ status: "FAILED", storepay_response: responseData })
       .eq("id", intent.id);
 
-    return err(
-      responseData?.message || "Storepay нэхэмжлэл үүсгэхэд алдаа гарлаа",
-      502
-    );
+    return err(errorMsg, 502);
   }
 
-  const loanId = responseData?.id || responseData?.loanId || null;
+  // value contains the loan ID
+  const loanId = responseData?.value || null;
 
-  // Update intent with loan details
   await supabaseAdmin
     .from("payment_intents")
     .update({
@@ -286,19 +296,25 @@ async function handleCheckStatus(body: any, req: Request) {
   }
 
   const data = await res.json();
-  const isConfirmed =
-    data.status === "success" ||
-    data.isConfirmed === true ||
-    data.confirmed === true;
+  console.log("Storepay check-status response:", JSON.stringify(data));
+
+  // By loanId: { "value": true/false, "status": "Success" }
+  // By requestId: { "value": { "loanId": 181685, "isExist": true, "isConfirmed": false }, "status": "Success" }
+  let isConfirmed = false;
+  if (data.status === "Success") {
+    if (typeof data.value === "boolean") {
+      isConfirmed = data.value === true;
+    } else if (typeof data.value === "object" && data.value !== null) {
+      isConfirmed = data.value.isConfirmed === true;
+    }
+  }
 
   if (isConfirmed) {
-    // Mark PAID
     await supabaseAdmin
       .from("payment_intents")
       .update({ status: "PAID", storepay_response: data })
       .eq("id", intent.id);
 
-    // If ORDER type, update order
     if (intent.order_id) {
       await supabaseAdmin
         .from("orders")
