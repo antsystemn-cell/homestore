@@ -185,7 +185,7 @@ const logFallback = (scope: string, error: unknown) => {
 export const fetchPublicProducts = async () => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,name,price,original_price,image_url,category,description,sales,is_new,is_on_sale,discount,product_code,brand_id,specifications,detail_media,colors,sizes",
+      select: "id,name,price,original_price,image_url,category,is_on_sale,discount,brand_id",
     });
   } catch (error) {
     logFallback("products", error);
@@ -196,7 +196,7 @@ export const fetchPublicProducts = async () => {
 export const fetchPublicBrands = async () => {
   try {
     return await fetchPublic<any[]>("brands", {
-      select: "id,name,logo_url",
+      select: "id,name",
       order: "name.asc",
     });
   } catch (error) {
@@ -208,7 +208,7 @@ export const fetchPublicBrands = async () => {
 export const searchPublicProducts = async (query: string) => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "*",
+      select: "id,name,price,original_price,image_url,category,product_code",
       or: `name.ilike.%${query}%,product_code.ilike.%${query}%`,
       limit: 8,
     });
