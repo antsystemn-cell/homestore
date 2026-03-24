@@ -176,11 +176,11 @@ const AdminPage = () => {
   };
 
   useEffect(() => {
-    if (!authLoading && !isAdmin) {
+    if (!authLoading && !isAdmin && !authError) {
       toast.error("Админ эрхгүй байна");
       navigate("/");
     }
-  }, [isAdmin, authLoading]);
+  }, [isAdmin, authLoading, authError]);
 
   useEffect(() => {
     fetchProducts();
