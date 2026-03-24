@@ -74,17 +74,16 @@ const AdminPage = () => {
       const file = files[i];
       if (!file.type.startsWith("image/") && !/\.(png|jpe?g|gif|webp|bmp|svg|heic|heif|avif|tiff?)$/i.test(file.name)) continue;
       if (file.size > 5 * 1024 * 1024) continue;
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = (ev) => resolve(ev.target?.result as string);
-        r.onerror = reject;
-        r.readAsDataURL(file);
-      });
-      newMedia.push({ type: "image", url: dataUrl, caption: "" });
+      try {
+        const webpUrl = await optimizeImage(file);
+        newMedia.push({ type: "image", url: webpUrl, caption: "" });
+      } catch {
+        console.error("Image optimization failed, skipping");
+      }
     }
     if (newMedia.length > 0) {
       setForm((prev) => ({ ...prev, detail_media: [...prev.detail_media, ...newMedia] }));
-      toast.success(`${newMedia.length} зураг нэмэгдлээ`);
+      toast.success(`${newMedia.length} зураг WebP болгож нэмэгдлээ`);
     }
     if (detailMediaFileRef.current) detailMediaFileRef.current.value = "";
   };
