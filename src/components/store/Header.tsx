@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Product, mapDbProduct } from "@/data/products";
 import { searchPublicProducts } from "@/lib/publicStoreApi";
+import techstoreLogo from "@/assets/techstore-logo.png";
 
 const Header = () => {
   const [query, setQuery] = useState("");
