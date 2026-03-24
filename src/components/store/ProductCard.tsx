@@ -19,6 +19,9 @@ const ProductCard = ({ product }: Props) => {
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
+          decoding="async"
+          width={300}
+          height={300}
         />
         {product.originalPrice != null && product.originalPrice > product.price && (
           <span className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded">
