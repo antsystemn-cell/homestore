@@ -3,11 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Heart, ShoppingCart, Truck, Shield, RotateCcw, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { Product, formatPrice, mapDbProduct, DetailMedia } from "@/data/products";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/store/ProductCard";
 import ProductReviews from "@/components/store/ProductReviews";
+import { fetchPublicProductById, fetchPublicProductImages, fetchRelatedPublicProducts } from "@/lib/publicStoreApi";
 
 const VideoWithThumbnail = ({ media }: { media: DetailMedia }) => {
   const [playing, setPlaying] = useState(false);
@@ -104,28 +104,20 @@ const ProductPage = () => {
     const fetchProduct = async () => {
       setLoading(true);
       try {
-        const { data, error } = await supabase.from("products").select("*").eq("id", id).maybeSingle();
-        if (error) throw error;
+        if (!id) throw new Error("Missing product id");
+        const rows = await fetchPublicProductById(id);
+        const data = rows?.[0];
 
         if (data) {
           const p = mapDbProduct(data);
           setProduct(p);
 
-          const { data: imgs } = await supabase
-            .from("product_images")
-            .select("image_url")
-            .eq("product_id", data.id)
-            .order("position");
+          const imgs = await fetchPublicProductImages(data.id);
           const extras = (imgs || []).map((r: any) => r.image_url);
           setAllImages([p.image, ...extras]);
           setActiveImg(0);
 
-          const { data: rel } = await supabase
-            .from("products")
-            .select("*")
-            .eq("category", data.category)
-            .neq("id", data.id)
-            .limit(4);
+          const rel = await fetchRelatedPublicProducts(data.category, data.id);
           setRelated((rel || []).map(mapDbProduct));
         } else {
           setProduct(null);

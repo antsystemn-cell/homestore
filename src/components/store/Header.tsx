@@ -2,7 +2,7 @@ import { Search, Bell } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Product, mapDbProduct } from "@/data/products";
-import { supabase } from "@/integrations/supabase/client";
+import { searchPublicProducts } from "@/lib/publicStoreApi";
 
 const Header = () => {
   const [query, setQuery] = useState("");
@@ -13,12 +13,12 @@ const Header = () => {
   const handleSearch = async (value: string) => {
     setQuery(value);
     if (value.trim().length > 0) {
-      const { data } = await supabase
-        .from("products")
-        .select("*")
-        .or(`name.ilike.%${value}%,product_code.ilike.%${value}%`)
-        .limit(8);
-      setResults((data || []).map(mapDbProduct));
+      try {
+        const data = await searchPublicProducts(value);
+        setResults((data || []).map(mapDbProduct));
+      } catch {
+        setResults([]);
+      }
       setShowResults(true);
     } else {
       setResults([]);

@@ -5,7 +5,7 @@ import BottomNav from "@/components/store/BottomNav";
 import ProductGridSkeleton from "@/components/store/ProductGridSkeleton";
 import LoadError from "@/components/store/LoadError";
 import { Product, mapDbProduct } from "@/data/products";
-import { supabase } from "@/integrations/supabase/client";
+import { fetchPublicBrands, fetchPublicProducts } from "@/lib/publicStoreApi";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -29,23 +29,18 @@ const Index = () => {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     setError(false);
-    let cancelled = false;
     const timeout = setTimeout(() => {
-      if (!cancelled) {
-        setLoading(false);
-        setError(true);
-      }
+      setLoading(false);
+      setError(true);
     }, 10000);
 
     try {
       const [prodRes, brandRes] = await Promise.all([
-        supabase.from("products").select("id, name, price, original_price, image_url, category, description, sales, is_new, is_on_sale, discount, product_code, brand_id"),
-        supabase.from("brands").select("id, name, logo_url"),
+        fetchPublicProducts(),
+        fetchPublicBrands(),
       ]);
-      if (cancelled) return;
-      if (prodRes.error) throw prodRes.error;
-      const brandMap = new Map((brandRes.data || []).map((b: any) => [b.id, b]));
-      const shuffled = shuffle((prodRes.data || []).map((row: any) => {
+      const brandMap = new Map((brandRes || []).map((b: any) => [b.id, b]));
+      const shuffled = shuffle((prodRes || []).map((row: any) => {
         const p = mapDbProduct(row);
         const brand = brandMap.get(p.brand_id || "");
         if (brand) { p.brandName = brand.name; p.brandLogo = brand.logo_url; }
@@ -57,23 +52,18 @@ const Index = () => {
       setError(false);
     } catch (err) {
       console.error("Failed to load products", err);
-      if (!cancelled) {
-        setAllProducts([]);
-        setVisible([]);
-        setHasMore(false);
-        setError(true);
-      }
+      setAllProducts([]);
+      setVisible([]);
+      setHasMore(false);
+      setError(true);
     } finally {
-      if (!cancelled) setLoading(false);
       clearTimeout(timeout);
+      setLoading(false);
     }
-
-    return () => { cancelled = true; clearTimeout(timeout); };
   }, []);
 
   useEffect(() => {
-    const cleanup = fetchAll();
-    return () => { cleanup.then?.((fn) => fn?.()); };
+    void fetchAll();
   }, [fetchAll]);
 
 
