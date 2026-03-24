@@ -135,18 +135,15 @@ const AdminPage = () => {
     if (file.size > 5 * 1024 * 1024) { toast.error("Зураг 5MB-ээс бага байх ёстой"); return; }
 
     setUploading(true);
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const dataUrl = ev.target?.result as string;
-      setForm((prev) => ({ ...prev, image_url: dataUrl }));
+    try {
+      const webpUrl = await optimizeImage(file);
+      setForm((prev) => ({ ...prev, image_url: webpUrl }));
+      toast.success("Зураг WebP (1200px) болгож оруулагдлаа");
+    } catch {
+      toast.error("Зураг оновчлоход алдаа гарлаа");
+    } finally {
       setUploading(false);
-      toast.success("Зураг амжилттай оруулагдлаа");
-    };
-    reader.onerror = () => {
-      setUploading(false);
-      toast.error("Зураг уншихад алдаа гарлаа");
-    };
-    reader.readAsDataURL(file);
+    }
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
