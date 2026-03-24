@@ -92,21 +92,30 @@ async function handleEligibility(body: any) {
     body: JSON.stringify({ mobileNumber: phone }),
   });
 
-  if (!res.ok) {
-    const text = await res.text();
-    // User not registered or error
-    if (res.status === 404 || text.includes("not found")) {
-      return json({
-        eligible: false,
-        reason: "NOT_REGISTERED",
-        message: "Энэ утасны дугаар Storepay-д бүртгэлгүй байна",
-      });
-    }
-    return err(`Storepay API алдаа: ${text}`, 502);
+  const responseText = await res.text();
+  let data: any;
+  try {
+    data = JSON.parse(responseText);
+  } catch {
+    return err(`Storepay API хариу буруу: ${responseText}`, 502);
   }
 
-  const data = await res.json();
-  const possibleAmount = data.possibleAmount || data.possible_amount || 0;
+  console.log("Storepay eligibility response:", JSON.stringify(data));
+
+  // API returns: { "value": 500000.0, "msgList": [], "attrs": {}, "status": "Success" }
+  // value = 0 means no credit, value > 0 means eligible
+  if (data.status !== "Success") {
+    // Check msgList for error messages
+    const msg = data.msgList?.[0]?.code || data.msgList?.[0]?.text || "Storepay API алдаа";
+    return json({
+      eligible: false,
+      possibleAmount: 0,
+      reason: "API_ERROR",
+      message: msg,
+    });
+  }
+
+  const possibleAmount = typeof data.value === "number" ? data.value : 0;
 
   return json({
     eligible: possibleAmount > 0,
