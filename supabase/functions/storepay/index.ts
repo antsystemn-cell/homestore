@@ -296,19 +296,25 @@ async function handleCheckStatus(body: any, req: Request) {
   }
 
   const data = await res.json();
-  const isConfirmed =
-    data.status === "success" ||
-    data.isConfirmed === true ||
-    data.confirmed === true;
+  console.log("Storepay check-status response:", JSON.stringify(data));
+
+  // By loanId: { "value": true/false, "status": "Success" }
+  // By requestId: { "value": { "loanId": 181685, "isExist": true, "isConfirmed": false }, "status": "Success" }
+  let isConfirmed = false;
+  if (data.status === "Success") {
+    if (typeof data.value === "boolean") {
+      isConfirmed = data.value === true;
+    } else if (typeof data.value === "object" && data.value !== null) {
+      isConfirmed = data.value.isConfirmed === true;
+    }
+  }
 
   if (isConfirmed) {
-    // Mark PAID
     await supabaseAdmin
       .from("payment_intents")
       .update({ status: "PAID", storepay_response: data })
       .eq("id", intent.id);
 
-    // If ORDER type, update order
     if (intent.order_id) {
       await supabaseAdmin
         .from("orders")
