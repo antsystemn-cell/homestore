@@ -1007,17 +1007,16 @@ const AdminPage = () => {
                               const input = document.createElement("input");
                               input.type = "file";
                               input.accept = "image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff";
-                              input.onchange = (e: any) => {
+                              input.onchange = async (e: any) => {
                                 const file = e.target.files?.[0];
                                 if (!file) return;
                                 if (file.size > 5 * 1024 * 1024) { toast.error("5MB-ээс бага байх ёстой"); return; }
-                                const reader = new FileReader();
-                                reader.onload = (ev) => {
+                                try {
+                                  const webpUrl = await optimizeImage(file);
                                   const updated = [...form.colors];
-                                  updated[idx] = { ...updated[idx], image: ev.target?.result as string };
+                                  updated[idx] = { ...updated[idx], image: webpUrl };
                                   setForm({ ...form, colors: updated });
-                                };
-                                reader.readAsDataURL(file);
+                                } catch { toast.error("Зураг оновчлоход алдаа"); }
                               };
                               input.click();
                             }}
