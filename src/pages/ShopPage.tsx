@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import Header from "@/components/store/Header";
 import ProductGrid from "@/components/store/ProductGrid";
 import BottomNav from "@/components/store/BottomNav";
+import ProductGridSkeleton from "@/components/store/ProductGridSkeleton";
+import LoadError from "@/components/store/LoadError";
 import { Product, mapDbProduct } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -10,32 +12,35 @@ const ShopPage = () => {
   const [loading, setLoading] = useState(true);
   const [brands, setBrands] = useState<{ id: string; name: string }[]>([]);
   const [selectedBrand, setSelectedBrand] = useState<string>("all");
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [prodRes, brandRes] = await Promise.all([
-          supabase.from("products").select("id, name, price, original_price, image_url, category, description, sales, is_new, is_on_sale, discount, product_code, brand_id").order("created_at", { ascending: false }),
-          supabase.from("brands").select("id, name, logo_url").order("name"),
-        ]);
-        if (prodRes.error) throw prodRes.error;
-        const brandMap = new Map((brandRes.data || []).map((b: any) => [b.id, b]));
-        setProducts((prodRes.data || []).map((row: any) => {
-          const p = mapDbProduct(row);
-          const brand = brandMap.get(p.brand_id || "");
-          if (brand) { p.brandName = brand.name; p.brandLogo = brand.logo_url; }
-          return p;
-        }));
-        setBrands((brandRes.data || []).map((b: any) => ({ id: b.id, name: b.name })));
-      } catch (error) {
-        console.error("Failed to load shop products", error);
-        setProducts([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const fetchData = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const [prodRes, brandRes] = await Promise.all([
+        supabase.from("products").select("id, name, price, original_price, image_url, category, description, sales, is_new, is_on_sale, discount, product_code, brand_id").order("created_at", { ascending: false }),
+        supabase.from("brands").select("id, name, logo_url").order("name"),
+      ]);
+      if (prodRes.error) throw prodRes.error;
+      const brandMap = new Map((brandRes.data || []).map((b: any) => [b.id, b]));
+      setProducts((prodRes.data || []).map((row: any) => {
+        const p = mapDbProduct(row);
+        const brand = brandMap.get(p.brand_id || "");
+        if (brand) { p.brandName = brand.name; p.brandLogo = brand.logo_url; }
+        return p;
+      }));
+      setBrands((brandRes.data || []).map((b: any) => ({ id: b.id, name: b.name })));
+    } catch (err) {
+      console.error("Failed to load shop products", err);
+      setProducts([]);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchData(); }, []);
 
   const filtered = selectedBrand === "all"
     ? products
@@ -74,7 +79,9 @@ const ShopPage = () => {
         </div>
       )}
       {loading ? (
-        <div className="flex items-center justify-center py-20 text-sm text-muted-foreground">Уншиж байна...</div>
+        <ProductGridSkeleton count={8} />
+      ) : error ? (
+        <LoadError onRetry={fetchData} retrying={loading} />
       ) : (
         <ProductGrid title="Бүх бараа" products={filtered} />
       )}
