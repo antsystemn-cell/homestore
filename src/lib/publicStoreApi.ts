@@ -196,7 +196,7 @@ export const fetchPublicProducts = async () => {
 export const fetchPublicBrands = async () => {
   try {
     return await fetchPublic<any[]>("brands", {
-      select: "id,name,logo_url",
+      select: "id,name",
       order: "name.asc",
     });
   } catch (error) {
