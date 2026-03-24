@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Product, mapDbProduct } from "@/data/products";
 import { searchPublicProducts } from "@/lib/publicStoreApi";
-import techstoreLogo from "@/assets/techstore-logo.png";
+
 
 const Header = () => {
   const [query, setQuery] = useState("");
@@ -30,12 +30,12 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-3 flex items-center gap-4 md:gap-8">
-        <img
-          src={techstoreLogo}
-          alt="TechStore"
-          className="h-8 md:h-10 cursor-pointer shrink-0"
+        <span
+          className="text-xl md:text-2xl font-bold cursor-pointer shrink-0 text-foreground"
           onClick={() => navigate("/")}
-        />
+        >
+          HomeStore
+        </span>
 
         {/* Desktop nav links */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
