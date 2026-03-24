@@ -908,17 +908,16 @@ const AdminPage = () => {
                               const input = document.createElement("input");
                               input.type = "file";
                               input.accept = "image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff";
-                              input.onchange = (ev: any) => {
+                              input.onchange = async (ev: any) => {
                                 const file = ev.target.files?.[0];
                                 if (!file) return;
                                 if (file.size > 5 * 1024 * 1024) { toast.error("5MB-ээс бага байх ёстой"); return; }
-                                const reader = new FileReader();
-                                reader.onload = (e) => {
+                                try {
+                                  const webpUrl = await optimizeImage(file);
                                   const dm = [...form.detail_media];
-                                  dm[idx] = { ...dm[idx], thumbnail: e.target?.result as string };
+                                  dm[idx] = { ...dm[idx], thumbnail: webpUrl };
                                   setForm({ ...form, detail_media: dm });
-                                };
-                                reader.readAsDataURL(file);
+                                } catch { toast.error("Зураг оновчлоход алдаа"); }
                               };
                               input.click();
                             }}
