@@ -19,7 +19,7 @@ type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" |
 
 const AdminPage = () => {
   const navigate = useNavigate();
-  const { isAdmin, loading: authLoading } = useAuth();
+  const { isAdmin, loading: authLoading, authError } = useAuth();
   const [tab, setTab] = useState<Tab>("stats");
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
@@ -176,11 +176,11 @@ const AdminPage = () => {
   };
 
   useEffect(() => {
-    if (!authLoading && !isAdmin) {
+    if (!authLoading && !isAdmin && !authError) {
       toast.error("Админ эрхгүй байна");
       navigate("/");
     }
-  }, [isAdmin, authLoading]);
+  }, [isAdmin, authLoading, authError]);
 
   useEffect(() => {
     fetchProducts();
@@ -517,6 +517,16 @@ const AdminPage = () => {
   const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
 
   if (authLoading) return <div className="min-h-screen flex items-center justify-center">Уншиж байна...</div>;
+
+  if (authError) return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-4 text-center">
+      <AlertTriangle className="w-12 h-12 text-destructive" />
+      <h2 className="text-lg font-semibold">Сүлжээний алдаа</h2>
+      <p className="text-muted-foreground text-sm max-w-sm">Backend-тэй холбогдож чадсангүй. Интернэт холболтоо шалгаад дахин оролдоно уу.</p>
+      <button onClick={() => window.location.reload()} className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm">Дахин оролдох</button>
+      <button onClick={() => navigate("/")} className="text-sm text-muted-foreground underline">Нүүр хуудас руу буцах</button>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background flex flex-col md:flex-row">
