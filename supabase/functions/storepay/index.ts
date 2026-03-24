@@ -211,22 +211,23 @@ async function handleCreateLoan(body: any, req: Request) {
     responseData = { raw: responseText };
   }
 
-  if (!res.ok) {
-    // Update intent to FAILED
+  console.log("Storepay create-loan response:", JSON.stringify(responseData));
+
+  // API returns: { "value": 9272, "msgList": [], "attrs": {}, "status": "Success" }
+  // On failure: { "value": null, "msgList": [{...}], "attrs": {}, "status": "Failed" }
+  if (!res.ok || responseData?.status === "Failed") {
+    const errorMsg = responseData?.msgList?.[0]?.code || responseData?.msgList?.[0]?.text || "Storepay нэхэмжлэл үүсгэхэд алдаа гарлаа";
     await supabaseAdmin
       .from("payment_intents")
       .update({ status: "FAILED", storepay_response: responseData })
       .eq("id", intent.id);
 
-    return err(
-      responseData?.message || "Storepay нэхэмжлэл үүсгэхэд алдаа гарлаа",
-      502
-    );
+    return err(errorMsg, 502);
   }
 
-  const loanId = responseData?.id || responseData?.loanId || null;
+  // value contains the loan ID
+  const loanId = responseData?.value || null;
 
-  // Update intent with loan details
   await supabaseAdmin
     .from("payment_intents")
     .update({
