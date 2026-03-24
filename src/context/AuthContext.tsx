@@ -20,6 +20,19 @@ const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 4000): Promise<T | 
   ]);
 };
 
+const clearStoredSession = () => {
+  try {
+    const keys = Object.keys(localStorage);
+    for (const key of keys) {
+      if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
+        localStorage.removeItem(key);
+      }
+    }
+  } catch {
+    // no-op
+  }
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -38,15 +51,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .maybeSingle()
       );
 
-      if (!result || result.error) {
-        if (result?.error) console.error("Failed to check admin role", result.error);
+      if (!result) {
+        console.error("Failed to check admin role: request timed out");
+        setAuthError(true);
         setIsAdmin(false);
         return;
       }
 
+      if (result.error) {
+        console.error("Failed to check admin role", result.error);
+        setAuthError(true);
+        setIsAdmin(false);
+        return;
+      }
+
+      setAuthError(false);
       setIsAdmin(!!result.data);
     } catch (error) {
       console.error("Failed to check admin role", error);
+      setAuthError(true);
       setIsAdmin(false);
     }
   };
@@ -79,15 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (!result || result.error) {
           if (result?.error) console.error("Failed to restore session", result.error);
-          // Clear stale session from localStorage to stop infinite refresh loop
-          try {
-            const keys = Object.keys(localStorage);
-            for (const key of keys) {
-              if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
-                localStorage.removeItem(key);
-              }
-            }
-          } catch {}
+          clearStoredSession();
           setAuthError(true);
           await applySession(null);
           return;
@@ -96,15 +111,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await applySession(result.data.session);
       } catch (error) {
         console.error("Failed to restore session", error);
-        // Clear stale tokens on network failure
-        try {
-          const keys = Object.keys(localStorage);
-          for (const key of keys) {
-            if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
-              localStorage.removeItem(key);
-            }
-          }
-        } catch {}
+        clearStoredSession();
         setAuthError(true);
         await applySession(null);
       }
@@ -119,9 +126,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setIsAdmin(false);
-    setAuthError(false);
+    try {
+      await withTimeout(supabase.auth.signOut(), 3000);
+    } catch (error) {
+      console.error("Failed to sign out cleanly", error);
+    } finally {
+      clearStoredSession();
+      setSession(null);
+      setUser(null);
+      setIsAdmin(false);
+      setAuthError(false);
+      setLoading(false);
+    }
   };
 
   return (
