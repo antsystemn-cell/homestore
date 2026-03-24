@@ -57,11 +57,14 @@ const ProductReviews = ({ productId }: Props) => {
   const { user, isAdmin } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const fetchReviews = async () => {
+    setLoading(true);
+    setLoadError(false);
     try {
       const { data, error } = await supabase
         .from("reviews")
@@ -70,15 +73,17 @@ const ProductReviews = ({ productId }: Props) => {
         .order("created_at", { ascending: false });
       if (error) throw error;
       setReviews((data || []) as Review[]);
-    } catch {
+    } catch (error) {
+      console.error("Failed to load reviews", error);
       setReviews([]);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchReviews();
+    void fetchReviews();
   }, [productId]);
 
   const avgRating = reviews.length > 0 ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
@@ -159,6 +164,8 @@ const ProductReviews = ({ productId }: Props) => {
       {/* Reviews list */}
       {loading ? (
         <p className="text-sm text-muted-foreground text-center py-4">Уншиж байна...</p>
+      ) : loadError ? (
+        <p className="text-sm text-muted-foreground text-center py-4">Сэтгэгдэл түр ачаалах боломжгүй байна.</p>
       ) : reviews.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-4">Одоогоор сэтгэгдэл алга. Та эхний сэтгэгдлийг бичнэ үү!</p>
       ) : (

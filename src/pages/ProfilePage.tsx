@@ -5,7 +5,7 @@ import BottomNav from "@/components/store/BottomNav";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const { user, isAdmin, signOut, loading } = useAuth();
+  const { user, isAdmin, signOut, loading, authError } = useAuth();
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Уншиж байна...</div>;
@@ -17,16 +17,19 @@ const ProfilePage = () => {
         <header className="sticky top-0 z-50 bg-background px-4 py-4 border-b border-border md:hidden">
           <h1 className="text-lg font-bold">Профайл</h1>
         </header>
-        <div className="flex flex-col items-center justify-center py-24 text-muted-foreground max-w-md mx-auto">
+        <div className="flex flex-col items-center justify-center py-24 text-muted-foreground max-w-md mx-auto px-4 text-center">
           <div className="h-20 w-20 rounded-full bg-secondary flex items-center justify-center mb-6">
             <User className="h-10 w-10 text-muted-foreground" />
           </div>
-          <p className="text-sm font-medium mb-4">Нэвтрээгүй байна</p>
+          <p className="text-sm font-medium mb-2">{authError ? "Сүлжээний алдаа гарлаа" : "Нэвтрээгүй байна"}</p>
+          <p className="text-xs text-muted-foreground mb-4">
+            {authError ? "Нэвтрэлтийн мэдээлэл шалгаж чадсангүй. Дахин оролдоно уу." : "Аккаунтаараа нэвтэрч үргэлжлүүлнэ үү."}
+          </p>
           <button
-            onClick={() => navigate("/auth")}
+            onClick={() => authError ? window.location.reload() : navigate("/auth")}
             className="bg-primary text-primary-foreground rounded-xl px-8 py-3 text-sm font-bold hover:bg-primary/90 transition-colors"
           >
-            Нэвтрэх / Бүртгүүлэх
+            {authError ? "Дахин оролдох" : "Нэвтрэх / Бүртгүүлэх"}
           </button>
         </div>
         <BottomNav />

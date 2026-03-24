@@ -183,13 +183,14 @@ const AdminPage = () => {
   }, [isAdmin, authLoading, authError]);
 
   useEffect(() => {
+    if (authLoading || !isAdmin || authError) return;
     fetchProducts();
     fetchOrders();
     fetchUsers();
     fetchCategories();
     fetchBrands();
     fetchDeliveryOptions();
-  }, []);
+  }, [authLoading, isAdmin, authError]);
 
   const fetchProducts = async () => {
     setLoading(true);

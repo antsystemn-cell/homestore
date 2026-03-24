@@ -7,6 +7,7 @@ import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/store/ProductCard";
 import ProductReviews from "@/components/store/ProductReviews";
+import LoadError from "@/components/store/LoadError";
 import { fetchPublicProductById, fetchPublicProductImages, fetchRelatedPublicProducts } from "@/lib/publicStoreApi";
 
 const VideoWithThumbnail = ({ media }: { media: DetailMedia }) => {
@@ -80,6 +81,7 @@ const ProductPage = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [related, setRelated] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [allImages, setAllImages] = useState<string[]>([]);
   const [activeImg, setActiveImg] = useState(0);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
@@ -103,6 +105,7 @@ const ProductPage = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       setLoading(true);
+      setLoadError(false);
       try {
         if (!id) throw new Error("Missing product id");
         const rows = await fetchPublicProductById(id);
@@ -121,17 +124,19 @@ const ProductPage = () => {
           setRelated((rel || []).map(mapDbProduct));
         } else {
           setProduct(null);
+          setLoadError(true);
         }
       } catch (error) {
         console.error("Failed to load product", error);
         setProduct(null);
         setAllImages([]);
         setRelated([]);
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
     };
-    fetchProduct();
+    void fetchProduct();
   }, [id]);
 
   if (loading) {
@@ -139,7 +144,11 @@ const ProductPage = () => {
   }
 
   if (!product) {
-    return (
+    return loadError ? (
+      <div className="min-h-screen bg-background">
+        <LoadError message="Барааны мэдээлэл ачаалж чадсангүй" onRetry={() => window.location.reload()} />
+      </div>
+    ) : (
       <div className="min-h-screen flex items-center justify-center text-muted-foreground">
         Бараа олдсонгүй
       </div>
