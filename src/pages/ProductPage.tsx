@@ -81,6 +81,7 @@ const ProductPage = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [related, setRelated] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [allImages, setAllImages] = useState<string[]>([]);
   const [activeImg, setActiveImg] = useState(0);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
