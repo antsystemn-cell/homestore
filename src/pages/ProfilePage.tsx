@@ -5,7 +5,7 @@ import BottomNav from "@/components/store/BottomNav";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const { user, isAdmin, signOut, loading } = useAuth();
+  const { user, isAdmin, signOut, loading, authError } = useAuth();
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Уншиж байна...</div>;
