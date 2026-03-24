@@ -105,6 +105,7 @@ const ProductPage = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       setLoading(true);
+      setLoadError(false);
       try {
         if (!id) throw new Error("Missing product id");
         const rows = await fetchPublicProductById(id);
@@ -123,17 +124,19 @@ const ProductPage = () => {
           setRelated((rel || []).map(mapDbProduct));
         } else {
           setProduct(null);
+          setLoadError(true);
         }
       } catch (error) {
         console.error("Failed to load product", error);
         setProduct(null);
         setAllImages([]);
         setRelated([]);
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
     };
-    fetchProduct();
+    void fetchProduct();
   }, [id]);
 
   if (loading) {
