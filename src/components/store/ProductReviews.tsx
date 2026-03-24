@@ -164,6 +164,8 @@ const ProductReviews = ({ productId }: Props) => {
       {/* Reviews list */}
       {loading ? (
         <p className="text-sm text-muted-foreground text-center py-4">Уншиж байна...</p>
+      ) : loadError ? (
+        <p className="text-sm text-muted-foreground text-center py-4">Сэтгэгдэл түр ачаалах боломжгүй байна.</p>
       ) : reviews.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-4">Одоогоор сэтгэгдэл алга. Та эхний сэтгэгдлийг бичнэ үү!</p>
       ) : (

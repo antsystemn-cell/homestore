@@ -144,7 +144,11 @@ const ProductPage = () => {
   }
 
   if (!product) {
-    return (
+    return loadError ? (
+      <div className="min-h-screen bg-background">
+        <LoadError message="Барааны мэдээлэл ачаалж чадсангүй" onRetry={() => window.location.reload()} />
+      </div>
+    ) : (
       <div className="min-h-screen flex items-center justify-center text-muted-foreground">
         Бараа олдсонгүй
       </div>
