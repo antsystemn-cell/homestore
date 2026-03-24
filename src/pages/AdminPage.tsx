@@ -156,18 +156,17 @@ const AdminPage = () => {
       const file = files[i];
       if (!file.type.startsWith("image/") && !/\.(png|jpe?g|gif|webp|bmp|svg|heic|heif|avif|tiff?)$/i.test(file.name)) { hasError = true; continue; }
       if (file.size > 5 * 1024 * 1024) { hasError = true; continue; }
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = (ev) => resolve(ev.target?.result as string);
-        r.onerror = reject;
-        r.readAsDataURL(file);
-      });
-      newImages.push(dataUrl);
+      try {
+        const webpUrl = await optimizeImage(file);
+        newImages.push(webpUrl);
+      } catch {
+        hasError = true;
+      }
     }
-    if (hasError) toast.error("Зарим зураг оруулж чадсангүй (5MB-ээс бага, зураг файл байх ёстой)");
+    if (hasError) toast.error("Зарим зураг оруулж чадсангүй");
     if (newImages.length > 0) {
       setExtraImages((prev) => [...prev, ...newImages]);
-      toast.success(`${newImages.length} зураг нэмэгдлээ`);
+      toast.success(`${newImages.length} зураг WebP болгож нэмэгдлээ`);
     }
     if (extraFileInputRef.current) extraFileInputRef.current.value = "";
   };
