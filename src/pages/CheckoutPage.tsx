@@ -2,13 +2,16 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/data/products";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Lock, Loader2, Truck } from "lucide-react";
+import { CheckCircle, Lock, Loader2, Truck, Banknote, CreditCard } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import Header from "@/components/store/Header";
 import BottomNav from "@/components/store/BottomNav";
+import StorepayPayment from "@/components/store/StorepayPayment";
+
+type PaymentMethod = "cash" | "storepay";
 
 const CheckoutPage = () => {
   const { items, cartTotal, clearCart } = useCart();
@@ -19,6 +22,8 @@ const CheckoutPage = () => {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [name, setName] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
+  const [orderId, setOrderId] = useState<string | null>(null);
 
   // Delivery options
   const [deliveryOptions, setDeliveryOptions] = useState<any[]>([]);
@@ -45,11 +50,11 @@ const CheckoutPage = () => {
   const deliveryFee = selectedDeliveryOption?.price || 0;
   const grandTotal = cartTotal + deliveryFee;
 
-  const handleOrder = async () => {
-    if (!user) { toast.error("Нэвтэрсэн байх шаардлагатай"); navigate("/auth"); return; }
-    if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return; }
-    if (deliveryOptions.length > 0 && !selectedDelivery) { toast.error("Хүргэлтийн сонголт хийнэ үү"); return; }
-    setSubmitting(true);
+  const createOrder = async (paymentStatus = "unpaid", pm: PaymentMethod = "cash") => {
+    if (!user) { toast.error("Нэвтэрсэн байх шаардлагатай"); navigate("/auth"); return null; }
+    if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return null; }
+    if (deliveryOptions.length > 0 && !selectedDelivery) { toast.error("Хүргэлтийн сонголт хийнэ үү"); return null; }
+
     const orderItems = items.map((item) => ({
       product_id: item.product.id,
       name: item.product.name,
@@ -59,24 +64,60 @@ const CheckoutPage = () => {
       size: item.selectedSize || null,
       image: item.product.image,
     }));
-    const { error } = await supabase.from("orders").insert({
+
+    const { data, error } = await supabase.from("orders").insert({
       user_id: user.id,
       items: orderItems as any,
       total: grandTotal,
-      phone: phone,
+      phone,
       shipping_address: address,
       status: "pending",
       delivery_option_id: selectedDelivery || null,
       delivery_fee: deliveryFee,
-    });
+      payment_method: pm,
+      payment_status: paymentStatus,
+    }).select("id").single();
+
     if (error) {
       toast.error("Захиалга өгөхөд алдаа гарлаа");
-      setSubmitting(false);
-      return;
+      return null;
     }
+    return data.id;
+  };
+
+  const handleCashOrder = async () => {
+    setSubmitting(true);
+    const id = await createOrder("unpaid", "cash");
+    if (id) {
+      clearCart();
+      setOrdered(true);
+    }
+    setSubmitting(false);
+  };
+
+  const handleStorepayStart = async () => {
+    if (!user) { toast.error("Нэвтэрсэн байх шаардлагатай"); navigate("/auth"); return; }
+    if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return; }
+    if (deliveryOptions.length > 0 && !selectedDelivery) { toast.error("Хүргэлтийн сонголт хийнэ үү"); return; }
+
+    // Create order first with pending payment
+    setSubmitting(true);
+    const id = await createOrder("pending", "storepay");
+    setSubmitting(false);
+
+    if (id) {
+      setOrderId(id);
+    }
+  };
+
+  const handleStorepaySuccess = () => {
     clearCart();
     setOrdered(true);
-    setSubmitting(false);
+  };
+
+  const handleStorepayCancel = () => {
+    setOrderId(null);
+    setPaymentMethod("cash");
   };
 
   if (ordered) {
@@ -99,8 +140,9 @@ const CheckoutPage = () => {
         <h1 className="text-lg md:text-2xl font-bold text-foreground mb-4 md:mb-6">Захиалга баталгаажуулах</h1>
 
         <div className="md:grid md:grid-cols-3 md:gap-8">
-          {/* Shipping form */}
+          {/* Left column */}
           <div className="md:col-span-2 space-y-4">
+            {/* Shipping form */}
             <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-4">
               <h2 className="font-semibold text-foreground md:text-lg">Хүргэлтийн мэдээлэл</h2>
               <div className="md:grid md:grid-cols-2 md:gap-4 space-y-3 md:space-y-0">
@@ -153,7 +195,7 @@ const CheckoutPage = () => {
                         value={opt.id}
                         checked={selectedDelivery === opt.id}
                         onChange={() => setSelectedDelivery(opt.id)}
-                        className="w-4 h-4 text-primary accent-[hsl(var(--primary))]"
+                        className="w-4 h-4 accent-[hsl(var(--primary))]"
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
@@ -174,6 +216,75 @@ const CheckoutPage = () => {
                 </div>
               </div>
             )}
+
+            {/* Payment Method Selection */}
+            <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-3">
+              <h2 className="font-semibold text-foreground md:text-lg flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-primary" />
+                Төлбөрийн хэлбэр
+              </h2>
+              <div className="space-y-2">
+                {/* Cash */}
+                <label
+                  className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    paymentMethod === "cash"
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-muted-foreground/30"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="cash"
+                    checked={paymentMethod === "cash"}
+                    onChange={() => setPaymentMethod("cash")}
+                    className="w-4 h-4 accent-[hsl(var(--primary))]"
+                  />
+                  <Banknote className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Бэлнээр / Шилжүүлэг</p>
+                    <p className="text-xs text-muted-foreground">Хүргэлтийн үед бэлнээр эсвэл дансаар төлөх</p>
+                  </div>
+                </label>
+
+                {/* Storepay */}
+                <label
+                  className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    paymentMethod === "storepay"
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-muted-foreground/30"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="storepay"
+                    checked={paymentMethod === "storepay"}
+                    onChange={() => setPaymentMethod("storepay")}
+                    className="w-4 h-4 accent-[hsl(var(--primary))]"
+                  />
+                  <div className="w-5 h-5 rounded bg-[#00B140] flex items-center justify-center">
+                    <span className="text-white text-[10px] font-bold">S</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Storepay</p>
+                    <p className="text-xs text-muted-foreground">Хуваан төлөх үйлчилгээ</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {/* Storepay Payment Flow - only show after order is created */}
+            {paymentMethod === "storepay" && orderId && (
+              <StorepayPayment
+                amount={grandTotal}
+                orderId={orderId}
+                type="ORDER"
+                description={`Захиалга #${orderId.slice(0, 8)}`}
+                onSuccess={handleStorepaySuccess}
+                onCancel={handleStorepayCancel}
+              />
+            )}
           </div>
 
           {/* Order summary sidebar */}
@@ -184,19 +295,19 @@ const CheckoutPage = () => {
                 const { product, quantity, selectedColor, selectedSize } = item;
                 const key = `${product.id}__${selectedColor || ""}__${selectedSize || ""}`;
                 return (
-                <div key={key} className="flex items-center gap-3 py-2">
-                  <img src={product.image} alt="" className="w-12 h-12 rounded-lg object-cover bg-secondary" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-foreground truncate">{product.name}</p>
-                    {(selectedColor || selectedSize) && (
-                      <p className="text-[10px] text-muted-foreground">
-                        {[selectedColor && `Өнгө: ${selectedColor}`, selectedSize && `Хэмжээ: ${selectedSize}`].filter(Boolean).join(" · ")}
-                      </p>
-                    )}
-                    <p className="text-[10px] text-muted-foreground">x{quantity}</p>
+                  <div key={key} className="flex items-center gap-3 py-2">
+                    <img src={product.image} alt="" className="w-12 h-12 rounded-lg object-cover bg-secondary" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-foreground truncate">{product.name}</p>
+                      {(selectedColor || selectedSize) && (
+                        <p className="text-[10px] text-muted-foreground">
+                          {[selectedColor && `Өнгө: ${selectedColor}`, selectedSize && `Хэмжээ: ${selectedSize}`].filter(Boolean).join(" · ")}
+                        </p>
+                      )}
+                      <p className="text-[10px] text-muted-foreground">x{quantity}</p>
+                    </div>
+                    <span className="text-xs font-bold text-foreground shrink-0">{formatPrice(product.price * quantity)}</span>
                   </div>
-                  <span className="text-xs font-bold text-foreground shrink-0">{formatPrice(product.price * quantity)}</span>
-                </div>
                 );
               })}
               <div className="border-t border-border pt-3 space-y-2">
@@ -221,14 +332,28 @@ const CheckoutPage = () => {
                 </div>
               </div>
 
-              <Button
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-base rounded-xl mt-2 gap-2"
-                disabled={submitting}
-                onClick={handleOrder}
-              >
-                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
-                {submitting ? "Илгээж байна..." : `Захиалга өгөх — ${formatPrice(grandTotal)}`}
-              </Button>
+              {/* Action button */}
+              {paymentMethod === "cash" && (
+                <Button
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-base rounded-xl mt-2 gap-2"
+                  disabled={submitting}
+                  onClick={handleCashOrder}
+                >
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
+                  {submitting ? "Илгээж байна..." : `Захиалга өгөх — ${formatPrice(grandTotal)}`}
+                </Button>
+              )}
+
+              {paymentMethod === "storepay" && !orderId && (
+                <Button
+                  className="w-full h-12 text-base rounded-xl mt-2 gap-2 bg-[#00B140] hover:bg-[#009930] text-white"
+                  disabled={submitting}
+                  onClick={handleStorepayStart}
+                >
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
+                  {submitting ? "Үүсгэж байна..." : `Storepay-ээр төлөх — ${formatPrice(grandTotal)}`}
+                </Button>
+              )}
 
               <p className="text-[10px] text-muted-foreground text-center mt-2">
                 Таны мэдээлэл аюулгүй хадгалагдана

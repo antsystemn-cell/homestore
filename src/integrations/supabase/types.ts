@@ -116,6 +116,9 @@ export type Database = {
           delivery_pickup_photo: string | null
           id: string
           items: Json
+          payment_intent_id: string | null
+          payment_method: string | null
+          payment_status: string | null
           phone: string | null
           shipping_address: string | null
           status: string
@@ -131,6 +134,9 @@ export type Database = {
           delivery_pickup_photo?: string | null
           id?: string
           items?: Json
+          payment_intent_id?: string | null
+          payment_method?: string | null
+          payment_status?: string | null
           phone?: string | null
           shipping_address?: string | null
           status?: string
@@ -146,6 +152,9 @@ export type Database = {
           delivery_pickup_photo?: string | null
           id?: string
           items?: Json
+          payment_intent_id?: string | null
+          payment_method?: string | null
+          payment_status?: string | null
           phone?: string | null
           shipping_address?: string | null
           status?: string
@@ -159,6 +168,62 @@ export type Database = {
             columns: ["delivery_option_id"]
             isOneToOne: false
             referencedRelation: "delivery_options"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_intents: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          loan_id: string | null
+          order_id: string | null
+          phone: string
+          provider: string
+          request_id: string
+          status: string
+          storepay_response: Json | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          loan_id?: string | null
+          order_id?: string | null
+          phone: string
+          provider?: string
+          request_id: string
+          status?: string
+          storepay_response?: Json | null
+          type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          loan_id?: string | null
+          order_id?: string | null
+          phone?: string
+          provider?: string
+          request_id?: string
+          status?: string
+          storepay_response?: Json | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_intents_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
