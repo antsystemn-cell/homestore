@@ -19,7 +19,7 @@ type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" |
 
 const AdminPage = () => {
   const navigate = useNavigate();
-  const { isAdmin, loading: authLoading } = useAuth();
+  const { isAdmin, loading: authLoading, authError } = useAuth();
   const [tab, setTab] = useState<Tab>("stats");
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);

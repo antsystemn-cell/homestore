@@ -7,6 +7,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   isAdmin: boolean;
+  authError: boolean;
   signOut: () => Promise<void>;
 }
 
@@ -24,6 +25,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [authError, setAuthError] = useState(false);
 
   const checkAdmin = async (userId: string) => {
     try {
@@ -67,6 +69,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setAuthError(false);
       void applySession(nextSession);
     });
 
@@ -76,6 +79,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (!result || result.error) {
           if (result?.error) console.error("Failed to restore session", result.error);
+          // Clear stale session from localStorage to stop infinite refresh loop
+          try {
+            const keys = Object.keys(localStorage);
+            for (const key of keys) {
+              if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
+                localStorage.removeItem(key);
+              }
+            }
+          } catch {}
+          setAuthError(true);
           await applySession(null);
           return;
         }
@@ -83,6 +96,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await applySession(result.data.session);
       } catch (error) {
         console.error("Failed to restore session", error);
+        // Clear stale tokens on network failure
+        try {
+          const keys = Object.keys(localStorage);
+          for (const key of keys) {
+            if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
+              localStorage.removeItem(key);
+            }
+          }
+        } catch {}
+        setAuthError(true);
         await applySession(null);
       }
     };
@@ -98,10 +121,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signOut = async () => {
     await supabase.auth.signOut();
     setIsAdmin(false);
+    setAuthError(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isAdmin, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isAdmin, authError, signOut }}>
       {children}
     </AuthContext.Provider>
   );
