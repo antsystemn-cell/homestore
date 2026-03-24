@@ -9,6 +9,7 @@ import {
 import { useRef } from "react";
 import { toast } from "sonner";
 import { formatPrice } from "@/data/products";
+import { optimizeImage } from "@/lib/imageOptimize";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -73,17 +74,16 @@ const AdminPage = () => {
       const file = files[i];
       if (!file.type.startsWith("image/") && !/\.(png|jpe?g|gif|webp|bmp|svg|heic|heif|avif|tiff?)$/i.test(file.name)) continue;
       if (file.size > 5 * 1024 * 1024) continue;
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = (ev) => resolve(ev.target?.result as string);
-        r.onerror = reject;
-        r.readAsDataURL(file);
-      });
-      newMedia.push({ type: "image", url: dataUrl, caption: "" });
+      try {
+        const webpUrl = await optimizeImage(file);
+        newMedia.push({ type: "image", url: webpUrl, caption: "" });
+      } catch {
+        console.error("Image optimization failed, skipping");
+      }
     }
     if (newMedia.length > 0) {
       setForm((prev) => ({ ...prev, detail_media: [...prev.detail_media, ...newMedia] }));
-      toast.success(`${newMedia.length} зураг нэмэгдлээ`);
+      toast.success(`${newMedia.length} зураг WebP болгож нэмэгдлээ`);
     }
     if (detailMediaFileRef.current) detailMediaFileRef.current.value = "";
   };
@@ -135,18 +135,15 @@ const AdminPage = () => {
     if (file.size > 5 * 1024 * 1024) { toast.error("Зураг 5MB-ээс бага байх ёстой"); return; }
 
     setUploading(true);
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const dataUrl = ev.target?.result as string;
-      setForm((prev) => ({ ...prev, image_url: dataUrl }));
+    try {
+      const webpUrl = await optimizeImage(file);
+      setForm((prev) => ({ ...prev, image_url: webpUrl }));
+      toast.success("Зураг WebP (1200px) болгож оруулагдлаа");
+    } catch {
+      toast.error("Зураг оновчлоход алдаа гарлаа");
+    } finally {
       setUploading(false);
-      toast.success("Зураг амжилттай оруулагдлаа");
-    };
-    reader.onerror = () => {
-      setUploading(false);
-      toast.error("Зураг уншихад алдаа гарлаа");
-    };
-    reader.readAsDataURL(file);
+    }
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -159,18 +156,17 @@ const AdminPage = () => {
       const file = files[i];
       if (!file.type.startsWith("image/") && !/\.(png|jpe?g|gif|webp|bmp|svg|heic|heif|avif|tiff?)$/i.test(file.name)) { hasError = true; continue; }
       if (file.size > 5 * 1024 * 1024) { hasError = true; continue; }
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = (ev) => resolve(ev.target?.result as string);
-        r.onerror = reject;
-        r.readAsDataURL(file);
-      });
-      newImages.push(dataUrl);
+      try {
+        const webpUrl = await optimizeImage(file);
+        newImages.push(webpUrl);
+      } catch {
+        hasError = true;
+      }
     }
-    if (hasError) toast.error("Зарим зураг оруулж чадсангүй (5MB-ээс бага, зураг файл байх ёстой)");
+    if (hasError) toast.error("Зарим зураг оруулж чадсангүй");
     if (newImages.length > 0) {
       setExtraImages((prev) => [...prev, ...newImages]);
-      toast.success(`${newImages.length} зураг нэмэгдлээ`);
+      toast.success(`${newImages.length} зураг WebP болгож нэмэгдлээ`);
     }
     if (extraFileInputRef.current) extraFileInputRef.current.value = "";
   };
@@ -912,17 +908,16 @@ const AdminPage = () => {
                               const input = document.createElement("input");
                               input.type = "file";
                               input.accept = "image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff";
-                              input.onchange = (ev: any) => {
+                              input.onchange = async (ev: any) => {
                                 const file = ev.target.files?.[0];
                                 if (!file) return;
                                 if (file.size > 5 * 1024 * 1024) { toast.error("5MB-ээс бага байх ёстой"); return; }
-                                const reader = new FileReader();
-                                reader.onload = (e) => {
+                                try {
+                                  const webpUrl = await optimizeImage(file);
                                   const dm = [...form.detail_media];
-                                  dm[idx] = { ...dm[idx], thumbnail: e.target?.result as string };
+                                  dm[idx] = { ...dm[idx], thumbnail: webpUrl };
                                   setForm({ ...form, detail_media: dm });
-                                };
-                                reader.readAsDataURL(file);
+                                } catch { toast.error("Зураг оновчлоход алдаа"); }
                               };
                               input.click();
                             }}
@@ -1012,17 +1007,16 @@ const AdminPage = () => {
                               const input = document.createElement("input");
                               input.type = "file";
                               input.accept = "image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff";
-                              input.onchange = (e: any) => {
+                              input.onchange = async (e: any) => {
                                 const file = e.target.files?.[0];
                                 if (!file) return;
                                 if (file.size > 5 * 1024 * 1024) { toast.error("5MB-ээс бага байх ёстой"); return; }
-                                const reader = new FileReader();
-                                reader.onload = (ev) => {
+                                try {
+                                  const webpUrl = await optimizeImage(file);
                                   const updated = [...form.colors];
-                                  updated[idx] = { ...updated[idx], image: ev.target?.result as string };
+                                  updated[idx] = { ...updated[idx], image: webpUrl };
                                   setForm({ ...form, colors: updated });
-                                };
-                                reader.readAsDataURL(file);
+                                } catch { toast.error("Зураг оновчлоход алдаа"); }
                               };
                               input.click();
                             }}
