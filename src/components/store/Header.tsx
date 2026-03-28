@@ -38,10 +38,10 @@ const Header = () => {
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-3 flex items-center gap-4 md:gap-8">
         <span
-          className="text-xl md:text-2xl font-bold cursor-pointer shrink-0 text-foreground"
+          className="text-xl md:text-2xl cursor-pointer shrink-0 text-foreground"
           onClick={() => navigate("/")}
         >
-          HomeStore
+          <span className="font-bold">Home</span><span className="font-light text-muted-foreground">Store</span>
         </span>
 
         {/* Desktop nav links */}
