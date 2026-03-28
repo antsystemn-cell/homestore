@@ -10,17 +10,32 @@ import { AuthProvider } from "@/context/AuthContext";
 // Eagerly load Index (critical landing page)
 import Index from "./pages/Index";
 
+// Retry wrapper for lazy imports (handles stale chunk hashes after redeploy)
+function lazyRetry<T extends { default: React.ComponentType<any> }>(
+  factory: () => Promise<T>,
+): Promise<T> {
+  return factory().catch((err) => {
+    // Reload once to get fresh asset manifest
+    const key = "chunk-retry";
+    if (!sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, "1");
+      window.location.reload();
+    }
+    throw err;
+  });
+}
+
 // Lazy-load all secondary routes
-const ShopPage = lazy(() => import("./pages/ShopPage"));
-const CartPage = lazy(() => import("./pages/CartPage"));
-const CheckoutPage = lazy(() => import("./pages/CheckoutPage"));
-const ProductPage = lazy(() => import("./pages/ProductPage"));
-const ProfilePage = lazy(() => import("./pages/ProfilePage"));
-const WishlistPage = lazy(() => import("./pages/WishlistPage"));
-const AuthPage = lazy(() => import("./pages/AuthPage"));
-const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
-const AdminPage = lazy(() => import("./pages/AdminPage"));
-const NotFound = lazy(() => import("./pages/NotFound"));
+const ShopPage = lazy(() => lazyRetry(() => import("./pages/ShopPage")));
+const CartPage = lazy(() => lazyRetry(() => import("./pages/CartPage")));
+const CheckoutPage = lazy(() => lazyRetry(() => import("./pages/CheckoutPage")));
+const ProductPage = lazy(() => lazyRetry(() => import("./pages/ProductPage")));
+const ProfilePage = lazy(() => lazyRetry(() => import("./pages/ProfilePage")));
+const WishlistPage = lazy(() => lazyRetry(() => import("./pages/WishlistPage")));
+const AuthPage = lazy(() => lazyRetry(() => import("./pages/AuthPage")));
+const ResetPasswordPage = lazy(() => lazyRetry(() => import("./pages/ResetPasswordPage")));
+const AdminPage = lazy(() => lazyRetry(() => import("./pages/AdminPage")));
+const NotFound = lazy(() => lazyRetry(() => import("./pages/NotFound")));
 
 const queryClient = new QueryClient({
   defaultOptions: {
