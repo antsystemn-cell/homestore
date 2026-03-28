@@ -8,7 +8,7 @@ import { Product, mapDbProduct } from "@/data/products";
 import { fetchPublicBrands, fetchPublicProducts } from "@/lib/publicStoreApi";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 12;
 
 const Index = () => {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
