@@ -11,21 +11,32 @@ interface PaymentProvider {
   position: number;
 }
 
+interface PromoBannerData {
+  id: string;
+  title: string;
+  subtitle: string;
+  button_text: string;
+  button_link: string;
+}
+
 const PromoBanner = () => {
   const navigate = useNavigate();
   const [providers, setProviders] = useState<PaymentProvider[]>([]);
+  const [banner, setBanner] = useState<PromoBannerData | null>(null);
 
   useEffect(() => {
-    const fetchProviders = async () => {
-      const { data } = await supabase
-        .from("payment_providers")
-        .select("*")
-        .eq("is_active", true)
-        .order("position");
-      if (data) setProviders(data as any);
+    const fetchData = async () => {
+      const [provRes, bannerRes] = await Promise.all([
+        supabase.from("payment_providers").select("*").eq("is_active", true).order("position"),
+        supabase.from("promo_banners").select("*").eq("is_active", true).order("position").limit(1),
+      ]);
+      if (provRes.data) setProviders(provRes.data as any);
+      if (bannerRes.data && bannerRes.data.length > 0) setBanner(bannerRes.data[0] as any);
     };
-    fetchProviders();
+    fetchData();
   }, []);
+
+  if (!banner) return null;
 
   return (
     <section className="py-4 md:py-6">
@@ -41,17 +52,21 @@ const PromoBanner = () => {
 
           <div className="relative z-10 flex flex-col justify-center h-full">
             <h2 className="text-white text-2xl md:text-4xl font-extrabold leading-tight">
-              1КГ тутамд -1$
+              {banner.title}
             </h2>
-            <p className="text-white/80 text-sm md:text-base mt-1.5">
-              Тээврийн зардал хямдарлаа!
-            </p>
-            <button
-              onClick={() => navigate("/shop")}
-              className="mt-4 w-fit px-5 py-2 rounded-full bg-white text-foreground text-sm font-semibold hover:bg-white/90 transition-colors shadow-md"
-            >
-              Бүтээгдхүүн үзэх
-            </button>
+            {banner.subtitle && (
+              <p className="text-white/80 text-sm md:text-base mt-1.5">
+                {banner.subtitle}
+              </p>
+            )}
+            {banner.button_text && (
+              <button
+                onClick={() => navigate(banner.button_link || "/shop")}
+                className="mt-4 w-fit px-5 py-2 rounded-full bg-white text-foreground text-sm font-semibold hover:bg-white/90 transition-colors shadow-md"
+              >
+                {banner.button_text}
+              </button>
+            )}
           </div>
         </div>
 
