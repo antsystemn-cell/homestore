@@ -128,7 +128,7 @@ const PromoBanner = () => {
 
         {/* Payment Providers */}
         {providers.length > 0 && (
-          <div className="mt-3 <div className="mt-3 grid grid-cols-6 gap-1.5 md:gap-2">">
+          <div className="mt-3 grid grid-cols-6 gap-1.5 md:gap-2">
             {providers.map((p) => (
               <div
                 key={p.id}
