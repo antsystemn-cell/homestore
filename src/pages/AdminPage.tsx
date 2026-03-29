@@ -184,8 +184,7 @@ const AdminPage = () => {
     }
   }, [isAdmin, authLoading, authError]);
 
-  useEffect(() => {
-    if (authLoading || !isAdmin || authError) return;
+  const loadAdminData = () => {
     fetchProducts();
     fetchOrders();
     fetchUsers();
@@ -193,7 +192,12 @@ const AdminPage = () => {
     fetchBrands();
     fetchDeliveryOptions();
     fetchPaymentProviders();
-  }, [authLoading, isAdmin, authError]);
+  };
+
+  useEffect(() => {
+    if (authLoading || !isAdmin) return;
+    loadAdminData();
+  }, [authLoading, isAdmin]);
 
   const fetchPaymentProviders = async () => {
     try {
