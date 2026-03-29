@@ -77,7 +77,7 @@ const PromoBanner = () => {
     <section className="py-4 md:py-6">
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         {/* Hero Banner */}
-        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[hsl(30,100%,50%)] via-[hsl(340,100%,55%)] to-[hsl(260,60%,55%)] min-h-[160px] sm:min-h-[200px] md:min-h-[280px] shadow-lg">
+        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[hsl(30,100%,50%)] via-[hsl(340,100%,55%)] to-[hsl(260,60%,55%)] min-h-[200px] sm:min-h-[240px] md:min-h-[280px] shadow-lg">
           {/* Banner image */}
           {banner.banner_image && (
             <img
@@ -128,7 +128,7 @@ const PromoBanner = () => {
 
         {/* Payment Providers */}
         {providers.length > 0 && (
-          <div className="mt-3 grid grid-cols-3 md:grid-cols-6 gap-2">
+          <div className="mt-3 grid grid-cols-6 gap-1.5 md:gap-2">
             {providers.map((p) => (
               <div
                 key={p.id}
