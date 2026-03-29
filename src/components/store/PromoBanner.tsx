@@ -31,12 +31,16 @@ const PromoBanner = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [provRes, bannerRes] = await Promise.all([
-        supabase.from("payment_providers").select("*").eq("is_active", true).order("position"),
-        supabase.from("promo_banners").select("*").eq("is_active", true).order("position"),
-      ]);
-      if (provRes.data) setProviders(provRes.data as any);
-      if (bannerRes.data && bannerRes.data.length > 0) setBanners(bannerRes.data as any);
+      try {
+        const [provRes, bannerRes] = await Promise.all([
+          supabase.from("payment_providers").select("*").eq("is_active", true).order("position"),
+          supabase.from("promo_banners").select("*").eq("is_active", true).order("position"),
+        ]);
+        if (provRes.data) setProviders(provRes.data as any);
+        if (bannerRes.data && bannerRes.data.length > 0) setBanners(bannerRes.data as any);
+      } catch (err) {
+        console.error("PromoBanner fetch failed", err);
+      }
     };
     fetchData();
   }, []);
