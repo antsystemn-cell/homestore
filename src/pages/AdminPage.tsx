@@ -724,6 +724,8 @@ const AdminPage = () => {
               {tab === "categories" && `Нийт ${dbCategories.length} ангилал`}
               {tab === "brands" && `Нийт ${dbBrands.length} брэнд`}
               {tab === "delivery" && `Нийт ${deliveryOptions.length} хүргэлтийн сонголт`}
+              {tab === "banner" && `Баннер болон ${paymentProviders.length} лого`}
+              {tab === "payments" && `Нийт ${paymentProviders.length} төлбөрийн суваг`}
             </p>
           </div>
           {tab === "products" && (
