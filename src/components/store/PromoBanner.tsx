@@ -45,12 +45,12 @@ const PromoBanner = () => {
           {paymentProviders.map((p) => (
             <div
               key={p.name}
-              className="flex items-center gap-2.5 bg-secondary rounded-xl p-3 md:p-4 transition-all duration-200 hover:bg-primary/10 hover:shadow-md hover:scale-[1.03] cursor-pointer"
+              className="flex flex-col items-center gap-1.5 bg-secondary rounded-xl p-3 md:p-4 transition-all duration-200 hover:bg-primary/10 hover:shadow-md hover:scale-[1.03] cursor-pointer"
             >
-              <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full ${p.color} flex items-center justify-center text-white text-sm md:text-base flex-shrink-0`}>
+              <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full ${p.color} flex items-center justify-center text-white text-base md:text-lg flex-shrink-0`}>
                 {p.icon}
               </div>
-              <span className="text-xs md:text-sm font-medium text-foreground truncate">
+              <span className="text-[11px] md:text-xs font-medium text-foreground text-center leading-tight">
                 {p.name}
               </span>
             </div>
