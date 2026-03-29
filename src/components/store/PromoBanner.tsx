@@ -1,16 +1,31 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-const paymentProviders = [
-  { name: "Golomt Bank", color: "bg-blue-500", icon: "🏦" },
-  { name: "Pocket", color: "bg-red-500", icon: "💳" },
-  { name: "Store Pay", color: "bg-teal-500", icon: "🛒" },
-  { name: "DigiPay", color: "bg-green-500", icon: "💰" },
-  { name: "HiPay", color: "bg-purple-500", icon: "📱" },
-  { name: "MonPay", color: "bg-cyan-500", icon: "🔄" },
-];
+interface PaymentProvider {
+  id: string;
+  name: string;
+  logo_url: string | null;
+  color: string;
+  icon: string;
+  position: number;
+}
 
 const PromoBanner = () => {
   const navigate = useNavigate();
+  const [providers, setProviders] = useState<PaymentProvider[]>([]);
+
+  useEffect(() => {
+    const fetchProviders = async () => {
+      const { data } = await supabase
+        .from("payment_providers")
+        .select("*")
+        .eq("is_active", true)
+        .order("position");
+      if (data) setProviders(data as any);
+    };
+    fetchProviders();
+  }, []);
 
   return (
     <section className="py-4 md:py-6">
@@ -41,21 +56,27 @@ const PromoBanner = () => {
         </div>
 
         {/* Payment Providers */}
-        <div className="mt-4 grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-3">
-          {paymentProviders.map((p) => (
-            <div
-              key={p.name}
-              className="flex flex-col items-center gap-1.5 bg-secondary rounded-xl p-3 md:p-4 transition-all duration-200 hover:bg-primary/10 hover:shadow-md hover:scale-[1.03] cursor-pointer"
-            >
-              <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full ${p.color} flex items-center justify-center text-white text-base md:text-lg flex-shrink-0`}>
-                {p.icon}
+        {providers.length > 0 && (
+          <div className="mt-4 grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-3">
+            {providers.map((p) => (
+              <div
+                key={p.id}
+                className="flex flex-col items-center gap-1.5 bg-secondary rounded-xl p-3 md:p-4 transition-all duration-200 hover:bg-primary/10 hover:shadow-md hover:scale-[1.03] cursor-pointer"
+              >
+                {p.logo_url ? (
+                  <img src={p.logo_url} alt={p.name} className="w-10 h-10 md:w-12 md:h-12 rounded-full object-contain" />
+                ) : (
+                  <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full ${p.color} flex items-center justify-center text-white text-base md:text-lg flex-shrink-0`}>
+                    {p.icon}
+                  </div>
+                )}
+                <span className="text-[11px] md:text-xs font-medium text-foreground text-center leading-tight">
+                  {p.name}
+                </span>
               </div>
-              <span className="text-[11px] md:text-xs font-medium text-foreground text-center leading-tight">
-                {p.name}
-              </span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

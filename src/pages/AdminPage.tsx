@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
-  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck
+  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard
 } from "lucide-react";
 import { useRef } from "react";
 import { toast } from "sonner";
@@ -16,7 +16,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery";
+type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments";
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -28,6 +28,7 @@ const AdminPage = () => {
   const [dbCategories, setDbCategories] = useState<any[]>([]);
   const [dbBrands, setDbBrands] = useState<any[]>([]);
   const [deliveryOptions, setDeliveryOptions] = useState<any[]>([]);
+  const [paymentProviders, setPaymentProviders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Category/Brand form state
@@ -46,6 +47,11 @@ const AdminPage = () => {
   });
   const [editDeliveryId, setEditDeliveryId] = useState<string | null>(null);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
+
+  // Payment provider form state
+  const [ppForm, setPpForm] = useState({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳" });
+  const [editPpId, setEditPpId] = useState<string | null>(null);
+  const ppLogoFileRef = useRef<HTMLInputElement>(null);
 
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -186,7 +192,50 @@ const AdminPage = () => {
     fetchCategories();
     fetchBrands();
     fetchDeliveryOptions();
+    fetchPaymentProviders();
   }, [authLoading, isAdmin, authError]);
+
+  const fetchPaymentProviders = async () => {
+    try {
+      const { data } = await supabase.from("payment_providers").select("*").order("position");
+      setPaymentProviders(data || []);
+    } catch { setPaymentProviders([]); }
+  };
+
+  const handleSavePaymentProvider = async () => {
+    if (!ppForm.name.trim()) { toast.error("Нэр оруулна уу"); return; }
+    const payload = { name: ppForm.name, logo_url: ppForm.logo_url || null, color: ppForm.color, icon: ppForm.icon || "💳" };
+    if (editPpId) {
+      const { error } = await supabase.from("payment_providers").update(payload).eq("id", editPpId);
+      if (error) toast.error(error.message);
+      else toast.success("Төлбөрийн суваг шинэчлэгдлээ");
+    } else {
+      const { error } = await supabase.from("payment_providers").insert({ ...payload, position: paymentProviders.length } as any);
+      if (error) toast.error(error.message);
+      else toast.success("Төлбөрийн суваг нэмэгдлээ");
+    }
+    setPpForm({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳" }); setEditPpId(null);
+    fetchPaymentProviders();
+  };
+
+  const handleDeletePaymentProvider = async (id: string) => {
+    const { error } = await supabase.from("payment_providers").delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success("Төлбөрийн суваг устгагдлаа"); fetchPaymentProviders(); }
+  };
+
+  const handlePpLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Зөвхөн зураг оруулна уу"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Зураг 5MB-ээс бага байх ёстой"); return; }
+    try {
+      const webpUrl = await optimizeImage(file);
+      setPpForm(f => ({ ...f, logo_url: webpUrl }));
+      toast.success("Лого оруулагдлаа");
+    } catch { toast.error("Зураг оновчлоход алдаа"); }
+    if (ppLogoFileRef.current) ppLogoFileRef.current.value = "";
+  };
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -474,6 +523,7 @@ const AdminPage = () => {
     { id: "categories", label: "Ангилал", icon: Layers },
     { id: "brands", label: "Брэнд", icon: Tag },
     { id: "delivery", label: "Хүргэлт", icon: Truck },
+    { id: "payments", label: "Төлбөр", icon: CreditCard },
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
     { id: "users", label: "Хэрэглэгч", icon: Users },
   ];
@@ -1695,6 +1745,83 @@ const AdminPage = () => {
                 ))}
                 {deliveryOptions.length === 0 && (
                   <p className="text-center text-sm text-muted-foreground py-8">Хүргэлтийн сонголт байхгүй</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Payment Providers Tab */}
+          {tab === "payments" && (
+            <div className="space-y-4">
+              <div className="bg-card rounded-2xl p-4 md:p-6 border border-border space-y-4">
+                <h3 className="font-bold text-sm">{editPpId ? "Төлбөрийн суваг засах" : "Шинэ төлбөрийн суваг нэмэх"}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <input placeholder="Нэр *" value={ppForm.name} onChange={(e) => setPpForm(f => ({ ...f, name: e.target.value }))}
+                    className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <input placeholder="Icon (emoji, жишээ: 🏦)" value={ppForm.icon} onChange={(e) => setPpForm(f => ({ ...f, icon: e.target.value }))}
+                    className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">Лого зураг</label>
+                  <div className="flex items-center gap-3">
+                    {ppForm.logo_url ? (
+                      <img src={ppForm.logo_url} alt="Лого" className="h-14 w-14 rounded-xl object-contain border border-border bg-background p-1" />
+                    ) : (
+                      <div className="h-14 w-14 rounded-xl bg-secondary flex items-center justify-center text-2xl">{ppForm.icon}</div>
+                    )}
+                    <div className="flex flex-col gap-1">
+                      <button type="button" onClick={() => ppLogoFileRef.current?.click()}
+                        className="text-xs text-primary hover:underline flex items-center gap-1"><Upload className="h-3 w-3" /> Зураг оруулах</button>
+                      {ppForm.logo_url && (
+                        <button type="button" onClick={() => setPpForm(f => ({ ...f, logo_url: "" }))} className="text-destructive text-xs hover:underline">Устгах</button>
+                      )}
+                    </div>
+                    <input ref={ppLogoFileRef} type="file" accept="image/*" className="hidden" onChange={handlePpLogoUpload} />
+                  </div>
+                  <input placeholder="Эсвэл лого URL оруулах (https://...)" value={ppForm.logo_url}
+                    onChange={(e) => setPpForm(f => ({ ...f, logo_url: e.target.value }))}
+                    className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={handleSavePaymentProvider}
+                    className="bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors">
+                    {editPpId ? "Шинэчлэх" : "Нэмэх"}
+                  </button>
+                  {editPpId && (
+                    <button onClick={() => { setPpForm({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳" }); setEditPpId(null); }}
+                      className="bg-secondary rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors">
+                      Болих
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-2">
+                {paymentProviders.map((p) => (
+                  <div key={p.id} className="flex items-center justify-between bg-card rounded-xl p-4 border border-border">
+                    <div className="flex items-center gap-3">
+                      {p.logo_url ? (
+                        <img src={p.logo_url} alt={p.name} className="h-10 w-10 rounded-lg object-contain bg-secondary p-1" />
+                      ) : (
+                        <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center text-lg">
+                          {p.icon || "💳"}
+                        </div>
+                      )}
+                      <p className="text-sm font-semibold">{p.name}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <button onClick={() => { setPpForm({ name: p.name, logo_url: p.logo_url || "", color: p.color || "bg-blue-500", icon: p.icon || "💳" }); setEditPpId(p.id); }}
+                        className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => handleDeletePaymentProvider(p.id)}
+                        className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {paymentProviders.length === 0 && (
+                  <p className="text-center text-sm text-muted-foreground py-8">Төлбөрийн суваг байхгүй</p>
                 )}
               </div>
             </div>
