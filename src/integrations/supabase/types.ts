@@ -402,6 +402,7 @@ export type Database = {
       }
       promo_banners: {
         Row: {
+          banner_image: string | null
           button_link: string | null
           button_text: string | null
           created_at: string
@@ -413,6 +414,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          banner_image?: string | null
           button_link?: string | null
           button_text?: string | null
           created_at?: string
@@ -424,6 +426,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          banner_image?: string | null
           button_link?: string | null
           button_text?: string | null
           created_at?: string
