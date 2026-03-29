@@ -963,6 +963,43 @@ const AdminPage = () => {
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div>
+                      <label className="text-[11px] text-muted-foreground mb-1 block">Үнэ *</label>
+                      <input type="number" placeholder="0" value={form.price || ""} onChange={(e) => setForm({ ...form, price: +e.target.value })}
+                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-muted-foreground mb-1 block">Хуучин үнэ</label>
+                      <input type="number" placeholder="0" value={form.original_price || ""} onChange={(e) => setForm({ ...form, original_price: +e.target.value })}
+                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-muted-foreground mb-1 block">Хямдрал %</label>
+                      <input type="number" placeholder="0" value={form.discount || ""} onChange={(e) => setForm({ ...form, discount: +e.target.value })}
+                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-muted-foreground mb-1 block">Ангилал</label>
+                      <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
+                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+                        {dbCategories.map((c) => (
+                          <option key={c.id} value={c.name}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-muted-foreground mb-1 block">Брэнд</label>
+                      <select value={form.brand_id} onChange={(e) => setForm({ ...form, brand_id: e.target.value })}
+                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+                        <option value="">Брэндгүй</option>
+                        {dbBrands.map((b) => (
+                          <option key={b.id} value={b.id}>{b.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                       <label className="text-[11px] text-muted-foreground mb-1 block">Бүтээгдэхүүний код</label>
@@ -1184,42 +1221,6 @@ const AdminPage = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <div>
-                      <label className="text-[11px] text-muted-foreground mb-1 block">Үнэ *</label>
-                      <input type="number" placeholder="0" value={form.price || ""} onChange={(e) => setForm({ ...form, price: +e.target.value })}
-                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                    </div>
-                    <div>
-                      <label className="text-[11px] text-muted-foreground mb-1 block">Хуучин үнэ</label>
-                      <input type="number" placeholder="0" value={form.original_price || ""} onChange={(e) => setForm({ ...form, original_price: +e.target.value })}
-                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                    </div>
-                    <div>
-                      <label className="text-[11px] text-muted-foreground mb-1 block">Хямдрал %</label>
-                      <input type="number" placeholder="0" value={form.discount || ""} onChange={(e) => setForm({ ...form, discount: +e.target.value })}
-                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                    </div>
-                    <div>
-                      <label className="text-[11px] text-muted-foreground mb-1 block">Ангилал</label>
-                      <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
-                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
-                        {dbCategories.map((c) => (
-                          <option key={c.id} value={c.name}>{c.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-[11px] text-muted-foreground mb-1 block">Брэнд</label>
-                      <select value={form.brand_id} onChange={(e) => setForm({ ...form, brand_id: e.target.value })}
-                        className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
-                        <option value="">Брэндгүй</option>
-                        {dbBrands.map((b) => (
-                          <option key={b.id} value={b.id}>{b.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
 
                   <div className="flex gap-6">
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
