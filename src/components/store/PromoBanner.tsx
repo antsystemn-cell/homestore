@@ -16,7 +16,7 @@ const PromoBanner = () => {
     <section className="py-4 md:py-6">
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         {/* Hero Banner */}
-        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[hsl(265,80%,45%)] via-[hsl(270,75%,40%)] to-[hsl(280,70%,30%)] p-6 md:p-10 min-h-[180px] md:min-h-[240px]">
+        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[hsl(265,80%,45%)] via-[hsl(270,75%,40%)] to-[hsl(280,70%,30%)] p-6 md:p-10 min-h-[220px] md:min-h-[280px]">
           {/* Decorative swirl lines */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute -top-10 -right-10 w-72 h-72 rounded-full bg-white/5 blur-2xl" />
@@ -45,7 +45,7 @@ const PromoBanner = () => {
           {paymentProviders.map((p) => (
             <div
               key={p.name}
-              className="flex items-center gap-2.5 bg-secondary rounded-xl p-3 md:p-4"
+              className="flex items-center gap-2.5 bg-secondary rounded-xl p-3 md:p-4 transition-all duration-200 hover:bg-primary/10 hover:shadow-md hover:scale-[1.03] cursor-pointer"
             >
               <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full ${p.color} flex items-center justify-center text-white text-sm md:text-base flex-shrink-0`}>
                 {p.icon}
