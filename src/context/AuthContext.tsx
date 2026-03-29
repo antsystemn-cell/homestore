@@ -13,7 +13,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 4000): Promise<T | null> => {
+const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 10000): Promise<T | null> => {
   return await Promise.race([
     promise,
     new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
