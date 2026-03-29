@@ -100,7 +100,11 @@ const ProductPage = () => {
     }
     addToCart(product!, selectedColor, selectedSize, quantity);
     setQuantity(1);
-    if (andNavigate) navigate("/cart");
+    if (andNavigate) {
+      navigate("/cart");
+    } else {
+      toast.success("Сагсанд амжилттай нэмлээ 🛒");
+    }
   };
 
   useEffect(() => {
