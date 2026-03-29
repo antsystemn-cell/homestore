@@ -14,7 +14,8 @@ import {
   fetchSaleProducts,
   fetchFeaturedProducts,
 } from "@/lib/publicStoreApi";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const PAGE_SIZE = 12;
 
@@ -25,6 +26,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [page, setPage] = useState(1);
+  const navigate = useNavigate();
 
   const totalPages = Math.max(1, Math.ceil(allProducts.length / PAGE_SIZE));
   const visible = useMemo(
@@ -106,7 +108,7 @@ const Index = () => {
   }, [totalPages, page]);
 
   return (
-    <div className="min-h-screen bg-background pb-16 md:pb-0">
+    <div className="min-h-screen bg-background pb-24 md:pb-0">
       <Header />
       {loading ? (
         <ProductGridSkeleton count={PAGE_SIZE} />
@@ -114,11 +116,18 @@ const Index = () => {
         <LoadError onRetry={fetchAll} retrying={loading} />
       ) : (
         <>
-          {/* Sale carousel */}
+          {/* Sale section */}
           {saleProducts.length > 0 && (
             <ErrorBoundary>
               <SaleCarousel products={saleProducts} />
             </ErrorBoundary>
+          )}
+
+          {/* Divider */}
+          {saleProducts.length > 0 && featuredProducts.length > 0 && (
+            <div className="max-w-6xl mx-auto px-5 md:px-8">
+              <div className="h-px bg-outline-variant/30" />
+            </div>
           )}
 
           {/* Featured section */}
@@ -128,14 +137,25 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
-          {/* Divider + all products header */}
+          {/* All products */}
           {visible.length > 0 && (
             <>
-              <div className="max-w-6xl mx-auto px-4 md:px-8 pt-4 pb-2">
-                <div className="flex items-center gap-3">
-                  <div className="h-6 w-1 rounded-full bg-primary" />
-                  <h2 className="text-base md:text-lg font-bold text-foreground">Бүх бараа</h2>
-                  <span className="text-xs text-muted-foreground ml-auto">
+              {/* Divider */}
+              <div className="max-w-6xl mx-auto px-5 md:px-8">
+                <div className="h-px bg-outline-variant/30" />
+              </div>
+
+              <div className="max-w-6xl mx-auto px-5 md:px-8 pt-6 pb-3">
+                <div className="flex items-end justify-between">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-medium mb-1">
+                      Бүх цуглуулга
+                    </p>
+                    <h2 className="font-display text-xl md:text-2xl font-extrabold text-foreground tracking-tight">
+                      Бүх бараа
+                    </h2>
+                  </div>
+                  <span className="text-xs text-muted-foreground font-medium">
                     {allProducts.length} бараа
                   </span>
                 </div>
@@ -146,11 +166,11 @@ const Index = () => {
               </ErrorBoundary>
 
               {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-1.5 py-6 px-4">
+                <div className="flex items-center justify-center gap-1.5 py-8 px-4">
                   <button
                     onClick={() => goToPage(page - 1)}
                     disabled={page === 1}
-                    className="p-2 rounded-lg bg-secondary text-foreground disabled:opacity-30 disabled:cursor-not-allowed hover:bg-accent transition-colors"
+                    className="p-2 rounded-full bg-surface-container text-foreground disabled:opacity-30 disabled:cursor-not-allowed hover:bg-accent transition-colors"
                     aria-label="Өмнөх хуудас"
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -163,10 +183,10 @@ const Index = () => {
                       <button
                         key={p}
                         onClick={() => goToPage(p)}
-                        className={`min-w-[36px] h-9 rounded-lg text-sm font-medium transition-colors ${
+                        className={`min-w-[36px] h-9 rounded-full text-sm font-medium transition-colors ${
                           p === page
                             ? "bg-primary text-primary-foreground"
-                            : "bg-secondary text-foreground hover:bg-accent"
+                            : "bg-surface-container text-foreground hover:bg-accent"
                         }`}
                       >
                         {p}
@@ -177,7 +197,7 @@ const Index = () => {
                   <button
                     onClick={() => goToPage(page + 1)}
                     disabled={page === totalPages}
-                    className="p-2 rounded-lg bg-secondary text-foreground disabled:opacity-30 disabled:cursor-not-allowed hover:bg-accent transition-colors"
+                    className="p-2 rounded-full bg-surface-container text-foreground disabled:opacity-30 disabled:cursor-not-allowed hover:bg-accent transition-colors"
                     aria-label="Дараагийн хуудас"
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -189,7 +209,7 @@ const Index = () => {
 
           {visible.length === 0 && saleProducts.length === 0 && featuredProducts.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-              <p className="text-lg font-medium">Бараа байхгүй байна</p>
+              <p className="text-lg font-display font-bold">Бараа байхгүй байна</p>
               <p className="text-sm mt-1">Удахгүй шинэ бараа нэмэгдэнэ</p>
             </div>
           )}
