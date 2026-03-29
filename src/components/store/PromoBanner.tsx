@@ -60,24 +60,7 @@ const PromoBanner = () => {
             {banner.banner_image && <div className="absolute inset-0 bg-black/30" />}
           </div>
 
-          <div className="relative z-10 flex flex-col justify-center h-full">
-            <h2 className="text-white text-2xl md:text-4xl font-extrabold leading-tight">
-              {banner.title}
-            </h2>
-            {banner.subtitle && (
-              <p className="text-white/80 text-sm md:text-base mt-1.5">
-                {banner.subtitle}
-              </p>
-            )}
-            {banner.button_text && (
-              <button
-                onClick={() => navigate(banner.button_link || "/shop")}
-                className="mt-4 w-fit px-5 py-2 rounded-full bg-white text-foreground text-sm font-semibold hover:bg-white/90 transition-colors shadow-md"
-              >
-                {banner.button_text}
-              </button>
-            )}
-          </div>
+          <div className="relative z-10 flex flex-col justify-center h-full" />
         </div>
 
         {/* Payment Providers */}
