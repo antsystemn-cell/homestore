@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Header from "@/components/store/Header";
 import ProductGrid from "@/components/store/ProductGrid";
 import BottomNav from "@/components/store/BottomNav";
 import ProductGridSkeleton from "@/components/store/ProductGridSkeleton";
 import LoadError from "@/components/store/LoadError";
+import ErrorBoundary from "@/components/store/ErrorBoundary";
 import { Product, mapDbProduct } from "@/data/products";
 import { fetchPublicBrands, fetchPublicProducts } from "@/lib/publicStoreApi";
 
@@ -14,7 +15,7 @@ const ShopPage = () => {
   const [selectedBrand, setSelectedBrand] = useState<string>("all");
   const [error, setError] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(false);
     try {
@@ -38,13 +39,14 @@ const ShopPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
-  const filtered = selectedBrand === "all"
-    ? products
-    : products.filter((p) => p.brand_id === selectedBrand);
+  const filtered = useMemo(
+    () => selectedBrand === "all" ? products : products.filter((p) => p.brand_id === selectedBrand),
+    [products, selectedBrand]
+  );
 
   return (
     <div className="min-h-screen bg-secondary pb-16 md:pb-0">
@@ -83,7 +85,9 @@ const ShopPage = () => {
       ) : error ? (
         <LoadError onRetry={fetchData} retrying={loading} />
       ) : (
-        <ProductGrid title="Бүх бараа" products={filtered} />
+        <ErrorBoundary>
+          <ProductGrid title="Бүх бараа" products={filtered} />
+        </ErrorBoundary>
       )}
       <BottomNav />
     </div>
