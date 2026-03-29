@@ -25,7 +25,9 @@ const SaleCarousel = React.memo(({ products }: Props) => {
     setImgErrors((prev) => ({ ...prev, [id]: true }));
   }, []);
 
-  if (products.length === 0) return null;
+  const limited = products.slice(0, 4);
+
+  if (limited.length === 0) return null;
 
   return (
     <section className="py-5 md:py-8">
@@ -62,7 +64,7 @@ const SaleCarousel = React.memo(({ products }: Props) => {
           ref={scrollRef}
           className="flex gap-3 md:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-2"
         >
-          {products.map((p) => {
+          {limited.map((p) => {
             const discountPct =
               p.originalPrice && p.originalPrice > p.price
                 ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100)
