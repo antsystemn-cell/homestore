@@ -261,3 +261,30 @@ export const fetchRelatedPublicProducts = async (category: string, excludeId: st
     return FALLBACK_PRODUCTS.filter((product) => product.category === category && product.id !== excludeId).slice(0, 4);
   }
 };
+
+export const fetchSaleProducts = async () => {
+  try {
+    return await fetchPublic<any[]>("products", {
+      select: "id,name,price,original_price,image_url,category,is_on_sale,discount,brand_id",
+      is_on_sale: "eq.true",
+      order: "discount.desc.nullslast",
+      limit: 10,
+    });
+  } catch (error) {
+    logFallback("saleProducts", error);
+    return FALLBACK_PRODUCTS.filter((p) => p.is_on_sale);
+  }
+};
+
+export const fetchFeaturedProducts = async () => {
+  try {
+    return await fetchPublic<any[]>("products", {
+      select: "id,name,price,original_price,image_url,category,is_on_sale,discount,brand_id,is_new,sales",
+      order: "sales.desc.nullslast",
+      limit: 8,
+    });
+  } catch (error) {
+    logFallback("featuredProducts", error);
+    return FALLBACK_PRODUCTS.slice(0, 8);
+  }
+};
