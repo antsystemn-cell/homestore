@@ -17,6 +17,15 @@ import {
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 const PAGE_SIZE = 12;
 const MOBILE_LOAD_SIZE = 12;
 
@@ -83,7 +92,7 @@ const Index = () => {
         return p;
       };
 
-      const mappedProducts = (prodRes || []).map(mapWithBrand);
+      const mappedProducts = shuffle((prodRes || []).map(mapWithBrand));
       const mappedSale = (saleRes || []).map(mapWithBrand);
       const mappedFeatured = (featuredRes || []).map(mapWithBrand);
 

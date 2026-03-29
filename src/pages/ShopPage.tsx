@@ -8,6 +8,15 @@ import ErrorBoundary from "@/components/store/ErrorBoundary";
 import { Product, mapDbProduct } from "@/data/products";
 import { fetchPublicBrands, fetchPublicProducts } from "@/lib/publicStoreApi";
 
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 const ShopPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,12 +33,12 @@ const ShopPage = () => {
         fetchPublicBrands(),
       ]);
       const brandMap = new Map((brandRes || []).map((b: any) => [b.id, b]));
-      setProducts((prodRes || []).map((row: any) => {
+      setProducts(shuffle((prodRes || []).map((row: any) => {
         const p = mapDbProduct(row);
         const brand = brandMap.get(p.brand_id || "");
         if (brand) { p.brandName = brand.name; p.brandLogo = brand.logo_url; }
         return p;
-      }));
+      })));
       setBrands((brandRes || []).map((b: any) => ({ id: b.id, name: b.name })));
     } catch (err) {
       console.error("Failed to load shop products", err);
