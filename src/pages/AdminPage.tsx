@@ -197,12 +197,48 @@ const AdminPage = () => {
     fetchBrands();
     fetchDeliveryOptions();
     fetchPaymentProviders();
+    fetchPromoBanners();
   };
 
   useEffect(() => {
     if (authLoading || !isAdmin) return;
     loadAdminData();
   }, [authLoading, isAdmin]);
+
+  const fetchPromoBanners = async () => {
+    try {
+      const { data } = await supabase.from("promo_banners").select("*").order("position");
+      setPromoBanners(data || []);
+    } catch { setPromoBanners([]); }
+  };
+
+  const handleSaveBanner = async () => {
+    if (!bannerForm.title.trim()) { toast.error("Гарчиг оруулна уу"); return; }
+    const payload = { title: bannerForm.title, subtitle: bannerForm.subtitle || "", button_text: bannerForm.button_text || "Бүтээгдхүүн үзэх", button_link: bannerForm.button_link || "/shop" };
+    if (editBannerId) {
+      const { error } = await supabase.from("promo_banners").update(payload).eq("id", editBannerId);
+      if (error) toast.error(error.message);
+      else toast.success("Баннер шинэчлэгдлээ");
+    } else {
+      const { error } = await supabase.from("promo_banners").insert({ ...payload, position: promoBanners.length } as any);
+      if (error) toast.error(error.message);
+      else toast.success("Баннер нэмэгдлээ");
+    }
+    setBannerForm({ title: "", subtitle: "", button_text: "Бүтээгдхүүн үзэх", button_link: "/shop" }); setEditBannerId(null);
+    fetchPromoBanners();
+  };
+
+  const handleDeleteBanner = async (id: string) => {
+    const { error } = await supabase.from("promo_banners").delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success("Баннер устгагдлаа"); fetchPromoBanners(); }
+  };
+
+  const toggleBannerActive = async (id: string, currentActive: boolean) => {
+    const { error } = await supabase.from("promo_banners").update({ is_active: !currentActive }).eq("id", id);
+    if (error) toast.error(error.message);
+    else fetchPromoBanners();
+  };
 
   const fetchPaymentProviders = async () => {
     try {
