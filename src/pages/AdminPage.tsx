@@ -192,7 +192,50 @@ const AdminPage = () => {
     fetchCategories();
     fetchBrands();
     fetchDeliveryOptions();
+    fetchPaymentProviders();
   }, [authLoading, isAdmin, authError]);
+
+  const fetchPaymentProviders = async () => {
+    try {
+      const { data } = await supabase.from("payment_providers").select("*").order("position");
+      setPaymentProviders(data || []);
+    } catch { setPaymentProviders([]); }
+  };
+
+  const handleSavePaymentProvider = async () => {
+    if (!ppForm.name.trim()) { toast.error("Нэр оруулна уу"); return; }
+    const payload = { name: ppForm.name, logo_url: ppForm.logo_url || null, color: ppForm.color, icon: ppForm.icon || "💳" };
+    if (editPpId) {
+      const { error } = await supabase.from("payment_providers").update(payload).eq("id", editPpId);
+      if (error) toast.error(error.message);
+      else toast.success("Төлбөрийн суваг шинэчлэгдлээ");
+    } else {
+      const { error } = await supabase.from("payment_providers").insert({ ...payload, position: paymentProviders.length } as any);
+      if (error) toast.error(error.message);
+      else toast.success("Төлбөрийн суваг нэмэгдлээ");
+    }
+    setPpForm({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳" }); setEditPpId(null);
+    fetchPaymentProviders();
+  };
+
+  const handleDeletePaymentProvider = async (id: string) => {
+    const { error } = await supabase.from("payment_providers").delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success("Төлбөрийн суваг устгагдлаа"); fetchPaymentProviders(); }
+  };
+
+  const handlePpLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Зөвхөн зураг оруулна уу"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Зураг 5MB-ээс бага байх ёстой"); return; }
+    try {
+      const webpUrl = await optimizeImage(file);
+      setPpForm(f => ({ ...f, logo_url: webpUrl }));
+      toast.success("Лого оруулагдлаа");
+    } catch { toast.error("Зураг оновчлоход алдаа"); }
+    if (ppLogoFileRef.current) ppLogoFileRef.current.value = "";
+  };
 
   const fetchProducts = async () => {
     setLoading(true);
