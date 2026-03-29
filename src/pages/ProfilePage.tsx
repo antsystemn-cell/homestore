@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { ChevronRight, LogOut, Shield, User, MapPin, Phone, ShoppingBag, Heart, Settings } from "lucide-react";
 import BottomNav from "@/components/store/BottomNav";
+import Header from "@/components/store/Header";
 
 const ProfilePage = () => {
   const navigate = useNavigate();

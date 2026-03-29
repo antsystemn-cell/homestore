@@ -2,6 +2,7 @@ import { Heart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import ProductCard from "@/components/store/ProductCard";
 import BottomNav from "@/components/store/BottomNav";
+import Header from "@/components/store/Header";
 import { useNavigate } from "react-router-dom";
 
 const WishlistPage = () => {

@@ -9,6 +9,7 @@ import ProductCard from "@/components/store/ProductCard";
 import ProductReviews from "@/components/store/ProductReviews";
 import LoadError from "@/components/store/LoadError";
 import { fetchPublicProductById, fetchPublicProductImages, fetchRelatedPublicProducts } from "@/lib/publicStoreApi";
+import Header from "@/components/store/Header";
 
 const VideoWithThumbnail = ({ media }: { media: DetailMedia }) => {
   const [playing, setPlaying] = useState(false);
@@ -159,6 +160,7 @@ const ProductPage = () => {
 
   return (
     <div className="min-h-screen bg-background pb-32 md:pb-12">
+      <div className="hidden md:block"><Header /></div>
       <div className="md:hidden sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border px-4 py-3 flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="p-1.5 rounded-full hover:bg-secondary">
           <ArrowLeft className="h-5 w-5 text-foreground" />
@@ -166,7 +168,7 @@ const ProductPage = () => {
         <span className="text-sm font-semibold text-foreground truncate">{product.name}</span>
       </div>
 
-      <div className="hidden md:block sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border">
+      <div className="hidden md:block">
         <div className="max-w-6xl mx-auto px-8 py-3">
           <button
             onClick={() => navigate(-1)}
