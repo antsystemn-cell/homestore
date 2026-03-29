@@ -63,12 +63,6 @@ const Index = () => {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     setError(false);
-    const controller = new AbortController();
-    const timeout = setTimeout(() => {
-      controller.abort();
-      setLoading(false);
-      setError(true);
-    }, 10000);
 
     try {
       const [prodRes, brandRes, saleRes, featuredRes] = await Promise.all([
@@ -89,22 +83,24 @@ const Index = () => {
         return p;
       };
 
-      setAllProducts((prodRes || []).map(mapWithBrand));
-      setSaleProducts((saleRes || []).map(mapWithBrand));
-      setFeaturedProducts((featuredRes || []).map(mapWithBrand));
+      const mappedProducts = (prodRes || []).map(mapWithBrand);
+      const mappedSale = (saleRes || []).map(mapWithBrand);
+      const mappedFeatured = (featuredRes || []).map(mapWithBrand);
+
+      setAllProducts(mappedProducts);
+      setSaleProducts(mappedSale);
+      setFeaturedProducts(mappedFeatured);
       setPage(1);
       setMobileVisibleCount(MOBILE_LOAD_SIZE);
-      setError(false);
+      // Only show error if absolutely no data was loaded
+      setError(mappedProducts.length === 0 && mappedSale.length === 0 && mappedFeatured.length === 0);
     } catch (err) {
-      if (!controller.signal.aborted) {
-        console.error("Failed to load products", err);
-        setAllProducts([]);
-        setSaleProducts([]);
-        setFeaturedProducts([]);
-        setError(true);
-      }
+      console.error("Failed to load products", err);
+      setAllProducts([]);
+      setSaleProducts([]);
+      setFeaturedProducts([]);
+      setError(true);
     } finally {
-      clearTimeout(timeout);
       setLoading(false);
     }
   }, []);
