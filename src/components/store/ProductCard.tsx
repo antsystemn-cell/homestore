@@ -1,3 +1,4 @@
+import React, { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Product, formatPrice } from "@/data/products";
 
@@ -5,23 +6,33 @@ interface Props {
   product: Product;
 }
 
-const ProductCard = ({ product }: Props) => {
+const ProductCard = React.memo(({ product }: Props) => {
   const navigate = useNavigate();
+  const [imgError, setImgError] = useState(false);
+
+  const handleClick = useCallback(() => {
+    navigate(`/product/${product.id}`);
+  }, [navigate, product.id]);
+
+  const handleImgError = useCallback(() => setImgError(true), []);
+
+  const imgSrc = imgError ? "/placeholder.svg" : product.image;
 
   return (
     <div
-      className="bg-card overflow-hidden cursor-pointer group transition-all duration-200 hover:shadow-lg rounded-none md:rounded-xl"
-      onClick={() => navigate(`/product/${product.id}`)}
+      className="bg-card overflow-hidden cursor-pointer group transition-all duration-200 hover:shadow-lg rounded-none md:rounded-xl animate-fade-in"
+      onClick={handleClick}
     >
       <div className="relative aspect-square bg-secondary overflow-hidden">
         <img
-          src={product.image}
+          src={imgSrc}
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
           decoding="async"
           width={300}
           height={300}
+          onError={handleImgError}
         />
         {product.originalPrice != null && product.originalPrice > product.price && (
           <span className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded">
@@ -46,6 +57,8 @@ const ProductCard = ({ product }: Props) => {
       </div>
     </div>
   );
-};
+});
+
+ProductCard.displayName = "ProductCard";
 
 export default ProductCard;

@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Header from "@/components/store/Header";
 import ProductGrid from "@/components/store/ProductGrid";
 import BottomNav from "@/components/store/BottomNav";
 import ProductGridSkeleton from "@/components/store/ProductGridSkeleton";
 import LoadError from "@/components/store/LoadError";
+import ErrorBoundary from "@/components/store/ErrorBoundary";
 import { Product, mapDbProduct } from "@/data/products";
 import { fetchPublicBrands, fetchPublicProducts } from "@/lib/publicStoreApi";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -17,12 +18,17 @@ const Index = () => {
   const [page, setPage] = useState(1);
 
   const totalPages = Math.max(1, Math.ceil(allProducts.length / PAGE_SIZE));
-  const visible = allProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const visible = useMemo(
+    () => allProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [allProducts, page]
+  );
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
     setError(false);
+    const controller = new AbortController();
     const timeout = setTimeout(() => {
+      controller.abort();
       setLoading(false);
       setError(true);
     }, 10000);
@@ -43,9 +49,11 @@ const Index = () => {
       setPage(1);
       setError(false);
     } catch (err) {
-      console.error("Failed to load products", err);
-      setAllProducts([]);
-      setError(true);
+      if (!controller.signal.aborted) {
+        console.error("Failed to load products", err);
+        setAllProducts([]);
+        setError(true);
+      }
     } finally {
       clearTimeout(timeout);
       setLoading(false);
@@ -56,12 +64,12 @@ const Index = () => {
     void fetchAll();
   }, [fetchAll]);
 
-  const goToPage = (p: number) => {
+  const goToPage = useCallback((p: number) => {
     setPage(p);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  }, []);
 
-  const renderPageNumbers = () => {
+  const pageNumbers = useMemo(() => {
     const pages: (number | string)[] = [];
     if (totalPages <= 7) {
       for (let i = 1; i <= totalPages; i++) pages.push(i);
@@ -75,7 +83,7 @@ const Index = () => {
       pages.push(totalPages);
     }
     return pages;
-  };
+  }, [totalPages, page]);
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
@@ -91,9 +99,10 @@ const Index = () => {
         </div>
       ) : (
         <>
-          <ProductGrid products={visible} />
+          <ErrorBoundary>
+            <ProductGrid products={visible} />
+          </ErrorBoundary>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-1.5 py-6 px-4">
               <button
@@ -105,7 +114,7 @@ const Index = () => {
                 <ChevronLeft className="h-4 w-4" />
               </button>
 
-              {renderPageNumbers().map((p, i) =>
+              {pageNumbers.map((p, i) =>
                 typeof p === "string" ? (
                   <span key={`dots-${i}`} className="px-2 text-muted-foreground text-sm">…</span>
                 ) : (
