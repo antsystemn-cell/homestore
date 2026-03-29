@@ -132,16 +132,16 @@ const PromoBanner = () => {
             {providers.map((p) => (
               <div
                 key={p.id}
-                className="flex flex-col items-center justify-center gap-1.5 bg-secondary rounded-xl py-3 px-2 transition-all duration-200 hover:bg-primary/10 hover:shadow-md cursor-pointer"
+                className="flex flex-col items-center justify-center gap-1 bg-secondary rounded-xl aspect-square transition-all duration-200 hover:bg-primary/10 hover:shadow-md cursor-pointer p-1"
               >
                 {p.logo_url ? (
-                  <img src={p.logo_url} alt={p.name} className="w-10 h-10 rounded-full object-contain flex-shrink-0" />
+                  <img src={p.logo_url} alt={p.name} className="w-8 h-8 md:w-10 md:h-10 rounded-full object-contain flex-shrink-0" />
                 ) : (
-                  <div className={`w-10 h-10 rounded-full ${p.color} flex items-center justify-center text-white text-base flex-shrink-0`}>
+                  <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full ${p.color} flex items-center justify-center text-white text-sm md:text-base flex-shrink-0`}>
                     {p.icon}
                   </div>
                 )}
-                <span className="text-[11px] font-medium text-foreground leading-tight text-center line-clamp-1">
+                <span className="text-[9px] md:text-[11px] font-medium text-foreground leading-tight text-center line-clamp-1">
                   {p.name}
                 </span>
               </div>
