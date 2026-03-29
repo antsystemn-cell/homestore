@@ -14,8 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        display: ["Manrope", "sans-serif"],
+        sans: ["Montserrat", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -26,12 +25,10 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
-          container: "hsl(var(--primary-container))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
-          container: "hsl(var(--secondary-container))",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -60,21 +57,6 @@ export default {
         warning: {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
-        },
-        surface: {
-          DEFAULT: "hsl(var(--surface))",
-          container: "hsl(var(--surface-container))",
-          "container-low": "hsl(var(--surface-container-low))",
-          "container-high": "hsl(var(--surface-container-high))",
-          "container-lowest": "hsl(var(--surface-container-lowest))",
-        },
-        "on-surface": {
-          DEFAULT: "hsl(var(--on-surface))",
-          variant: "hsl(var(--on-surface-variant))",
-        },
-        outline: {
-          DEFAULT: "hsl(var(--outline))",
-          variant: "hsl(var(--outline-variant))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
