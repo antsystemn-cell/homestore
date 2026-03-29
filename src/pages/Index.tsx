@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Header from "@/components/store/Header";
 import ProductGrid from "@/components/store/ProductGrid";
 import BottomNav from "@/components/store/BottomNav";
@@ -15,8 +15,10 @@ import {
   fetchFeaturedProducts,
 } from "@/lib/publicStoreApi";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const PAGE_SIZE = 12;
+const MOBILE_LOAD_SIZE = 12;
 
 const Index = () => {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -25,12 +27,38 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [page, setPage] = useState(1);
+  const [mobileVisibleCount, setMobileVisibleCount] = useState(MOBILE_LOAD_SIZE);
+  const isMobile = useIsMobile();
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const totalPages = Math.max(1, Math.ceil(allProducts.length / PAGE_SIZE));
-  const visible = useMemo(
-    () => allProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [allProducts, page]
-  );
+  const visible = useMemo(() => {
+    if (isMobile) {
+      return allProducts.slice(0, mobileVisibleCount);
+    }
+    return allProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  }, [allProducts, page, isMobile, mobileVisibleCount]);
+
+  // Infinite scroll observer for mobile
+  useEffect(() => {
+    if (!isMobile || allProducts.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && mobileVisibleCount < allProducts.length) {
+          setMobileVisibleCount((prev) => Math.min(prev + MOBILE_LOAD_SIZE, allProducts.length));
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const el = loadMoreRef.current;
+    if (el) observer.observe(el);
+
+    return () => {
+      if (el) observer.unobserve(el);
+    };
+  }, [isMobile, allProducts.length, mobileVisibleCount]);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -65,6 +93,7 @@ const Index = () => {
       setSaleProducts((saleRes || []).map(mapWithBrand));
       setFeaturedProducts((featuredRes || []).map(mapWithBrand));
       setPage(1);
+      setMobileVisibleCount(MOBILE_LOAD_SIZE);
       setError(false);
     } catch (err) {
       if (!controller.signal.aborted) {
@@ -105,6 +134,8 @@ const Index = () => {
     return pages;
   }, [totalPages, page]);
 
+  const hasMoreMobile = isMobile && mobileVisibleCount < allProducts.length;
+
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
       <Header />
@@ -134,7 +165,9 @@ const Index = () => {
                   <div className="h-6 w-1 rounded-full bg-primary" />
                   <h2 className="text-base md:text-lg font-bold text-foreground">Бүх бараа</h2>
                   <span className="text-xs text-muted-foreground ml-auto">
-                    {allProducts.length} бараа
+                    {isMobile
+                      ? `${Math.min(mobileVisibleCount, allProducts.length)} / ${allProducts.length} бараа`
+                      : `${allProducts.length} бараа`}
                   </span>
                 </div>
               </div>
@@ -143,7 +176,15 @@ const Index = () => {
                 <ProductGrid products={visible} />
               </ErrorBoundary>
 
-              {totalPages > 1 && (
+              {/* Mobile: infinite scroll trigger */}
+              {hasMoreMobile && (
+                <div ref={loadMoreRef} className="flex items-center justify-center py-6">
+                  <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                </div>
+              )}
+
+              {/* Desktop: pagination */}
+              {!isMobile && totalPages > 1 && (
                 <div className="flex items-center justify-center gap-1.5 py-6 px-4">
                   <button
                     onClick={() => goToPage(page - 1)}
