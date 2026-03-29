@@ -33,8 +33,9 @@ const AdminPage = () => {
   const [loading, setLoading] = useState(false);
 
   // Promo banner form state
-  const [bannerForm, setBannerForm] = useState({ title: "", subtitle: "", button_text: "Бүтээгдхүүн үзэх", button_link: "/shop" });
+  const [bannerForm, setBannerForm] = useState({ title: "", subtitle: "", button_text: "Бүтээгдхүүн үзэх", button_link: "/shop", banner_image: "" });
   const [editBannerId, setEditBannerId] = useState<string | null>(null);
+  const bannerImageFileRef = useRef<HTMLInputElement>(null);
 
   // Category/Brand form state
   const [catName, setCatName] = useState("");
@@ -214,7 +215,7 @@ const AdminPage = () => {
 
   const handleSaveBanner = async () => {
     if (!bannerForm.title.trim()) { toast.error("Гарчиг оруулна уу"); return; }
-    const payload = { title: bannerForm.title, subtitle: bannerForm.subtitle || "", button_text: bannerForm.button_text || "Бүтээгдхүүн үзэх", button_link: bannerForm.button_link || "/shop" };
+    const payload = { title: bannerForm.title, subtitle: bannerForm.subtitle || "", button_text: bannerForm.button_text || "Бүтээгдхүүн үзэх", button_link: bannerForm.button_link || "/shop", banner_image: bannerForm.banner_image || null };
     if (editBannerId) {
       const { error } = await supabase.from("promo_banners").update(payload).eq("id", editBannerId);
       if (error) toast.error(error.message);
@@ -224,8 +225,21 @@ const AdminPage = () => {
       if (error) toast.error(error.message);
       else toast.success("Баннер нэмэгдлээ");
     }
-    setBannerForm({ title: "", subtitle: "", button_text: "Бүтээгдхүүн үзэх", button_link: "/shop" }); setEditBannerId(null);
+    setBannerForm({ title: "", subtitle: "", button_text: "Бүтээгдхүүн үзэх", button_link: "/shop", banner_image: "" }); setEditBannerId(null);
     fetchPromoBanners();
+  };
+
+  const handleBannerImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Зөвхөн зураг оруулна уу"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Зураг 5MB-ээс бага байх ёстой"); return; }
+    try {
+      const webpUrl = await optimizeImage(file);
+      setBannerForm(f => ({ ...f, banner_image: webpUrl }));
+      toast.success("Баннер зураг оруулагдлаа");
+    } catch { toast.error("Зураг оновчлоход алдаа"); }
+    if (bannerImageFileRef.current) bannerImageFileRef.current.value = "";
   };
 
   const handleDeleteBanner = async (id: string) => {
@@ -1891,13 +1905,37 @@ const AdminPage = () => {
                   <input placeholder="Товчлуурын линк (жишээ: /shop)" value={bannerForm.button_link} onChange={(e) => setBannerForm(f => ({ ...f, button_link: e.target.value }))}
                     className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
                 </div>
+                {/* Banner Image Upload */}
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">Баннер зураг (арын зураг)</label>
+                  <div className="flex items-center gap-3">
+                    {bannerForm.banner_image ? (
+                      <img src={bannerForm.banner_image} alt="Баннер" className="h-20 w-36 rounded-xl object-cover border border-border" />
+                    ) : (
+                      <div className="h-20 w-36 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground">
+                        <ImageIcon className="h-6 w-6" />
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-1.5">
+                      <button type="button" onClick={() => bannerImageFileRef.current?.click()}
+                        className="flex items-center gap-1.5 bg-secondary hover:bg-secondary/80 rounded-lg px-3 py-2 text-xs font-medium transition-colors">
+                        <Upload className="h-3.5 w-3.5" /> Зураг оруулах
+                      </button>
+                      {bannerForm.banner_image && (
+                        <button type="button" onClick={() => setBannerForm(f => ({ ...f, banner_image: "" }))}
+                          className="text-xs text-destructive hover:underline">Зураг устгах</button>
+                      )}
+                      <input ref={bannerImageFileRef} type="file" accept="image/*" className="hidden" onChange={handleBannerImageUpload} />
+                    </div>
+                  </div>
+                </div>
                 <div className="flex gap-2">
                   <button onClick={handleSaveBanner}
                     className="bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors">
                     {editBannerId ? "Шинэчлэх" : "Нэмэх"}
                   </button>
                   {editBannerId && (
-                    <button onClick={() => { setBannerForm({ title: "", subtitle: "", button_text: "Бүтээгдхүүн үзэх", button_link: "/shop" }); setEditBannerId(null); }}
+                    <button onClick={() => { setBannerForm({ title: "", subtitle: "", button_text: "Бүтээгдхүүн үзэх", button_link: "/shop", banner_image: "" }); setEditBannerId(null); }}
                       className="bg-secondary rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors">
                       Болих
                     </button>
@@ -1922,7 +1960,7 @@ const AdminPage = () => {
                           className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${b.is_active ? "bg-green-500/10 text-green-600" : "bg-secondary text-muted-foreground"}`}>
                           {b.is_active ? "Идэвхтэй" : "Идэвхгүй"}
                         </button>
-                        <button onClick={() => { setBannerForm({ title: b.title, subtitle: b.subtitle || "", button_text: b.button_text || "", button_link: b.button_link || "/shop" }); setEditBannerId(b.id); }}
+                        <button onClick={() => { setBannerForm({ title: b.title, subtitle: b.subtitle || "", button_text: b.button_text || "", button_link: b.button_link || "/shop", banner_image: b.banner_image || "" }); setEditBannerId(b.id); }}
                           className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
                           <Pencil className="h-4 w-4" />
                         </button>

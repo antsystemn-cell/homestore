@@ -17,6 +17,7 @@ interface PromoBannerData {
   subtitle: string;
   button_text: string;
   button_link: string;
+  banner_image: string | null;
 }
 
 const PromoBanner = () => {
@@ -43,11 +44,20 @@ const PromoBanner = () => {
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         {/* Hero Banner */}
         <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[hsl(265,80%,45%)] via-[hsl(270,75%,40%)] to-[hsl(280,70%,30%)] p-6 md:p-10 min-h-[220px] md:min-h-[280px]">
-          {/* Decorative swirl lines */}
+          {/* Banner image */}
+          {banner.banner_image && (
+            <img src={banner.banner_image} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            )}
+          {/* Decorative overlay */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-10 -right-10 w-72 h-72 rounded-full bg-white/5 blur-2xl" />
-            <div className="absolute bottom-0 left-0 w-96 h-40 rounded-full bg-white/5 blur-3xl" />
-            <div className="absolute top-1/2 right-1/4 w-48 h-48 rounded-full bg-purple-300/10 blur-2xl" />
+            {!banner.banner_image && (
+              <>
+                <div className="absolute -top-10 -right-10 w-72 h-72 rounded-full bg-white/5 blur-2xl" />
+                <div className="absolute bottom-0 left-0 w-96 h-40 rounded-full bg-white/5 blur-3xl" />
+                <div className="absolute top-1/2 right-1/4 w-48 h-48 rounded-full bg-purple-300/10 blur-2xl" />
+              </>
+            )}
+            {banner.banner_image && <div className="absolute inset-0 bg-black/30" />}
           </div>
 
           <div className="relative z-10 flex flex-col justify-center h-full">

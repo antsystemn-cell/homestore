@@ -1,0 +1,1 @@
+ALTER TABLE public.promo_banners ADD COLUMN banner_image text DEFAULT NULL;
