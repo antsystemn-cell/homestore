@@ -5,14 +5,23 @@ import BottomNav from "@/components/store/BottomNav";
 import ProductGridSkeleton from "@/components/store/ProductGridSkeleton";
 import LoadError from "@/components/store/LoadError";
 import ErrorBoundary from "@/components/store/ErrorBoundary";
+import SaleCarousel from "@/components/store/SaleCarousel";
+import FeaturedSection from "@/components/store/FeaturedSection";
 import { Product, mapDbProduct } from "@/data/products";
-import { fetchPublicBrands, fetchPublicProducts } from "@/lib/publicStoreApi";
+import {
+  fetchPublicBrands,
+  fetchPublicProducts,
+  fetchSaleProducts,
+  fetchFeaturedProducts,
+} from "@/lib/publicStoreApi";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const PAGE_SIZE = 12;
 
 const Index = () => {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [saleProducts, setSaleProducts] = useState<Product[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [page, setPage] = useState(1);
@@ -34,24 +43,35 @@ const Index = () => {
     }, 10000);
 
     try {
-      const [prodRes, brandRes] = await Promise.all([
+      const [prodRes, brandRes, saleRes, featuredRes] = await Promise.all([
         fetchPublicProducts(),
         fetchPublicBrands(),
+        fetchSaleProducts(),
+        fetchFeaturedProducts(),
       ]);
       const brandMap = new Map((brandRes || []).map((b: any) => [b.id, b]));
-      const products = (prodRes || []).map((row: any) => {
+
+      const mapWithBrand = (row: any) => {
         const p = mapDbProduct(row);
         const brand = brandMap.get(p.brand_id || "");
-        if (brand) { p.brandName = brand.name; p.brandLogo = brand.logo_url; }
+        if (brand) {
+          p.brandName = brand.name;
+          p.brandLogo = brand.logo_url;
+        }
         return p;
-      });
-      setAllProducts(products);
+      };
+
+      setAllProducts((prodRes || []).map(mapWithBrand));
+      setSaleProducts((saleRes || []).map(mapWithBrand));
+      setFeaturedProducts((featuredRes || []).map(mapWithBrand));
       setPage(1);
       setError(false);
     } catch (err) {
       if (!controller.signal.aborted) {
         console.error("Failed to load products", err);
         setAllProducts([]);
+        setSaleProducts([]);
+        setFeaturedProducts([]);
         setError(true);
       }
     } finally {
@@ -92,54 +112,85 @@ const Index = () => {
         <ProductGridSkeleton count={PAGE_SIZE} />
       ) : error ? (
         <LoadError onRetry={fetchAll} retrying={loading} />
-      ) : visible.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-          <p className="text-lg font-medium">Бараа байхгүй байна</p>
-          <p className="text-sm mt-1">Удахгүй шинэ бараа нэмэгдэнэ</p>
-        </div>
       ) : (
         <>
-          <ErrorBoundary>
-            <ProductGrid products={visible} />
-          </ErrorBoundary>
+          {/* Sale carousel */}
+          {saleProducts.length > 0 && (
+            <ErrorBoundary>
+              <SaleCarousel products={saleProducts} />
+            </ErrorBoundary>
+          )}
 
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-1.5 py-6 px-4">
-              <button
-                onClick={() => goToPage(page - 1)}
-                disabled={page === 1}
-                className="p-2 rounded-lg bg-secondary text-foreground disabled:opacity-30 disabled:cursor-not-allowed hover:bg-accent transition-colors"
-                aria-label="Өмнөх хуудас"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
+          {/* Featured section */}
+          {featuredProducts.length > 0 && (
+            <ErrorBoundary>
+              <FeaturedSection products={featuredProducts} />
+            </ErrorBoundary>
+          )}
 
-              {pageNumbers.map((p, i) =>
-                typeof p === "string" ? (
-                  <span key={`dots-${i}`} className="px-2 text-muted-foreground text-sm">…</span>
-                ) : (
+          {/* Divider + all products header */}
+          {visible.length > 0 && (
+            <>
+              <div className="max-w-6xl mx-auto px-4 md:px-8 pt-4 pb-2">
+                <div className="flex items-center gap-3">
+                  <div className="h-6 w-1 rounded-full bg-primary" />
+                  <h2 className="text-base md:text-lg font-bold text-foreground">Бүх бараа</h2>
+                  <span className="text-xs text-muted-foreground ml-auto">
+                    {allProducts.length} бараа
+                  </span>
+                </div>
+              </div>
+
+              <ErrorBoundary>
+                <ProductGrid products={visible} />
+              </ErrorBoundary>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-1.5 py-6 px-4">
                   <button
-                    key={p}
-                    onClick={() => goToPage(p)}
-                    className={`min-w-[36px] h-9 rounded-lg text-sm font-medium transition-colors ${
-                      p === page
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary text-foreground hover:bg-accent"
-                    }`}
+                    onClick={() => goToPage(page - 1)}
+                    disabled={page === 1}
+                    className="p-2 rounded-lg bg-secondary text-foreground disabled:opacity-30 disabled:cursor-not-allowed hover:bg-accent transition-colors"
+                    aria-label="Өмнөх хуудас"
                   >
-                    {p}
+                    <ChevronLeft className="h-4 w-4" />
                   </button>
-                )
-              )}
 
-              <button
-                onClick={() => goToPage(page + 1)}
-                disabled={page === totalPages}
-                className="p-2 rounded-lg bg-secondary text-foreground disabled:opacity-30 disabled:cursor-not-allowed hover:bg-accent transition-colors"
-                aria-label="Дараагийн хуудас"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
+                  {pageNumbers.map((p, i) =>
+                    typeof p === "string" ? (
+                      <span key={`dots-${i}`} className="px-2 text-muted-foreground text-sm">…</span>
+                    ) : (
+                      <button
+                        key={p}
+                        onClick={() => goToPage(p)}
+                        className={`min-w-[36px] h-9 rounded-lg text-sm font-medium transition-colors ${
+                          p === page
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-secondary text-foreground hover:bg-accent"
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    )
+                  )}
+
+                  <button
+                    onClick={() => goToPage(page + 1)}
+                    disabled={page === totalPages}
+                    className="p-2 rounded-lg bg-secondary text-foreground disabled:opacity-30 disabled:cursor-not-allowed hover:bg-accent transition-colors"
+                    aria-label="Дараагийн хуудас"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {visible.length === 0 && saleProducts.length === 0 && featuredProducts.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+              <p className="text-lg font-medium">Бараа байхгүй байна</p>
+              <p className="text-sm mt-1">Удахгүй шинэ бараа нэмэгдэнэ</p>
             </div>
           )}
         </>
