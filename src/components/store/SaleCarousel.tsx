@@ -25,7 +25,9 @@ const SaleCarousel = React.memo(({ products }: Props) => {
     setImgErrors((prev) => ({ ...prev, [id]: true }));
   }, []);
 
-  if (products.length === 0) return null;
+  const limited = products.slice(0, 4);
+
+  if (limited.length === 0) return null;
 
   return (
     <section className="py-5 md:py-8">
