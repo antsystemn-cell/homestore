@@ -523,6 +523,7 @@ const AdminPage = () => {
     { id: "categories", label: "Ангилал", icon: Layers },
     { id: "brands", label: "Брэнд", icon: Tag },
     { id: "delivery", label: "Хүргэлт", icon: Truck },
+    { id: "payments", label: "Төлбөр", icon: CreditCard },
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
     { id: "users", label: "Хэрэглэгч", icon: Users },
   ];
