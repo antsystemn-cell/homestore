@@ -72,20 +72,20 @@ const PromoBanner = () => {
 
         {/* Payment Providers */}
         {providers.length > 0 && (
-          <div className="mt-4 grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-3">
+          <div className="mt-4 flex flex-wrap gap-2">
             {providers.map((p) => (
               <div
                 key={p.id}
-                className="flex flex-col items-center gap-1.5 bg-secondary rounded-xl p-3 md:p-4 transition-all duration-200 hover:bg-primary/10 hover:shadow-md hover:scale-[1.03] cursor-pointer"
+                className="flex items-center gap-2 bg-secondary rounded-xl px-3 py-2 transition-all duration-200 hover:bg-primary/10 hover:shadow-md cursor-pointer"
               >
                 {p.logo_url ? (
-                  <img src={p.logo_url} alt={p.name} className="w-10 h-10 md:w-12 md:h-12 rounded-full object-contain" />
+                  <img src={p.logo_url} alt={p.name} className="w-8 h-8 rounded-full object-contain flex-shrink-0" />
                 ) : (
-                  <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full ${p.color} flex items-center justify-center text-white text-base md:text-lg flex-shrink-0`}>
+                  <div className={`w-8 h-8 rounded-full ${p.color} flex items-center justify-center text-white text-sm flex-shrink-0`}>
                     {p.icon}
                   </div>
                 )}
-                <span className="text-[11px] md:text-xs font-medium text-foreground text-center leading-tight">
+                <span className="text-[11px] font-medium text-foreground leading-tight whitespace-nowrap">
                   {p.name}
                 </span>
               </div>
