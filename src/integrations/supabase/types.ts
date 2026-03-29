@@ -228,6 +228,39 @@ export type Database = {
           },
         ]
       }
+      payment_providers: {
+        Row: {
+          color: string
+          created_at: string
+          icon: string | null
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          name: string
+          position: number | null
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name: string
+          position?: number | null
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name?: string
+          position?: number | null
+        }
+        Relationships: []
+      }
       product_images: {
         Row: {
           created_at: string
