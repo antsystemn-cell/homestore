@@ -569,6 +569,7 @@ const AdminPage = () => {
     { id: "brands", label: "Брэнд", icon: Tag },
     { id: "delivery", label: "Хүргэлт", icon: Truck },
     { id: "payments", label: "Төлбөр", icon: CreditCard },
+    { id: "banner", label: "Баннер", icon: Megaphone },
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
     { id: "users", label: "Хэрэглэгч", icon: Users },
   ];
