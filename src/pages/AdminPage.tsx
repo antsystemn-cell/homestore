@@ -1749,6 +1749,83 @@ const AdminPage = () => {
               </div>
             </div>
           )}
+
+          {/* Payment Providers Tab */}
+          {tab === "payments" && (
+            <div className="space-y-4">
+              <div className="bg-card rounded-2xl p-4 md:p-6 border border-border space-y-4">
+                <h3 className="font-bold text-sm">{editPpId ? "Төлбөрийн суваг засах" : "Шинэ төлбөрийн суваг нэмэх"}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <input placeholder="Нэр *" value={ppForm.name} onChange={(e) => setPpForm(f => ({ ...f, name: e.target.value }))}
+                    className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <input placeholder="Icon (emoji, жишээ: 🏦)" value={ppForm.icon} onChange={(e) => setPpForm(f => ({ ...f, icon: e.target.value }))}
+                    className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-muted-foreground">Лого зураг</label>
+                  <div className="flex items-center gap-3">
+                    {ppForm.logo_url ? (
+                      <img src={ppForm.logo_url} alt="Лого" className="h-14 w-14 rounded-xl object-contain border border-border bg-background p-1" />
+                    ) : (
+                      <div className="h-14 w-14 rounded-xl bg-secondary flex items-center justify-center text-2xl">{ppForm.icon}</div>
+                    )}
+                    <div className="flex flex-col gap-1">
+                      <button type="button" onClick={() => ppLogoFileRef.current?.click()}
+                        className="text-xs text-primary hover:underline flex items-center gap-1"><Upload className="h-3 w-3" /> Зураг оруулах</button>
+                      {ppForm.logo_url && (
+                        <button type="button" onClick={() => setPpForm(f => ({ ...f, logo_url: "" }))} className="text-destructive text-xs hover:underline">Устгах</button>
+                      )}
+                    </div>
+                    <input ref={ppLogoFileRef} type="file" accept="image/*" className="hidden" onChange={handlePpLogoUpload} />
+                  </div>
+                  <input placeholder="Эсвэл лого URL оруулах (https://...)" value={ppForm.logo_url}
+                    onChange={(e) => setPpForm(f => ({ ...f, logo_url: e.target.value }))}
+                    className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={handleSavePaymentProvider}
+                    className="bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors">
+                    {editPpId ? "Шинэчлэх" : "Нэмэх"}
+                  </button>
+                  {editPpId && (
+                    <button onClick={() => { setPpForm({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳" }); setEditPpId(null); }}
+                      className="bg-secondary rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors">
+                      Болих
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-2">
+                {paymentProviders.map((p) => (
+                  <div key={p.id} className="flex items-center justify-between bg-card rounded-xl p-4 border border-border">
+                    <div className="flex items-center gap-3">
+                      {p.logo_url ? (
+                        <img src={p.logo_url} alt={p.name} className="h-10 w-10 rounded-lg object-contain bg-secondary p-1" />
+                      ) : (
+                        <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center text-lg">
+                          {p.icon || "💳"}
+                        </div>
+                      )}
+                      <p className="text-sm font-semibold">{p.name}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <button onClick={() => { setPpForm({ name: p.name, logo_url: p.logo_url || "", color: p.color || "bg-blue-500", icon: p.icon || "💳" }); setEditPpId(p.id); }}
+                        className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => handleDeletePaymentProvider(p.id)}
+                        className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {paymentProviders.length === 0 && (
+                  <p className="text-center text-sm text-muted-foreground py-8">Төлбөрийн суваг байхгүй</p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>
