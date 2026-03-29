@@ -490,6 +490,22 @@ const AdminPage = () => {
   const handleSaveProduct = async () => {
     if (!form.name.trim()) { toast.error("Барааны нэр заавал бөглөнө"); return; }
     if (!form.price || form.price <= 0) { toast.error("Зөв үнэ оруулна уу"); return; }
+
+    // Check duplicate name
+    {
+      let q = supabase.from("products").select("id").eq("name", form.name.trim());
+      if (editId) q = q.neq("id", editId);
+      const { data } = await q.limit(1);
+      if (data && data.length > 0) { toast.error("Ижил нэртэй бараа бүртгэлтэй байна"); return; }
+    }
+
+    // Check duplicate product_code
+    if (form.product_code && form.product_code.trim()) {
+      let q = supabase.from("products").select("id").eq("product_code", form.product_code.trim());
+      if (editId) q = q.neq("id", editId);
+      const { data } = await q.limit(1);
+      if (data && data.length > 0) { toast.error("Ижил бүтээгдэхүүний код бүртгэлтэй байна"); return; }
+    }
     setLoading(true);
     const payload = {
       name: form.name, description: form.description, price: form.price,
