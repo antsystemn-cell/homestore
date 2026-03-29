@@ -6,7 +6,7 @@ import ProductGridSkeleton from "@/components/store/ProductGridSkeleton";
 import LoadError from "@/components/store/LoadError";
 import ErrorBoundary from "@/components/store/ErrorBoundary";
 import SaleCarousel from "@/components/store/SaleCarousel";
-import FeaturedSection from "@/components/store/FeaturedSection";
+import PromoBanner from "@/components/store/PromoBanner";
 import { Product, mapDbProduct } from "@/data/products";
 import {
   fetchPublicBrands,
@@ -121,12 +121,10 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
-          {/* Featured section */}
-          {featuredProducts.length > 0 && (
-            <ErrorBoundary>
-              <FeaturedSection products={featuredProducts} />
-            </ErrorBoundary>
-          )}
+          {/* Promo banner */}
+          <ErrorBoundary>
+            <PromoBanner />
+          </ErrorBoundary>
 
           {/* Divider + all products header */}
           {visible.length > 0 && (
