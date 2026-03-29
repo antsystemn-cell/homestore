@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
-  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard
+  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone
 } from "lucide-react";
 import { useRef } from "react";
 import { toast } from "sonner";
@@ -16,7 +16,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments";
+type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner";
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -29,7 +29,12 @@ const AdminPage = () => {
   const [dbBrands, setDbBrands] = useState<any[]>([]);
   const [deliveryOptions, setDeliveryOptions] = useState<any[]>([]);
   const [paymentProviders, setPaymentProviders] = useState<any[]>([]);
+  const [promoBanners, setPromoBanners] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Promo banner form state
+  const [bannerForm, setBannerForm] = useState({ title: "", subtitle: "", button_text: "Бүтээгдхүүн үзэх", button_link: "/shop" });
+  const [editBannerId, setEditBannerId] = useState<string | null>(null);
 
   // Category/Brand form state
   const [catName, setCatName] = useState("");
@@ -192,12 +197,48 @@ const AdminPage = () => {
     fetchBrands();
     fetchDeliveryOptions();
     fetchPaymentProviders();
+    fetchPromoBanners();
   };
 
   useEffect(() => {
     if (authLoading || !isAdmin) return;
     loadAdminData();
   }, [authLoading, isAdmin]);
+
+  const fetchPromoBanners = async () => {
+    try {
+      const { data } = await supabase.from("promo_banners").select("*").order("position");
+      setPromoBanners(data || []);
+    } catch { setPromoBanners([]); }
+  };
+
+  const handleSaveBanner = async () => {
+    if (!bannerForm.title.trim()) { toast.error("Гарчиг оруулна уу"); return; }
+    const payload = { title: bannerForm.title, subtitle: bannerForm.subtitle || "", button_text: bannerForm.button_text || "Бүтээгдхүүн үзэх", button_link: bannerForm.button_link || "/shop" };
+    if (editBannerId) {
+      const { error } = await supabase.from("promo_banners").update(payload).eq("id", editBannerId);
+      if (error) toast.error(error.message);
+      else toast.success("Баннер шинэчлэгдлээ");
+    } else {
+      const { error } = await supabase.from("promo_banners").insert({ ...payload, position: promoBanners.length } as any);
+      if (error) toast.error(error.message);
+      else toast.success("Баннер нэмэгдлээ");
+    }
+    setBannerForm({ title: "", subtitle: "", button_text: "Бүтээгдхүүн үзэх", button_link: "/shop" }); setEditBannerId(null);
+    fetchPromoBanners();
+  };
+
+  const handleDeleteBanner = async (id: string) => {
+    const { error } = await supabase.from("promo_banners").delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success("Баннер устгагдлаа"); fetchPromoBanners(); }
+  };
+
+  const toggleBannerActive = async (id: string, currentActive: boolean) => {
+    const { error } = await supabase.from("promo_banners").update({ is_active: !currentActive }).eq("id", id);
+    if (error) toast.error(error.message);
+    else fetchPromoBanners();
+  };
 
   const fetchPaymentProviders = async () => {
     try {
@@ -528,6 +569,7 @@ const AdminPage = () => {
     { id: "brands", label: "Брэнд", icon: Tag },
     { id: "delivery", label: "Хүргэлт", icon: Truck },
     { id: "payments", label: "Төлбөр", icon: CreditCard },
+    { id: "banner", label: "Баннер", icon: Megaphone },
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
     { id: "users", label: "Хэрэглэгч", icon: Users },
   ];
@@ -682,6 +724,8 @@ const AdminPage = () => {
               {tab === "categories" && `Нийт ${dbCategories.length} ангилал`}
               {tab === "brands" && `Нийт ${dbBrands.length} брэнд`}
               {tab === "delivery" && `Нийт ${deliveryOptions.length} хүргэлтийн сонголт`}
+              {tab === "banner" && `Баннер болон ${paymentProviders.length} лого`}
+              {tab === "payments" && `Нийт ${paymentProviders.length} төлбөрийн суваг`}
             </p>
           </div>
           {tab === "products" && (
@@ -1827,6 +1871,148 @@ const AdminPage = () => {
                 {paymentProviders.length === 0 && (
                   <p className="text-center text-sm text-muted-foreground py-8">Төлбөрийн суваг байхгүй</p>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Banner Tab */}
+          {tab === "banner" && (
+            <div className="space-y-6">
+              {/* Banner Management */}
+              <div className="bg-card rounded-2xl p-4 md:p-6 border border-border space-y-4">
+                <h3 className="font-bold text-sm">{editBannerId ? "Баннер засах" : "Шинэ баннер нэмэх"}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <input placeholder="Гарчиг *" value={bannerForm.title} onChange={(e) => setBannerForm(f => ({ ...f, title: e.target.value }))}
+                    className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <input placeholder="Дэд гарчиг" value={bannerForm.subtitle} onChange={(e) => setBannerForm(f => ({ ...f, subtitle: e.target.value }))}
+                    className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <input placeholder="Товчлуурын текст" value={bannerForm.button_text} onChange={(e) => setBannerForm(f => ({ ...f, button_text: e.target.value }))}
+                    className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <input placeholder="Товчлуурын линк (жишээ: /shop)" value={bannerForm.button_link} onChange={(e) => setBannerForm(f => ({ ...f, button_link: e.target.value }))}
+                    className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={handleSaveBanner}
+                    className="bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors">
+                    {editBannerId ? "Шинэчлэх" : "Нэмэх"}
+                  </button>
+                  {editBannerId && (
+                    <button onClick={() => { setBannerForm({ title: "", subtitle: "", button_text: "Бүтээгдхүүн үзэх", button_link: "/shop" }); setEditBannerId(null); }}
+                      className="bg-secondary rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors">
+                      Болих
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Banner List */}
+              <div className="space-y-2">
+                {promoBanners.map((b) => (
+                  <div key={b.id} className="bg-card rounded-xl p-4 border border-border">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold truncate">{b.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">{b.subtitle}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Товч: {b.button_text} → {b.button_link}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1 ml-3">
+                        <button onClick={() => toggleBannerActive(b.id, b.is_active)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${b.is_active ? "bg-green-500/10 text-green-600" : "bg-secondary text-muted-foreground"}`}>
+                          {b.is_active ? "Идэвхтэй" : "Идэвхгүй"}
+                        </button>
+                        <button onClick={() => { setBannerForm({ title: b.title, subtitle: b.subtitle || "", button_text: b.button_text || "", button_link: b.button_link || "/shop" }); setEditBannerId(b.id); }}
+                          className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => handleDeleteBanner(b.id)}
+                          className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {promoBanners.length === 0 && (
+                  <p className="text-center text-sm text-muted-foreground py-8">Баннер байхгүй</p>
+                )}
+              </div>
+
+              {/* Payment Providers Section within Banner tab */}
+              <div className="border-t border-border pt-6">
+                <h3 className="font-bold text-base mb-4">Доод талын лого / Төлбөрийн сувгууд</h3>
+                <div className="bg-card rounded-2xl p-4 md:p-6 border border-border space-y-4">
+                  <h4 className="font-bold text-sm">{editPpId ? "Лого засах" : "Шинэ лого нэмэх"}</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <input placeholder="Нэр *" value={ppForm.name} onChange={(e) => setPpForm(f => ({ ...f, name: e.target.value }))}
+                      className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                    <input placeholder="Icon (emoji, жишээ: 🏦)" value={ppForm.icon} onChange={(e) => setPpForm(f => ({ ...f, icon: e.target.value }))}
+                      className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs text-muted-foreground">Лого зураг</label>
+                    <div className="flex items-center gap-3">
+                      {ppForm.logo_url ? (
+                        <img src={ppForm.logo_url} alt="Лого" className="h-14 w-14 rounded-xl object-contain border border-border bg-background p-1" />
+                      ) : (
+                        <div className="h-14 w-14 rounded-xl bg-secondary flex items-center justify-center text-2xl">{ppForm.icon}</div>
+                      )}
+                      <div className="flex flex-col gap-1">
+                        <button type="button" onClick={() => ppLogoFileRef.current?.click()}
+                          className="text-xs text-primary hover:underline flex items-center gap-1"><Upload className="h-3 w-3" /> Зураг оруулах</button>
+                        {ppForm.logo_url && (
+                          <button type="button" onClick={() => setPpForm(f => ({ ...f, logo_url: "" }))} className="text-destructive text-xs hover:underline">Устгах</button>
+                        )}
+                      </div>
+                      <input ref={ppLogoFileRef} type="file" accept="image/*" className="hidden" onChange={handlePpLogoUpload} />
+                    </div>
+                    <input placeholder="Эсвэл лого URL оруулах (https://...)" value={ppForm.logo_url}
+                      onChange={(e) => setPpForm(f => ({ ...f, logo_url: e.target.value }))}
+                      className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={handleSavePaymentProvider}
+                      className="bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors">
+                      {editPpId ? "Шинэчлэх" : "Нэмэх"}
+                    </button>
+                    {editPpId && (
+                      <button onClick={() => { setPpForm({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳" }); setEditPpId(null); }}
+                        className="bg-secondary rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors">
+                        Болих
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2 mt-4">
+                  {paymentProviders.map((p) => (
+                    <div key={p.id} className="flex items-center justify-between bg-card rounded-xl p-4 border border-border">
+                      <div className="flex items-center gap-3">
+                        {p.logo_url ? (
+                          <img src={p.logo_url} alt={p.name} className="h-10 w-10 rounded-lg object-contain bg-secondary p-1" />
+                        ) : (
+                          <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center text-lg">
+                            {p.icon || "💳"}
+                          </div>
+                        )}
+                        <p className="text-sm font-semibold">{p.name}</p>
+                      </div>
+                      <div className="flex gap-1">
+                        <button onClick={() => { setPpForm({ name: p.name, logo_url: p.logo_url || "", color: p.color || "bg-blue-500", icon: p.icon || "💳" }); setEditPpId(p.id); }}
+                          className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => handleDeletePaymentProvider(p.id)}
+                          className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {paymentProviders.length === 0 && (
+                    <p className="text-center text-sm text-muted-foreground py-8">Лого байхгүй</p>
+                  )}
+                </div>
               </div>
             </div>
           )}
