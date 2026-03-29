@@ -1,5 +1,4 @@
-import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface PaymentProvider {
@@ -20,33 +19,72 @@ interface PromoBannerData {
   banner_image: string | null;
 }
 
+const SLIDE_DURATION = 5000; // 5 seconds per banner
+
 const PromoBanner = () => {
-  const navigate = useNavigate();
   const [providers, setProviders] = useState<PaymentProvider[]>([]);
-  const [banner, setBanner] = useState<PromoBannerData | null>(null);
+  const [banners, setBanners] = useState<PromoBannerData[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startTimeRef = useRef(Date.now());
 
   useEffect(() => {
     const fetchData = async () => {
       const [provRes, bannerRes] = await Promise.all([
         supabase.from("payment_providers").select("*").eq("is_active", true).order("position"),
-        supabase.from("promo_banners").select("*").eq("is_active", true).order("position").limit(1),
+        supabase.from("promo_banners").select("*").eq("is_active", true).order("position"),
       ]);
       if (provRes.data) setProviders(provRes.data as any);
-      if (bannerRes.data && bannerRes.data.length > 0) setBanner(bannerRes.data[0] as any);
+      if (bannerRes.data && bannerRes.data.length > 0) setBanners(bannerRes.data as any);
     };
     fetchData();
   }, []);
 
-  if (!banner) return null;
+  const goToSlide = useCallback((index: number) => {
+    setActiveIndex(index);
+    setProgress(0);
+    startTimeRef.current = Date.now();
+  }, []);
+
+  // Auto-rotate and progress bar
+  useEffect(() => {
+    if (banners.length <= 1) return;
+
+    startTimeRef.current = Date.now();
+    timerRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTimeRef.current;
+      const pct = Math.min((elapsed / SLIDE_DURATION) * 100, 100);
+      setProgress(pct);
+
+      if (elapsed >= SLIDE_DURATION) {
+        setActiveIndex((prev) => (prev + 1) % banners.length);
+        startTimeRef.current = Date.now();
+        setProgress(0);
+      }
+    }, 50);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [banners.length, activeIndex]);
+
+  if (banners.length === 0) return null;
+
+  const banner = banners[activeIndex];
 
   return (
     <section className="py-4 md:py-6">
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         {/* Hero Banner */}
-        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[hsl(30,100%,50%)] via-[hsl(340,100%,55%)] to-[hsl(260,60%,55%)] p-6 md:p-10 min-h-[220px] md:min-h-[280px] shadow-lg">
+        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[hsl(30,100%,50%)] via-[hsl(340,100%,55%)] to-[hsl(260,60%,55%)] min-h-[220px] md:min-h-[280px] shadow-lg">
           {/* Banner image */}
           {banner.banner_image && (
-            <img src={banner.banner_image} alt="" className="absolute inset-0 w-full h-full object-cover brightness-110 saturate-[1.25] contrast-[1.08]" />
+            <img
+              src={banner.banner_image}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover brightness-110 saturate-[1.25] contrast-[1.08] transition-opacity duration-500"
+            />
           )}
           {/* Decorative overlay */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -61,6 +99,31 @@ const PromoBanner = () => {
           </div>
 
           <div className="relative z-10 flex flex-col justify-center h-full" />
+
+          {/* Slide indicators with progress */}
+          {banners.length > 1 && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+              {banners.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => goToSlide(i)}
+                  className="relative h-1.5 rounded-full overflow-hidden transition-all duration-300"
+                  style={{ width: i === activeIndex ? 32 : 12 }}
+                >
+                  <div className="absolute inset-0 bg-white/40 rounded-full" />
+                  {i === activeIndex && (
+                    <div
+                      className="absolute inset-y-0 left-0 bg-white rounded-full transition-none"
+                      style={{ width: `${progress}%` }}
+                    />
+                  )}
+                  {i !== activeIndex && (
+                    <div className="absolute inset-0 bg-white/40 rounded-full" />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Payment Providers */}
