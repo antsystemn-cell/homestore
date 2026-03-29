@@ -15,7 +15,8 @@ const ProfilePage = () => {
   if (!user) {
     return (
       <div className="min-h-screen bg-background pb-16 md:pb-0">
-        <header className="sticky top-0 z-50 bg-background px-4 py-4 border-b border-border md:hidden">
+        <Header />
+        <header className="sticky top-0 z-50 bg-background px-4 py-4 border-b border-border md:hidden hidden">
           <h1 className="text-lg font-bold">Профайл</h1>
         </header>
         <div className="flex flex-col items-center justify-center py-24 text-muted-foreground max-w-md mx-auto px-4 text-center">
@@ -49,8 +50,9 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
+      <Header />
       {/* Mobile Header */}
-      <header className="sticky top-0 z-50 bg-background px-4 py-4 border-b border-border md:hidden">
+      <header className="sticky top-0 z-50 bg-background px-4 py-4 border-b border-border md:hidden hidden">
         <h1 className="text-lg font-bold">Профайл</h1>
       </header>
 

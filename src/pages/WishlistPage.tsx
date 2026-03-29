@@ -11,7 +11,8 @@ const WishlistPage = () => {
 
   return (
     <div className="min-h-screen bg-secondary pb-20 md:pb-0">
-      <header className="sticky top-0 z-50 bg-background px-4 py-4 border-b border-border md:hidden">
+      <Header />
+      <header className="sticky top-0 z-50 bg-background px-4 py-4 border-b border-border md:hidden hidden">
         <h1 className="text-lg font-bold text-foreground">Таалагдсан</h1>
       </header>
 
