@@ -28,6 +28,7 @@ const AdminPage = () => {
   const [dbCategories, setDbCategories] = useState<any[]>([]);
   const [dbBrands, setDbBrands] = useState<any[]>([]);
   const [deliveryOptions, setDeliveryOptions] = useState<any[]>([]);
+  const [paymentProviders, setPaymentProviders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Category/Brand form state
