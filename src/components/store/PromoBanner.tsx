@@ -77,7 +77,7 @@ const PromoBanner = () => {
     <section className="py-4 md:py-6">
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         {/* Hero Banner */}
-        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[hsl(30,100%,50%)] via-[hsl(340,100%,55%)] to-[hsl(260,60%,55%)] min-h-[200px] sm:min-h-[240px] md:min-h-[280px] shadow-lg">
+        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[hsl(30,100%,50%)] via-[hsl(340,100%,55%)] to-[hsl(260,60%,55%)] min-h-[260px] sm:min-h-[280px] md:min-h-[280px] shadow-lg">
           {/* Banner image */}
           {banner.banner_image && (
             <img
@@ -128,11 +128,11 @@ const PromoBanner = () => {
 
         {/* Payment Providers */}
         {providers.length > 0 && (
-          <div className="mt-3 grid grid-cols-6 gap-1.5 md:gap-2">
+          <div className="mt-3 flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
             {providers.map((p) => (
               <div
                 key={p.id}
-                className="flex flex-col items-center justify-center gap-1 bg-secondary rounded-xl aspect-square transition-all duration-200 hover:bg-primary/10 hover:shadow-md cursor-pointer p-1"
+                className="flex flex-col items-center justify-center gap-1 bg-secondary rounded-xl min-w-[56px] w-[56px] md:w-auto md:flex-1 aspect-square transition-all duration-200 hover:bg-primary/10 hover:shadow-md cursor-pointer p-1 flex-shrink-0"
               >
                 {p.logo_url ? (
                   <img src={p.logo_url} alt={p.name} className="w-8 h-8 md:w-10 md:h-10 rounded-full object-contain flex-shrink-0" />
