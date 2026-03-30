@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import Header from "@/components/store/Header";
 import ProductGrid from "@/components/store/ProductGrid";
 import BottomNav from "@/components/store/BottomNav";
@@ -18,10 +19,11 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 const ShopPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [brands, setBrands] = useState<{ id: string; name: string }[]>([]);
-  const [selectedBrand, setSelectedBrand] = useState<string>("all");
+  const [selectedBrand, setSelectedBrand] = useState<string>(searchParams.get("brand") || "all");
   const [error, setError] = useState(false);
 
   const fetchData = useCallback(async () => {
@@ -64,7 +66,7 @@ const ShopPage = () => {
         <div className="max-w-6xl mx-auto px-4 md:px-8 pt-4">
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             <button
-              onClick={() => setSelectedBrand("all")}
+              onClick={() => { setSelectedBrand("all"); setSearchParams({}); }}
               className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                 selectedBrand === "all"
                   ? "bg-primary text-primary-foreground"
@@ -76,7 +78,7 @@ const ShopPage = () => {
             {brands.map((b) => (
               <button
                 key={b.id}
-                onClick={() => setSelectedBrand(b.id)}
+                onClick={() => { setSelectedBrand(b.id); setSearchParams({ brand: b.id }); }}
                 className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                   selectedBrand === b.id
                     ? "bg-primary text-primary-foreground"
