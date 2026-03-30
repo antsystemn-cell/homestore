@@ -45,6 +45,7 @@ const AdminPage = () => {
   const [brandName, setBrandName] = useState("");
   const [brandLogo, setBrandLogo] = useState("");
   const [editBrandId, setEditBrandId] = useState<string | null>(null);
+  const brandLogoFileRef = useRef<HTMLInputElement>(null);
 
   // Delivery form state
   const [deliveryForm, setDeliveryForm] = useState({
@@ -1656,6 +1657,25 @@ const AdminPage = () => {
                   <input placeholder="Логоны URL (https://...)" value={brandLogo} onChange={(e) => setBrandLogo(e.target.value)}
                     className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
                   <div className="flex items-center gap-3">
+                    <input ref={brandLogoFileRef} type="file" accept="image/*" className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (!file.type.startsWith("image/")) { toast.error("Зөвхөн зураг оруулна уу"); return; }
+                        if (file.size > 5 * 1024 * 1024) { toast.error("Зураг 5MB-ээс бага байх ёстой"); return; }
+                        try {
+                          const webpUrl = await optimizeImage(file);
+                          setBrandLogo(webpUrl);
+                          toast.success("Лого оруулагдлаа");
+                        } catch { toast.error("Зураг оновчлоход алдаа"); }
+                        if (brandLogoFileRef.current) brandLogoFileRef.current.value = "";
+                      }}
+                    />
+                    <button type="button" onClick={() => brandLogoFileRef.current?.click()}
+                      className="flex items-center gap-2 bg-secondary rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-accent transition-colors">
+                      <Upload className="h-4 w-4" />
+                      Лого оруулах
+                    </button>
                     {brandLogo && (
                       <img src={brandLogo} alt="Лого" className="h-12 w-12 rounded-lg object-contain border border-border bg-background" />
                     )}
