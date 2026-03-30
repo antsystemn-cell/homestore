@@ -18,10 +18,6 @@ const BrandLogos = ({ brands }: BrandLogosProps) => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 md:px-8 py-4">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="h-6 w-1 rounded-full bg-primary" />
-        <h2 className="text-base md:text-lg font-bold text-foreground">Брэндүүд</h2>
-      </div>
       <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
         {displayed.map((brand) => (
           <button
