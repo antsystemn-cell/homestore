@@ -603,6 +603,7 @@ const AdminPage = () => {
     { id: "banner", label: "Баннер", icon: Megaphone },
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
     { id: "users", label: "Хэрэглэгч", icon: Users },
+    { id: "analytics", label: "Хандалт", icon: Globe },
   ];
 
   const totalRevenue = orders.reduce((s: number, o: any) => s + o.total, 0);
