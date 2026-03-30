@@ -1587,6 +1587,9 @@ const AdminPage = () => {
             </div>
           )}
 
+          {/* Web Analytics */}
+          {tab === "analytics" && <WebAnalytics />}
+
           {/* Categories Tab */}
           {tab === "categories" && (
             <div className="space-y-4">
