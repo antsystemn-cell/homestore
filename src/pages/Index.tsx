@@ -172,20 +172,8 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
-          {/* Divider + all products header */}
           {visible.length > 0 && (
             <>
-              <div className="max-w-6xl mx-auto px-4 md:px-8 pt-4 pb-2">
-                <div className="flex items-center gap-3">
-                  <div className="h-6 w-1 rounded-full bg-primary" />
-                  <h2 className="text-base md:text-lg font-bold text-foreground">Бүх бараа</h2>
-                  <span className="text-xs text-muted-foreground ml-auto">
-                    {isMobile
-                      ? `${Math.min(mobileVisibleCount, allProducts.length)} / ${allProducts.length} бараа`
-                      : `${allProducts.length} бараа`}
-                  </span>
-                </div>
-              </div>
 
               <ErrorBoundary>
                 <ProductGrid products={visible} />
