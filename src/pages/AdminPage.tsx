@@ -688,7 +688,7 @@ const AdminPage = () => {
               <LayoutDashboard className="h-5 w-5 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="font-bold text-sm">HomeStore</h1>
+              <h1 className="text-sm"><span className="font-bold">Easy</span><span className="font-light">Shop</span></h1>
               <p className="text-[11px] text-muted-foreground">Админ удирдлага</p>
             </div>
           </div>
