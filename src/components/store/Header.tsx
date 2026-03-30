@@ -46,7 +46,7 @@ const Header = () => {
 
         {/* Desktop nav links */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-          <button onClick={() => navigate("/")} className="hover:text-foreground transition-colors">Нүүр</button>
+          
           <button onClick={() => navigate("/shop")} className="hover:text-foreground transition-colors">Ангилал</button>
           <button onClick={() => navigate("/wishlist")} className="hover:text-foreground transition-colors">Таалагдсан</button>
           <button onClick={() => navigate("/cart")} className="hover:text-foreground transition-colors">Сагс</button>
