@@ -7,6 +7,7 @@ import LoadError from "@/components/store/LoadError";
 import ErrorBoundary from "@/components/store/ErrorBoundary";
 import SaleCarousel from "@/components/store/SaleCarousel";
 import PromoBanner from "@/components/store/PromoBanner";
+import BrandLogos from "@/components/store/BrandLogos";
 import { Product, mapDbProduct } from "@/data/products";
 import {
   fetchPublicBrands,
@@ -33,6 +34,7 @@ const Index = () => {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [saleProducts, setSaleProducts] = useState<Product[]>([]);
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [brands, setBrands] = useState<{ id: string; name: string; logo_url?: string | null }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [page, setPage] = useState(1);
@@ -99,6 +101,7 @@ const Index = () => {
       setAllProducts(mappedProducts);
       setSaleProducts(mappedSale);
       setFeaturedProducts(mappedFeatured);
+      setBrands((brandRes || []).map((b: any) => ({ id: b.id, name: b.name, logo_url: b.logo_url })));
       setPage(1);
       setMobileVisibleCount(MOBILE_LOAD_SIZE);
       // Only show error if absolutely no data was loaded
@@ -161,6 +164,13 @@ const Index = () => {
           <ErrorBoundary>
             <PromoBanner />
           </ErrorBoundary>
+
+          {/* Brand logos */}
+          {brands.length > 0 && (
+            <ErrorBoundary>
+              <BrandLogos brands={brands} />
+            </ErrorBoundary>
+          )}
 
           {/* Divider + all products header */}
           {visible.length > 0 && (
