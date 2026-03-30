@@ -758,6 +758,7 @@ const AdminPage = () => {
               {tab === "delivery" && `Нийт ${deliveryOptions.length} хүргэлтийн сонголт`}
               {tab === "banner" && `Баннер болон ${paymentProviders.length} лого`}
               {tab === "payments" && `Нийт ${paymentProviders.length} төлбөрийн суваг`}
+              {tab === "analytics" && "Вэб сайтын хандалтын мэдээлэл"}
             </p>
           </div>
           {tab === "products" && (
