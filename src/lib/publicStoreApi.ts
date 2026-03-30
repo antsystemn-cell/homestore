@@ -71,7 +71,7 @@ const FALLBACK_PRODUCTS = [
     is_on_sale: true,
     discount: 17,
     product_code: "HS-LAMP-03",
-    brand_id: "fallback-brand-homestore",
+    brand_id: "fallback-brand-easyshop",
     specifications: [
       { key: "Чадал", value: "12W" },
       { key: "Өнгөний температур", value: "3000K" },
@@ -115,7 +115,7 @@ const FALLBACK_PRODUCTS = [
     is_on_sale: true,
     discount: 13,
     product_code: "HS-SHELF-05",
-    brand_id: "fallback-brand-homestore",
+    brand_id: "fallback-brand-easyshop",
     specifications: [
       { key: "Өндөр", value: "180 см" },
       { key: "Өргөн", value: "80 см" },
