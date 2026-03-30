@@ -8,7 +8,7 @@ const DEFAULT_HEADERS = {
 };
 
 const FALLBACK_BRANDS = [
-  { id: "fallback-brand-homestore", name: "HomeStore", logo_url: null },
+  { id: "fallback-brand-easyshop", name: "EasyShop", logo_url: null },
   { id: "fallback-brand-living", name: "Living", logo_url: null },
   { id: "fallback-brand-kitchen", name: "Kitchen Pro", logo_url: null },
 ];
