@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
-  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone
+  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe
 } from "lucide-react";
+import WebAnalytics from "@/components/admin/WebAnalytics";
 import { useRef } from "react";
 import { toast } from "sonner";
 import { formatPrice } from "@/data/products";
@@ -16,7 +17,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner";
+type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "analytics";
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -602,6 +603,7 @@ const AdminPage = () => {
     { id: "banner", label: "Баннер", icon: Megaphone },
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
     { id: "users", label: "Хэрэглэгч", icon: Users },
+    { id: "analytics", label: "Хандалт", icon: Globe },
   ];
 
   const totalRevenue = orders.reduce((s: number, o: any) => s + o.total, 0);
@@ -756,6 +758,7 @@ const AdminPage = () => {
               {tab === "delivery" && `Нийт ${deliveryOptions.length} хүргэлтийн сонголт`}
               {tab === "banner" && `Баннер болон ${paymentProviders.length} лого`}
               {tab === "payments" && `Нийт ${paymentProviders.length} төлбөрийн суваг`}
+              {tab === "analytics" && "Вэб сайтын хандалтын мэдээлэл"}
             </p>
           </div>
           {tab === "products" && (
@@ -1583,6 +1586,9 @@ const AdminPage = () => {
               </div>
             </div>
           )}
+
+          {/* Web Analytics */}
+          {tab === "analytics" && <WebAnalytics />}
 
           {/* Categories Tab */}
           {tab === "categories" && (
