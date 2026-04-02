@@ -612,7 +612,8 @@ const AdminPage = () => {
     { id: "analytics", label: "Хандалт", icon: Globe },
   ];
 
-  const totalRevenue = orders.reduce((s: number, o: any) => s + o.total, 0);
+  const paidOrders = orders.filter((o: any) => o.status === 'confirmed');
+  const totalRevenue = paidOrders.reduce((s: number, o: any) => s + o.total, 0);
 
   // Өнөөдрийн захиалга
   const todayOrders = useMemo(() => {
@@ -620,21 +621,21 @@ const AdminPage = () => {
     return orders.filter((o: any) => o.created_at?.startsWith(today));
   }, [orders]);
 
-  const todayRevenue = todayOrders.reduce((s: number, o: any) => s + o.total, 0);
+  const todayRevenue = todayOrders.filter((o: any) => o.status === 'confirmed').reduce((s: number, o: any) => s + o.total, 0);
 
   // Энэ долоо хоногийн орлого
   const weekRevenue = useMemo(() => {
     const now = new Date();
     const weekAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
     return orders
-      .filter((o: any) => new Date(o.created_at) >= weekAgo)
+      .filter((o: any) => o.status === 'confirmed' && new Date(o.created_at) >= weekAgo)
       .reduce((s: number, o: any) => s + o.total, 0);
   }, [orders]);
 
   // Хамгийн их борлуулалттай бараа (top 5)
   const topProducts = useMemo(() => {
     const salesMap: Record<string, { name: string; count: number; revenue: number; image_url: string }> = {};
-    orders.forEach((o: any) => {
+    paidOrders.forEach((o: any) => {
       const items = Array.isArray(o.items) ? o.items : [];
       items.forEach((item: any) => {
         const id = item.id || item.product_id || item.name;
@@ -647,11 +648,11 @@ const AdminPage = () => {
       });
     });
     return Object.values(salesMap).sort((a, b) => b.count - a.count).slice(0, 5);
-  }, [orders]);
+  }, [paidOrders]);
 
   const monthlyData = useMemo(() => {
     const months: Record<string, number> = {};
-    orders.forEach((o: any) => {
+    paidOrders.forEach((o: any) => {
       const d = new Date(o.created_at);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
       months[key] = (months[key] || 0) + (o.total || 0);
@@ -665,7 +666,7 @@ const AdminPage = () => {
       result.push({ name: monthNames[d.getMonth()], revenue: months[key] || 0 });
     }
     return result;
-  }, [orders]);
+  }, [paidOrders]);
 
   const categoryData = useMemo(() => {
     const cats: Record<string, number> = {};
@@ -847,7 +848,7 @@ const AdminPage = () => {
                 </div>
                 <div className="bg-card rounded-2xl p-5 border border-border">
                   <p className="text-xs text-muted-foreground mb-1">Дундаж захиалга</p>
-                  <p className="text-2xl font-extrabold">{orders.length > 0 ? formatPrice(Math.round(totalRevenue / orders.length)) : "₮0"}</p>
+                  <p className="text-2xl font-extrabold">{paidOrders.length > 0 ? formatPrice(Math.round(totalRevenue / paidOrders.length)) : "₮0"}</p>
                 </div>
               </div>
 
