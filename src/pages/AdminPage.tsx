@@ -528,7 +528,7 @@ const AdminPage = () => {
       await supabase.from("product_images").delete().eq("product_id", editId);
       toast.success("Бараа амжилттай шинэчлэгдлээ");
     } else {
-      const { data, error } = await supabase.from("products").insert(payload).select("id").single();
+      const { data, error } = await supabase.from("products").insert({...payload, slug: ""}).select("id").single();
       if (error) { toast.error(error.message); setLoading(false); return; }
       productId = data.id;
       toast.success("Бараа амжилттай нэмэгдлээ");

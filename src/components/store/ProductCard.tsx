@@ -11,8 +11,8 @@ const ProductCard = React.memo(({ product }: Props) => {
   const [imgError, setImgError] = useState(false);
 
   const handleClick = useCallback(() => {
-    navigate(`/product/${product.id}`);
-  }, [navigate, product.id]);
+    navigate(`/product/${product.slug || product.id}`);
+  }, [navigate, product.slug, product.id]);
 
   const handleImgError = useCallback(() => setImgError(true), []);
 
