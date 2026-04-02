@@ -78,7 +78,7 @@ const SaleCarousel = React.memo(({ products }: Props) => {
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         {/* Header with gradient accent */}
         <div className="flex items-center justify-between mb-3 md:mb-4">
-          <div className="flex items-center gap-3">
+          <a href="/sales" onClick={(e) => { e.preventDefault(); navigate("/sales"); }} className="flex items-center gap-3 group/link">
             <div className="relative">
               <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-destructive to-[hsl(30,100%,50%)] flex items-center justify-center shadow-md">
                 <Zap className="h-5 w-5 text-white fill-white" />
@@ -86,12 +86,12 @@ const SaleCarousel = React.memo(({ products }: Props) => {
               <div className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-[hsl(var(--warning))] rounded-full animate-pulse" />
             </div>
             <div>
-              <h2 className="text-base md:text-lg font-extrabold text-foreground tracking-tight">
+              <h2 className="text-base md:text-lg font-extrabold text-foreground tracking-tight group-hover/link:text-primary transition-colors">
                 Flash Sale
               </h2>
               <CountdownTimer />
             </div>
-          </div>
+          </a>
           <div className="hidden md:flex items-center gap-1.5">
             <button
               onClick={() => scroll("left")}
