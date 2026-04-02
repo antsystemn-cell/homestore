@@ -67,7 +67,7 @@ const AdminPage = () => {
     name: "", description: "", price: 0, original_price: 0,
     image_url: "", category: "general", discount: 0,
     is_new: false, is_on_sale: false,
-    product_code: "", specifications: [] as { key: string; value: string }[],
+    product_code: "", slug: "", specifications: [] as { key: string; value: string }[],
     detail_media: [] as { type: "image" | "video"; url: string; caption: string; thumbnail?: string }[],
     brand_id: "",
     colors: [] as { name: string; image: string }[],
@@ -301,7 +301,7 @@ const AdminPage = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from("products").select("id, name, price, original_price, image_url, category, description, sales, is_new, is_on_sale, discount, product_code, brand_id, created_at, colors, sizes, specifications, detail_media").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("products").select("id, name, price, original_price, image_url, category, description, sales, is_new, is_on_sale, discount, product_code, slug, brand_id, created_at, colors, sizes, specifications, detail_media").order("created_at", { ascending: false });
       if (error) throw error;
       setProducts(data || []);
     } catch (error) {
@@ -482,7 +482,7 @@ const AdminPage = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, product_code: "", specifications: [], detail_media: [], brand_id: "", colors: [], sizes: [] });
+    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, product_code: "", slug: "", specifications: [], detail_media: [], brand_id: "", colors: [], sizes: [] });
     setNewColor(""); setNewSize("");
     setEditId(null);
     setShowForm(false);
@@ -515,6 +515,7 @@ const AdminPage = () => {
       category: form.category, discount: form.discount,
       is_new: form.is_new, is_on_sale: form.is_on_sale,
       product_code: form.product_code || null,
+      slug: form.slug.trim() || "",
       specifications: form.specifications.filter(s => s.key.trim() && s.value.trim()),
       detail_media: form.detail_media.filter(m => m.url.trim()),
       brand_id: form.brand_id || null,
@@ -528,7 +529,7 @@ const AdminPage = () => {
       await supabase.from("product_images").delete().eq("product_id", editId);
       toast.success("Бараа амжилттай шинэчлэгдлээ");
     } else {
-      const { data, error } = await supabase.from("products").insert({...payload, slug: ""}).select("id").single();
+      const { data, error } = await supabase.from("products").insert(payload).select("id").single();
       if (error) { toast.error(error.message); setLoading(false); return; }
       productId = data.id;
       toast.success("Бараа амжилттай нэмэгдлээ");
@@ -567,6 +568,7 @@ const AdminPage = () => {
       category: p.category, discount: p.discount || 0,
       is_new: p.is_new, is_on_sale: p.is_on_sale,
       product_code: p.product_code || "",
+      slug: p.slug || "",
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
       detail_media: media.map((m: any) => ({ type: m.type || "image", url: m.url || "", caption: m.caption || "", thumbnail: m.thumbnail || "" })),
       brand_id: p.brand_id || "",
@@ -1025,6 +1027,15 @@ const AdminPage = () => {
                       <label className="text-[11px] text-muted-foreground mb-1 block">Бүтээгдэхүүний код</label>
                       <input placeholder="SKU-001" value={form.product_code} onChange={(e) => setForm({ ...form, product_code: e.target.value })}
                         className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-muted-foreground mb-1 block">Линк (slug)</label>
+                      <div className="flex items-center gap-0">
+                        <span className="text-xs text-muted-foreground bg-muted px-3 py-3 rounded-l-xl border-r border-border">/product/</span>
+                        <input placeholder="автоматаар үүснэ" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+                          className="w-full rounded-r-xl bg-secondary px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                      </div>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">Хоосон үлдээвэл нэрнээс автомат үүснэ</p>
                     </div>
                   </div>
 
