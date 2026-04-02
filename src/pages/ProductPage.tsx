@@ -112,8 +112,12 @@ const ProductPage = () => {
       setLoading(true);
       setLoadError(false);
       try {
-        if (!id) throw new Error("Missing product id");
-        const rows = await fetchPublicProductById(id);
+        if (!slug) throw new Error("Missing product slug");
+        // Try slug first, fall back to ID lookup
+        let rows = await fetchPublicProductBySlug(slug);
+        if (!rows || rows.length === 0) {
+          rows = await fetchPublicProductById(slug);
+        }
         const data = rows?.[0];
 
         if (data) {
