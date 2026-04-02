@@ -278,7 +278,7 @@ export const fetchSaleProducts = async () => {
 export const fetchFeaturedProducts = async () => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,name,price,original_price,image_url,category,is_on_sale,discount,brand_id,is_new,sales",
+      select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id,is_new,sales",
       order: "sales.desc.nullslast",
       limit: 8,
     });
