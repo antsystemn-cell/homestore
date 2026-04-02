@@ -74,7 +74,7 @@ const FeaturedSection = React.memo(({ products }: Props) => {
             {rest.map((p) => (
               <div
                 key={p.id}
-                onClick={() => navigate(`/product/${p.id}`)}
+                onClick={() => navigate(`/product/${p.slug || p.id}`)}
                 className="relative rounded-xl overflow-hidden bg-secondary cursor-pointer group animate-fade-in aspect-square"
               >
                 <img
