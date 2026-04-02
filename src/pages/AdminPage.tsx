@@ -351,6 +351,7 @@ const AdminPage = () => {
 
   const statusLabels: Record<string, string> = {
     pending: "Хүлээгдэж буй",
+    confirmed: "Төлбөр орсон",
     processing: "Боловсруулж буй",
     completed: "Дууссан",
     cancelled: "Цуцлагдсан",
@@ -358,6 +359,7 @@ const AdminPage = () => {
 
   const statusColors: Record<string, string> = {
     pending: "bg-amber-500/10 text-amber-600",
+    confirmed: "bg-emerald-500/10 text-emerald-600",
     processing: "bg-blue-500/10 text-blue-600",
     completed: "bg-green-500/10 text-green-600",
     cancelled: "bg-red-500/10 text-red-600",
@@ -674,7 +676,7 @@ const AdminPage = () => {
   const orderStatusData = useMemo(() => {
     const statuses: Record<string, number> = {};
     orders.forEach((o: any) => { statuses[o.status] = (statuses[o.status] || 0) + 1; });
-    const labels: Record<string, string> = { pending: "Хүлээгдэж буй", processing: "Боловсруулж буй", completed: "Дууссан", cancelled: "Цуцлагдсан" };
+    const labels: Record<string, string> = { pending: "Хүлээгдэж буй", confirmed: "Төлбөр орсон", processing: "Боловсруулж буй", completed: "Дууссан", cancelled: "Цуцлагдсан" };
     return Object.entries(statuses).map(([key, value]) => ({ name: labels[key] || key, value }));
   }, [orders]);
 
