@@ -48,6 +48,15 @@ const SaleCarousel = React.memo(({ products }: Props) => {
             <ArrowRight className="h-3.5 w-3.5 text-muted-foreground group-hover/link:text-destructive group-hover/link:translate-x-0.5 transition-all" />
           </a>
 
+          <a
+            href="/sales"
+            onClick={(e) => { e.preventDefault(); navigate("/sales"); }}
+            className="text-xs md:text-sm font-medium text-destructive hover:underline transition-colors"
+          >
+            Бүгдийг харах
+          </a>
+          </a>
+
           <div className="hidden md:flex items-center gap-1.5">
             <button
               onClick={() => scroll("left")}
