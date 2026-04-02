@@ -831,6 +831,23 @@ const AdminPage = () => {
                 })}
               </div>
 
+              {/* Өнөөдөр & Долоо хоног */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                <div className="bg-card rounded-2xl p-5 border border-border">
+                  <p className="text-xs text-muted-foreground mb-1">Өнөөдрийн захиалга</p>
+                  <p className="text-2xl font-extrabold">{todayOrders.length}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Орлого: {formatPrice(todayRevenue)}</p>
+                </div>
+                <div className="bg-card rounded-2xl p-5 border border-border">
+                  <p className="text-xs text-muted-foreground mb-1">7 хоногийн орлого</p>
+                  <p className="text-2xl font-extrabold">{formatPrice(weekRevenue)}</p>
+                </div>
+                <div className="bg-card rounded-2xl p-5 border border-border">
+                  <p className="text-xs text-muted-foreground mb-1">Дундаж захиалга</p>
+                  <p className="text-2xl font-extrabold">{orders.length > 0 ? formatPrice(Math.round(totalRevenue / orders.length)) : "₮0"}</p>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
                 <div className="bg-card rounded-2xl p-5 border border-border">
                   <h3 className="text-sm font-bold mb-4">Сарын орлого</h3>
@@ -847,6 +864,33 @@ const AdminPage = () => {
                   </div>
                 </div>
 
+                {/* Хамгийн их борлуулалттай бараа */}
+                <div className="bg-card rounded-2xl p-5 border border-border">
+                  <h3 className="text-sm font-bold mb-4">Шилдэг бараа (борлуулалтаар)</h3>
+                  <div className="space-y-3">
+                    {topProducts.length > 0 ? topProducts.map((p, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <span className="text-xs font-bold text-muted-foreground w-5">{i + 1}</span>
+                        {p.image_url ? (
+                          <img src={p.image_url} alt={p.name} className="h-9 w-9 rounded-lg object-cover border border-border" />
+                        ) : (
+                          <div className="h-9 w-9 rounded-lg bg-secondary flex items-center justify-center">
+                            <Package className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{p.name}</p>
+                          <p className="text-xs text-muted-foreground">{p.count} ширхэг · {formatPrice(p.revenue)}</p>
+                        </div>
+                      </div>
+                    )) : (
+                      <p className="text-sm text-muted-foreground text-center py-4">Мэдээлэл байхгүй</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
                 <div className="bg-card rounded-2xl p-5 border border-border">
                   <h3 className="text-sm font-bold mb-4">Ангилалын тархалт</h3>
                   <div className="h-52">
@@ -864,7 +908,7 @@ const AdminPage = () => {
                 </div>
 
                 {orderStatusData.length > 0 && (
-                  <div className="bg-card rounded-2xl p-5 border border-border lg:col-span-2">
+                  <div className="bg-card rounded-2xl p-5 border border-border">
                     <h3 className="text-sm font-bold mb-4">Захиалгын төлөв</h3>
                     <div className="h-52">
                       <ResponsiveContainer width="100%" height="100%">
