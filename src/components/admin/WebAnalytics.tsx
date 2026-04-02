@@ -133,11 +133,25 @@ const WebAnalytics = () => {
 
   if (error) {
     return (
-      <div className="bg-card rounded-2xl p-8 border border-border text-center">
+      <div className="bg-card rounded-2xl p-8 border border-border text-center space-y-3">
+        <Globe className="h-10 w-10 mx-auto text-muted-foreground" />
         <p className="text-muted-foreground">{error}</p>
-        <button onClick={() => fetchAnalytics(range)} className="mt-3 text-sm text-primary hover:underline">
-          Дахин оролдох
-        </button>
+        <p className="text-xs text-muted-foreground">
+          Аналитик мэдээллийг Lovable тохиргоо хэсгийн Analytics табаас харна уу.
+        </p>
+        <div className="flex gap-2 justify-center">
+          <button onClick={() => fetchAnalytics(range)} className="text-sm text-primary hover:underline">
+            Дахин оролдох
+          </button>
+          <a
+            href="https://lovable.dev/projects/76cda098-2c2e-4b20-b1fe-0f10f7df909a/settings?tab=analytics"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-primary hover:underline"
+          >
+            Lovable Analytics нээх →
+          </a>
+        </div>
       </div>
     );
   }
