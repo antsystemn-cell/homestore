@@ -11,6 +11,7 @@ import { useRef } from "react";
 import { toast } from "sonner";
 import { formatPrice } from "@/data/products";
 import { optimizeImage } from "@/lib/imageOptimize";
+import { cyrillicToLatinSlug } from "@/lib/cyrillicToLatin";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -515,7 +516,7 @@ const AdminPage = () => {
       category: form.category, discount: form.discount,
       is_new: form.is_new, is_on_sale: form.is_on_sale,
       product_code: form.product_code || null,
-      slug: form.slug.trim() || "",
+      slug: form.slug.trim() || cyrillicToLatinSlug(form.name),
       specifications: form.specifications.filter(s => s.key.trim() && s.value.trim()),
       detail_media: form.detail_media.filter(m => m.url.trim()),
       brand_id: form.brand_id || null,
@@ -1111,7 +1112,7 @@ const AdminPage = () => {
                       <label className="text-[11px] text-muted-foreground mb-1 block">Линк (slug)</label>
                       <div className="flex items-center gap-0">
                         <span className="text-xs text-muted-foreground bg-muted px-3 py-3 rounded-l-xl border-r border-border">/product/</span>
-                        <input placeholder="автоматаар үүснэ" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+                        <input placeholder="автоматаар үүснэ" value={form.slug} onChange={(e) => setForm({ ...form, slug: cyrillicToLatinSlug(e.target.value) })}
                           className="w-full rounded-r-xl bg-secondary px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
                       </div>
                       <p className="text-[10px] text-muted-foreground mt-0.5">Хоосон үлдээвэл нэрнээс автомат үүснэ</p>
