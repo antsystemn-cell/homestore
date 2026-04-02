@@ -122,7 +122,7 @@ const SaleCarousel = React.memo(({ products }: Props) => {
             return (
               <div
                 key={p.id}
-                onClick={() => navigate(`/product/${p.id}`)}
+                onClick={() => navigate(`/product/${p.slug || p.id}`)}
                 className="flex-shrink-0 w-[38vw] md:w-[200px] snap-start cursor-pointer group animate-fade-in"
                 style={{ animationDelay: `${index * 60}ms` }}
               >

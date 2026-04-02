@@ -185,7 +185,7 @@ const logFallback = (scope: string, error: unknown) => {
 export const fetchPublicProducts = async () => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,name,price,original_price,image_url,category,is_on_sale,discount,brand_id",
+      select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id",
     });
   } catch (error) {
     logFallback("products", error);
@@ -208,7 +208,7 @@ export const fetchPublicBrands = async () => {
 export const searchPublicProducts = async (query: string) => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,name,price,original_price,image_url,category,product_code",
+      select: "id,slug,name,price,original_price,image_url,category,product_code",
       or: `name.ilike.%${query}%,product_code.ilike.%${query}%`,
       limit: 8,
     });
@@ -235,6 +235,19 @@ export const fetchPublicProductById = async (id: string) => {
   }
 };
 
+export const fetchPublicProductBySlug = async (slug: string) => {
+  try {
+    return await fetchPublic<any[]>("products", {
+      select: "*",
+      slug: `eq.${slug}`,
+      limit: 1,
+    });
+  } catch (error) {
+    logFallback("productBySlug", error);
+    return [];
+  }
+};
+
 export const fetchPublicProductImages = async (productId: string) => {
   try {
     return await fetchPublic<any[]>("product_images", {
@@ -251,7 +264,7 @@ export const fetchPublicProductImages = async (productId: string) => {
 export const fetchRelatedPublicProducts = async (category: string, excludeId: string) => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,name,price,original_price,image_url,category,is_on_sale,discount,brand_id",
+      select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id",
       category: `eq.${category}`,
       id: `neq.${excludeId}`,
       limit: 4,
@@ -265,7 +278,7 @@ export const fetchRelatedPublicProducts = async (category: string, excludeId: st
 export const fetchSaleProducts = async () => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,name,price,original_price,image_url,category,is_on_sale,discount,brand_id",
+      select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id",
       is_on_sale: "eq.true",
       order: "discount.desc.nullslast",
     });
@@ -278,7 +291,7 @@ export const fetchSaleProducts = async () => {
 export const fetchFeaturedProducts = async () => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,name,price,original_price,image_url,category,is_on_sale,discount,brand_id,is_new,sales",
+      select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id,is_new,sales",
       order: "sales.desc.nullslast",
       limit: 8,
     });

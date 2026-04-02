@@ -39,7 +39,7 @@ const FeaturedSection = React.memo(({ products }: Props) => {
         <div className="hidden md:grid md:grid-cols-12 gap-4">
           {/* Hero card */}
           <div
-            onClick={() => navigate(`/product/${hero.id}`)}
+            onClick={() => navigate(`/product/${hero.slug || hero.id}`)}
             className="col-span-6 relative rounded-2xl overflow-hidden bg-secondary cursor-pointer group animate-fade-in aspect-[4/3]"
           >
             <img
@@ -74,7 +74,7 @@ const FeaturedSection = React.memo(({ products }: Props) => {
             {rest.map((p) => (
               <div
                 key={p.id}
-                onClick={() => navigate(`/product/${p.id}`)}
+                onClick={() => navigate(`/product/${p.slug || p.id}`)}
                 className="relative rounded-xl overflow-hidden bg-secondary cursor-pointer group animate-fade-in aspect-square"
               >
                 <img
@@ -104,7 +104,7 @@ const FeaturedSection = React.memo(({ products }: Props) => {
           {products.slice(0, 6).map((p, i) => (
             <div
               key={p.id}
-              onClick={() => navigate(`/product/${p.id}`)}
+              onClick={() => navigate(`/product/${p.slug || p.id}`)}
               className={`flex-shrink-0 snap-start cursor-pointer group animate-fade-in ${
                 i === 0 ? "w-[65vw]" : "w-[44vw]"
               }`}

@@ -528,7 +528,7 @@ const AdminPage = () => {
       await supabase.from("product_images").delete().eq("product_id", editId);
       toast.success("Бараа амжилттай шинэчлэгдлээ");
     } else {
-      const { data, error } = await supabase.from("products").insert(payload).select("id").single();
+      const { data, error } = await supabase.from("products").insert({...payload, slug: ""}).select("id").single();
       if (error) { toast.error(error.message); setLoading(false); return; }
       productId = data.id;
       toast.success("Бараа амжилттай нэмэгдлээ");
@@ -1316,7 +1316,7 @@ const AdminPage = () => {
                           </td>
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-1.5">
-                              <button onClick={() => navigate(`/product/${p.id}`)}
+                              <button onClick={() => navigate(`/product/${p.slug || p.id}`)}
                                 className="p-2 rounded-lg hover:bg-secondary transition-colors" title="Харах">
                                 <Eye className="h-3.5 w-3.5 text-muted-foreground" />
                               </button>

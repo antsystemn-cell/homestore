@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/store/ProductCard";
 import ProductReviews from "@/components/store/ProductReviews";
 import LoadError from "@/components/store/LoadError";
-import { fetchPublicProductById, fetchPublicProductImages, fetchRelatedPublicProducts } from "@/lib/publicStoreApi";
+import { fetchPublicProductBySlug, fetchPublicProductById, fetchPublicProductImages, fetchRelatedPublicProducts } from "@/lib/publicStoreApi";
 import Header from "@/components/store/Header";
 
 const VideoWithThumbnail = ({ media }: { media: DetailMedia }) => {
@@ -76,7 +76,7 @@ const VideoWithThumbnail = ({ media }: { media: DetailMedia }) => {
 
 
 const ProductPage = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const [product, setProduct] = useState<Product | null>(null);
@@ -112,8 +112,12 @@ const ProductPage = () => {
       setLoading(true);
       setLoadError(false);
       try {
-        if (!id) throw new Error("Missing product id");
-        const rows = await fetchPublicProductById(id);
+        if (!slug) throw new Error("Missing product slug");
+        // Try slug first, fall back to ID lookup
+        let rows = await fetchPublicProductBySlug(slug);
+        if (!rows || rows.length === 0) {
+          rows = await fetchPublicProductById(slug);
+        }
         const data = rows?.[0];
 
         if (data) {
@@ -142,7 +146,7 @@ const ProductPage = () => {
       }
     };
     void fetchProduct();
-  }, [id]);
+  }, [slug]);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Уншиж байна...</div>;

@@ -17,6 +17,7 @@ export interface DetailMedia {
 
 export interface Product {
   id: string;
+  slug?: string;
   name: string;
   price: number;
   originalPrice?: number | null;
@@ -55,6 +56,7 @@ export function formatPrice(price: number): string {
 export function mapDbProduct(row: any): Product {
   return {
     id: row.id,
+    slug: row.slug || row.id,
     name: row.name,
     price: row.price,
     originalPrice: row.original_price,

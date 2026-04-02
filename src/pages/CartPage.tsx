@@ -41,12 +41,12 @@ const CartPage = () => {
                     }
                     alt={product.name}
                     className="w-20 h-20 md:w-28 md:h-28 rounded-lg object-cover bg-secondary cursor-pointer"
-                    onClick={() => navigate(`/product/${product.id}`)}
+                    onClick={() => navigate(`/product/${product.slug || product.id}`)}
                   />
                   <div className="flex-1 min-w-0">
                     <h3
                       className="text-sm md:text-base font-medium text-foreground truncate cursor-pointer hover:underline"
-                      onClick={() => navigate(`/product/${product.id}`)}
+                      onClick={() => navigate(`/product/${product.slug || product.id}`)}
                     >
                       {product.name}
                     </h3>
