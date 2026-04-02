@@ -635,7 +635,7 @@ const AdminPage = () => {
   // Хамгийн их борлуулалттай бараа (top 5)
   const topProducts = useMemo(() => {
     const salesMap: Record<string, { name: string; count: number; revenue: number; image_url: string }> = {};
-    orders.forEach((o: any) => {
+    paidOrders.forEach((o: any) => {
       const items = Array.isArray(o.items) ? o.items : [];
       items.forEach((item: any) => {
         const id = item.id || item.product_id || item.name;
@@ -648,7 +648,7 @@ const AdminPage = () => {
       });
     });
     return Object.values(salesMap).sort((a, b) => b.count - a.count).slice(0, 5);
-  }, [orders]);
+  }, [paidOrders]);
 
   const monthlyData = useMemo(() => {
     const months: Record<string, number> = {};
