@@ -104,7 +104,7 @@ const FeaturedSection = React.memo(({ products }: Props) => {
           {products.slice(0, 6).map((p, i) => (
             <div
               key={p.id}
-              onClick={() => navigate(`/product/${p.id}`)}
+              onClick={() => navigate(`/product/${p.slug || p.id}`)}
               className={`flex-shrink-0 snap-start cursor-pointer group animate-fade-in ${
                 i === 0 ? "w-[65vw]" : "w-[44vw]"
               }`}

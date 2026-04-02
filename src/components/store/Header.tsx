@@ -69,7 +69,7 @@ const Header = () => {
                 <button
                   key={p.id}
                   onMouseDown={() => {
-                    navigate(`/product/${p.id}`);
+                    navigate(`/product/${p.slug || p.id}`);
                     setShowResults(false);
                     setQuery("");
                   }}

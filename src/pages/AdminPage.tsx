@@ -1316,7 +1316,7 @@ const AdminPage = () => {
                           </td>
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-1.5">
-                              <button onClick={() => navigate(`/product/${p.id}`)}
+                              <button onClick={() => navigate(`/product/${p.slug || p.id}`)}
                                 className="p-2 rounded-lg hover:bg-secondary transition-colors" title="Харах">
                                 <Eye className="h-3.5 w-3.5 text-muted-foreground" />
                               </button>
