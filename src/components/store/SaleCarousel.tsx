@@ -55,7 +55,6 @@ const SaleCarousel = React.memo(({ products }: Props) => {
           >
             Бүгдийг харах
           </a>
-          </a>
 
           <div className="hidden md:flex items-center gap-1.5">
             <button
