@@ -268,7 +268,6 @@ export const fetchSaleProducts = async () => {
       select: "id,name,price,original_price,image_url,category,is_on_sale,discount,brand_id",
       is_on_sale: "eq.true",
       order: "discount.desc.nullslast",
-      limit: 10,
     });
   } catch (error) {
     logFallback("saleProducts", error);
