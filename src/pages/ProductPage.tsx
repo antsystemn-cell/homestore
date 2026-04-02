@@ -76,7 +76,7 @@ const VideoWithThumbnail = ({ media }: { media: DetailMedia }) => {
 
 
 const ProductPage = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const [product, setProduct] = useState<Product | null>(null);
