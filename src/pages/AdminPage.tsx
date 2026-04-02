@@ -848,7 +848,7 @@ const AdminPage = () => {
                 </div>
                 <div className="bg-card rounded-2xl p-5 border border-border">
                   <p className="text-xs text-muted-foreground mb-1">Дундаж захиалга</p>
-                  <p className="text-2xl font-extrabold">{orders.length > 0 ? formatPrice(Math.round(totalRevenue / orders.length)) : "₮0"}</p>
+                  <p className="text-2xl font-extrabold">{paidOrders.length > 0 ? formatPrice(Math.round(totalRevenue / paidOrders.length)) : "₮0"}</p>
                 </div>
               </div>
 
