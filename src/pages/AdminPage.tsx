@@ -611,6 +611,41 @@ const AdminPage = () => {
 
   const totalRevenue = orders.reduce((s: number, o: any) => s + o.total, 0);
 
+  // Өнөөдрийн захиалга
+  const todayOrders = useMemo(() => {
+    const today = new Date().toISOString().split("T")[0];
+    return orders.filter((o: any) => o.created_at?.startsWith(today));
+  }, [orders]);
+
+  const todayRevenue = todayOrders.reduce((s: number, o: any) => s + o.total, 0);
+
+  // Энэ долоо хоногийн орлого
+  const weekRevenue = useMemo(() => {
+    const now = new Date();
+    const weekAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+    return orders
+      .filter((o: any) => new Date(o.created_at) >= weekAgo)
+      .reduce((s: number, o: any) => s + o.total, 0);
+  }, [orders]);
+
+  // Хамгийн их борлуулалттай бараа (top 5)
+  const topProducts = useMemo(() => {
+    const salesMap: Record<string, { name: string; count: number; revenue: number; image_url: string }> = {};
+    orders.forEach((o: any) => {
+      const items = Array.isArray(o.items) ? o.items : [];
+      items.forEach((item: any) => {
+        const id = item.id || item.product_id || item.name;
+        if (!id) return;
+        if (!salesMap[id]) {
+          salesMap[id] = { name: item.name || id, count: 0, revenue: 0, image_url: item.image_url || "" };
+        }
+        salesMap[id].count += (item.quantity || 1);
+        salesMap[id].revenue += (item.price || 0) * (item.quantity || 1);
+      });
+    });
+    return Object.values(salesMap).sort((a, b) => b.count - a.count).slice(0, 5);
+  }, [orders]);
+
   const monthlyData = useMemo(() => {
     const months: Record<string, number> = {};
     orders.forEach((o: any) => {
