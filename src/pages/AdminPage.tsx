@@ -612,7 +612,8 @@ const AdminPage = () => {
     { id: "analytics", label: "Хандалт", icon: Globe },
   ];
 
-  const totalRevenue = orders.reduce((s: number, o: any) => s + o.total, 0);
+  const paidOrders = orders.filter((o: any) => o.status === 'confirmed');
+  const totalRevenue = paidOrders.reduce((s: number, o: any) => s + o.total, 0);
 
   // Өнөөдрийн захиалга
   const todayOrders = useMemo(() => {
