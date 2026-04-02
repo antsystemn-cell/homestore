@@ -208,7 +208,7 @@ export const fetchPublicBrands = async () => {
 export const searchPublicProducts = async (query: string) => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,name,price,original_price,image_url,category,product_code",
+      select: "id,slug,name,price,original_price,image_url,category,product_code",
       or: `name.ilike.%${query}%,product_code.ilike.%${query}%`,
       limit: 8,
     });
