@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/store/ProductCard";
 import ProductReviews from "@/components/store/ProductReviews";
 import LoadError from "@/components/store/LoadError";
-import { fetchPublicProductById, fetchPublicProductImages, fetchRelatedPublicProducts } from "@/lib/publicStoreApi";
+import { fetchPublicProductBySlug, fetchPublicProductById, fetchPublicProductImages, fetchRelatedPublicProducts } from "@/lib/publicStoreApi";
 import Header from "@/components/store/Header";
 
 const VideoWithThumbnail = ({ media }: { media: DetailMedia }) => {
