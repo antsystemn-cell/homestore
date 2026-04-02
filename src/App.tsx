@@ -27,6 +27,7 @@ function lazyRetry<T extends { default: React.ComponentType<any> }>(
 
 // Lazy-load all secondary routes
 const ShopPage = lazy(() => lazyRetry(() => import("./pages/ShopPage")));
+const SalesPage = lazy(() => lazyRetry(() => import("./pages/SalesPage")));
 const CartPage = lazy(() => lazyRetry(() => import("./pages/CartPage")));
 const CheckoutPage = lazy(() => lazyRetry(() => import("./pages/CheckoutPage")));
 const ProductPage = lazy(() => lazyRetry(() => import("./pages/ProductPage")));
