@@ -1028,6 +1028,15 @@ const AdminPage = () => {
                       <input placeholder="SKU-001" value={form.product_code} onChange={(e) => setForm({ ...form, product_code: e.target.value })}
                         className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
                     </div>
+                    <div>
+                      <label className="text-[11px] text-muted-foreground mb-1 block">Линк (slug)</label>
+                      <div className="flex items-center gap-0">
+                        <span className="text-xs text-muted-foreground bg-muted px-3 py-3 rounded-l-xl border-r border-border">/product/</span>
+                        <input placeholder="автоматаар үүснэ" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+                          className="w-full rounded-r-xl bg-secondary px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                      </div>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">Хоосон үлдээвэл нэрнээс автомат үүснэ</p>
+                    </div>
                   </div>
 
                   <textarea placeholder="Тайлбар" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
