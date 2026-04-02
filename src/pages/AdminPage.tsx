@@ -676,7 +676,7 @@ const AdminPage = () => {
   const orderStatusData = useMemo(() => {
     const statuses: Record<string, number> = {};
     orders.forEach((o: any) => { statuses[o.status] = (statuses[o.status] || 0) + 1; });
-    const labels: Record<string, string> = { pending: "Хүлээгдэж буй", processing: "Боловсруулж буй", completed: "Дууссан", cancelled: "Цуцлагдсан" };
+    const labels: Record<string, string> = { pending: "Хүлээгдэж буй", confirmed: "Төлбөр орсон", processing: "Боловсруулж буй", completed: "Дууссан", cancelled: "Цуцлагдсан" };
     return Object.entries(statuses).map(([key, value]) => ({ name: labels[key] || key, value }));
   }, [orders]);
 
