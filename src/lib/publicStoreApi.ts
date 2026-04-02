@@ -235,6 +235,19 @@ export const fetchPublicProductById = async (id: string) => {
   }
 };
 
+export const fetchPublicProductBySlug = async (slug: string) => {
+  try {
+    return await fetchPublic<any[]>("products", {
+      select: "*",
+      slug: `eq.${slug}`,
+      limit: 1,
+    });
+  } catch (error) {
+    logFallback("productBySlug", error);
+    return [];
+  }
+};
+
 export const fetchPublicProductImages = async (productId: string) => {
   try {
     return await fetchPublic<any[]>("product_images", {
