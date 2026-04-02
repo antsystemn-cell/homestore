@@ -153,13 +153,6 @@ const Index = () => {
         <LoadError onRetry={fetchAll} retrying={loading} />
       ) : (
         <>
-          {/* Sale carousel */}
-          {saleProducts.length > 0 && (
-            <ErrorBoundary>
-              <SaleCarousel products={saleProducts} />
-            </ErrorBoundary>
-          )}
-
           {/* Promo banner */}
           <ErrorBoundary>
             <PromoBanner />
@@ -169,6 +162,13 @@ const Index = () => {
           {brands.length > 0 && (
             <ErrorBoundary>
               <BrandLogos brands={brands} />
+            </ErrorBoundary>
+          )}
+
+          {/* Sale carousel - below brands */}
+          {saleProducts.length > 0 && (
+            <ErrorBoundary>
+              <SaleCarousel products={saleProducts} />
             </ErrorBoundary>
           )}
 

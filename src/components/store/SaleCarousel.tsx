@@ -41,12 +41,9 @@ const SaleCarousel = React.memo(({ products }: Props) => {
               </div>
               <div className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-[hsl(var(--warning))] rounded-full animate-pulse" />
             </div>
-            <div>
-              <h2 className="text-base md:text-lg font-extrabold text-foreground tracking-tight group-hover/link:text-primary transition-colors">
-                Flash Sale
-              </h2>
-              <CountdownTimer />
-            </div>
+            <h2 className="text-base md:text-lg font-extrabold text-foreground tracking-tight group-hover/link:text-primary transition-colors">
+              Хямдралтай
+            </h2>
           </a>
           <div className="hidden md:flex items-center gap-1.5">
             <button
