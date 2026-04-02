@@ -146,7 +146,7 @@ const ProductPage = () => {
       }
     };
     void fetchProduct();
-  }, [id]);
+  }, [slug]);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Уншиж байна...</div>;
