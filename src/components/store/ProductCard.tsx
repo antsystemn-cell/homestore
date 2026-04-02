@@ -18,10 +18,20 @@ const ProductCard = React.memo(({ product }: Props) => {
 
   const imgSrc = imgError ? "/placeholder.svg" : product.image;
 
+  const productUrl = `/product/${product.slug || product.id}`;
+
+  const handleLinkClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+      e.preventDefault();
+      navigate(productUrl);
+    }
+  }, [navigate, productUrl]);
+
   return (
-    <div
-      className="bg-card overflow-hidden cursor-pointer group transition-all duration-200 hover:shadow-lg rounded-none md:rounded-xl animate-fade-in"
-      onClick={handleClick}
+    <a
+      href={productUrl}
+      className="bg-card overflow-hidden cursor-pointer group transition-all duration-200 hover:shadow-lg rounded-none md:rounded-xl animate-fade-in block no-underline text-inherit"
+      onClick={handleLinkClick}
     >
       <div className="relative aspect-square bg-secondary overflow-hidden">
         <img
@@ -55,7 +65,7 @@ const ProductCard = React.memo(({ product }: Props) => {
           )}
         </div>
       </div>
-    </div>
+    </a>
   );
 });
 
