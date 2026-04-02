@@ -1,55 +1,11 @@
-import React, { useCallback, useRef, useState, useEffect } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Product, formatPrice } from "@/data/products";
-import { ChevronLeft, ChevronRight, Zap, Timer } from "lucide-react";
+import { ChevronLeft, ChevronRight, Zap } from "lucide-react";
 
 interface Props {
   products: Product[];
 }
-
-const CountdownTimer = () => {
-  const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
-
-  useEffect(() => {
-    const getEndOfDay = () => {
-      const now = new Date();
-      const end = new Date(now);
-      end.setHours(23, 59, 59, 999);
-      return end.getTime() - now.getTime();
-    };
-
-    const update = () => {
-      const diff = getEndOfDay();
-      setTimeLeft({
-        hours: Math.floor(diff / 3600000),
-        minutes: Math.floor((diff % 3600000) / 60000),
-        seconds: Math.floor((diff % 60000) / 1000),
-      });
-    };
-
-    update();
-    const interval = setInterval(update, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const pad = (n: number) => String(n).padStart(2, "0");
-
-  return (
-    <div className="flex items-center gap-1">
-      <Timer className="h-3.5 w-3.5 text-destructive" />
-      <div className="flex items-center gap-0.5">
-        {[timeLeft.hours, timeLeft.minutes, timeLeft.seconds].map((val, i) => (
-          <React.Fragment key={i}>
-            {i > 0 && <span className="text-destructive font-bold text-xs">:</span>}
-            <span className="bg-destructive text-destructive-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md min-w-[24px] text-center">
-              {pad(val)}
-            </span>
-          </React.Fragment>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 const SaleCarousel = React.memo(({ products }: Props) => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -85,12 +41,9 @@ const SaleCarousel = React.memo(({ products }: Props) => {
               </div>
               <div className="absolute -top-0.5 -right-0.5 h-3 w-3 bg-[hsl(var(--warning))] rounded-full animate-pulse" />
             </div>
-            <div>
-              <h2 className="text-base md:text-lg font-extrabold text-foreground tracking-tight group-hover/link:text-primary transition-colors">
-                Flash Sale
-              </h2>
-              <CountdownTimer />
-            </div>
+            <h2 className="text-base md:text-lg font-extrabold text-foreground tracking-tight group-hover/link:text-primary transition-colors">
+              Хямдралтай
+            </h2>
           </a>
           <div className="hidden md:flex items-center gap-1.5">
             <button
