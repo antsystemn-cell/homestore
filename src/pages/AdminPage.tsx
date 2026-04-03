@@ -1610,7 +1610,15 @@ const AdminPage = () => {
                           </div>
                         </div>
 
-                        {/* Delivery info */}
+                        {/* Payment method info */}
+                        <div>
+                          <h4 className="text-xs font-bold text-muted-foreground mb-2">Төлбөрийн мэдээлэл</h4>
+                          <div className="bg-secondary/50 rounded-lg p-3 text-xs space-y-1">
+                            <p><span className="text-muted-foreground">Төлбөрийн суваг:</span> <span className="font-medium">{paymentMethodLabels[(o.payment_method || "cash").toLowerCase()]?.label || o.payment_method || "Бэлнээр"}</span></p>
+                            <p><span className="text-muted-foreground">Төлбөрийн төлөв:</span> <span className={`font-medium ${o.payment_status === "confirmed" ? "text-emerald-600" : "text-amber-600"}`}>{o.payment_status === "confirmed" ? "Төлбөр орсон" : o.payment_status === "unpaid" ? "Төлөгдөөгүй" : o.payment_status}</span></p>
+                            {o.order_ref && <p><span className="text-muted-foreground">Лавлах дугаар:</span> <span className="font-medium">{o.order_ref}</span></p>}
+                          </div>
+                        </div>
                         {delOpt && (
                           <div>
                             <h4 className="text-xs font-bold text-muted-foreground mb-2">Хүргэлтийн мэдээлэл</h4>
