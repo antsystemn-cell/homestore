@@ -654,7 +654,7 @@ const AdminPage = () => {
     return orders.filter((o: any) => o.created_at?.startsWith(today));
   }, [orders]);
 
-  const todayRevenue = todayOrders.filter((o: any) => o.status === 'confirmed').reduce((s: number, o: any) => s + o.total, 0);
+  const todayRevenue = todayOrders.filter((o: any) => o.status === 'confirmed' || o.status === 'completed').reduce((s: number, o: any) => s + o.total, 0);
 
   // Энэ долоо хоногийн орлого
   const weekRevenue = useMemo(() => {
