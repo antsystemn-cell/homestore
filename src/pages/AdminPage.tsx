@@ -569,7 +569,7 @@ const AdminPage = () => {
       name: p.name, description: p.description || "", price: p.price,
       original_price: p.original_price || 0, image_url: p.image_url || "",
       category: p.category, discount: p.discount || 0,
-      is_new: p.is_new, is_on_sale: p.is_on_sale,
+      is_new: p.is_new, is_on_sale: p.is_on_sale, is_bogo: p.is_bogo || false,
       product_code: p.product_code || "",
       slug: p.slug || "",
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
