@@ -2182,7 +2182,7 @@ const AdminPage = () => {
                       {editPpId ? "Шинэчлэх" : "Нэмэх"}
                     </button>
                     {editPpId && (
-                      <button onClick={() => { setPpForm({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳" }); setEditPpId(null); }}
+                      <button onClick={() => { setPpForm({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳", description: "", is_active: true }); setEditPpId(null); }}
                         className="bg-secondary rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors">
                         Болих
                       </button>
