@@ -47,7 +47,9 @@ const AuthPage = () => {
         if (!result) throw new Error("Request timeout");
         if (result.error) throw result.error;
         toast.success("Амжилттай нэвтэрлээ");
-        navigate("/");
+        const returnUrl = sessionStorage.getItem("returnAfterAuth");
+        sessionStorage.removeItem("returnAfterAuth");
+        navigate(returnUrl || "/");
       } else {
         const result = await withTimeout(
           supabase.auth.signUp({
