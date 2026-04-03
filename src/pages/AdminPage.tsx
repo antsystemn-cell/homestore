@@ -1515,11 +1515,29 @@ const AdminPage = () => {
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusColors[o.status] || "bg-secondary text-muted-foreground"}`}>
                             {statusLabels[o.status] || o.status}
                           </span>
+                          {(() => {
+                            const pm = paymentMethodLabels[(o.payment_method || "cash").toLowerCase()];
+                            return pm ? (
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${pm.color}`}>
+                                {pm.label}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
+                                {o.payment_method || "Бэлнээр"}
+                              </span>
+                            );
+                          })()}
+                          {o.payment_status === "confirmed" && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">
+                              💰 Төлбөр орсон
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                           <span className="font-semibold text-foreground">{formatPrice(o.total)}</span>
                           <span>{o.phone || "—"}</span>
                           <span>{new Date(o.created_at).toLocaleDateString("mn-MN")}</span>
+                          {o.is_guest && <span className="text-[10px] bg-secondary px-1.5 py-0.5 rounded">Зочин{o.guest_name ? `: ${o.guest_name}` : ""}</span>}
                         </div>
                         {delOpt && (
                           <div className="flex items-center gap-1.5 mt-1">
@@ -1530,7 +1548,18 @@ const AdminPage = () => {
                           </div>
                         )}
                       </div>
-                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                      <div className="flex items-center gap-2">
+                        {o.status === "cancelled" && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setDeleteOrderTarget({ id: o.id }); }}
+                            className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"
+                            title="Устгах"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
+                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                      </div>
                     </button>
 
                     {/* Expanded details */}
