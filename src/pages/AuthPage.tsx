@@ -184,7 +184,7 @@ const AuthPage = () => {
             <ShoppingBag className="h-10 w-10 text-primary-foreground" />
           </div>
           <h2 className="text-3xl font-extrabold text-primary-foreground mb-4">
-            Home<span className="opacity-60">Store</span>
+            Easy<span className="font-light text-yellow-400">Shop</span>
           </h2>
           <p className="text-primary-foreground/70 text-sm leading-relaxed">
             Гэр ахуйн бараа, цахилгаан хэрэгсэл, гал тогооны хэрэгслүүдийг хямд үнээр худалдаж аваарай.
@@ -203,7 +203,7 @@ const AuthPage = () => {
 
           <div className="text-center md:text-left mb-8">
             <h2 className="text-2xl font-extrabold md:hidden">
-              Home<span className="text-primary/60">Store</span>
+              <span className="font-bold">Easy</span><span className="font-light text-yellow-400">Shop</span>
             </h2>
             <h2 className="hidden md:block text-2xl font-extrabold">
               {isLogin ? "Нэвтрэх" : "Бүртгүүлэх"}
