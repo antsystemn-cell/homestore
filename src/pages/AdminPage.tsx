@@ -622,7 +622,9 @@ const AdminPage = () => {
 
   const categories = [...new Set(products.map((p) => p.category))];
 
-  const sidebarItems: { id: Tab; label: string; icon: any }[] = [
+  const moderatorTabs: Tab[] = ["stats", "delivery", "orders"];
+
+  const allSidebarItems: { id: Tab; label: string; icon: any }[] = [
     { id: "stats", label: "Статистик", icon: BarChart3 },
     { id: "products", label: "Бараа", icon: Package },
     { id: "categories", label: "Ангилал", icon: Layers },
@@ -634,6 +636,10 @@ const AdminPage = () => {
     { id: "users", label: "Хэрэглэгч", icon: Users },
     { id: "analytics", label: "Хандалт", icon: Globe },
   ];
+
+  const sidebarItems = isAdmin
+    ? allSidebarItems
+    : allSidebarItems.filter(item => moderatorTabs.includes(item.id));
 
   const paidOrders = orders.filter((o: any) => o.status === 'confirmed');
   const totalRevenue = paidOrders.reduce((s: number, o: any) => s + o.total, 0);
