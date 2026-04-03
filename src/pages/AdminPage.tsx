@@ -645,7 +645,7 @@ const AdminPage = () => {
     ? allSidebarItems
     : allSidebarItems.filter(item => moderatorTabs.includes(item.id));
 
-  const paidOrders = orders.filter((o: any) => o.status === 'confirmed');
+  const paidOrders = orders.filter((o: any) => o.status === 'confirmed' || o.status === 'completed');
   const totalRevenue = paidOrders.reduce((s: number, o: any) => s + o.total, 0);
 
   // Өнөөдрийн захиалга
