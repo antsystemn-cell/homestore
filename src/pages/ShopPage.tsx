@@ -25,7 +25,7 @@ const ShopPage = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [brands, setBrands] = useState<{ id: string; name: string }[]>([]);
+  const [brands, setBrands] = useState<{ id: string; name: string; logo_url?: string | null }[]>([]);
   const [selectedBrand, setSelectedBrand] = useState<string>("all");
   const [error, setError] = useState(false);
 
