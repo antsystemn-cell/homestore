@@ -20,7 +20,8 @@ function shuffle<T>(arr: T[]): T[] {
 
 const ShopPage = () => {
   const { brandName: brandParam } = useParams<{ brandName?: string }>();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [brands, setBrands] = useState<{ id: string; name: string }[]>([]);
