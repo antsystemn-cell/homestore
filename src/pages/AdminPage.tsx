@@ -206,7 +206,7 @@ const AdminPage = () => {
   };
 
   useEffect(() => {
-    if (authLoading || !isAdmin) return;
+    if (authLoading || !hasAdminAccess) return;
     loadAdminData();
   }, [authLoading, isAdmin]);
 
