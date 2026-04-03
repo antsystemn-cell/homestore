@@ -185,7 +185,7 @@ const logFallback = (scope: string, error: unknown) => {
 export const fetchPublicProducts = async () => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id",
+      select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id,is_bogo",
     });
   } catch (error) {
     logFallback("products", error);
