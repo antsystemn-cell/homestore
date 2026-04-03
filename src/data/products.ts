@@ -37,6 +37,7 @@ export interface Product {
   brandLogo?: string | null;
   colors?: ProductColor[];
   sizes?: string[];
+  isBogo?: boolean | null;
 }
 
 export const categories = [
