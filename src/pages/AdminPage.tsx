@@ -334,6 +334,28 @@ const AdminPage = () => {
     }
   };
 
+  const [deleteOrderTarget, setDeleteOrderTarget] = useState<{ id: string } | null>(null);
+  const [deletingOrder, setDeletingOrder] = useState(false);
+
+  const handleDeleteOrder = async (orderId: string) => {
+    setDeletingOrder(true);
+    const { error } = await supabase.from("orders").delete().eq("id", orderId);
+    if (error) {
+      toast.error("Захиалга устгахад алдаа гарлаа: " + error.message);
+    } else {
+      toast.success("Захиалга устгагдлаа");
+      setOrders((prev) => prev.filter((o) => o.id !== orderId));
+    }
+    setDeleteOrderTarget(null);
+    setDeletingOrder(false);
+  };
+
+  const paymentMethodLabels: Record<string, { label: string; color: string }> = {
+    storepay: { label: "Storepay", color: "bg-purple-500/10 text-purple-600" },
+    qpay: { label: "QPay", color: "bg-blue-500/10 text-blue-600" },
+    cash: { label: "Бэлнээр", color: "bg-amber-500/10 text-amber-600" },
+  };
+
   const handleDeliveryPhotoUpload = async (orderId: string, field: "delivery_pickup_photo" | "delivery_completed_photo", file: File) => {
     if (!file.type.startsWith("image/")) { toast.error("Зөвхөн зураг оруулна уу"); return; }
     if (file.size > 5 * 1024 * 1024) { toast.error("Зураг 5MB-ээс бага байх ёстой"); return; }
