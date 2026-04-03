@@ -323,9 +323,8 @@ const CheckoutPage = () => {
                   </div>
                 </label>
 
-                {/* Storepay - only for authenticated users */}
-                {!isGuestCheckout && (
-                  <label
+                {/* Storepay */}
+                <label
                     className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
                       paymentMethod === "storepay"
                         ? "border-primary bg-primary/5"
