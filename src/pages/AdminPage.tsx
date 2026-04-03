@@ -744,7 +744,32 @@ const AdminPage = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Desktop Sidebar */}
+      {/* Delete Order Confirmation Dialog */}
+      <AlertDialog open={!!deleteOrderTarget} onOpenChange={(open) => !open && setDeleteOrderTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Захиалга устгах
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Цуцлагдсан захиалга <span className="font-semibold text-foreground">#{deleteOrderTarget?.id.slice(0, 8)}</span>-г устгахдаа итгэлтэй байна уу? Энэ үйлдлийг буцаах боломжгүй.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingOrder}>Болих</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteOrderTarget && handleDeleteOrder(deleteOrderTarget.id)}
+              disabled={deletingOrder}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletingOrder ? "Устгаж байна..." : "Устгах"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+
       <aside className="hidden md:flex md:flex-col md:w-64 bg-card border-r border-border min-h-screen sticky top-0">
         <div className="p-6 border-b border-border">
           <div className="flex items-center gap-3">
