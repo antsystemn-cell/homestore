@@ -26,7 +26,7 @@ const GuestCheckoutModal = ({ open, onContinueAsGuest }: GuestCheckoutModalProps
   return (
     <Dialog open={open} onOpenChange={() => {}}>
       <DialogContent
-        className="max-w-md"
+        className="max-w-md [&>button]:hidden"
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
         // Hide default close button
