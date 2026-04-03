@@ -130,7 +130,7 @@ async function handleEligibility(body: any) {
 
 async function handleCreateLoan(body: any, req: Request) {
   const userId = await getUserId(req);
-  if (!userId) return err("Нэвтрэлт шаардлагатай", 401);
+  // Allow guest users (userId may be null)
 
   const { phone, amount, description, orderId, type } = body;
 
@@ -162,17 +162,19 @@ async function handleCreateLoan(body: any, req: Request) {
   }
 
   // Create payment intent record first
+  const intentData: any = {
+    order_id: orderId || null,
+    type: type || "ORDER",
+    phone,
+    amount,
+    request_id: requestId,
+    status: "INITIATED",
+  };
+  if (userId) intentData.user_id = userId;
+
   const { data: intent, error: intentError } = await supabaseAdmin
     .from("payment_intents")
-    .insert({
-      user_id: userId,
-      order_id: orderId || null,
-      type: type || "ORDER",
-      phone,
-      amount,
-      request_id: requestId,
-      status: "INITIATED",
-    })
+    .insert(intentData)
     .select()
     .single();
 
@@ -248,7 +250,7 @@ async function handleCreateLoan(body: any, req: Request) {
 
 async function handleCheckStatus(body: any, req: Request) {
   const userId = await getUserId(req);
-  if (!userId) return err("Нэвтрэлт шаардлагатай", 401);
+  // Allow guest users (userId may be null)
 
   const { intentId, loanId, requestId } = body;
 
@@ -257,12 +259,19 @@ async function handleCheckStatus(body: any, req: Request) {
   // Fetch intent
   let intent: any;
   if (intentId) {
-    const { data } = await supabaseAdmin
+    let query = supabaseAdmin
       .from("payment_intents")
       .select("*")
-      .eq("id", intentId)
-      .eq("user_id", userId)
-      .single();
+      .eq("id", intentId);
+    
+    // For authenticated users, scope to their user_id; for guests, scope to null user_id
+    if (userId) {
+      query = query.eq("user_id", userId);
+    } else {
+      query = query.is("user_id", null);
+    }
+    
+    const { data } = await query.single();
     intent = data;
   }
 

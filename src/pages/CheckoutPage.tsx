@@ -122,11 +122,8 @@ const CheckoutPage = () => {
   };
 
   const handleStorepayStart = async () => {
-    if (isGuestCheckout) {
-      toast.error("Storepay төлбөр зөвхөн нэвтэрсэн хэрэглэгчдэд боломжтой");
-      return;
-    }
     if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return; }
+    if (isGuestCheckout && !name.trim()) { toast.error("Нэр заавал бөглөнө үү"); return; }
     if (deliveryOptions.length > 0 && !selectedDelivery) { toast.error("Хүргэлтийн сонголт хийнэ үү"); return; }
 
     setSubmitting(true);
@@ -326,9 +323,8 @@ const CheckoutPage = () => {
                   </div>
                 </label>
 
-                {/* Storepay - only for authenticated users */}
-                {!isGuestCheckout && (
-                  <label
+                {/* Storepay */}
+                <label
                     className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
                       paymentMethod === "storepay"
                         ? "border-primary bg-primary/5"
@@ -351,7 +347,6 @@ const CheckoutPage = () => {
                       <p className="text-xs text-muted-foreground">Хуваан төлөх үйлчилгээ</p>
                     </div>
                   </label>
-                )}
               </div>
             </div>
 
