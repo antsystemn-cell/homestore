@@ -22,7 +22,8 @@ type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" |
 
 const AdminPage = () => {
   const navigate = useNavigate();
-  const { isAdmin, loading: authLoading, authError } = useAuth();
+  const { isAdmin, isModerator, loading: authLoading, authError } = useAuth();
+  const hasAdminAccess = isAdmin || isModerator;
   const [tab, setTab] = useState<Tab>("stats");
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
@@ -187,7 +188,7 @@ const AdminPage = () => {
   };
 
   useEffect(() => {
-    if (!authLoading && !isAdmin && !authError) {
+    if (!authLoading && !hasAdminAccess && !authError) {
       toast.error("Админ эрхгүй байна");
       navigate("/");
     }
@@ -205,7 +206,7 @@ const AdminPage = () => {
   };
 
   useEffect(() => {
-    if (authLoading || !isAdmin) return;
+    if (authLoading || !hasAdminAccess) return;
     loadAdminData();
   }, [authLoading, isAdmin]);
 
@@ -621,7 +622,9 @@ const AdminPage = () => {
 
   const categories = [...new Set(products.map((p) => p.category))];
 
-  const sidebarItems: { id: Tab; label: string; icon: any }[] = [
+  const moderatorTabs: Tab[] = ["stats", "delivery", "orders"];
+
+  const allSidebarItems: { id: Tab; label: string; icon: any }[] = [
     { id: "stats", label: "Статистик", icon: BarChart3 },
     { id: "products", label: "Бараа", icon: Package },
     { id: "categories", label: "Ангилал", icon: Layers },
@@ -633,6 +636,10 @@ const AdminPage = () => {
     { id: "users", label: "Хэрэглэгч", icon: Users },
     { id: "analytics", label: "Хандалт", icon: Globe },
   ];
+
+  const sidebarItems = isAdmin
+    ? allSidebarItems
+    : allSidebarItems.filter(item => moderatorTabs.includes(item.id));
 
   const paidOrders = orders.filter((o: any) => o.status === 'confirmed');
   const totalRevenue = paidOrders.reduce((s: number, o: any) => s + o.total, 0);

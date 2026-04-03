@@ -6,7 +6,7 @@ import Header from "@/components/store/Header";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const { user, isAdmin, signOut, loading, authError } = useAuth();
+  const { user, isAdmin, isModerator, signOut, loading, authError } = useAuth();
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Уншиж байна...</div>;
@@ -45,7 +45,7 @@ const ProfilePage = () => {
     { label: "Хаяг", desc: "Хүргэлтийн хаяг", icon: MapPin, onClick: () => {} },
     { label: "Утасны дугаар", desc: "Холбоо барих мэдээлэл", icon: Phone, onClick: () => {} },
     { label: "Тохиргоо", desc: "Аккаунт тохиргоо", icon: Settings, onClick: () => {} },
-    ...(isAdmin ? [{ label: "Админ удирдлага", desc: "Дэлгүүр удирдах", icon: Shield, onClick: () => navigate("/admin") }] : []),
+    ...((isAdmin || isModerator) ? [{ label: "Админ удирдлага", desc: "Дэлгүүр удирдах", icon: Shield, onClick: () => navigate("/admin") }] : []),
   ];
 
   return (
