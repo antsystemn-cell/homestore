@@ -334,6 +334,28 @@ const AdminPage = () => {
     }
   };
 
+  const [deleteOrderTarget, setDeleteOrderTarget] = useState<{ id: string } | null>(null);
+  const [deletingOrder, setDeletingOrder] = useState(false);
+
+  const handleDeleteOrder = async (orderId: string) => {
+    setDeletingOrder(true);
+    const { error } = await supabase.from("orders").delete().eq("id", orderId);
+    if (error) {
+      toast.error("Захиалга устгахад алдаа гарлаа: " + error.message);
+    } else {
+      toast.success("Захиалга устгагдлаа");
+      setOrders((prev) => prev.filter((o) => o.id !== orderId));
+    }
+    setDeleteOrderTarget(null);
+    setDeletingOrder(false);
+  };
+
+  const paymentMethodLabels: Record<string, { label: string; color: string }> = {
+    storepay: { label: "Storepay", color: "bg-purple-500/10 text-purple-600" },
+    qpay: { label: "QPay", color: "bg-blue-500/10 text-blue-600" },
+    cash: { label: "Бэлнээр", color: "bg-amber-500/10 text-amber-600" },
+  };
+
   const handleDeliveryPhotoUpload = async (orderId: string, field: "delivery_pickup_photo" | "delivery_completed_photo", file: File) => {
     if (!file.type.startsWith("image/")) { toast.error("Зөвхөн зураг оруулна уу"); return; }
     if (file.size > 5 * 1024 * 1024) { toast.error("Зураг 5MB-ээс бага байх ёстой"); return; }
@@ -722,7 +744,32 @@ const AdminPage = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Desktop Sidebar */}
+      {/* Delete Order Confirmation Dialog */}
+      <AlertDialog open={!!deleteOrderTarget} onOpenChange={(open) => !open && setDeleteOrderTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Захиалга устгах
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Цуцлагдсан захиалга <span className="font-semibold text-foreground">#{deleteOrderTarget?.id.slice(0, 8)}</span>-г устгахдаа итгэлтэй байна уу? Энэ үйлдлийг буцаах боломжгүй.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingOrder}>Болих</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteOrderTarget && handleDeleteOrder(deleteOrderTarget.id)}
+              disabled={deletingOrder}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletingOrder ? "Устгаж байна..." : "Устгах"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+
       <aside className="hidden md:flex md:flex-col md:w-64 bg-card border-r border-border min-h-screen sticky top-0">
         <div className="p-6 border-b border-border">
           <div className="flex items-center gap-3">
@@ -1493,11 +1540,29 @@ const AdminPage = () => {
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusColors[o.status] || "bg-secondary text-muted-foreground"}`}>
                             {statusLabels[o.status] || o.status}
                           </span>
+                          {(() => {
+                            const pm = paymentMethodLabels[(o.payment_method || "cash").toLowerCase()];
+                            return pm ? (
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${pm.color}`}>
+                                {pm.label}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
+                                {o.payment_method || "Бэлнээр"}
+                              </span>
+                            );
+                          })()}
+                          {o.payment_status === "confirmed" && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">
+                              💰 Төлбөр орсон
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                           <span className="font-semibold text-foreground">{formatPrice(o.total)}</span>
                           <span>{o.phone || "—"}</span>
                           <span>{new Date(o.created_at).toLocaleDateString("mn-MN")}</span>
+                          {o.is_guest && <span className="text-[10px] bg-secondary px-1.5 py-0.5 rounded">Зочин{o.guest_name ? `: ${o.guest_name}` : ""}</span>}
                         </div>
                         {delOpt && (
                           <div className="flex items-center gap-1.5 mt-1">
@@ -1508,7 +1573,18 @@ const AdminPage = () => {
                           </div>
                         )}
                       </div>
-                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                      <div className="flex items-center gap-2">
+                        {o.status === "cancelled" && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setDeleteOrderTarget({ id: o.id }); }}
+                            className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"
+                            title="Устгах"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
+                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                      </div>
                     </button>
 
                     {/* Expanded details */}
@@ -1534,7 +1610,15 @@ const AdminPage = () => {
                           </div>
                         </div>
 
-                        {/* Delivery info */}
+                        {/* Payment method info */}
+                        <div>
+                          <h4 className="text-xs font-bold text-muted-foreground mb-2">Төлбөрийн мэдээлэл</h4>
+                          <div className="bg-secondary/50 rounded-lg p-3 text-xs space-y-1">
+                            <p><span className="text-muted-foreground">Төлбөрийн суваг:</span> <span className="font-medium">{paymentMethodLabels[(o.payment_method || "cash").toLowerCase()]?.label || o.payment_method || "Бэлнээр"}</span></p>
+                            <p><span className="text-muted-foreground">Төлбөрийн төлөв:</span> <span className={`font-medium ${o.payment_status === "confirmed" ? "text-emerald-600" : "text-amber-600"}`}>{o.payment_status === "confirmed" ? "Төлбөр орсон" : o.payment_status === "unpaid" ? "Төлөгдөөгүй" : o.payment_status}</span></p>
+                            {o.order_ref && <p><span className="text-muted-foreground">Лавлах дугаар:</span> <span className="font-medium">{o.order_ref}</span></p>}
+                          </div>
+                        </div>
                         {delOpt && (
                           <div>
                             <h4 className="text-xs font-bold text-muted-foreground mb-2">Хүргэлтийн мэдээлэл</h4>
