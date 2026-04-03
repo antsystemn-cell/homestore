@@ -58,7 +58,7 @@ const AdminPage = () => {
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
   // Payment provider form state
-  const [ppForm, setPpForm] = useState({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳" });
+  const [ppForm, setPpForm] = useState({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳", description: "", is_active: true });
   const [editPpId, setEditPpId] = useState<string | null>(null);
   const ppLogoFileRef = useRef<HTMLInputElement>(null);
 
