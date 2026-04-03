@@ -67,7 +67,7 @@ const AdminPage = () => {
   const [form, setForm] = useState({
     name: "", description: "", price: 0, original_price: 0,
     image_url: "", category: "general", discount: 0,
-    is_new: false, is_on_sale: false,
+    is_new: false, is_on_sale: false, is_bogo: false,
     product_code: "", slug: "", specifications: [] as { key: string; value: string }[],
     detail_media: [] as { type: "image" | "video"; url: string; caption: string; thumbnail?: string }[],
     brand_id: "",
@@ -302,7 +302,7 @@ const AdminPage = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from("products").select("id, name, price, original_price, image_url, category, description, sales, is_new, is_on_sale, discount, product_code, slug, brand_id, created_at, colors, sizes, specifications, detail_media").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("products").select("id, name, price, original_price, image_url, category, description, sales, is_new, is_on_sale, is_bogo, discount, product_code, slug, brand_id, created_at, colors, sizes, specifications, detail_media").order("created_at", { ascending: false });
       if (error) throw error;
       setProducts(data || []);
     } catch (error) {
@@ -485,7 +485,7 @@ const AdminPage = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, product_code: "", slug: "", specifications: [], detail_media: [], brand_id: "", colors: [], sizes: [] });
+    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, is_bogo: false, product_code: "", slug: "", specifications: [], detail_media: [], brand_id: "", colors: [], sizes: [] });
     setNewColor(""); setNewSize("");
     setEditId(null);
     setShowForm(false);
@@ -516,7 +516,7 @@ const AdminPage = () => {
       name: form.name, description: form.description, price: form.price,
       original_price: form.original_price, image_url: form.image_url,
       category: form.category, discount: form.discount,
-      is_new: form.is_new, is_on_sale: form.is_on_sale,
+      is_new: form.is_new, is_on_sale: form.is_on_sale, is_bogo: form.is_bogo,
       product_code: form.product_code || null,
       slug: form.slug.trim() || cyrillicToLatinSlug(form.name),
       specifications: form.specifications.filter(s => s.key.trim() && s.value.trim()),
@@ -569,7 +569,7 @@ const AdminPage = () => {
       name: p.name, description: p.description || "", price: p.price,
       original_price: p.original_price || 0, image_url: p.image_url || "",
       category: p.category, discount: p.discount || 0,
-      is_new: p.is_new, is_on_sale: p.is_on_sale,
+      is_new: p.is_new, is_on_sale: p.is_on_sale, is_bogo: p.is_bogo || false,
       product_code: p.product_code || "",
       slug: p.slug || "",
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
@@ -1344,6 +1344,10 @@ const AdminPage = () => {
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
                       <input type="checkbox" checked={form.is_on_sale} onChange={(e) => setForm({ ...form, is_on_sale: e.target.checked })} className="rounded" />
                       Хямдралтай
+                    </label>
+                    <label className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input type="checkbox" checked={form.is_bogo} onChange={(e) => setForm({ ...form, is_bogo: e.target.checked })} className="rounded" />
+                      1+1 Үнэгүй
                     </label>
                   </div>
 

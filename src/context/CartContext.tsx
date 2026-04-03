@@ -70,7 +70,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     wishlist.some((p) => p.id === productId), [wishlist]);
 
   const cartTotal = useMemo(() =>
-    items.reduce((sum, i) => sum + i.product.price * i.quantity, 0), [items]);
+    items.reduce((sum, i) => {
+      if (i.product.isBogo) {
+        // BOGO: for every 2 items, 1 is free. Pay for ceil(qty/2) * 2 - floor(qty/2)
+        const paidQty = Math.ceil(i.quantity / 2);
+        return sum + i.product.price * paidQty;
+      }
+      return sum + i.product.price * i.quantity;
+    }, 0), [items]);
 
   const cartCount = useMemo(() =>
     items.reduce((sum, i) => sum + i.quantity, 0), [items]);

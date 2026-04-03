@@ -185,7 +185,7 @@ const logFallback = (scope: string, error: unknown) => {
 export const fetchPublicProducts = async () => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id",
+      select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id,is_bogo",
     });
   } catch (error) {
     logFallback("products", error);
@@ -264,7 +264,7 @@ export const fetchPublicProductImages = async (productId: string) => {
 export const fetchRelatedPublicProducts = async (category: string, excludeId: string) => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id",
+      select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id,is_bogo",
       category: `eq.${category}`,
       id: `neq.${excludeId}`,
       limit: 4,
@@ -278,7 +278,7 @@ export const fetchRelatedPublicProducts = async (category: string, excludeId: st
 export const fetchSaleProducts = async () => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id",
+      select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id,is_bogo",
       is_on_sale: "eq.true",
       order: "discount.desc.nullslast",
     });
@@ -291,7 +291,7 @@ export const fetchSaleProducts = async () => {
 export const fetchFeaturedProducts = async () => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id,is_new,sales",
+      select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id,is_new,sales,is_bogo",
       order: "sales.desc.nullslast",
       limit: 8,
     });

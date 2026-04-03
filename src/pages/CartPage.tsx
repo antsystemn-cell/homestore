@@ -60,10 +60,13 @@ const CartPage = () => {
                         )}
                       </div>
                     )}
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
                       <span className="text-foreground font-bold text-sm md:text-lg">{formatPrice(product.price)}</span>
                       {quantity > 1 && (
-                        <span className="text-xs text-muted-foreground">× {quantity} = {formatPrice(product.price * quantity)}</span>
+                        <span className="text-xs text-muted-foreground">× {quantity} = {formatPrice(product.isBogo ? product.price * Math.ceil(quantity / 2) : product.price * quantity)}</span>
+                      )}
+                      {product.isBogo && (
+                        <span className="text-[10px] bg-primary/10 text-primary font-semibold px-1.5 py-0.5 rounded">1+1 Үнэгүй</span>
                       )}
                     </div>
                     <div className="flex items-center justify-between mt-2 md:mt-3">
