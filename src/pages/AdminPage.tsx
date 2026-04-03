@@ -67,7 +67,7 @@ const AdminPage = () => {
   const [form, setForm] = useState({
     name: "", description: "", price: 0, original_price: 0,
     image_url: "", category: "general", discount: 0,
-    is_new: false, is_on_sale: false,
+    is_new: false, is_on_sale: false, is_bogo: false,
     product_code: "", slug: "", specifications: [] as { key: string; value: string }[],
     detail_media: [] as { type: "image" | "video"; url: string; caption: string; thumbnail?: string }[],
     brand_id: "",
