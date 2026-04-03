@@ -34,8 +34,8 @@ const GuestCheckoutModal = ({ open, onContinueAsGuest }: GuestCheckoutModalProps
       >
         <DialogHeader>
           <div className="flex justify-center mb-2">
-            <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
-              <AlertTriangle className="h-6 w-6 text-amber-600" />
+            <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
+              <AlertTriangle className="h-6 w-6 text-destructive" />
             </div>
           </div>
           <DialogTitle className="text-center">Анхааруулга</DialogTitle>
