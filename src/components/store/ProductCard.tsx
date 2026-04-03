@@ -44,6 +44,11 @@ const ProductCard = React.memo(({ product }: Props) => {
           height={300}
           onError={handleImgError}
         />
+        {product.isBogo && (
+          <span className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded">
+            1+1
+          </span>
+        )}
         {product.originalPrice != null && product.originalPrice > product.price && (
           <span className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded">
             -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
