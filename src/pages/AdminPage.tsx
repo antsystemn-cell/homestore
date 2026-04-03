@@ -645,7 +645,7 @@ const AdminPage = () => {
     ? allSidebarItems
     : allSidebarItems.filter(item => moderatorTabs.includes(item.id));
 
-  const paidOrders = orders.filter((o: any) => o.status === 'confirmed');
+  const paidOrders = orders.filter((o: any) => o.status === 'confirmed' || o.status === 'completed');
   const totalRevenue = paidOrders.reduce((s: number, o: any) => s + o.total, 0);
 
   // Өнөөдрийн захиалга
@@ -654,14 +654,14 @@ const AdminPage = () => {
     return orders.filter((o: any) => o.created_at?.startsWith(today));
   }, [orders]);
 
-  const todayRevenue = todayOrders.filter((o: any) => o.status === 'confirmed').reduce((s: number, o: any) => s + o.total, 0);
+  const todayRevenue = todayOrders.filter((o: any) => o.status === 'confirmed' || o.status === 'completed').reduce((s: number, o: any) => s + o.total, 0);
 
   // Энэ долоо хоногийн орлого
   const weekRevenue = useMemo(() => {
     const now = new Date();
     const weekAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
     return orders
-      .filter((o: any) => o.status === 'confirmed' && new Date(o.created_at) >= weekAgo)
+      .filter((o: any) => (o.status === 'confirmed' || o.status === 'completed') && new Date(o.created_at) >= weekAgo)
       .reduce((s: number, o: any) => s + o.total, 0);
   }, [orders]);
 
