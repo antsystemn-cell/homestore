@@ -29,14 +29,14 @@ const ShopPage = () => {
 
   // Resolve brand name from URL to brand id after brands load
   useEffect(() => {
-    const brandParam = searchParams.get("brand");
-    if (!brandParam) {
+    const urlBrand = brandParam || searchParams.get("brand");
+    if (!urlBrand) {
       setSelectedBrand("all");
     } else if (brands.length > 0) {
-      const match = brands.find((b) => b.name === decodeURIComponent(brandParam));
+      const match = brands.find((b) => b.name === decodeURIComponent(urlBrand));
       if (match) setSelectedBrand(match.id);
     }
-  }, [brands, searchParams]);
+  }, [brands, searchParams, brandParam]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
