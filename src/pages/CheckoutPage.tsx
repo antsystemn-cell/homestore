@@ -60,7 +60,11 @@ const CheckoutPage = () => {
 
   const selectedDeliveryOption = deliveryOptions.find(d => d.id === selectedDelivery);
   const deliveryFee = selectedDeliveryOption?.price || 0;
-  const grandTotal = cartTotal + deliveryFee;
+
+  // Extra 8,000₮ surcharge: if cart total < 50,000₮ OR cart has any sale items
+  const hasSaleItems = items.some(item => item.product.isOnSale || (item.product.discount && item.product.discount > 0));
+  const surcharge = (cartTotal < 50000 || hasSaleItems) ? 8000 : 0;
+  const grandTotal = cartTotal + deliveryFee + surcharge;
 
   const createOrder = async (paymentStatus = "unpaid", pm: PaymentMethod = "cash") => {
     if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return null; }
