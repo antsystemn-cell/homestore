@@ -141,6 +141,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(null);
       setUser(null);
       setIsAdmin(false);
+      setIsModerator(false);
       setAuthError(false);
       setLoading(false);
     }
