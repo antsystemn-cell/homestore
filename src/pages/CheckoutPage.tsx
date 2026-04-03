@@ -2,7 +2,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/data/products";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Lock, Loader2, Truck, Banknote, CreditCard, Copy, UserPlus } from "lucide-react";
+import { CheckCircle, Lock, Loader2, Truck, Banknote, CreditCard, Copy, UserPlus, QrCode } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
@@ -10,8 +10,9 @@ import { toast } from "sonner";
 import Header from "@/components/store/Header";
 import BottomNav from "@/components/store/BottomNav";
 import StorepayPayment from "@/components/store/StorepayPayment";
+import QPayPayment from "@/components/store/QPayPayment";
 
-type PaymentMethod = "cash" | "storepay";
+type PaymentMethod = "cash" | "storepay" | "qpay";
 
 const CheckoutPage = () => {
   const { items, cartTotal, clearCart } = useCart();
@@ -141,6 +142,30 @@ const CheckoutPage = () => {
   };
 
   const handleStorepayCancel = () => {
+    setOrderId(null);
+    setPaymentMethod("cash");
+  };
+
+  const handleQPayStart = async () => {
+    if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return; }
+    if (isGuestCheckout && !name.trim()) { toast.error("Нэр заавал бөглөнө үү"); return; }
+    if (deliveryOptions.length > 0 && !selectedDelivery) { toast.error("Хүргэлтийн сонголт хийнэ үү"); return; }
+
+    setSubmitting(true);
+    const id = await createOrder("processing", "qpay");
+    setSubmitting(false);
+
+    if (id) {
+      setOrderId(id);
+    }
+  };
+
+  const handleQPaySuccess = () => {
+    clearCart();
+    setOrdered(true);
+  };
+
+  const handleQPayCancel = () => {
     setOrderId(null);
     setPaymentMethod("cash");
   };
@@ -347,10 +372,35 @@ const CheckoutPage = () => {
                       <p className="text-xs text-muted-foreground">Хуваан төлөх үйлчилгээ</p>
                     </div>
                   </label>
+
+                {/* QPay */}
+                <label
+                  className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    paymentMethod === "qpay"
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-muted-foreground/30"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="qpay"
+                    checked={paymentMethod === "qpay"}
+                    onChange={() => setPaymentMethod("qpay")}
+                    className="w-4 h-4 accent-[hsl(var(--primary))]"
+                  />
+                  <div className="w-5 h-5 rounded bg-primary flex items-center justify-center">
+                    <span className="text-primary-foreground text-[10px] font-bold">Q</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">QPay</p>
+                    <p className="text-xs text-muted-foreground">QR кодоор төлөх (бүх банк)</p>
+                  </div>
+                </label>
               </div>
             </div>
 
-            {/* Storepay Payment Flow - only show after order is created */}
+            {/* Storepay Payment Flow */}
             {paymentMethod === "storepay" && orderId && (
               <StorepayPayment
                 amount={grandTotal}
@@ -359,6 +409,16 @@ const CheckoutPage = () => {
                 description={`Захиалга #${orderId.slice(0, 8)}`}
                 onSuccess={handleStorepaySuccess}
                 onCancel={handleStorepayCancel}
+              />
+            )}
+
+            {/* QPay Payment Flow */}
+            {paymentMethod === "qpay" && orderId && (
+              <QPayPayment
+                orderId={orderId}
+                amount={grandTotal}
+                onSuccess={handleQPaySuccess}
+                onCancel={handleQPayCancel}
               />
             )}
           </div>
@@ -428,6 +488,17 @@ const CheckoutPage = () => {
                 >
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
                   {submitting ? "Үүсгэж байна..." : `Storepay-ээр төлөх — ${formatPrice(grandTotal)}`}
+                </Button>
+              )}
+
+              {paymentMethod === "qpay" && !orderId && (
+                <Button
+                  className="w-full h-12 text-base rounded-xl mt-2 gap-2"
+                  disabled={submitting}
+                  onClick={handleQPayStart}
+                >
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <QrCode className="h-4 w-4" />}
+                  {submitting ? "Үүсгэж байна..." : `QPay-ээр төлөх — ${formatPrice(grandTotal)}`}
                 </Button>
               )}
 
