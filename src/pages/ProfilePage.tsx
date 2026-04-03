@@ -6,7 +6,7 @@ import Header from "@/components/store/Header";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const { user, isAdmin, signOut, loading, authError } = useAuth();
+  const { user, isAdmin, isModerator, signOut, loading, authError } = useAuth();
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Уншиж байна...</div>;
