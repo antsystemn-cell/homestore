@@ -6,6 +6,7 @@ import BottomNav from "@/components/store/BottomNav";
 import ProductGridSkeleton from "@/components/store/ProductGridSkeleton";
 import LoadError from "@/components/store/LoadError";
 import ErrorBoundary from "@/components/store/ErrorBoundary";
+import BrandBanner from "@/components/store/BrandBanner";
 import { Product, mapDbProduct } from "@/data/products";
 import { fetchPublicBrands, fetchPublicProducts } from "@/lib/publicStoreApi";
 
@@ -24,7 +25,7 @@ const ShopPage = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [brands, setBrands] = useState<{ id: string; name: string }[]>([]);
+  const [brands, setBrands] = useState<{ id: string; name: string; logo_url?: string | null }[]>([]);
   const [selectedBrand, setSelectedBrand] = useState<string>("all");
   const [error, setError] = useState(false);
 
@@ -55,7 +56,7 @@ const ShopPage = () => {
         if (brand) { p.brandName = brand.name; p.brandLogo = brand.logo_url; }
         return p;
       })));
-      setBrands((brandRes || []).map((b: any) => ({ id: b.id, name: b.name })));
+      setBrands((brandRes || []).map((b: any) => ({ id: b.id, name: b.name, logo_url: b.logo_url })));
     } catch (err) {
       console.error("Failed to load shop products", err);
       setProducts([]);
@@ -76,6 +77,10 @@ const ShopPage = () => {
   return (
     <div className="min-h-screen bg-secondary pb-16 md:pb-0">
       <Header />
+      {/* Brand banner when a specific brand is selected */}
+      {selectedBrand !== "all" && (
+        <BrandBanner logoUrl={brands.find((b) => b.id === selectedBrand)?.logo_url} />
+      )}
       {brands.length > 0 && (
         <div className="max-w-6xl mx-auto px-4 md:px-8 pt-4">
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
