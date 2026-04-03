@@ -348,10 +348,35 @@ const CheckoutPage = () => {
                       <p className="text-xs text-muted-foreground">Хуваан төлөх үйлчилгээ</p>
                     </div>
                   </label>
+
+                {/* QPay */}
+                <label
+                  className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    paymentMethod === "qpay"
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-muted-foreground/30"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="qpay"
+                    checked={paymentMethod === "qpay"}
+                    onChange={() => setPaymentMethod("qpay")}
+                    className="w-4 h-4 accent-[hsl(var(--primary))]"
+                  />
+                  <div className="w-5 h-5 rounded bg-primary flex items-center justify-center">
+                    <span className="text-primary-foreground text-[10px] font-bold">Q</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">QPay</p>
+                    <p className="text-xs text-muted-foreground">QR кодоор төлөх (бүх банк)</p>
+                  </div>
+                </label>
               </div>
             </div>
 
-            {/* Storepay Payment Flow - only show after order is created */}
+            {/* Storepay Payment Flow */}
             {paymentMethod === "storepay" && orderId && (
               <StorepayPayment
                 amount={grandTotal}
@@ -360,6 +385,16 @@ const CheckoutPage = () => {
                 description={`Захиалга #${orderId.slice(0, 8)}`}
                 onSuccess={handleStorepaySuccess}
                 onCancel={handleStorepayCancel}
+              />
+            )}
+
+            {/* QPay Payment Flow */}
+            {paymentMethod === "qpay" && orderId && (
+              <QPayPayment
+                orderId={orderId}
+                amount={grandTotal}
+                onSuccess={handleQPaySuccess}
+                onCancel={handleQPayCancel}
               />
             )}
           </div>
