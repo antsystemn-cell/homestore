@@ -41,7 +41,7 @@ const Header = () => {
           className="text-xl md:text-2xl cursor-pointer shrink-0 text-foreground"
           onClick={() => navigate("/")}
         >
-          <span className="font-bold">Easy</span><span className="font-light text-yellow-400">Shop</span>
+          <span className="font-bold">Easy</span><span className="font-light text-muted-foreground">Shop</span>
         </span>
 
         {/* Desktop nav links */}
