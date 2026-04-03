@@ -347,7 +347,6 @@ const CheckoutPage = () => {
                       <p className="text-xs text-muted-foreground">Хуваан төлөх үйлчилгээ</p>
                     </div>
                   </label>
-                )}
               </div>
             </div>
 
