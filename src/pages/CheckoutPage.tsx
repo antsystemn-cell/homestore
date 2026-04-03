@@ -10,8 +10,9 @@ import { toast } from "sonner";
 import Header from "@/components/store/Header";
 import BottomNav from "@/components/store/BottomNav";
 import StorepayPayment from "@/components/store/StorepayPayment";
+import QPayPayment from "@/components/store/QPayPayment";
 
-type PaymentMethod = "cash" | "storepay";
+type PaymentMethod = "cash" | "storepay" | "qpay";
 
 const CheckoutPage = () => {
   const { items, cartTotal, clearCart } = useCart();
