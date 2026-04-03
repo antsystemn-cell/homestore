@@ -114,8 +114,11 @@ export type Database = {
           delivery_fee: number | null
           delivery_option_id: string | null
           delivery_pickup_photo: string | null
+          guest_name: string | null
           id: string
+          is_guest: boolean | null
           items: Json
+          order_ref: string | null
           payment_intent_id: string | null
           payment_method: string | null
           payment_status: string | null
@@ -124,7 +127,7 @@ export type Database = {
           status: string
           total: number
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -132,8 +135,11 @@ export type Database = {
           delivery_fee?: number | null
           delivery_option_id?: string | null
           delivery_pickup_photo?: string | null
+          guest_name?: string | null
           id?: string
+          is_guest?: boolean | null
           items?: Json
+          order_ref?: string | null
           payment_intent_id?: string | null
           payment_method?: string | null
           payment_status?: string | null
@@ -142,7 +148,7 @@ export type Database = {
           status?: string
           total?: number
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -150,8 +156,11 @@ export type Database = {
           delivery_fee?: number | null
           delivery_option_id?: string | null
           delivery_pickup_photo?: string | null
+          guest_name?: string | null
           id?: string
+          is_guest?: boolean | null
           items?: Json
+          order_ref?: string | null
           payment_intent_id?: string | null
           payment_method?: string | null
           payment_status?: string | null
@@ -160,7 +169,7 @@ export type Database = {
           status?: string
           total?: number
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {

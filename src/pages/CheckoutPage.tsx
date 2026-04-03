@@ -1,8 +1,8 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/data/products";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Lock, Loader2, Truck, Banknote, CreditCard } from "lucide-react";
+import { CheckCircle, Lock, Loader2, Truck, Banknote, CreditCard, Copy, UserPlus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
@@ -17,6 +17,9 @@ const CheckoutPage = () => {
   const { items, cartTotal, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isGuestCheckout = !user && searchParams.get("guest") === "1";
+
   const [ordered, setOrdered] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [phone, setPhone] = useState("");
@@ -24,11 +27,19 @@ const CheckoutPage = () => {
   const [name, setName] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [orderRef, setOrderRef] = useState<string | null>(null);
 
   // Delivery options
   const [deliveryOptions, setDeliveryOptions] = useState<any[]>([]);
   const [selectedDelivery, setSelectedDelivery] = useState<string | null>(null);
   const [loadingDelivery, setLoadingDelivery] = useState(true);
+
+  // Redirect unauthenticated non-guest users
+  useEffect(() => {
+    if (!user && !isGuestCheckout) {
+      navigate("/cart");
+    }
+  }, [user, isGuestCheckout, navigate]);
 
   useEffect(() => {
     const fetchDelivery = async () => {
@@ -51,8 +62,8 @@ const CheckoutPage = () => {
   const grandTotal = cartTotal + deliveryFee;
 
   const createOrder = async (paymentStatus = "unpaid", pm: PaymentMethod = "cash") => {
-    if (!user) { toast.error("Нэвтэрсэн байх шаардлагатай"); navigate("/auth"); return null; }
     if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return null; }
+    if (isGuestCheckout && !name.trim()) { toast.error("Нэр заавал бөглөнө үү"); return null; }
     if (deliveryOptions.length > 0 && !selectedDelivery) { toast.error("Хүргэлтийн сонголт хийнэ үү"); return null; }
 
     const orderItems = items.map((item) => ({
@@ -65,9 +76,8 @@ const CheckoutPage = () => {
       image: item.product.image,
     }));
 
-    const { data, error } = await supabase.from("orders").insert({
-      user_id: user.id,
-      items: orderItems as any,
+    const orderData: any = {
+      items: orderItems,
       total: grandTotal,
       phone,
       shipping_address: address,
@@ -76,12 +86,28 @@ const CheckoutPage = () => {
       delivery_fee: deliveryFee,
       payment_method: pm,
       payment_status: paymentStatus,
-    }).select("id").single();
+    };
+
+    if (isGuestCheckout) {
+      orderData.user_id = null;
+      orderData.is_guest = true;
+      orderData.guest_name = name.trim();
+    } else {
+      orderData.user_id = user!.id;
+    }
+
+    const { data, error } = await supabase
+      .from("orders")
+      .insert(orderData)
+      .select("id, order_ref")
+      .single();
 
     if (error) {
+      console.error("Order error:", error);
       toast.error("Захиалга өгөхөд алдаа гарлаа");
       return null;
     }
+    setOrderRef(data.order_ref);
     return data.id;
   };
 
@@ -96,11 +122,13 @@ const CheckoutPage = () => {
   };
 
   const handleStorepayStart = async () => {
-    if (!user) { toast.error("Нэвтэрсэн байх шаардлагатай"); navigate("/auth"); return; }
+    if (isGuestCheckout) {
+      toast.error("Storepay төлбөр зөвхөн нэвтэрсэн хэрэглэгчдэд боломжтой");
+      return;
+    }
     if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return; }
     if (deliveryOptions.length > 0 && !selectedDelivery) { toast.error("Хүргэлтийн сонголт хийнэ үү"); return; }
 
-    // Create order first with pending payment
     setSubmitting(true);
     const id = await createOrder("pending", "storepay");
     setSubmitting(false);
@@ -120,6 +148,52 @@ const CheckoutPage = () => {
     setPaymentMethod("cash");
   };
 
+  // Guest order confirmation
+  if (ordered && isGuestCheckout) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <div className="bg-card rounded-2xl p-8 md:p-12 border border-border max-w-md w-full text-center">
+          <CheckCircle className="h-16 w-16 text-primary mx-auto mb-4" />
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">Захиалга амжилттай!</h1>
+          {orderRef && (
+            <div className="mt-4 p-4 bg-secondary rounded-xl border border-border">
+              <p className="text-xs text-muted-foreground mb-1">Захиалгын дугаар</p>
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-lg font-bold text-foreground tracking-wider">{orderRef}</span>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(orderRef);
+                    toast.success("Хуулагдлаа");
+                  }}
+                  className="p-1.5 rounded-lg hover:bg-accent transition-colors"
+                >
+                  <Copy className="h-4 w-4 text-muted-foreground" />
+                </button>
+              </div>
+            </div>
+          )}
+          <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
+            Захиалгын дугаараа хадгалж авна уу. Бүртгүүлснээр захиалгынхаа явцыг хянах боломжтой.
+          </p>
+          <div className="flex flex-col gap-2 mt-6">
+            <Button
+              variant="outline"
+              className="w-full rounded-xl gap-2"
+              onClick={() => navigate("/auth")}
+            >
+              <UserPlus className="h-4 w-4" />
+              Бүртгүүлэх
+            </Button>
+            <Button className="w-full rounded-xl" onClick={() => navigate("/")}>
+              Нүүр хуудас
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Authenticated order confirmation (unchanged)
   if (ordered) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
@@ -127,6 +201,11 @@ const CheckoutPage = () => {
           <CheckCircle className="h-16 w-16 text-primary mx-auto mb-4" />
           <h1 className="text-xl md:text-2xl font-bold text-foreground">Захиалга амжилттай!</h1>
           <p className="text-muted-foreground mt-2">Таны захиалгыг хүлээн авлаа. Бид тантай удахгүй холбогдох болно.</p>
+          {orderRef && (
+            <p className="text-sm text-muted-foreground mt-2">
+              Захиалгын дугаар: <span className="font-bold text-foreground">{orderRef}</span>
+            </p>
+          )}
           <Button className="mt-6 rounded-xl" onClick={() => navigate("/")}>Нүүр хуудас</Button>
         </div>
       </div>
@@ -147,20 +226,20 @@ const CheckoutPage = () => {
               <h2 className="font-semibold text-foreground md:text-lg">Хүргэлтийн мэдээлэл</h2>
               <div className="md:grid md:grid-cols-2 md:gap-4 space-y-3 md:space-y-0">
                 <input
-                  placeholder="Нэр"
+                  placeholder="Нэр *"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 />
                 <input
-                  placeholder="Утасны дугаар"
+                  placeholder="Утасны дугаар *"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
               <input
-                placeholder="Хаяг"
+                placeholder="Хаяг *"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
@@ -247,30 +326,32 @@ const CheckoutPage = () => {
                   </div>
                 </label>
 
-                {/* Storepay */}
-                <label
-                  className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    paymentMethod === "storepay"
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-muted-foreground/30"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="storepay"
-                    checked={paymentMethod === "storepay"}
-                    onChange={() => setPaymentMethod("storepay")}
-                    className="w-4 h-4 accent-[hsl(var(--primary))]"
-                  />
-                  <div className="w-5 h-5 rounded bg-[#00B140] flex items-center justify-center">
-                    <span className="text-white text-[10px] font-bold">S</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">Storepay</p>
-                    <p className="text-xs text-muted-foreground">Хуваан төлөх үйлчилгээ</p>
-                  </div>
-                </label>
+                {/* Storepay - only for authenticated users */}
+                {!isGuestCheckout && (
+                  <label
+                    className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                      paymentMethod === "storepay"
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-muted-foreground/30"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="storepay"
+                      checked={paymentMethod === "storepay"}
+                      onChange={() => setPaymentMethod("storepay")}
+                      className="w-4 h-4 accent-[hsl(var(--primary))]"
+                    />
+                    <div className="w-5 h-5 rounded bg-[#00B140] flex items-center justify-center">
+                      <span className="text-white text-[10px] font-bold">S</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">Storepay</p>
+                      <p className="text-xs text-muted-foreground">Хуваан төлөх үйлчилгээ</p>
+                    </div>
+                  </label>
+                )}
               </div>
             </div>
 

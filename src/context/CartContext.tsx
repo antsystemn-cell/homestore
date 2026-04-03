@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode, useEffect } from "react";
 import { Product } from "@/data/products";
 
 interface CartItem {
@@ -25,11 +25,32 @@ function makeCartKey(productId: string, color?: string | null, size?: string | n
   return `${productId}__${color || ""}__${size || ""}`;
 }
 
+const CART_STORAGE_KEY = "easyshop_cart";
+
+function loadCartFromStorage(): CartItem[] {
+  try {
+    const raw = localStorage.getItem(CART_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return [];
+}
+
+function saveCartToStorage(items: CartItem[]) {
+  try {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+  } catch {}
+}
+
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>(() => loadCartFromStorage());
   const [wishlist, setWishlist] = useState<Product[]>([]);
+
+  // Persist cart to localStorage whenever it changes
+  useEffect(() => {
+    saveCartToStorage(items);
+  }, [items]);
 
   const addToCart = useCallback((product: Product, color?: string | null, size?: string | null, quantity: number = 1) => {
     setItems((prev) => {
@@ -72,7 +93,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const cartTotal = useMemo(() =>
     items.reduce((sum, i) => {
       if (i.product.isBogo) {
-        // BOGO: for every 2 items, 1 is free. Pay for ceil(qty/2) * 2 - floor(qty/2)
         const paidQty = Math.ceil(i.quantity / 2);
         return sum + i.product.price * paidQty;
       }
@@ -82,7 +102,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const cartCount = useMemo(() =>
     items.reduce((sum, i) => sum + i.quantity, 0), [items]);
 
-  const clearCart = useCallback(() => setItems([]), []);
+  const clearCart = useCallback(() => {
+    setItems([]);
+    try { localStorage.removeItem(CART_STORAGE_KEY); } catch {}
+  }, []);
 
   const value = useMemo<CartContextType>(() => ({
     items, wishlist, addToCart, removeFromCart, updateQuantity,
