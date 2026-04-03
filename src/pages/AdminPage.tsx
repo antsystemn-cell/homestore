@@ -188,7 +188,7 @@ const AdminPage = () => {
   };
 
   useEffect(() => {
-    if (!authLoading && !isAdmin && !authError) {
+    if (!authLoading && !hasAdminAccess && !authError) {
       toast.error("Админ эрхгүй байна");
       navigate("/");
     }
