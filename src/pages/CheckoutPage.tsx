@@ -60,7 +60,11 @@ const CheckoutPage = () => {
 
   const selectedDeliveryOption = deliveryOptions.find(d => d.id === selectedDelivery);
   const deliveryFee = selectedDeliveryOption?.price || 0;
-  const grandTotal = cartTotal + deliveryFee;
+
+  // Extra 8,000₮ surcharge: if cart total < 50,000₮ OR cart has any sale items
+  const hasSaleItems = items.some(item => item.product.isOnSale || (item.product.discount && item.product.discount > 0));
+  const surcharge = (cartTotal < 50000 || hasSaleItems) ? 8000 : 0;
+  const grandTotal = cartTotal + deliveryFee + surcharge;
 
   const createOrder = async (paymentStatus = "unpaid", pm: PaymentMethod = "cash") => {
     if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return null; }
@@ -84,7 +88,7 @@ const CheckoutPage = () => {
       shipping_address: address,
       status: "pending",
       delivery_option_id: selectedDelivery || null,
-      delivery_fee: deliveryFee,
+      delivery_fee: deliveryFee + surcharge,
       payment_method: pm,
       payment_status: paymentStatus,
     };
@@ -457,6 +461,21 @@ const CheckoutPage = () => {
                     {deliveryFee > 0 ? formatPrice(deliveryFee) : "Үнэгүй"}
                   </span>
                 </div>
+                {surcharge > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Нэмэлт хүргэлт</span>
+                    <span className="font-medium text-foreground">{formatPrice(surcharge)}</span>
+                  </div>
+                )}
+                {surcharge > 0 && (
+                  <p className="text-[10px] text-muted-foreground">
+                    {cartTotal < 50000 && hasSaleItems
+                      ? "50,000₮-с доош + хямдралтай бараа → нэмэлт хүргэлт"
+                      : cartTotal < 50000
+                        ? "50,000₮-с доош захиалга → нэмэлт хүргэлт"
+                        : "Хямдралтай бараа → нэмэлт хүргэлт"}
+                  </p>
+                )}
                 {selectedDeliveryOption && (
                   <p className="text-[10px] text-muted-foreground">
                     {selectedDeliveryOption.name} · {selectedDeliveryOption.estimated_days_min}-{selectedDeliveryOption.estimated_days_max} хоног
