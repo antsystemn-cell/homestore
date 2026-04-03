@@ -27,7 +27,7 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 20;
 const MOBILE_LOAD_SIZE = 12;
 
 const Index = () => {
