@@ -58,7 +58,7 @@ const AdminPage = () => {
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
   // Payment provider form state
-  const [ppForm, setPpForm] = useState({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳" });
+  const [ppForm, setPpForm] = useState({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳", description: "", is_active: true });
   const [editPpId, setEditPpId] = useState<string | null>(null);
   const ppLogoFileRef = useRef<HTMLInputElement>(null);
 
@@ -266,7 +266,7 @@ const AdminPage = () => {
 
   const handleSavePaymentProvider = async () => {
     if (!ppForm.name.trim()) { toast.error("Нэр оруулна уу"); return; }
-    const payload = { name: ppForm.name, logo_url: ppForm.logo_url || null, color: ppForm.color, icon: ppForm.icon || "💳" };
+    const payload = { name: ppForm.name, logo_url: ppForm.logo_url || null, color: ppForm.color, icon: ppForm.icon || "💳", description: ppForm.description || null, is_active: ppForm.is_active };
     if (editPpId) {
       const { error } = await supabase.from("payment_providers").update(payload).eq("id", editPpId);
       if (error) toast.error(error.message);
@@ -276,7 +276,7 @@ const AdminPage = () => {
       if (error) toast.error(error.message);
       else toast.success("Төлбөрийн суваг нэмэгдлээ");
     }
-    setPpForm({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳" }); setEditPpId(null);
+    setPpForm({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳", description: "", is_active: true }); setEditPpId(null);
     fetchPaymentProviders();
   };
 
@@ -1957,13 +1957,15 @@ const AdminPage = () => {
           {tab === "payments" && (
             <div className="space-y-4">
               <div className="bg-card rounded-2xl p-4 md:p-6 border border-border space-y-4">
-                <h3 className="font-bold text-sm">{editPpId ? "Төлбөрийн суваг засах" : "Шинэ төлбөрийн суваг нэмэх"}</h3>
+                <h3 className="font-bold text-sm">{editPpId ? "Төлбөрийн хэрэгсэл засах" : "Шинэ төлбөрийн хэрэгсэл нэмэх"}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <input placeholder="Нэр *" value={ppForm.name} onChange={(e) => setPpForm(f => ({ ...f, name: e.target.value }))}
                     className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
                   <input placeholder="Icon (emoji, жишээ: 🏦)" value={ppForm.icon} onChange={(e) => setPpForm(f => ({ ...f, icon: e.target.value }))}
                     className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
                 </div>
+                <textarea placeholder="Тайлбар (заавал биш)" value={ppForm.description} onChange={(e) => setPpForm(f => ({ ...f, description: e.target.value }))}
+                  rows={2} className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none" />
                 <div className="space-y-2">
                   <label className="text-xs text-muted-foreground">Лого зураг</label>
                   <div className="flex items-center gap-3">
@@ -1985,13 +1987,20 @@ const AdminPage = () => {
                     onChange={(e) => setPpForm(f => ({ ...f, logo_url: e.target.value }))}
                     className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
                 </div>
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={ppForm.is_active} onChange={(e) => setPpForm(f => ({ ...f, is_active: e.target.checked }))}
+                      className="rounded border-border" />
+                    <span className="text-sm">Идэвхтэй</span>
+                  </label>
+                </div>
                 <div className="flex gap-2">
                   <button onClick={handleSavePaymentProvider}
                     className="bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors">
                     {editPpId ? "Шинэчлэх" : "Нэмэх"}
                   </button>
                   {editPpId && (
-                    <button onClick={() => { setPpForm({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳" }); setEditPpId(null); }}
+                    <button onClick={() => { setPpForm({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳", description: "", is_active: true }); setEditPpId(null); }}
                       className="bg-secondary rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors">
                       Болих
                     </button>
@@ -2000,19 +2009,36 @@ const AdminPage = () => {
               </div>
               <div className="space-y-2">
                 {paymentProviders.map((p) => (
-                  <div key={p.id} className="flex items-center justify-between bg-card rounded-xl p-4 border border-border">
-                    <div className="flex items-center gap-3">
+                  <div key={p.id} className={`flex items-center justify-between bg-card rounded-xl p-4 border border-border ${!p.is_active ? 'opacity-60' : ''}`}>
+                    <div className="flex items-center gap-3 min-w-0">
                       {p.logo_url ? (
-                        <img src={p.logo_url} alt={p.name} className="h-10 w-10 rounded-lg object-contain bg-secondary p-1" />
+                        <img src={p.logo_url} alt={p.name} className="h-10 w-10 rounded-lg object-contain bg-secondary p-1 shrink-0" />
                       ) : (
-                        <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center text-lg">
+                        <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center text-lg shrink-0">
                           {p.icon || "💳"}
                         </div>
                       )}
-                      <p className="text-sm font-semibold">{p.name}</p>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold truncate">{p.name}</p>
+                          {!p.is_active && (
+                            <span className="text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full">Идэвхгүй</span>
+                          )}
+                        </div>
+                        {p.description && <p className="text-xs text-muted-foreground truncate">{p.description}</p>}
+                      </div>
                     </div>
-                    <div className="flex gap-1">
-                      <button onClick={() => { setPpForm({ name: p.name, logo_url: p.logo_url || "", color: p.color || "bg-blue-500", icon: p.icon || "💳" }); setEditPpId(p.id); }}
+                    <div className="flex gap-1 shrink-0">
+                      <button onClick={async () => {
+                        const { error } = await supabase.from("payment_providers").update({ is_active: !p.is_active }).eq("id", p.id);
+                        if (error) toast.error(error.message);
+                        else fetchPaymentProviders();
+                      }}
+                        className={`p-2 rounded-lg transition-colors ${p.is_active ? 'hover:bg-amber-500/10 text-amber-600' : 'hover:bg-green-500/10 text-green-600'}`}
+                        title={p.is_active ? "Идэвхгүй болгох" : "Идэвхтэй болгох"}>
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => { setPpForm({ name: p.name, logo_url: p.logo_url || "", color: p.color || "bg-blue-500", icon: p.icon || "💳", description: p.description || "", is_active: p.is_active }); setEditPpId(p.id); }}
                         className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
                         <Pencil className="h-4 w-4" />
                       </button>
@@ -2024,7 +2050,7 @@ const AdminPage = () => {
                   </div>
                 ))}
                 {paymentProviders.length === 0 && (
-                  <p className="text-center text-sm text-muted-foreground py-8">Төлбөрийн суваг байхгүй</p>
+                  <p className="text-center text-sm text-muted-foreground py-8">Төлбөрийн хэрэгсэл байхгүй</p>
                 )}
               </div>
             </div>
@@ -2156,7 +2182,7 @@ const AdminPage = () => {
                       {editPpId ? "Шинэчлэх" : "Нэмэх"}
                     </button>
                     {editPpId && (
-                      <button onClick={() => { setPpForm({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳" }); setEditPpId(null); }}
+                      <button onClick={() => { setPpForm({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳", description: "", is_active: true }); setEditPpId(null); }}
                         className="bg-secondary rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors">
                         Болих
                       </button>
@@ -2177,7 +2203,7 @@ const AdminPage = () => {
                         <p className="text-sm font-semibold">{p.name}</p>
                       </div>
                       <div className="flex gap-1">
-                        <button onClick={() => { setPpForm({ name: p.name, logo_url: p.logo_url || "", color: p.color || "bg-blue-500", icon: p.icon || "💳" }); setEditPpId(p.id); }}
+                        <button onClick={() => { setPpForm({ name: p.name, logo_url: p.logo_url || "", color: p.color || "bg-blue-500", icon: p.icon || "💳", description: p.description || "", is_active: p.is_active }); setEditPpId(p.id); }}
                           className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
                           <Pencil className="h-4 w-4" />
                         </button>
