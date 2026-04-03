@@ -88,9 +88,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(nextSession?.user ?? null);
 
       if (nextSession?.user) {
-        await checkAdmin(nextSession.user.id);
+        await checkRoles(nextSession.user.id);
       } else {
         setIsAdmin(false);
+        setIsModerator(false);
       }
 
       if (mounted) setLoading(false);
