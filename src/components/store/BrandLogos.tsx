@@ -22,7 +22,7 @@ const BrandLogos = ({ brands }: BrandLogosProps) => {
         {displayed.map((brand) => (
           <button
             key={brand.id}
-            onClick={() => navigate(`/${encodeURIComponent(brand.name)}`)}
+            onClick={() => navigate(`/${brand.name.replace(/\s+/g, '')}`)}
             className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl bg-card border border-border hover:border-primary/40 hover:shadow-md transition-all group"
           >
             {brand.logo_url ? (

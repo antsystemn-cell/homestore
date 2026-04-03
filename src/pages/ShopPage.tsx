@@ -34,7 +34,8 @@ const ShopPage = () => {
     if (!urlBrand) {
       setSelectedBrand("all");
     } else if (brands.length > 0) {
-      const match = brands.find((b) => b.name === decodeURIComponent(urlBrand));
+      const decoded = decodeURIComponent(urlBrand);
+      const match = brands.find((b) => b.name === decoded || b.name.replace(/\s+/g, '') === decoded);
       if (match) setSelectedBrand(match.id);
     }
   }, [brands, searchParams, brandParam]);
@@ -91,7 +92,7 @@ const ShopPage = () => {
             {brands.map((b) => (
               <button
                 key={b.id}
-                onClick={() => { setSelectedBrand(b.id); navigate(`/${encodeURIComponent(b.name)}`); }}
+                onClick={() => { setSelectedBrand(b.id); navigate(`/${b.name.replace(/\s+/g, '')}`); }}
                 className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                   selectedBrand === b.id
                     ? "bg-primary text-primary-foreground"
