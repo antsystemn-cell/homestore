@@ -516,7 +516,7 @@ const AdminPage = () => {
       name: form.name, description: form.description, price: form.price,
       original_price: form.original_price, image_url: form.image_url,
       category: form.category, discount: form.discount,
-      is_new: form.is_new, is_on_sale: form.is_on_sale,
+      is_new: form.is_new, is_on_sale: form.is_on_sale, is_bogo: form.is_bogo,
       product_code: form.product_code || null,
       slug: form.slug.trim() || cyrillicToLatinSlug(form.name),
       specifications: form.specifications.filter(s => s.key.trim() && s.value.trim()),
