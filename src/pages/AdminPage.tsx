@@ -266,7 +266,7 @@ const AdminPage = () => {
 
   const handleSavePaymentProvider = async () => {
     if (!ppForm.name.trim()) { toast.error("Нэр оруулна уу"); return; }
-    const payload = { name: ppForm.name, logo_url: ppForm.logo_url || null, color: ppForm.color, icon: ppForm.icon || "💳" };
+    const payload = { name: ppForm.name, logo_url: ppForm.logo_url || null, color: ppForm.color, icon: ppForm.icon || "💳", description: ppForm.description || null, is_active: ppForm.is_active };
     if (editPpId) {
       const { error } = await supabase.from("payment_providers").update(payload).eq("id", editPpId);
       if (error) toast.error(error.message);
@@ -276,7 +276,7 @@ const AdminPage = () => {
       if (error) toast.error(error.message);
       else toast.success("Төлбөрийн суваг нэмэгдлээ");
     }
-    setPpForm({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳" }); setEditPpId(null);
+    setPpForm({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳", description: "", is_active: true }); setEditPpId(null);
     fetchPaymentProviders();
   };
 
