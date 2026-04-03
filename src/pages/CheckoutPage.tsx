@@ -146,6 +146,30 @@ const CheckoutPage = () => {
     setPaymentMethod("cash");
   };
 
+  const handleQPayStart = async () => {
+    if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return; }
+    if (isGuestCheckout && !name.trim()) { toast.error("Нэр заавал бөглөнө үү"); return; }
+    if (deliveryOptions.length > 0 && !selectedDelivery) { toast.error("Хүргэлтийн сонголт хийнэ үү"); return; }
+
+    setSubmitting(true);
+    const id = await createOrder("processing", "qpay");
+    setSubmitting(false);
+
+    if (id) {
+      setOrderId(id);
+    }
+  };
+
+  const handleQPaySuccess = () => {
+    clearCart();
+    setOrdered(true);
+  };
+
+  const handleQPayCancel = () => {
+    setOrderId(null);
+    setPaymentMethod("cash");
+  };
+
   // Guest order confirmation
   if (ordered && isGuestCheckout) {
     return (
