@@ -122,11 +122,8 @@ const CheckoutPage = () => {
   };
 
   const handleStorepayStart = async () => {
-    if (isGuestCheckout) {
-      toast.error("Storepay төлбөр зөвхөн нэвтэрсэн хэрэглэгчдэд боломжтой");
-      return;
-    }
     if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return; }
+    if (isGuestCheckout && !name.trim()) { toast.error("Нэр заавал бөглөнө үү"); return; }
     if (deliveryOptions.length > 0 && !selectedDelivery) { toast.error("Хүргэлтийн сонголт хийнэ үү"); return; }
 
     setSubmitting(true);
