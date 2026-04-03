@@ -162,10 +162,19 @@ async function handleCreateLoan(body: any, req: Request) {
   }
 
   // Create payment intent record first
+  const intentData: any = {
+    order_id: orderId || null,
+    type: type || "ORDER",
+    phone,
+    amount,
+    request_id: requestId,
+    status: "INITIATED",
+  };
+  if (userId) intentData.user_id = userId;
+
   const { data: intent, error: intentError } = await supabaseAdmin
     .from("payment_intents")
-    .insert({
-      user_id: userId,
+    .insert(intentData)
       order_id: orderId || null,
       type: type || "ORDER",
       phone,
