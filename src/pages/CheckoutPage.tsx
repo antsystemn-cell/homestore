@@ -461,6 +461,12 @@ const CheckoutPage = () => {
                     {deliveryFee > 0 ? formatPrice(deliveryFee) : "Үнэгүй"}
                   </span>
                 </div>
+                {surcharge > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Нэмэлт хүргэлт</span>
+                    <span className="font-medium text-foreground">{formatPrice(surcharge)}</span>
+                  </div>
+                )}
                 {selectedDeliveryOption && (
                   <p className="text-[10px] text-muted-foreground">
                     {selectedDeliveryOption.name} · {selectedDeliveryOption.estimated_days_min}-{selectedDeliveryOption.estimated_days_max} хоног
