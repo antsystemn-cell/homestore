@@ -45,7 +45,7 @@ const ProfilePage = () => {
     { label: "Хаяг", desc: "Хүргэлтийн хаяг", icon: MapPin, onClick: () => {} },
     { label: "Утасны дугаар", desc: "Холбоо барих мэдээлэл", icon: Phone, onClick: () => {} },
     { label: "Тохиргоо", desc: "Аккаунт тохиргоо", icon: Settings, onClick: () => {} },
-    ...(isAdmin ? [{ label: "Админ удирдлага", desc: "Дэлгүүр удирдах", icon: Shield, onClick: () => navigate("/admin") }] : []),
+    ...((isAdmin || isModerator) ? [{ label: "Админ удирдлага", desc: "Дэлгүүр удирдах", icon: Shield, onClick: () => navigate("/admin") }] : []),
   ];
 
   return (
