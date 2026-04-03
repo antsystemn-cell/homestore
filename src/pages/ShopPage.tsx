@@ -23,8 +23,19 @@ const ShopPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [brands, setBrands] = useState<{ id: string; name: string }[]>([]);
-  const [selectedBrand, setSelectedBrand] = useState<string>(searchParams.get("brand") || "all");
+  const [selectedBrand, setSelectedBrand] = useState<string>("all");
   const [error, setError] = useState(false);
+
+  // Resolve brand name from URL to brand id after brands load
+  useEffect(() => {
+    const brandParam = searchParams.get("brand");
+    if (!brandParam) {
+      setSelectedBrand("all");
+    } else if (brands.length > 0) {
+      const match = brands.find((b) => b.name === decodeURIComponent(brandParam));
+      if (match) setSelectedBrand(match.id);
+    }
+  }, [brands, searchParams]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -78,7 +89,7 @@ const ShopPage = () => {
             {brands.map((b) => (
               <button
                 key={b.id}
-                onClick={() => { setSelectedBrand(b.id); setSearchParams({ brand: b.id }); }}
+                onClick={() => { setSelectedBrand(b.id); setSearchParams({ brand: encodeURIComponent(b.name) }); }}
                 className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                   selectedBrand === b.id
                     ? "bg-primary text-primary-foreground"
