@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import Header from "@/components/store/Header";
 import ProductGrid from "@/components/store/ProductGrid";
 import BottomNav from "@/components/store/BottomNav";
@@ -19,7 +19,9 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 const ShopPage = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { brandName: brandParam } = useParams<{ brandName?: string }>();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [brands, setBrands] = useState<{ id: string; name: string }[]>([]);
@@ -28,14 +30,14 @@ const ShopPage = () => {
 
   // Resolve brand name from URL to brand id after brands load
   useEffect(() => {
-    const brandParam = searchParams.get("brand");
-    if (!brandParam) {
+    const urlBrand = brandParam || searchParams.get("brand");
+    if (!urlBrand) {
       setSelectedBrand("all");
     } else if (brands.length > 0) {
-      const match = brands.find((b) => b.name === decodeURIComponent(brandParam));
+      const match = brands.find((b) => b.name === decodeURIComponent(urlBrand));
       if (match) setSelectedBrand(match.id);
     }
-  }, [brands, searchParams]);
+  }, [brands, searchParams, brandParam]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -77,7 +79,7 @@ const ShopPage = () => {
         <div className="max-w-6xl mx-auto px-4 md:px-8 pt-4">
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             <button
-              onClick={() => { setSelectedBrand("all"); setSearchParams({}); }}
+              onClick={() => { setSelectedBrand("all"); navigate("/shop"); }}
               className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                 selectedBrand === "all"
                   ? "bg-primary text-primary-foreground"
@@ -89,7 +91,7 @@ const ShopPage = () => {
             {brands.map((b) => (
               <button
                 key={b.id}
-                onClick={() => { setSelectedBrand(b.id); setSearchParams({ brand: encodeURIComponent(b.name) }); }}
+                onClick={() => { setSelectedBrand(b.id); navigate(`/${encodeURIComponent(b.name)}`); }}
                 className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                   selectedBrand === b.id
                     ? "bg-primary text-primary-foreground"
