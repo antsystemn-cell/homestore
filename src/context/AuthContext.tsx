@@ -42,37 +42,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isModerator, setIsModerator] = useState(false);
   const [authError, setAuthError] = useState(false);
 
-  const checkAdmin = async (userId: string) => {
+  const checkRoles = async (userId: string) => {
     try {
       const result = await withTimeout(
         supabase
           .from("user_roles")
           .select("role")
           .eq("user_id", userId)
-          .eq("role", "admin")
-          .maybeSingle()
       );
 
       if (!result) {
-        console.error("Failed to check admin role: request timed out");
+        console.error("Failed to check roles: request timed out");
         setAuthError(true);
         setIsAdmin(false);
+        setIsModerator(false);
         return;
       }
 
       if (result.error) {
-        console.error("Failed to check admin role", result.error);
+        console.error("Failed to check roles", result.error);
         setAuthError(true);
         setIsAdmin(false);
+        setIsModerator(false);
         return;
       }
 
       setAuthError(false);
-      setIsAdmin(!!result.data);
+      const roles = (result.data || []).map((r: any) => r.role);
+      setIsAdmin(roles.includes("admin"));
+      setIsModerator(roles.includes("moderator"));
     } catch (error) {
-      console.error("Failed to check admin role", error);
+      console.error("Failed to check roles", error);
       setAuthError(true);
       setIsAdmin(false);
+      setIsModerator(false);
     }
   };
 
