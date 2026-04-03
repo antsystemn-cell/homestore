@@ -278,7 +278,7 @@ export const fetchRelatedPublicProducts = async (category: string, excludeId: st
 export const fetchSaleProducts = async () => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id",
+      select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id,is_bogo",
       is_on_sale: "eq.true",
       order: "discount.desc.nullslast",
     });
