@@ -56,7 +56,7 @@ const ShopPage = () => {
         if (brand) { p.brandName = brand.name; p.brandLogo = brand.logo_url; }
         return p;
       })));
-      setBrands((brandRes || []).map((b: any) => ({ id: b.id, name: b.name })));
+      setBrands((brandRes || []).map((b: any) => ({ id: b.id, name: b.name, logo_url: b.logo_url })));
     } catch (err) {
       console.error("Failed to load shop products", err);
       setProducts([]);
