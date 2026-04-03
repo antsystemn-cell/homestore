@@ -1,14 +1,27 @@
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import { formatPrice } from "@/data/products";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/store/Header";
 import BottomNav from "@/components/store/BottomNav";
+import GuestCheckoutModal from "@/components/store/GuestCheckoutModal";
 
 const CartPage = () => {
   const { items, updateQuantity, removeFromCart, cartTotal } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const [showGuestModal, setShowGuestModal] = useState(false);
+
+  const handleCheckout = () => {
+    if (user) {
+      navigate("/checkout");
+    } else {
+      setShowGuestModal(true);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-secondary pb-16 md:pb-0">
