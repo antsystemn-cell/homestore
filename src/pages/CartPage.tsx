@@ -129,7 +129,7 @@ const CartPage = () => {
 
                 <Button
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-base rounded-xl mt-2"
-                  onClick={() => navigate("/checkout")}
+                  onClick={handleCheckout}
                 >
                   Захиалга өгөх
                 </Button>
@@ -138,6 +138,13 @@ const CartPage = () => {
           </div>
         )}
       </div>
+      <GuestCheckoutModal
+        open={showGuestModal}
+        onContinueAsGuest={() => {
+          setShowGuestModal(false);
+          navigate("/checkout?guest=1");
+        }}
+      />
       <BottomNav />
     </div>
   );
