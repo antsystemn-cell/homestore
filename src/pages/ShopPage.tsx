@@ -78,7 +78,7 @@ const ShopPage = () => {
             {brands.map((b) => (
               <button
                 key={b.id}
-                onClick={() => { setSelectedBrand(b.id); setSearchParams({ brand: b.id }); }}
+                onClick={() => { setSelectedBrand(b.id); setSearchParams({ brand: encodeURIComponent(b.name) }); }}
                 className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                   selectedBrand === b.id
                     ? "bg-primary text-primary-foreground"
