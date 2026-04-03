@@ -130,7 +130,7 @@ async function handleEligibility(body: any) {
 
 async function handleCreateLoan(body: any, req: Request) {
   const userId = await getUserId(req);
-  if (!userId) return err("Нэвтрэлт шаардлагатай", 401);
+  // Allow guest users (userId may be null)
 
   const { phone, amount, description, orderId, type } = body;
 
