@@ -661,7 +661,7 @@ const AdminPage = () => {
     const now = new Date();
     const weekAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
     return orders
-      .filter((o: any) => o.status === 'confirmed' && new Date(o.created_at) >= weekAgo)
+      .filter((o: any) => (o.status === 'confirmed' || o.status === 'completed') && new Date(o.created_at) >= weekAgo)
       .reduce((s: number, o: any) => s + o.total, 0);
   }, [orders]);
 
