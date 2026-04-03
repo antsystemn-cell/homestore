@@ -2203,7 +2203,7 @@ const AdminPage = () => {
                         <p className="text-sm font-semibold">{p.name}</p>
                       </div>
                       <div className="flex gap-1">
-                        <button onClick={() => { setPpForm({ name: p.name, logo_url: p.logo_url || "", color: p.color || "bg-blue-500", icon: p.icon || "💳" }); setEditPpId(p.id); }}
+                        <button onClick={() => { setPpForm({ name: p.name, logo_url: p.logo_url || "", color: p.color || "bg-blue-500", icon: p.icon || "💳", description: p.description || "", is_active: p.is_active }); setEditPpId(p.id); }}
                           className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
                           <Pencil className="h-4 w-4" />
                         </button>
