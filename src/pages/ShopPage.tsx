@@ -77,6 +77,10 @@ const ShopPage = () => {
   return (
     <div className="min-h-screen bg-secondary pb-16 md:pb-0">
       <Header />
+      {/* Brand banner when a specific brand is selected */}
+      {selectedBrand !== "all" && (
+        <BrandBanner logoUrl={brands.find((b) => b.id === selectedBrand)?.logo_url} />
+      )}
       {brands.length > 0 && (
         <div className="max-w-6xl mx-auto px-4 md:px-8 pt-4">
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
