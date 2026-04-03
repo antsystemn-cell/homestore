@@ -100,10 +100,10 @@ const Header = () => {
         <div className="hidden md:flex items-center gap-3">
           <button
             onClick={() => navigate("/profile")}
-            className="p-2 rounded-full bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+            className="relative p-2 rounded-full bg-secondary text-muted-foreground hover:text-foreground transition-colors"
           >
             <Bell className="h-5 w-5" />
-            <span className="absolute top-3 right-3 h-2 w-2 bg-sale rounded-full" />
+            <span className="absolute top-1 right-1 h-2 w-2 bg-sale rounded-full" />
           </button>
         </div>
       </div>
