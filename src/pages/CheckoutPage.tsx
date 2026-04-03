@@ -467,6 +467,15 @@ const CheckoutPage = () => {
                     <span className="font-medium text-foreground">{formatPrice(surcharge)}</span>
                   </div>
                 )}
+                {surcharge > 0 && (
+                  <p className="text-[10px] text-muted-foreground">
+                    {cartTotal < 50000 && hasSaleItems
+                      ? "50,000₮-с доош + хямдралтай бараа → нэмэлт хүргэлт"
+                      : cartTotal < 50000
+                        ? "50,000₮-с доош захиалга → нэмэлт хүргэлт"
+                        : "Хямдралтай бараа → нэмэлт хүргэлт"}
+                  </p>
+                )}
                 {selectedDeliveryOption && (
                   <p className="text-[10px] text-muted-foreground">
                     {selectedDeliveryOption.name} · {selectedDeliveryOption.estimated_days_min}-{selectedDeliveryOption.estimated_days_max} хоног
