@@ -326,9 +326,10 @@ const AdminPage = () => {
   };
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
-    const { error } = await supabase.from("orders").update({ status: newStatus }).eq("id", orderId);
+    const { error } = await supabase.from("orders").update({ status: newStatus, updated_at: new Date().toISOString() }).eq("id", orderId);
     if (error) {
-      toast.error("Төлөв өөрчлөхөд алдаа гарлаа");
+      console.error("Order status update error:", error);
+      toast.error("Төлөв өөрчлөхөд алдаа гарлаа: " + error.message);
     } else {
       toast.success(`Захиалгын төлөв "${statusLabels[newStatus]}" болж өөрчлөгдлөө`);
       setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status: newStatus } : o));
