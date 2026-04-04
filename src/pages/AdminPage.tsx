@@ -908,19 +908,19 @@ const AdminPage = () => {
               </div>
 
               {/* Өнөөдөр & Долоо хоног */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                <div className="bg-card rounded-2xl p-5 border border-border">
-                  <p className="text-xs text-muted-foreground mb-1">Өнөөдрийн захиалга</p>
-                  <p className="text-2xl font-extrabold">{todayOrders.length}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Орлого: {formatPrice(todayRevenue)}</p>
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mt-3 md:mt-4">
+                <div className="bg-card rounded-2xl p-4 md:p-5 border border-border">
+                  <p className="text-[10px] md:text-xs text-muted-foreground mb-0.5">Өнөөдрийн захиалга</p>
+                  <p className="text-lg md:text-2xl font-extrabold">{todayOrders.length}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">Орлого: {formatPrice(todayRevenue)}</p>
                 </div>
-                <div className="bg-card rounded-2xl p-5 border border-border">
-                  <p className="text-xs text-muted-foreground mb-1">7 хоногийн орлого</p>
-                  <p className="text-2xl font-extrabold">{formatPrice(weekRevenue)}</p>
+                <div className="bg-card rounded-2xl p-4 md:p-5 border border-border">
+                  <p className="text-[10px] md:text-xs text-muted-foreground mb-0.5">7 хоногийн орлого</p>
+                  <p className="text-lg md:text-2xl font-extrabold">{formatPrice(weekRevenue)}</p>
                 </div>
-                <div className="bg-card rounded-2xl p-5 border border-border">
-                  <p className="text-xs text-muted-foreground mb-1">Дундаж захиалга</p>
-                  <p className="text-2xl font-extrabold">{paidOrders.length > 0 ? formatPrice(Math.round(totalRevenue / paidOrders.length)) : "₮0"}</p>
+                <div className="bg-card rounded-2xl p-4 md:p-5 border border-border col-span-2 lg:col-span-1">
+                  <p className="text-[10px] md:text-xs text-muted-foreground mb-0.5">Дундаж захиалга</p>
+                  <p className="text-lg md:text-2xl font-extrabold">{paidOrders.length > 0 ? formatPrice(Math.round(totalRevenue / paidOrders.length)) : "₮0"}</p>
                 </div>
               </div>
 
