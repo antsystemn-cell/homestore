@@ -1459,6 +1459,7 @@ const AdminPage = () => {
                               <div className="min-w-0">
                                 <span className="text-sm font-medium block truncate max-w-[200px]">{p.name}</span>
                                 {p.is_new && <span className="text-[10px] bg-blue-500/10 text-blue-600 px-1.5 py-0.5 rounded-full font-medium">Шинэ</span>}
+                                {p.is_active === false && <span className="text-[10px] bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full font-medium">Идэвхгүй</span>}
                               </div>
                             </div>
                           </td>
