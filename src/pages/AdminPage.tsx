@@ -831,7 +831,7 @@ const AdminPage = () => {
           </div>
         </header>
         <div className="sticky top-[52px] z-40 bg-background/95 backdrop-blur-md border-b border-border">
-          <div className="flex overflow-x-auto scrollbar-hide gap-1 px-3 py-2">
+          <div className="flex overflow-x-auto no-scrollbar gap-1 px-3 py-2">
             {sidebarItems.map((t) => {
               const Icon = t.icon;
               const active = tab === t.id;
