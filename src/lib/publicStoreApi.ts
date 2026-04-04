@@ -281,6 +281,7 @@ export const fetchSaleProducts = async () => {
     return await fetchPublic<any[]>("products", {
       select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id,is_bogo",
       is_on_sale: "eq.true",
+      is_active: "eq.true",
       order: "discount.desc.nullslast",
     });
   } catch (error) {
