@@ -821,25 +821,38 @@ const AdminPage = () => {
 
       {/* Mobile Header + Tabs */}
       <div className="md:hidden">
-        <header className="sticky top-0 z-50 bg-background px-4 py-3 flex items-center gap-3 border-b border-border">
-          <button onClick={() => navigate("/")} className="p-2 rounded-full bg-secondary">
-            <ArrowLeft className="h-5 w-5" />
+        <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md px-4 py-3 flex items-center gap-3 border-b border-border">
+          <button onClick={() => navigate("/")} className="p-2 rounded-full bg-secondary shrink-0">
+            <ArrowLeft className="h-4 w-4" />
           </button>
-          <h1 className="text-lg font-bold">Админ удирдлага</h1>
+          <h1 className="text-base font-bold flex-1">Админ</h1>
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] text-muted-foreground bg-secondary px-2 py-1 rounded-full">{sidebarItems.find(s => s.id === tab)?.label}</span>
+          </div>
         </header>
-        <div className="flex border-b border-border">
-          {sidebarItems.map((t) => {
-            const Icon = t.icon;
-            return (
-              <button key={t.id} onClick={() => setTab(t.id)}
-                className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors ${
-                  tab === t.id ? "text-foreground border-b-2 border-foreground" : "text-muted-foreground"
-                }`}>
-                <Icon className="h-4 w-4" />
-                {t.label}
-              </button>
-            );
-          })}
+        <div className="sticky top-[52px] z-40 bg-background/95 backdrop-blur-md border-b border-border">
+          <div className="flex overflow-x-auto scrollbar-hide gap-1 px-3 py-2">
+            {sidebarItems.map((t) => {
+              const Icon = t.icon;
+              const active = tab === t.id;
+              return (
+                <button key={t.id} onClick={() => setTab(t.id)}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all shrink-0 ${
+                    active 
+                      ? "bg-primary text-primary-foreground shadow-sm" 
+                      : "text-muted-foreground bg-secondary/60 active:bg-secondary"
+                  }`}>
+                  <Icon className="h-3.5 w-3.5" />
+                  {t.label}
+                  {t.id === "orders" && orders.length > 0 && (
+                    <span className={`text-[9px] min-w-[16px] h-4 flex items-center justify-center rounded-full ${active ? "bg-primary-foreground/20" : "bg-muted"}`}>
+                      {orders.filter(o => o.status === 'pending').length || ""}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
