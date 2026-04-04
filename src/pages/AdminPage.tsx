@@ -821,25 +821,38 @@ const AdminPage = () => {
 
       {/* Mobile Header + Tabs */}
       <div className="md:hidden">
-        <header className="sticky top-0 z-50 bg-background px-4 py-3 flex items-center gap-3 border-b border-border">
-          <button onClick={() => navigate("/")} className="p-2 rounded-full bg-secondary">
-            <ArrowLeft className="h-5 w-5" />
+        <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md px-4 py-3 flex items-center gap-3 border-b border-border">
+          <button onClick={() => navigate("/")} className="p-2 rounded-full bg-secondary shrink-0">
+            <ArrowLeft className="h-4 w-4" />
           </button>
-          <h1 className="text-lg font-bold">Админ удирдлага</h1>
+          <h1 className="text-base font-bold flex-1">Админ</h1>
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] text-muted-foreground bg-secondary px-2 py-1 rounded-full">{sidebarItems.find(s => s.id === tab)?.label}</span>
+          </div>
         </header>
-        <div className="flex border-b border-border">
-          {sidebarItems.map((t) => {
-            const Icon = t.icon;
-            return (
-              <button key={t.id} onClick={() => setTab(t.id)}
-                className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors ${
-                  tab === t.id ? "text-foreground border-b-2 border-foreground" : "text-muted-foreground"
-                }`}>
-                <Icon className="h-4 w-4" />
-                {t.label}
-              </button>
-            );
-          })}
+        <div className="sticky top-[52px] z-40 bg-background/95 backdrop-blur-md border-b border-border">
+          <div className="flex overflow-x-auto no-scrollbar gap-1 px-3 py-2">
+            {sidebarItems.map((t) => {
+              const Icon = t.icon;
+              const active = tab === t.id;
+              return (
+                <button key={t.id} onClick={() => setTab(t.id)}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all shrink-0 ${
+                    active 
+                      ? "bg-primary text-primary-foreground shadow-sm" 
+                      : "text-muted-foreground bg-secondary/60 active:bg-secondary"
+                  }`}>
+                  <Icon className="h-3.5 w-3.5" />
+                  {t.label}
+                  {t.id === "orders" && orders.length > 0 && (
+                    <span className={`text-[9px] min-w-[16px] h-4 flex items-center justify-center rounded-full ${active ? "bg-primary-foreground/20" : "bg-muted"}`}>
+                      {orders.filter(o => o.status === 'pending').length || ""}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -874,7 +887,7 @@ const AdminPage = () => {
           {/* Stats */}
           {tab === "stats" && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 {[
                   { label: "Нийт бараа", value: products.length, icon: Package, color: "bg-blue-500/10 text-blue-600" },
                   { label: "Нийт захиалга", value: orders.length, icon: ShoppingBag, color: "bg-green-500/10 text-green-600" },
@@ -883,31 +896,31 @@ const AdminPage = () => {
                 ].map((stat, i) => {
                   const Icon = stat.icon;
                   return (
-                    <div key={i} className="bg-card rounded-2xl p-6 border border-border">
-                      <div className={`h-10 w-10 rounded-xl ${stat.color} flex items-center justify-center mb-4`}>
-                        <Icon className="h-5 w-5" />
+                    <div key={i} className="bg-card rounded-2xl p-4 md:p-6 border border-border">
+                      <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl ${stat.color} flex items-center justify-center mb-3 md:mb-4`}>
+                        <Icon className="h-4 w-4 md:h-5 md:w-5" />
                       </div>
-                      <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
-                      <p className="text-2xl font-extrabold">{stat.value}</p>
+                      <p className="text-[10px] md:text-xs text-muted-foreground mb-0.5">{stat.label}</p>
+                      <p className="text-lg md:text-2xl font-extrabold">{stat.value}</p>
                     </div>
                   );
                 })}
               </div>
 
               {/* Өнөөдөр & Долоо хоног */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                <div className="bg-card rounded-2xl p-5 border border-border">
-                  <p className="text-xs text-muted-foreground mb-1">Өнөөдрийн захиалга</p>
-                  <p className="text-2xl font-extrabold">{todayOrders.length}</p>
-                  <p className="text-xs text-muted-foreground mt-1">Орлого: {formatPrice(todayRevenue)}</p>
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mt-3 md:mt-4">
+                <div className="bg-card rounded-2xl p-4 md:p-5 border border-border">
+                  <p className="text-[10px] md:text-xs text-muted-foreground mb-0.5">Өнөөдрийн захиалга</p>
+                  <p className="text-lg md:text-2xl font-extrabold">{todayOrders.length}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">Орлого: {formatPrice(todayRevenue)}</p>
                 </div>
-                <div className="bg-card rounded-2xl p-5 border border-border">
-                  <p className="text-xs text-muted-foreground mb-1">7 хоногийн орлого</p>
-                  <p className="text-2xl font-extrabold">{formatPrice(weekRevenue)}</p>
+                <div className="bg-card rounded-2xl p-4 md:p-5 border border-border">
+                  <p className="text-[10px] md:text-xs text-muted-foreground mb-0.5">7 хоногийн орлого</p>
+                  <p className="text-lg md:text-2xl font-extrabold">{formatPrice(weekRevenue)}</p>
                 </div>
-                <div className="bg-card rounded-2xl p-5 border border-border">
-                  <p className="text-xs text-muted-foreground mb-1">Дундаж захиалга</p>
-                  <p className="text-2xl font-extrabold">{paidOrders.length > 0 ? formatPrice(Math.round(totalRevenue / paidOrders.length)) : "₮0"}</p>
+                <div className="bg-card rounded-2xl p-4 md:p-5 border border-border col-span-2 lg:col-span-1">
+                  <p className="text-[10px] md:text-xs text-muted-foreground mb-0.5">Дундаж захиалга</p>
+                  <p className="text-lg md:text-2xl font-extrabold">{paidOrders.length > 0 ? formatPrice(Math.round(totalRevenue / paidOrders.length)) : "₮0"}</p>
                 </div>
               </div>
 
