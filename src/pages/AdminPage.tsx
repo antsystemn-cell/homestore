@@ -68,7 +68,7 @@ const AdminPage = () => {
   const [form, setForm] = useState({
     name: "", description: "", price: 0, original_price: 0,
     image_url: "", category: "general", discount: 0,
-    is_new: false, is_on_sale: false, is_bogo: false,
+    is_new: false, is_on_sale: false, is_bogo: false, is_active: true,
     product_code: "", slug: "", specifications: [] as { key: string; value: string }[],
     detail_media: [] as { type: "image" | "video"; url: string; caption: string; thumbnail?: string }[],
     brand_id: "",
@@ -303,7 +303,7 @@ const AdminPage = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from("products").select("id, name, price, original_price, image_url, category, description, sales, is_new, is_on_sale, is_bogo, discount, product_code, slug, brand_id, created_at, colors, sizes, specifications, detail_media").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("products").select("id, name, price, original_price, image_url, category, description, sales, is_new, is_on_sale, is_bogo, is_active, discount, product_code, slug, brand_id, created_at, colors, sizes, specifications, detail_media").order("created_at", { ascending: false });
       if (error) throw error;
       setProducts(data || []);
     } catch (error) {
@@ -512,7 +512,7 @@ const AdminPage = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, is_bogo: false, product_code: "", slug: "", specifications: [], detail_media: [], brand_id: "", colors: [], sizes: [] });
+    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, is_bogo: false, is_active: true, product_code: "", slug: "", specifications: [], detail_media: [], brand_id: "", colors: [], sizes: [] });
     setNewColor(""); setNewSize("");
     setEditId(null);
     setShowForm(false);
@@ -543,7 +543,7 @@ const AdminPage = () => {
       name: form.name, description: form.description, price: form.price,
       original_price: form.original_price, image_url: form.image_url,
       category: form.category, discount: form.discount,
-      is_new: form.is_new, is_on_sale: form.is_on_sale, is_bogo: form.is_bogo,
+      is_new: form.is_new, is_on_sale: form.is_on_sale, is_bogo: form.is_bogo, is_active: form.is_active,
       product_code: form.product_code || null,
       slug: form.slug.trim() || cyrillicToLatinSlug(form.name),
       specifications: form.specifications.filter(s => s.key.trim() && s.value.trim()),
@@ -596,7 +596,7 @@ const AdminPage = () => {
       name: p.name, description: p.description || "", price: p.price,
       original_price: p.original_price || 0, image_url: p.image_url || "",
       category: p.category, discount: p.discount || 0,
-      is_new: p.is_new, is_on_sale: p.is_on_sale, is_bogo: p.is_bogo || false,
+      is_new: p.is_new, is_on_sale: p.is_on_sale, is_bogo: p.is_bogo || false, is_active: p.is_active !== false,
       product_code: p.product_code || "",
       slug: p.slug || "",
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
@@ -1408,6 +1408,14 @@ const AdminPage = () => {
                       1+1 Үнэгүй
                     </label>
                   </div>
+                  <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-secondary/30">
+                    <label className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="rounded accent-primary" />
+                      <span className={form.is_active ? "text-foreground font-medium" : "text-destructive font-medium"}>
+                        {form.is_active ? "✅ Идэвхтэй" : "⛔ Идэвхгүй (дэлгүүрт харагдахгүй)"}
+                      </span>
+                    </label>
+                  </div>
 
                   <div className="flex gap-3 pt-2 sticky bottom-0 bg-card pb-2 z-10 border-t border-border mt-4 pt-4">
                     <button onClick={handleSaveProduct} disabled={loading}
@@ -1436,7 +1444,7 @@ const AdminPage = () => {
                     </thead>
                     <tbody>
                       {filteredProducts.map((p) => (
-                        <tr key={p.id} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
+                        <tr key={p.id} className={`border-b border-border last:border-0 hover:bg-secondary/30 transition-colors ${p.is_active === false ? "opacity-50" : ""}`}>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div className="h-10 w-10 rounded-lg bg-secondary overflow-hidden shrink-0">
@@ -1451,6 +1459,7 @@ const AdminPage = () => {
                               <div className="min-w-0">
                                 <span className="text-sm font-medium block truncate max-w-[200px]">{p.name}</span>
                                 {p.is_new && <span className="text-[10px] bg-blue-500/10 text-blue-600 px-1.5 py-0.5 rounded-full font-medium">Шинэ</span>}
+                                {p.is_active === false && <span className="text-[10px] bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full font-medium">Идэвхгүй</span>}
                               </div>
                             </div>
                           </td>
@@ -1501,7 +1510,7 @@ const AdminPage = () => {
               {/* Mobile card view */}
               <div className="md:hidden space-y-2">
                 {filteredProducts.map((p) => (
-                  <div key={p.id} className="flex items-center gap-3 bg-card rounded-xl p-3 border border-border">
+                  <div key={p.id} className={`flex items-center gap-3 bg-card rounded-xl p-3 border border-border ${p.is_active === false ? "opacity-50" : ""}`}>
                     <div className="h-12 w-12 rounded-lg bg-secondary overflow-hidden shrink-0">
                       {p.image_url ? (
                         <img src={p.image_url} alt="" className="h-full w-full object-cover" />

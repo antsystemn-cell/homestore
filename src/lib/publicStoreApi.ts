@@ -186,6 +186,7 @@ export const fetchPublicProducts = async () => {
   try {
     return await fetchPublic<any[]>("products", {
       select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id,is_bogo",
+      is_active: "eq.true",
     });
   } catch (error) {
     logFallback("products", error);
@@ -267,6 +268,7 @@ export const fetchRelatedPublicProducts = async (category: string, excludeId: st
       select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id,is_bogo",
       category: `eq.${category}`,
       id: `neq.${excludeId}`,
+      is_active: "eq.true",
       limit: 4,
     });
   } catch (error) {
@@ -280,6 +282,7 @@ export const fetchSaleProducts = async () => {
     return await fetchPublic<any[]>("products", {
       select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id,is_bogo",
       is_on_sale: "eq.true",
+      is_active: "eq.true",
       order: "discount.desc.nullslast",
     });
   } catch (error) {
@@ -292,6 +295,7 @@ export const fetchFeaturedProducts = async () => {
   try {
     return await fetchPublic<any[]>("products", {
       select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id,is_new,sales,is_bogo",
+      is_active: "eq.true",
       order: "sales.desc.nullslast",
       limit: 8,
     });

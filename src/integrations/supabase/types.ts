@@ -316,6 +316,7 @@ export type Database = {
           discount: number | null
           id: string
           image_url: string | null
+          is_active: boolean
           is_bogo: boolean | null
           is_new: boolean | null
           is_on_sale: boolean | null
@@ -339,6 +340,7 @@ export type Database = {
           discount?: number | null
           id?: string
           image_url?: string | null
+          is_active?: boolean
           is_bogo?: boolean | null
           is_new?: boolean | null
           is_on_sale?: boolean | null
@@ -362,6 +364,7 @@ export type Database = {
           discount?: number | null
           id?: string
           image_url?: string | null
+          is_active?: boolean
           is_bogo?: boolean | null
           is_new?: boolean | null
           is_on_sale?: boolean | null
