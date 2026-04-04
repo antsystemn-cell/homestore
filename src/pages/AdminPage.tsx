@@ -1510,7 +1510,7 @@ const AdminPage = () => {
               {/* Mobile card view */}
               <div className="md:hidden space-y-2">
                 {filteredProducts.map((p) => (
-                  <div key={p.id} className="flex items-center gap-3 bg-card rounded-xl p-3 border border-border">
+                  <div key={p.id} className={`flex items-center gap-3 bg-card rounded-xl p-3 border border-border ${p.is_active === false ? "opacity-50" : ""}`}>
                     <div className="h-12 w-12 rounded-lg bg-secondary overflow-hidden shrink-0">
                       {p.image_url ? (
                         <img src={p.image_url} alt="" className="h-full w-full object-cover" />

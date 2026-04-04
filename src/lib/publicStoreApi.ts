@@ -268,6 +268,7 @@ export const fetchRelatedPublicProducts = async (category: string, excludeId: st
       select: "id,slug,name,price,original_price,image_url,category,is_on_sale,discount,brand_id,is_bogo",
       category: `eq.${category}`,
       id: `neq.${excludeId}`,
+      is_active: "eq.true",
       limit: 4,
     });
   } catch (error) {
