@@ -1408,6 +1408,14 @@ const AdminPage = () => {
                       1+1 Үнэгүй
                     </label>
                   </div>
+                  <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-secondary/30">
+                    <label className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="rounded accent-primary" />
+                      <span className={form.is_active ? "text-foreground font-medium" : "text-destructive font-medium"}>
+                        {form.is_active ? "✅ Идэвхтэй" : "⛔ Идэвхгүй (дэлгүүрт харагдахгүй)"}
+                      </span>
+                    </label>
+                  </div>
 
                   <div className="flex gap-3 pt-2 sticky bottom-0 bg-card pb-2 z-10 border-t border-border mt-4 pt-4">
                     <button onClick={handleSaveProduct} disabled={loading}
