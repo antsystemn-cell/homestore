@@ -1444,7 +1444,7 @@ const AdminPage = () => {
                     </thead>
                     <tbody>
                       {filteredProducts.map((p) => (
-                        <tr key={p.id} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
+                        <tr key={p.id} className={`border-b border-border last:border-0 hover:bg-secondary/30 transition-colors ${p.is_active === false ? "opacity-50" : ""}`}>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div className="h-10 w-10 rounded-lg bg-secondary overflow-hidden shrink-0">
