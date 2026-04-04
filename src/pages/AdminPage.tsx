@@ -896,12 +896,12 @@ const AdminPage = () => {
                 ].map((stat, i) => {
                   const Icon = stat.icon;
                   return (
-                    <div key={i} className="bg-card rounded-2xl p-6 border border-border">
-                      <div className={`h-10 w-10 rounded-xl ${stat.color} flex items-center justify-center mb-4`}>
-                        <Icon className="h-5 w-5" />
+                    <div key={i} className="bg-card rounded-2xl p-4 md:p-6 border border-border">
+                      <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl ${stat.color} flex items-center justify-center mb-3 md:mb-4`}>
+                        <Icon className="h-4 w-4 md:h-5 md:w-5" />
                       </div>
-                      <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
-                      <p className="text-2xl font-extrabold">{stat.value}</p>
+                      <p className="text-[10px] md:text-xs text-muted-foreground mb-0.5">{stat.label}</p>
+                      <p className="text-lg md:text-2xl font-extrabold">{stat.value}</p>
                     </div>
                   );
                 })}
