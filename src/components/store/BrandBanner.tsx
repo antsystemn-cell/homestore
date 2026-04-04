@@ -9,7 +9,7 @@ const BrandBanner: React.FC<Props> = ({ logoUrl }) => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 md:px-8 pt-4">
-      <div className="w-full rounded-2xl bg-card border border-border overflow-hidden flex items-center justify-center py-10 md:py-14">
+      <div className="w-full rounded-2xl bg-gradient-to-br from-primary/10 via-accent/20 to-secondary/30 border border-border/50 overflow-hidden flex items-center justify-center py-12 md:py-16 shadow-lg backdrop-blur-sm">
         <img
           src={logoUrl}
           alt=""
