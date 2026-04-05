@@ -355,10 +355,12 @@ const CheckoutPage = () => {
 
                 {/* Storepay */}
                 <label
-                    className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      paymentMethod === "storepay"
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-muted-foreground/30"
+                    className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 transition-all ${
+                      grandTotal < 100000
+                        ? "border-border opacity-50 cursor-not-allowed"
+                        : paymentMethod === "storepay"
+                          ? "border-primary bg-primary/5 cursor-pointer"
+                          : "border-border hover:border-muted-foreground/30 cursor-pointer"
                     }`}
                   >
                     <input
@@ -366,7 +368,8 @@ const CheckoutPage = () => {
                       name="payment"
                       value="storepay"
                       checked={paymentMethod === "storepay"}
-                      onChange={() => setPaymentMethod("storepay")}
+                      onChange={() => grandTotal >= 100000 && setPaymentMethod("storepay")}
+                      disabled={grandTotal < 100000}
                       className="w-4 h-4 accent-[hsl(var(--primary))]"
                     />
                     <div className="w-5 h-5 rounded bg-[#00B140] flex items-center justify-center">
@@ -375,6 +378,9 @@ const CheckoutPage = () => {
                     <div>
                       <p className="text-sm font-semibold text-foreground">Storepay</p>
                       <p className="text-xs text-muted-foreground">Хуваан төлөх үйлчилгээ</p>
+                      {grandTotal < 100000 && (
+                        <p className="text-[11px] text-destructive mt-0.5">100,000₮ доош худалдан авалт боломжгүй байна</p>
+                      )}
                     </div>
                   </label>
 
