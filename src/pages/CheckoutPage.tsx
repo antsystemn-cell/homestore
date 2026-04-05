@@ -89,7 +89,7 @@ const CheckoutPage = () => {
       shipping_address: address,
       status: "pending",
       delivery_option_id: selectedDelivery || null,
-      delivery_fee: deliveryFee + surcharge,
+      delivery_fee: totalDeliveryFee,
       payment_method: pm,
       payment_status: paymentStatus,
     };
