@@ -15,6 +15,9 @@ const CartPage = () => {
   const navigate = useNavigate();
   const [showGuestModal, setShowGuestModal] = useState(false);
 
+  const hasSaleItems = items.some(item => item.product.isOnSale || (item.product.discount && item.product.discount > 0));
+  const deliverySurcharge = (cartTotal < 50000 || hasSaleItems) ? 8000 : 0;
+
   const handleCheckout = () => {
     if (user) {
       navigate("/checkout");
@@ -120,11 +123,22 @@ const CartPage = () => {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Хүргэлт</span>
-                  <span className="text-primary font-medium">Үнэгүй</span>
+                  <span className={`font-medium ${deliverySurcharge > 0 ? 'text-foreground' : 'text-primary'}`}>
+                    {deliverySurcharge > 0 ? formatPrice(deliverySurcharge) : "Үнэгүй"}
+                  </span>
                 </div>
+                {deliverySurcharge > 0 && (
+                  <p className="text-[10px] text-muted-foreground">
+                    {cartTotal < 50000 && hasSaleItems
+                      ? "50,000₮-с доош + хямдралтай бараа"
+                      : cartTotal < 50000
+                        ? "50,000₮-с доош захиалга"
+                        : "Хямдралтай бараа агуулсан захиалга"}
+                  </p>
+                )}
                 <div className="border-t border-border pt-3 flex justify-between">
                   <span className="font-bold text-foreground">Төлөх дүн</span>
-                  <span className="font-extrabold text-foreground text-lg">{formatPrice(cartTotal)}</span>
+                  <span className="font-extrabold text-foreground text-lg">{formatPrice(cartTotal + deliverySurcharge)}</span>
                 </div>
 
                 <Button
