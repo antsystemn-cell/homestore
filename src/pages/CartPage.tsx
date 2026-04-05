@@ -129,11 +129,7 @@ const CartPage = () => {
                 </div>
                 {deliverySurcharge > 0 && (
                   <p className="text-[10px] text-muted-foreground">
-                    {cartTotal < 50000 && hasSaleItems
-                      ? "50,000₮-с доош + хямдралтай бараа"
-                      : cartTotal < 50000
-                        ? "50,000₮-с доош захиалга"
-                        : "Хямдралтай бараа агуулсан захиалга"}
+                    Хямдралтай бараа болон 50,000₮ доош худалдан авалтанд хамаарна.
                   </p>
                 )}
                 <div className="border-t border-border pt-3 flex justify-between">
