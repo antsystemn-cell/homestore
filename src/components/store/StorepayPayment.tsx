@@ -166,6 +166,17 @@ export default function StorepayPayment({
         </div>
       </div>
 
+      {amount < 100000 && (
+        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-3">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+            <p className="text-xs text-amber-800 dark:text-amber-300">
+              Storepay-ийн доод худалдан авалтын дүн <span className="font-semibold">100,000₮</span> байна. Одоогийн захиалгын дүн хүрэлцэхгүй байна.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Step: Phone input */}
       {(step === "phone" || step === "checking") && (
         <div className="space-y-3">
@@ -183,7 +194,7 @@ export default function StorepayPayment({
               setPhone(val);
               if (phoneError) setPhoneError(validatePhone(val));
             }}
-            disabled={step === "checking"}
+            disabled={step === "checking" || amount < 100000}
             className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
           />
           {phoneError && (
@@ -194,7 +205,7 @@ export default function StorepayPayment({
           )}
           <Button
             onClick={handleCheckEligibility}
-            disabled={step === "checking" || !phone}
+            disabled={step === "checking" || !phone || amount < 100000}
             className="w-full rounded-xl h-11 gap-2"
           >
             {step === "checking" ? (
