@@ -1634,8 +1634,10 @@ const AdminPage = () => {
                                 <div className="flex-1 min-w-0">
                                   <p className="text-xs font-medium truncate">{item.name}</p>
                                   <p className="text-[10px] text-muted-foreground">
+                                    {item.product_code && <span className="font-mono mr-1">SKU: {item.product_code}</span>}
+                                    {item.product_code && (item.color || item.size) && "· "}
                                     {[item.color && `Өнгө: ${item.color}`, item.size && `Хэмжээ: ${item.size}`].filter(Boolean).join(" · ")}
-                                    {item.color || item.size ? " · " : ""}x{item.quantity}
+                                    {(item.product_code || item.color || item.size) ? " · " : ""}x{item.quantity}
                                   </p>
                                 </div>
                                 <span className="text-xs font-bold">{formatPrice(item.price * item.quantity)}</span>
