@@ -80,6 +80,7 @@ const CheckoutPage = () => {
       color: item.selectedColor || null,
       size: item.selectedSize || null,
       image: item.product.image,
+      product_code: item.product.productCode || null,
     }));
 
     const orderData: any = {
