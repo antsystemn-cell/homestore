@@ -36,6 +36,9 @@ const CheckoutPage = () => {
   const [selectedDelivery, setSelectedDelivery] = useState<string | null>(null);
   const [loadingDelivery, setLoadingDelivery] = useState(true);
 
+  // Payment provider logos from DB
+  const [providerLogos, setProviderLogos] = useState<Record<string, string>>({});
+
   // Redirect unauthenticated non-guest users
   useEffect(() => {
     if (!user && !isGuestCheckout) {
