@@ -2,7 +2,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/data/products";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Lock, Loader2, Truck, Banknote, CreditCard, Copy, UserPlus, QrCode } from "lucide-react";
+import { CheckCircle, Lock, Loader2, Truck, Banknote, CreditCard, Copy, UserPlus, QrCode, Wallet } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
