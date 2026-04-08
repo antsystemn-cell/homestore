@@ -59,7 +59,22 @@ const CheckoutPage = () => {
       }
       setLoadingDelivery(false);
     };
+    const fetchProviderLogos = async () => {
+      const { data } = await supabase
+        .from("payment_providers")
+        .select("name, logo_url")
+        .eq("is_active", true);
+      if (data) {
+        const logos: Record<string, string> = {};
+        for (const p of data) {
+          const key = p.name?.toLowerCase().replace(/\s/g, "");
+          if (key && p.logo_url) logos[key] = p.logo_url;
+        }
+        setProviderLogos(logos);
+      }
+    };
     fetchDelivery();
+    fetchProviderLogos();
   }, []);
 
   const selectedDeliveryOption = deliveryOptions.find(d => d.id === selectedDelivery);
