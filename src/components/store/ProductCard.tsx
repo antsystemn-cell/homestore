@@ -16,7 +16,7 @@ const ProductCard = React.memo(({ product }: Props) => {
 
   const handleImgError = useCallback(() => setImgError(true), []);
 
-  const imgSrc = imgError ? "/placeholder.svg" : product.image;
+  const imgSrc = imgError ? "/placeholder.svg" : (product.thumbnail || product.image);
 
   const productUrl = `/product/${product.slug || product.id}`;
 

@@ -100,7 +100,7 @@ const SaleCarousel = React.memo(({ products }: Props) => {
                   {/* Image */}
                   <div className="relative aspect-square bg-secondary overflow-hidden">
                     <img
-                      src={imgErrors[p.id] ? "/placeholder.svg" : p.image}
+                      src={imgErrors[p.id] ? "/placeholder.svg" : (p.thumbnail || p.image)}
                       alt={p.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
