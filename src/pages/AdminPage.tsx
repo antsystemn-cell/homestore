@@ -540,9 +540,20 @@ const AdminPage = () => {
       if (data && data.length > 0) { toast.error("Ижил бүтээгдэхүүний код бүртгэлтэй байна"); return; }
     }
     setLoading(true);
+    // Generate thumbnail from main image
+    let thumbnailUrl: string | null = null;
+    if (form.image_url && form.image_url.startsWith("data:")) {
+      try {
+        thumbnailUrl = await generateThumbnail(form.image_url);
+      } catch (e) {
+        console.error("Thumbnail generation failed", e);
+      }
+    }
+
     const payload = {
       name: form.name, description: form.description, price: form.price,
       original_price: form.original_price, image_url: form.image_url,
+      thumbnail_url: thumbnailUrl,
       category: form.category, discount: form.discount,
       is_new: form.is_new, is_on_sale: form.is_on_sale, is_bogo: form.is_bogo, is_active: form.is_active,
       product_code: form.product_code || null,
