@@ -583,6 +583,17 @@ const CheckoutPage = () => {
                 </Button>
               )}
 
+              {paymentMethod === "pocket" && !orderId && (
+                <Button
+                  className="w-full h-12 text-base rounded-xl mt-2 gap-2 bg-[#6C3FC5] hover:bg-[#5A32A8] text-white"
+                  disabled={submitting}
+                  onClick={handlePocketStart}
+                >
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
+                  {submitting ? "Үүсгэж байна..." : `Pocket-ээр төлөх — ${formatPrice(grandTotal)}`}
+                </Button>
+              )}
+
               <p className="text-[10px] text-muted-foreground text-center mt-2">
                 Таны мэдээлэл аюулгүй хадгалагдана
               </p>
