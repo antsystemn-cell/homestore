@@ -378,7 +378,7 @@ const CheckoutPage = () => {
                 <label
                   className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
                     paymentMethod === "qpay"
-                      ? "border-primary bg-primary/5"
+                      ? "border-primary bg-primary/5 shadow-sm"
                       : "border-border hover:border-muted-foreground/30"
                   }`}
                 >
@@ -390,10 +390,14 @@ const CheckoutPage = () => {
                     onChange={() => setPaymentMethod("qpay")}
                     className="w-4 h-4 accent-[hsl(var(--primary))]"
                   />
-                  <div className="w-5 h-5 rounded bg-primary flex items-center justify-center">
-                    <span className="text-primary-foreground text-[10px] font-bold">Q</span>
-                  </div>
-                  <div>
+                  {providerLogos["qpay"] ? (
+                    <img src={providerLogos["qpay"]} alt="QPay" className="w-9 h-9 rounded-lg object-contain" />
+                  ) : (
+                    <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
+                      <span className="text-primary-foreground text-xs font-bold">Q</span>
+                    </div>
+                  )}
+                  <div className="flex-1">
                     <p className="text-sm font-semibold text-foreground">QPay</p>
                     <p className="text-xs text-muted-foreground">QR кодоор төлөх (бүх банк)</p>
                   </div>
@@ -405,7 +409,7 @@ const CheckoutPage = () => {
                       grandTotal < 100000
                         ? "border-border opacity-50 cursor-not-allowed"
                         : paymentMethod === "storepay"
-                          ? "border-primary bg-primary/5 cursor-pointer"
+                          ? "border-primary bg-primary/5 shadow-sm cursor-pointer"
                           : "border-border hover:border-muted-foreground/30 cursor-pointer"
                     }`}
                   >
@@ -418,10 +422,14 @@ const CheckoutPage = () => {
                       disabled={grandTotal < 100000}
                       className="w-4 h-4 accent-[hsl(var(--primary))]"
                     />
-                    <div className="w-5 h-5 rounded bg-[#00B140] flex items-center justify-center">
-                      <span className="text-white text-[10px] font-bold">S</span>
-                    </div>
-                    <div>
+                    {providerLogos["storepay"] ? (
+                      <img src={providerLogos["storepay"]} alt="Storepay" className="w-9 h-9 rounded-lg object-contain" />
+                    ) : (
+                      <div className="w-9 h-9 rounded-lg bg-[#00B140] flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">S</span>
+                      </div>
+                    )}
+                    <div className="flex-1">
                       <p className="text-sm font-semibold text-foreground">Storepay</p>
                       <p className="text-xs text-muted-foreground">Хуваан төлөх үйлчилгээ</p>
                       {grandTotal < 100000 && (
@@ -434,7 +442,7 @@ const CheckoutPage = () => {
                 <label
                   className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
                     paymentMethod === "pocket"
-                      ? "border-[#6C3FC5] bg-[#6C3FC5]/5"
+                      ? "border-[#6C3FC5] bg-[#6C3FC5]/5 shadow-sm"
                       : "border-border hover:border-muted-foreground/30"
                   }`}
                 >
@@ -446,10 +454,14 @@ const CheckoutPage = () => {
                     onChange={() => setPaymentMethod("pocket")}
                     className="w-4 h-4 accent-[#6C3FC5]"
                   />
-                  <div className="w-5 h-5 rounded bg-[#6C3FC5] flex items-center justify-center">
-                    <span className="text-white text-[10px] font-bold">P</span>
-                  </div>
-                  <div>
+                  {providerLogos["pocket"] ? (
+                    <img src={providerLogos["pocket"]} alt="Pocket" className="w-9 h-9 rounded-lg object-contain" />
+                  ) : (
+                    <div className="w-9 h-9 rounded-lg bg-[#6C3FC5] flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">P</span>
+                    </div>
+                  )}
+                  <div className="flex-1">
                     <p className="text-sm font-semibold text-foreground">Pocket</p>
                     <p className="text-xs text-muted-foreground">Pocket апп-аар төлөх</p>
                   </div>
@@ -459,7 +471,7 @@ const CheckoutPage = () => {
                 <label
                   className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
                     paymentMethod === "cash"
-                      ? "border-primary bg-primary/5"
+                      ? "border-primary bg-primary/5 shadow-sm"
                       : "border-border hover:border-muted-foreground/30"
                   }`}
                 >
@@ -471,8 +483,10 @@ const CheckoutPage = () => {
                     onChange={() => setPaymentMethod("cash")}
                     className="w-4 h-4 accent-[hsl(var(--primary))]"
                   />
-                  <Banknote className="h-5 w-5 text-muted-foreground" />
-                  <div>
+                  <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+                    <Banknote className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div className="flex-1">
                     <p className="text-sm font-semibold text-foreground">Бэлнээр / Шилжүүлэг</p>
                     <p className="text-xs text-muted-foreground">Хүргэлтийн үед бэлнээр эсвэл дансаар төлөх</p>
                   </div>
