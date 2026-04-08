@@ -2,7 +2,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/data/products";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Lock, Loader2, Truck, Banknote, CreditCard, Copy, UserPlus, QrCode } from "lucide-react";
+import { CheckCircle, Lock, Loader2, Truck, Banknote, CreditCard, Copy, UserPlus, QrCode, Wallet } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
@@ -11,8 +11,9 @@ import Header from "@/components/store/Header";
 import BottomNav from "@/components/store/BottomNav";
 import StorepayPayment from "@/components/store/StorepayPayment";
 import QPayPayment from "@/components/store/QPayPayment";
+import PocketPayment from "@/components/store/PocketPayment";
 
-type PaymentMethod = "cash" | "storepay" | "qpay";
+type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket";
 
 const CheckoutPage = () => {
   const { items, cartTotal, clearCart } = useCart();
@@ -172,6 +173,30 @@ const CheckoutPage = () => {
   };
 
   const handleQPayCancel = () => {
+    setOrderId(null);
+    setPaymentMethod("cash");
+  };
+
+  const handlePocketStart = async () => {
+    if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return; }
+    if (isGuestCheckout && !name.trim()) { toast.error("Нэр заавал бөглөнө үү"); return; }
+    if (deliveryOptions.length > 0 && !selectedDelivery) { toast.error("Хүргэлтийн сонголт хийнэ үү"); return; }
+
+    setSubmitting(true);
+    const id = await createOrder("processing", "pocket");
+    setSubmitting(false);
+
+    if (id) {
+      setOrderId(id);
+    }
+  };
+
+  const handlePocketSuccess = () => {
+    clearCart();
+    setOrdered(true);
+  };
+
+  const handlePocketCancel = () => {
     setOrderId(null);
     setPaymentMethod("cash");
   };
@@ -409,6 +434,31 @@ const CheckoutPage = () => {
                     <p className="text-xs text-muted-foreground">QR кодоор төлөх (бүх банк)</p>
                   </div>
                 </label>
+
+                {/* Pocket */}
+                <label
+                  className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    paymentMethod === "pocket"
+                      ? "border-[#6C3FC5] bg-[#6C3FC5]/5"
+                      : "border-border hover:border-muted-foreground/30"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="pocket"
+                    checked={paymentMethod === "pocket"}
+                    onChange={() => setPaymentMethod("pocket")}
+                    className="w-4 h-4 accent-[#6C3FC5]"
+                  />
+                  <div className="w-5 h-5 rounded bg-[#6C3FC5] flex items-center justify-center">
+                    <span className="text-white text-[10px] font-bold">P</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Pocket</p>
+                    <p className="text-xs text-muted-foreground">Pocket апп-аар төлөх</p>
+                  </div>
+                </label>
               </div>
             </div>
 
@@ -431,6 +481,16 @@ const CheckoutPage = () => {
                 amount={grandTotal}
                 onSuccess={handleQPaySuccess}
                 onCancel={handleQPayCancel}
+              />
+            )}
+
+            {/* Pocket Payment Flow */}
+            {paymentMethod === "pocket" && orderId && (
+              <PocketPayment
+                orderId={orderId}
+                amount={grandTotal}
+                onSuccess={handlePocketSuccess}
+                onCancel={handlePocketCancel}
               />
             )}
           </div>
@@ -520,6 +580,17 @@ const CheckoutPage = () => {
                 >
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <QrCode className="h-4 w-4" />}
                   {submitting ? "Үүсгэж байна..." : `QPay-ээр төлөх — ${formatPrice(grandTotal)}`}
+                </Button>
+              )}
+
+              {paymentMethod === "pocket" && !orderId && (
+                <Button
+                  className="w-full h-12 text-base rounded-xl mt-2 gap-2 bg-[#6C3FC5] hover:bg-[#5A32A8] text-white"
+                  disabled={submitting}
+                  onClick={handlePocketStart}
+                >
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
+                  {submitting ? "Үүсгэж байна..." : `Pocket-ээр төлөх — ${formatPrice(grandTotal)}`}
                 </Button>
               )}
 
