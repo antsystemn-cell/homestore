@@ -11,8 +11,9 @@ import Header from "@/components/store/Header";
 import BottomNav from "@/components/store/BottomNav";
 import StorepayPayment from "@/components/store/StorepayPayment";
 import QPayPayment from "@/components/store/QPayPayment";
+import PocketPayment from "@/components/store/PocketPayment";
 
-type PaymentMethod = "cash" | "storepay" | "qpay";
+type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket";
 
 const CheckoutPage = () => {
   const { items, cartTotal, clearCart } = useCart();
