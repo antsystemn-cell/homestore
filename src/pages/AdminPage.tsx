@@ -659,6 +659,7 @@ const AdminPage = () => {
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
     { id: "users", label: "Хэрэглэгч", icon: Users },
     { id: "analytics", label: "Хандалт", icon: Globe },
+    { id: "diagnostics", label: "Оношлогоо", icon: AlertTriangle },
   ];
 
   const sidebarItems = isAdmin
@@ -892,6 +893,7 @@ const AdminPage = () => {
               {tab === "banner" && `Баннер болон ${paymentProviders.length} лого`}
               {tab === "payments" && `Нийт ${paymentProviders.length} төлбөрийн суваг`}
               {tab === "analytics" && "Вэб сайтын хандалтын мэдээлэл"}
+              {tab === "diagnostics" && "Зургийн оношлогоо & Cloud зардал"}
             </p>
           </div>
           {tab === "products" && (
@@ -1827,6 +1829,117 @@ const AdminPage = () => {
 
           {/* Web Analytics */}
           {tab === "analytics" && <WebAnalytics />}
+
+          {/* Diagnostics Tab */}
+          {tab === "diagnostics" && (() => {
+            const totalProducts = products.length;
+            const withImage = products.filter((p: any) => p.image_url && p.image_url.startsWith("data:")).length;
+            const withThumbnail = products.filter((p: any) => p.thumbnail_url).length;
+            const withoutThumbnail = products.filter((p: any) => p.image_url && !p.thumbnail_url).length;
+            const oversizedProducts = products.filter((p: any) => {
+              if (!p.image_url || !p.image_url.startsWith("data:")) return false;
+              return estimateBase64Size(p.image_url) > 300 * 1024; // > 300KB
+            });
+            const totalImageBytes = products.reduce((sum: number, p: any) => {
+              if (!p.image_url || !p.image_url.startsWith("data:")) return sum;
+              return sum + estimateBase64Size(p.image_url);
+            }, 0);
+            const avgSize = withImage > 0 ? Math.round(totalImageBytes / withImage / 1024) : 0;
+            const noImage = products.filter((p: any) => !p.image_url || p.image_url === "/placeholder.svg").length;
+
+            return (
+              <div className="space-y-4">
+                <div className="bg-card rounded-2xl p-4 md:p-6 border border-border">
+                  <h3 className="font-bold text-sm mb-4">📊 Зургийн статистик</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="bg-secondary rounded-xl p-3 text-center">
+                      <p className="text-2xl font-bold text-foreground">{totalProducts}</p>
+                      <p className="text-xs text-muted-foreground">Нийт бараа</p>
+                    </div>
+                    <div className="bg-secondary rounded-xl p-3 text-center">
+                      <p className="text-2xl font-bold text-foreground">{withImage}</p>
+                      <p className="text-xs text-muted-foreground">Base64 зурагтай</p>
+                    </div>
+                    <div className="bg-secondary rounded-xl p-3 text-center">
+                      <p className="text-2xl font-bold text-foreground">{withThumbnail}</p>
+                      <p className="text-xs text-muted-foreground">Thumbnail-тэй</p>
+                    </div>
+                    <div className="bg-secondary rounded-xl p-3 text-center">
+                      <p className="text-2xl font-bold text-destructive">{withoutThumbnail}</p>
+                      <p className="text-xs text-muted-foreground">Thumbnail-гүй</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-card rounded-2xl p-4 md:p-6 border border-border">
+                  <h3 className="font-bold text-sm mb-4">💾 Хэмжээний мэдээлэл</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div className="bg-secondary rounded-xl p-3 text-center">
+                      <p className="text-2xl font-bold text-foreground">{(totalImageBytes / 1024 / 1024).toFixed(1)} MB</p>
+                      <p className="text-xs text-muted-foreground">Нийт зургийн хэмжээ</p>
+                    </div>
+                    <div className="bg-secondary rounded-xl p-3 text-center">
+                      <p className="text-2xl font-bold text-foreground">{avgSize} KB</p>
+                      <p className="text-xs text-muted-foreground">Дундаж хэмжээ</p>
+                    </div>
+                    <div className="bg-secondary rounded-xl p-3 text-center">
+                      <p className="text-2xl font-bold text-destructive">{oversizedProducts.length}</p>
+                      <p className="text-xs text-muted-foreground">&gt;300KB зураг</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-card rounded-2xl p-4 md:p-6 border border-border">
+                  <h3 className="font-bold text-sm mb-3">⚡ Зөвлөмж</h3>
+                  <div className="space-y-2 text-sm">
+                    {withoutThumbnail > 0 && (
+                      <div className="flex items-start gap-2 bg-amber-500/10 text-amber-700 p-3 rounded-xl">
+                        <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                        <span><strong>{withoutThumbnail}</strong> бараа thumbnail-гүй байна. Бараа дахин хадгалж thumbnail үүсгэнэ үү.</span>
+                      </div>
+                    )}
+                    {oversizedProducts.length > 0 && (
+                      <div className="flex items-start gap-2 bg-amber-500/10 text-amber-700 p-3 rounded-xl">
+                        <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                        <span><strong>{oversizedProducts.length}</strong> бараа 300KB-ээс том зурагтай. Зургийг дахин оруулж оновчлоно уу.</span>
+                      </div>
+                    )}
+                    {noImage > 0 && (
+                      <div className="flex items-start gap-2 bg-blue-500/10 text-blue-700 p-3 rounded-xl">
+                        <ImageIcon className="h-4 w-4 mt-0.5 shrink-0" />
+                        <span><strong>{noImage}</strong> бараа зурагүй байна.</span>
+                      </div>
+                    )}
+                    {withoutThumbnail === 0 && oversizedProducts.length === 0 && noImage === 0 && (
+                      <div className="flex items-start gap-2 bg-emerald-500/10 text-emerald-700 p-3 rounded-xl">
+                        <Eye className="h-4 w-4 mt-0.5 shrink-0" />
+                        <span>Бүх зураг оновчлогдсон байна! ✅</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {oversizedProducts.length > 0 && (
+                  <div className="bg-card rounded-2xl p-4 md:p-6 border border-border">
+                    <h3 className="font-bold text-sm mb-3">🔴 Том зурагтай бараанууд (300KB+)</h3>
+                    <div className="space-y-2 max-h-80 overflow-y-auto">
+                      {oversizedProducts.slice(0, 20).map((p: any) => (
+                        <div key={p.id} className="flex items-center justify-between bg-secondary rounded-xl px-3 py-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-xs font-mono text-muted-foreground">{p.product_code || "—"}</span>
+                            <span className="text-sm text-foreground truncate">{p.name}</span>
+                          </div>
+                          <span className="text-xs font-bold text-destructive shrink-0">
+                            {Math.round(estimateBase64Size(p.image_url) / 1024)} KB
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Categories Tab */}
           {tab === "categories" && (
