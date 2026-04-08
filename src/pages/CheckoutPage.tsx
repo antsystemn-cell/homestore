@@ -27,7 +27,7 @@ const CheckoutPage = () => {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [name, setName] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("qpay");
   const [orderId, setOrderId] = useState<string | null>(null);
   const [orderRef, setOrderRef] = useState<string | null>(null);
 
@@ -356,10 +356,10 @@ const CheckoutPage = () => {
                 Төлбөрийн хэлбэр
               </h2>
               <div className="space-y-2">
-                {/* Cash */}
+                {/* QPay */}
                 <label
                   className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    paymentMethod === "cash"
+                    paymentMethod === "qpay"
                       ? "border-primary bg-primary/5"
                       : "border-border hover:border-muted-foreground/30"
                   }`}
@@ -367,15 +367,17 @@ const CheckoutPage = () => {
                   <input
                     type="radio"
                     name="payment"
-                    value="cash"
-                    checked={paymentMethod === "cash"}
-                    onChange={() => setPaymentMethod("cash")}
+                    value="qpay"
+                    checked={paymentMethod === "qpay"}
+                    onChange={() => setPaymentMethod("qpay")}
                     className="w-4 h-4 accent-[hsl(var(--primary))]"
                   />
-                  <Banknote className="h-5 w-5 text-muted-foreground" />
+                  <div className="w-5 h-5 rounded bg-primary flex items-center justify-center">
+                    <span className="text-primary-foreground text-[10px] font-bold">Q</span>
+                  </div>
                   <div>
-                    <p className="text-sm font-semibold text-foreground">Бэлнээр / Шилжүүлэг</p>
-                    <p className="text-xs text-muted-foreground">Хүргэлтийн үед бэлнээр эсвэл дансаар төлөх</p>
+                    <p className="text-sm font-semibold text-foreground">QPay</p>
+                    <p className="text-xs text-muted-foreground">QR кодоор төлөх (бүх банк)</p>
                   </div>
                 </label>
 
@@ -410,31 +412,6 @@ const CheckoutPage = () => {
                     </div>
                   </label>
 
-                {/* QPay */}
-                <label
-                  className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    paymentMethod === "qpay"
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-muted-foreground/30"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="qpay"
-                    checked={paymentMethod === "qpay"}
-                    onChange={() => setPaymentMethod("qpay")}
-                    className="w-4 h-4 accent-[hsl(var(--primary))]"
-                  />
-                  <div className="w-5 h-5 rounded bg-primary flex items-center justify-center">
-                    <span className="text-primary-foreground text-[10px] font-bold">Q</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">QPay</p>
-                    <p className="text-xs text-muted-foreground">QR кодоор төлөх (бүх банк)</p>
-                  </div>
-                </label>
-
                 {/* Pocket */}
                 <label
                   className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
@@ -457,6 +434,29 @@ const CheckoutPage = () => {
                   <div>
                     <p className="text-sm font-semibold text-foreground">Pocket</p>
                     <p className="text-xs text-muted-foreground">Pocket апп-аар төлөх</p>
+                  </div>
+                </label>
+
+                {/* Cash */}
+                <label
+                  className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    paymentMethod === "cash"
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-muted-foreground/30"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="cash"
+                    checked={paymentMethod === "cash"}
+                    onChange={() => setPaymentMethod("cash")}
+                    className="w-4 h-4 accent-[hsl(var(--primary))]"
+                  />
+                  <Banknote className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Бэлнээр / Шилжүүлэг</p>
+                    <p className="text-xs text-muted-foreground">Хүргэлтийн үед бэлнээр эсвэл дансаар төлөх</p>
                   </div>
                 </label>
               </div>
