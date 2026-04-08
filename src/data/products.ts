@@ -23,6 +23,7 @@ export interface Product {
   originalPrice?: number | null;
   image: string;
   image_url?: string | null;
+  thumbnail?: string | null;
   category: string;
   description?: string | null;
   sales?: number | null;
@@ -63,6 +64,7 @@ export function mapDbProduct(row: any): Product {
     originalPrice: row.original_price,
     image: row.image_url || "/placeholder.svg",
     image_url: row.image_url,
+    thumbnail: row.thumbnail_url || null,
     category: row.category,
     description: row.description,
     sales: row.sales,
