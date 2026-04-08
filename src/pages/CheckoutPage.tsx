@@ -434,6 +434,31 @@ const CheckoutPage = () => {
                     <p className="text-xs text-muted-foreground">QR кодоор төлөх (бүх банк)</p>
                   </div>
                 </label>
+
+                {/* Pocket */}
+                <label
+                  className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    paymentMethod === "pocket"
+                      ? "border-[#6C3FC5] bg-[#6C3FC5]/5"
+                      : "border-border hover:border-muted-foreground/30"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="pocket"
+                    checked={paymentMethod === "pocket"}
+                    onChange={() => setPaymentMethod("pocket")}
+                    className="w-4 h-4 accent-[#6C3FC5]"
+                  />
+                  <div className="w-5 h-5 rounded bg-[#6C3FC5] flex items-center justify-center">
+                    <span className="text-white text-[10px] font-bold">P</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Pocket</p>
+                    <p className="text-xs text-muted-foreground">Pocket апп-аар төлөх</p>
+                  </div>
+                </label>
               </div>
             </div>
 
@@ -456,6 +481,16 @@ const CheckoutPage = () => {
                 amount={grandTotal}
                 onSuccess={handleQPaySuccess}
                 onCancel={handleQPayCancel}
+              />
+            )}
+
+            {/* Pocket Payment Flow */}
+            {paymentMethod === "pocket" && orderId && (
+              <PocketPayment
+                orderId={orderId}
+                amount={grandTotal}
+                onSuccess={handlePocketSuccess}
+                onCancel={handlePocketCancel}
               />
             )}
           </div>
