@@ -43,7 +43,7 @@ const FeaturedSection = React.memo(({ products }: Props) => {
             className="col-span-6 relative rounded-2xl overflow-hidden bg-secondary cursor-pointer group animate-fade-in aspect-[4/3]"
           >
             <img
-              src={imgErrors[hero.id] ? "/placeholder.svg" : hero.image}
+              src={imgErrors[hero.id] ? "/placeholder.svg" : (hero.thumbnail || hero.image)}
               alt={hero.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               loading="lazy"
@@ -78,7 +78,7 @@ const FeaturedSection = React.memo(({ products }: Props) => {
                 className="relative rounded-xl overflow-hidden bg-secondary cursor-pointer group animate-fade-in aspect-square"
               >
                 <img
-                  src={imgErrors[p.id] ? "/placeholder.svg" : p.image}
+                  src={imgErrors[p.id] ? "/placeholder.svg" : (p.thumbnail || p.image)}
                   alt={p.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   loading="lazy"
@@ -111,7 +111,7 @@ const FeaturedSection = React.memo(({ products }: Props) => {
             >
               <div className="relative aspect-square rounded-xl overflow-hidden bg-secondary">
                 <img
-                  src={imgErrors[p.id] ? "/placeholder.svg" : p.image}
+                  src={imgErrors[p.id] ? "/placeholder.svg" : (p.thumbnail || p.image)}
                   alt={p.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   loading="lazy"

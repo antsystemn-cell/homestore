@@ -5,6 +5,10 @@
 export const MAX_IMAGE_WIDTH = 1200;
 export const WEBP_QUALITY = 0.82;
 
+/** Thumbnail settings for product card listings — much smaller payload */
+export const THUMB_WIDTH = 400;
+export const THUMB_QUALITY = 0.65;
+
 export function optimizeImage(
   file: File,
   maxWidth = MAX_IMAGE_WIDTH,
@@ -87,4 +91,35 @@ export function optimizeDataUrl(
     img.onerror = () => reject(new Error("Failed to load image for optimization"));
     img.src = dataUrl;
   });
+}
+
+/**
+ * Generate a small thumbnail from a base64 data URL.
+ * Used for product card listings to reduce data transfer.
+ */
+export function generateThumbnail(
+  dataUrl: string,
+  maxWidth = THUMB_WIDTH,
+  quality = THUMB_QUALITY
+): Promise<string> {
+  return optimizeDataUrl(dataUrl, maxWidth, quality);
+}
+
+/**
+ * Generate a thumbnail directly from a File.
+ */
+export function generateThumbnailFromFile(
+  file: File,
+  maxWidth = THUMB_WIDTH,
+  quality = THUMB_QUALITY
+): Promise<string> {
+  return optimizeImage(file, maxWidth, quality);
+}
+
+/**
+ * Estimate the byte size of a base64 data URL string.
+ */
+export function estimateBase64Size(dataUrl: string): number {
+  const base64 = dataUrl.split(",")[1] || "";
+  return Math.round((base64.length * 3) / 4);
 }

@@ -10,7 +10,7 @@ import WebAnalytics from "@/components/admin/WebAnalytics";
 import { useRef } from "react";
 import { toast } from "sonner";
 import { formatPrice } from "@/data/products";
-import { optimizeImage } from "@/lib/imageOptimize";
+import { optimizeImage, generateThumbnail, estimateBase64Size } from "@/lib/imageOptimize";
 import { cyrillicToLatinSlug } from "@/lib/cyrillicToLatin";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import {
@@ -18,7 +18,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "analytics";
+type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "analytics" | "diagnostics";
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -303,7 +303,7 @@ const AdminPage = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from("products").select("id, name, price, original_price, image_url, category, description, sales, is_new, is_on_sale, is_bogo, is_active, discount, product_code, slug, brand_id, created_at, colors, sizes, specifications, detail_media").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("products").select("id, name, price, original_price, image_url, thumbnail_url, category, sales, is_new, is_on_sale, is_bogo, is_active, discount, product_code, slug, brand_id, created_at").order("created_at", { ascending: false });
       if (error) throw error;
       setProducts(data || []);
     } catch (error) {
@@ -540,9 +540,20 @@ const AdminPage = () => {
       if (data && data.length > 0) { toast.error("Ижил бүтээгдэхүүний код бүртгэлтэй байна"); return; }
     }
     setLoading(true);
+    // Generate thumbnail from main image
+    let thumbnailUrl: string | null = null;
+    if (form.image_url && form.image_url.startsWith("data:")) {
+      try {
+        thumbnailUrl = await generateThumbnail(form.image_url);
+      } catch (e) {
+        console.error("Thumbnail generation failed", e);
+      }
+    }
+
     const payload = {
       name: form.name, description: form.description, price: form.price,
       original_price: form.original_price, image_url: form.image_url,
+      thumbnail_url: thumbnailUrl,
       category: form.category, discount: form.discount,
       is_new: form.is_new, is_on_sale: form.is_on_sale, is_bogo: form.is_bogo, is_active: form.is_active,
       product_code: form.product_code || null,
@@ -591,10 +602,18 @@ const AdminPage = () => {
   };
 
   const handleEditProduct = async (p: any) => {
-    const specs = Array.isArray(p.specifications) ? p.specifications : [];
-    const media = Array.isArray(p.detail_media) ? p.detail_media : [];
+    // Fetch heavy data (colors, sizes, specifications, detail_media, description) only when editing
+    const { data: fullProduct } = await supabase
+      .from("products")
+      .select("description, colors, sizes, specifications, detail_media")
+      .eq("id", p.id)
+      .single();
+
+    const full: any = fullProduct || {};
+    const specs = Array.isArray(full.specifications) ? full.specifications : [];
+    const media = Array.isArray(full.detail_media) ? full.detail_media : [];
     setForm({
-      name: p.name, description: p.description || "", price: p.price,
+      name: p.name, description: full.description || "", price: p.price,
       original_price: p.original_price || 0, image_url: p.image_url || "",
       category: p.category, discount: p.discount || 0,
       is_new: p.is_new, is_on_sale: p.is_on_sale, is_bogo: p.is_bogo || false, is_active: p.is_active !== false,
@@ -603,8 +622,8 @@ const AdminPage = () => {
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
       detail_media: media.map((m: any) => ({ type: m.type || "image", url: m.url || "", caption: m.caption || "", thumbnail: m.thumbnail || "" })),
       brand_id: p.brand_id || "",
-      colors: Array.isArray(p.colors) ? p.colors.map((c: any) => typeof c === 'string' ? { name: c, image: '' } : { name: c.name || '', image: c.image || '' }) : [],
-      sizes: Array.isArray(p.sizes) ? p.sizes : [],
+      colors: Array.isArray(full.colors) ? full.colors.map((c: any) => typeof c === 'string' ? { name: c, image: '' } : { name: c.name || '', image: c.image || '' }) : [],
+      sizes: Array.isArray(full.sizes) ? full.sizes : [],
     });
     setEditId(p.id);
     setShowForm(true);
@@ -640,6 +659,7 @@ const AdminPage = () => {
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
     { id: "users", label: "Хэрэглэгч", icon: Users },
     { id: "analytics", label: "Хандалт", icon: Globe },
+    { id: "diagnostics", label: "Оношлогоо", icon: AlertTriangle },
   ];
 
   const sidebarItems = isAdmin
@@ -873,6 +893,7 @@ const AdminPage = () => {
               {tab === "banner" && `Баннер болон ${paymentProviders.length} лого`}
               {tab === "payments" && `Нийт ${paymentProviders.length} төлбөрийн суваг`}
               {tab === "analytics" && "Вэб сайтын хандалтын мэдээлэл"}
+              {tab === "diagnostics" && "Зургийн оношлогоо & Cloud зардал"}
             </p>
           </div>
           {tab === "products" && (
@@ -1808,6 +1829,117 @@ const AdminPage = () => {
 
           {/* Web Analytics */}
           {tab === "analytics" && <WebAnalytics />}
+
+          {/* Diagnostics Tab */}
+          {tab === "diagnostics" && (() => {
+            const totalProducts = products.length;
+            const withImage = products.filter((p: any) => p.image_url && p.image_url.startsWith("data:")).length;
+            const withThumbnail = products.filter((p: any) => p.thumbnail_url).length;
+            const withoutThumbnail = products.filter((p: any) => p.image_url && !p.thumbnail_url).length;
+            const oversizedProducts = products.filter((p: any) => {
+              if (!p.image_url || !p.image_url.startsWith("data:")) return false;
+              return estimateBase64Size(p.image_url) > 300 * 1024; // > 300KB
+            });
+            const totalImageBytes = products.reduce((sum: number, p: any) => {
+              if (!p.image_url || !p.image_url.startsWith("data:")) return sum;
+              return sum + estimateBase64Size(p.image_url);
+            }, 0);
+            const avgSize = withImage > 0 ? Math.round(totalImageBytes / withImage / 1024) : 0;
+            const noImage = products.filter((p: any) => !p.image_url || p.image_url === "/placeholder.svg").length;
+
+            return (
+              <div className="space-y-4">
+                <div className="bg-card rounded-2xl p-4 md:p-6 border border-border">
+                  <h3 className="font-bold text-sm mb-4">📊 Зургийн статистик</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="bg-secondary rounded-xl p-3 text-center">
+                      <p className="text-2xl font-bold text-foreground">{totalProducts}</p>
+                      <p className="text-xs text-muted-foreground">Нийт бараа</p>
+                    </div>
+                    <div className="bg-secondary rounded-xl p-3 text-center">
+                      <p className="text-2xl font-bold text-foreground">{withImage}</p>
+                      <p className="text-xs text-muted-foreground">Base64 зурагтай</p>
+                    </div>
+                    <div className="bg-secondary rounded-xl p-3 text-center">
+                      <p className="text-2xl font-bold text-foreground">{withThumbnail}</p>
+                      <p className="text-xs text-muted-foreground">Thumbnail-тэй</p>
+                    </div>
+                    <div className="bg-secondary rounded-xl p-3 text-center">
+                      <p className="text-2xl font-bold text-destructive">{withoutThumbnail}</p>
+                      <p className="text-xs text-muted-foreground">Thumbnail-гүй</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-card rounded-2xl p-4 md:p-6 border border-border">
+                  <h3 className="font-bold text-sm mb-4">💾 Хэмжээний мэдээлэл</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div className="bg-secondary rounded-xl p-3 text-center">
+                      <p className="text-2xl font-bold text-foreground">{(totalImageBytes / 1024 / 1024).toFixed(1)} MB</p>
+                      <p className="text-xs text-muted-foreground">Нийт зургийн хэмжээ</p>
+                    </div>
+                    <div className="bg-secondary rounded-xl p-3 text-center">
+                      <p className="text-2xl font-bold text-foreground">{avgSize} KB</p>
+                      <p className="text-xs text-muted-foreground">Дундаж хэмжээ</p>
+                    </div>
+                    <div className="bg-secondary rounded-xl p-3 text-center">
+                      <p className="text-2xl font-bold text-destructive">{oversizedProducts.length}</p>
+                      <p className="text-xs text-muted-foreground">&gt;300KB зураг</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-card rounded-2xl p-4 md:p-6 border border-border">
+                  <h3 className="font-bold text-sm mb-3">⚡ Зөвлөмж</h3>
+                  <div className="space-y-2 text-sm">
+                    {withoutThumbnail > 0 && (
+                      <div className="flex items-start gap-2 bg-amber-500/10 text-amber-700 p-3 rounded-xl">
+                        <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                        <span><strong>{withoutThumbnail}</strong> бараа thumbnail-гүй байна. Бараа дахин хадгалж thumbnail үүсгэнэ үү.</span>
+                      </div>
+                    )}
+                    {oversizedProducts.length > 0 && (
+                      <div className="flex items-start gap-2 bg-amber-500/10 text-amber-700 p-3 rounded-xl">
+                        <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                        <span><strong>{oversizedProducts.length}</strong> бараа 300KB-ээс том зурагтай. Зургийг дахин оруулж оновчлоно уу.</span>
+                      </div>
+                    )}
+                    {noImage > 0 && (
+                      <div className="flex items-start gap-2 bg-blue-500/10 text-blue-700 p-3 rounded-xl">
+                        <ImageIcon className="h-4 w-4 mt-0.5 shrink-0" />
+                        <span><strong>{noImage}</strong> бараа зурагүй байна.</span>
+                      </div>
+                    )}
+                    {withoutThumbnail === 0 && oversizedProducts.length === 0 && noImage === 0 && (
+                      <div className="flex items-start gap-2 bg-emerald-500/10 text-emerald-700 p-3 rounded-xl">
+                        <Eye className="h-4 w-4 mt-0.5 shrink-0" />
+                        <span>Бүх зураг оновчлогдсон байна! ✅</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {oversizedProducts.length > 0 && (
+                  <div className="bg-card rounded-2xl p-4 md:p-6 border border-border">
+                    <h3 className="font-bold text-sm mb-3">🔴 Том зурагтай бараанууд (300KB+)</h3>
+                    <div className="space-y-2 max-h-80 overflow-y-auto">
+                      {oversizedProducts.slice(0, 20).map((p: any) => (
+                        <div key={p.id} className="flex items-center justify-between bg-secondary rounded-xl px-3 py-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-xs font-mono text-muted-foreground">{p.product_code || "—"}</span>
+                            <span className="text-sm text-foreground truncate">{p.name}</span>
+                          </div>
+                          <span className="text-xs font-bold text-destructive shrink-0">
+                            {Math.round(estimateBase64Size(p.image_url) / 1024)} KB
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Categories Tab */}
           {tab === "categories" && (
