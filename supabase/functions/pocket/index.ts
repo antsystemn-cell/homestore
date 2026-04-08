@@ -395,6 +395,27 @@ async function handleCheckPayment(body: any, req: Request) {
   return json({ status: "WAITING", intentId: intent.id, state: checkData.state });
 }
 
+// --- Route: Configure Webhook ---
+async function handleConfigureWebhook() {
+  const webhookUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/pocket-webhook`;
+  const configUrl = `${POCKET_SCHEMA}://${POCKET_MERCHANT_HOST}/pg/config`;
+
+  const res = await pocketFetch(configUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fallBackUrl: webhookUrl }),
+  });
+
+  const data = await res.json();
+  console.log("Pocket webhook config response:", JSON.stringify(data));
+
+  if (!res.ok) {
+    return err("Webhook тохиргоо хийхэд алдаа", 502);
+  }
+
+  return json({ success: true, webhookUrl, response: data });
+}
+
 // --- Main Handler ---
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -416,8 +437,10 @@ Deno.serve(async (req: Request) => {
         return await handleCreateInvoice(body, req);
       case "check-payment":
         return await handleCheckPayment(body, req);
+      case "configure-webhook":
+        return await handleConfigureWebhook();
       default:
-        return err("Unknown action. Use: create-invoice, check-payment");
+        return err("Unknown action. Use: create-invoice, check-payment, configure-webhook");
     }
   } catch (e: any) {
     console.error("Pocket edge function error:", e);
