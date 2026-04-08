@@ -598,11 +598,11 @@ const AdminPage = () => {
       .eq("id", p.id)
       .single();
 
-    const full = fullProduct || {};
+    const full: any = fullProduct || {};
     const specs = Array.isArray(full.specifications) ? full.specifications : [];
     const media = Array.isArray(full.detail_media) ? full.detail_media : [];
     setForm({
-      name: p.name, description: (full.description as string) || "", price: p.price,
+      name: p.name, description: full.description || "", price: p.price,
       original_price: p.original_price || 0, image_url: p.image_url || "",
       category: p.category, discount: p.discount || 0,
       is_new: p.is_new, is_on_sale: p.is_on_sale, is_bogo: p.is_bogo || false, is_active: p.is_active !== false,
@@ -611,8 +611,8 @@ const AdminPage = () => {
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
       detail_media: media.map((m: any) => ({ type: m.type || "image", url: m.url || "", caption: m.caption || "", thumbnail: m.thumbnail || "" })),
       brand_id: p.brand_id || "",
-      colors: Array.isArray(full.colors) ? (full.colors as any[]).map((c: any) => typeof c === 'string' ? { name: c, image: '' } : { name: c.name || '', image: c.image || '' }) : [],
-      sizes: Array.isArray(full.sizes) ? (full.sizes as string[]) : [],
+      colors: Array.isArray(full.colors) ? full.colors.map((c: any) => typeof c === 'string' ? { name: c, image: '' } : { name: c.name || '', image: c.image || '' }) : [],
+      sizes: Array.isArray(full.sizes) ? full.sizes : [],
     });
     setEditId(p.id);
     setShowForm(true);
