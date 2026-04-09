@@ -910,14 +910,14 @@ const AdminPage = () => {
             <>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 {[
-                  { label: "Нийт бараа", value: products.length, icon: Package, color: "bg-blue-500/10 text-blue-600" },
-                  { label: "Нийт захиалга", value: orders.length, icon: ShoppingBag, color: "bg-green-500/10 text-green-600" },
-                  { label: "Нийт хэрэглэгч", value: users.length, icon: Users, color: "bg-purple-500/10 text-purple-600" },
-                  { label: "Нийт орлого", value: formatPrice(totalRevenue), icon: BarChart3, color: "bg-amber-500/10 text-amber-600" },
+                  { label: "Нийт бараа", value: products.length, icon: Package, color: "bg-blue-500/10 text-blue-600", tab: "products" as Tab },
+                  { label: "Нийт захиалга", value: orders.length, icon: ShoppingBag, color: "bg-green-500/10 text-green-600", tab: "orders" as Tab },
+                  { label: "Нийт хэрэглэгч", value: users.length, icon: Users, color: "bg-purple-500/10 text-purple-600", tab: "users" as Tab },
+                  { label: "Нийт орлого", value: formatPrice(totalRevenue), icon: BarChart3, color: "bg-amber-500/10 text-amber-600", tab: "orders" as Tab },
                 ].map((stat, i) => {
                   const Icon = stat.icon;
                   return (
-                    <div key={i} className="bg-card rounded-2xl p-4 md:p-6 border border-border">
+                    <div key={i} onClick={() => setTab(stat.tab)} className="bg-card rounded-2xl p-4 md:p-6 border border-border cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all active:scale-[0.98]">
                       <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl ${stat.color} flex items-center justify-center mb-3 md:mb-4`}>
                         <Icon className="h-4 w-4 md:h-5 md:w-5" />
                       </div>
@@ -930,16 +930,16 @@ const AdminPage = () => {
 
               {/* Өнөөдөр & Долоо хоног */}
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mt-3 md:mt-4">
-                <div className="bg-card rounded-2xl p-4 md:p-5 border border-border">
+                <div onClick={() => setTab("orders")} className="bg-card rounded-2xl p-4 md:p-5 border border-border cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all active:scale-[0.98]">
                   <p className="text-[10px] md:text-xs text-muted-foreground mb-0.5">Өнөөдрийн захиалга</p>
                   <p className="text-lg md:text-2xl font-extrabold">{todayOrders.length}</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5">Орлого: {formatPrice(todayRevenue)}</p>
                 </div>
-                <div className="bg-card rounded-2xl p-4 md:p-5 border border-border">
+                <div onClick={() => setTab("orders")} className="bg-card rounded-2xl p-4 md:p-5 border border-border cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all active:scale-[0.98]">
                   <p className="text-[10px] md:text-xs text-muted-foreground mb-0.5">7 хоногийн орлого</p>
                   <p className="text-lg md:text-2xl font-extrabold">{formatPrice(weekRevenue)}</p>
                 </div>
-                <div className="bg-card rounded-2xl p-4 md:p-5 border border-border col-span-2 lg:col-span-1">
+                <div onClick={() => setTab("orders")} className="bg-card rounded-2xl p-4 md:p-5 border border-border col-span-2 lg:col-span-1 cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all active:scale-[0.98]">
                   <p className="text-[10px] md:text-xs text-muted-foreground mb-0.5">Дундаж захиалга</p>
                   <p className="text-lg md:text-2xl font-extrabold">{paidOrders.length > 0 ? formatPrice(Math.round(totalRevenue / paidOrders.length)) : "₮0"}</p>
                 </div>
