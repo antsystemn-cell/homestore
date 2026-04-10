@@ -1579,7 +1579,28 @@ const AdminPage = () => {
           {/* Orders */}
           {tab === "orders" && (
             <div className="space-y-3">
-              {orders.map((o) => {
+              {/* Phone search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Утасны дугаараар хайх..."
+                  value={orderSearchPhone}
+                  onChange={(e) => setOrderSearchPhone(e.target.value)}
+                  className="w-full rounded-xl bg-secondary pl-10 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+                {orderSearchPhone && (
+                  <button onClick={() => setOrderSearchPhone("")} className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                  </button>
+                )}
+              </div>
+              {orderSearchPhone && (
+                <p className="text-xs text-muted-foreground">
+                  {orders.filter(o => o.phone?.includes(orderSearchPhone)).length} захиалга олдлоо
+                </p>
+              )}
+              {(orderSearchPhone ? orders.filter(o => o.phone?.includes(orderSearchPhone)) : orders).map((o) => {
                 const delOpt = deliveryOptions.find((d: any) => d.id === o.delivery_option_id);
                 const isExpanded = expandedOrderId === o.id;
                 const orderItems = Array.isArray(o.items) ? o.items : [];
