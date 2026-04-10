@@ -133,6 +133,7 @@ const AdminPage = () => {
   // Search & filter
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [orderSearchPhone, setOrderSearchPhone] = useState("");
 
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
