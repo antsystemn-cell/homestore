@@ -1638,7 +1638,7 @@ const AdminPage = () => {
                         <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                           <span className="font-semibold text-foreground">{formatPrice(o.total)}</span>
                           <span>{o.phone || "—"}</span>
-                          <span>{new Date(o.created_at).toLocaleDateString("mn-MN")}</span>
+                          <span>{new Date(o.created_at).toLocaleDateString("mn-MN")} {new Date(o.created_at).toLocaleTimeString("mn-MN", { hour: "2-digit", minute: "2-digit" })}</span>
                           {o.is_guest && <span className="text-[10px] bg-secondary px-1.5 py-0.5 rounded">Зочин{o.guest_name ? `: ${o.guest_name}` : ""}</span>}
                         </div>
                         {delOpt && (
