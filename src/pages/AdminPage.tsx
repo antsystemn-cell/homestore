@@ -1661,11 +1661,10 @@ const AdminPage = () => {
                               itemNames,
                               String(o.total),
                               "",
-                              "EasyShop",
-                              "Online",
+                              "EasyShop\tOnline",
                               "",
                               o.shipping_address || "",
-                            ].join("\n");
+                            ].join("\t");
                             navigator.clipboard.writeText(clipText).then(() => toast.success("Excel-д хуулагдлаа")).catch(() => toast.error("Хуулж чадсангүй"));
                           }}
                           className="p-2 rounded-lg hover:bg-primary/10 text-primary transition-colors"
