@@ -1661,8 +1661,8 @@ const AdminPage = () => {
                               itemNames,
                               String(o.total),
                               "",
-                              "",
-                              "",
+                              "EasyShop",
+                              "Online",
                               "",
                               o.shipping_address || "",
                             ].join("\n");
