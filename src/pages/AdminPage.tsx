@@ -1651,6 +1651,28 @@ const AdminPage = () => {
                         )}
                       </div>
                       <div className="flex items-center gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const itemNames = orderItems.map((item: any) => item.name).join(", ");
+                            const clipText = [
+                              o.phone || "",
+                              "",
+                              itemNames,
+                              String(o.total),
+                              "",
+                              "",
+                              "",
+                              "",
+                              o.shipping_address || "",
+                            ].join("\n");
+                            navigator.clipboard.writeText(clipText).then(() => toast.success("Excel-д хуулагдлаа")).catch(() => toast.error("Хуулж чадсангүй"));
+                          }}
+                          className="p-2 rounded-lg hover:bg-primary/10 text-primary transition-colors"
+                          title="Excel-д хуулах"
+                        >
+                          📋
+                        </button>
                         {o.status === "cancelled" && (
                           <button
                             onClick={(e) => { e.stopPropagation(); setDeleteOrderTarget({ id: o.id }); }}
