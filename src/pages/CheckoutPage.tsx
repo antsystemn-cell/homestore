@@ -134,6 +134,12 @@ const CheckoutPage = () => {
       return null;
     }
     setOrderRef(data.order_ref);
+
+    // Auto-send to delivery system (fire-and-forget)
+    supabase.functions.invoke("send-to-delivery", {
+      body: { order_id: data.id },
+    }).catch((e) => console.error("Failed to send to delivery:", e));
+
     return data.id;
   };
 

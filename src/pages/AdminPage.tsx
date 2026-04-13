@@ -334,6 +334,47 @@ const AdminPage = () => {
     } else {
       toast.success(`Захиалгын төлөв "${statusLabels[newStatus]}" болж өөрчлөгдлөө`);
       setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status: newStatus } : o));
+
+      // Notify delivery system on cancellation
+      if (newStatus === "cancelled") {
+        const order = orders.find(o => o.id === orderId);
+        if (order?.delivery_order_id) {
+          supabase.functions.invoke("notify-delivery-status", {
+            body: { order_id: orderId, fulfillment_status: "cancelled", note: "Easyshop дээр цуцлагдсан" },
+          }).catch(console.error);
+        }
+      }
+      // Notify delivery system when payment confirmed
+      if (newStatus === "confirmed") {
+        const order = orders.find(o => o.id === orderId);
+        if (order?.delivery_order_id) {
+          supabase.functions.invoke("notify-delivery-status", {
+            body: { order_id: orderId, payment_status: "paid" },
+          }).catch(console.error);
+        }
+      }
+    }
+  };
+
+  const [sendingDelivery, setSendingDelivery] = useState<string | null>(null);
+
+  const sendToDelivery = async (orderId: string) => {
+    setSendingDelivery(orderId);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-to-delivery", {
+        body: { order_id: orderId },
+      });
+      if (error) throw error;
+      if (data?.success) {
+        toast.success(`Хүргэлтэнд илгээгдлээ: ${data.delivery_order_id || ""}`);
+        setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, delivery_order_id: data.delivery_order_id, delivery_status: "processing" } : o));
+      } else {
+        toast.error("Хүргэлтэнд илгээхэд алдаа: " + (data?.error || "Unknown"));
+      }
+    } catch (e: any) {
+      toast.error("Хүргэлтэнд илгээхэд алдаа: " + e.message);
+    } finally {
+      setSendingDelivery(null);
     }
   };
 
@@ -1649,6 +1690,26 @@ const AdminPage = () => {
                             </span>
                           </div>
                         )}
+                        {o.delivery_order_id && (
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <span className="text-[10px] font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded">{o.delivery_order_id}</span>
+                            {o.delivery_status && (
+                              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                                o.delivery_status === "delivered" ? "bg-green-500/10 text-green-600" :
+                                o.delivery_status === "out_for_delivery" ? "bg-violet-500/10 text-violet-600" :
+                                o.delivery_status === "cancelled" ? "bg-red-500/10 text-red-600" :
+                                "bg-blue-500/10 text-blue-600"
+                              }`}>
+                                {o.delivery_status === "confirmed" ? "Баталгаажсан" :
+                                 o.delivery_status === "phone_confirmed" ? "Утсаар баталгаажсан" :
+                                 o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
+                                 o.delivery_status === "delivered" ? "Хүргэгдсэн" :
+                                 o.delivery_status === "cancelled" ? "Цуцлагдсан" :
+                                 o.delivery_status === "processing" ? "Боловсруулж байна" : o.delivery_status}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <button
@@ -1672,6 +1733,16 @@ const AdminPage = () => {
                         >
                           📋
                         </button>
+                        {!o.delivery_order_id && o.status !== "cancelled" && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); sendToDelivery(o.id); }}
+                            disabled={sendingDelivery === o.id}
+                            className="p-2 rounded-lg hover:bg-primary/10 text-primary transition-colors disabled:opacity-50"
+                            title="Хүргэлтэнд илгээх"
+                          >
+                            {sendingDelivery === o.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Truck className="h-4 w-4" />}
+                          </button>
+                        )}
                         {o.status === "cancelled" && (
                           <button
                             onClick={(e) => { e.stopPropagation(); setDeleteOrderTarget({ id: o.id }); }}
@@ -1729,6 +1800,23 @@ const AdminPage = () => {
                               {delOpt.address && <p><span className="text-muted-foreground">Хаяг:</span> <span className="font-medium">{delOpt.address}</span></p>}
                               {delOpt.phone && <p><span className="text-muted-foreground">Утас:</span> <span className="font-medium">{delOpt.phone}</span></p>}
                               {delOpt.payment_terms && <p><span className="text-muted-foreground">Төлбөрийн нөхцөл:</span> <span className="font-medium">{delOpt.payment_terms}</span></p>}
+                            </div>
+                          </div>
+                        )}
+                        {/* ON Shop Delivery info */}
+                        {o.delivery_order_id && (
+                          <div>
+                            <h4 className="text-xs font-bold text-muted-foreground mb-2">ON Shop Delivery</h4>
+                            <div className="bg-secondary/50 rounded-lg p-3 text-xs space-y-1">
+                              <p><span className="text-muted-foreground">Дугаар:</span> <span className="font-mono font-medium">{o.delivery_order_id}</span></p>
+                              {o.delivery_status && <p><span className="text-muted-foreground">Төлөв:</span> <span className="font-medium">{
+                                o.delivery_status === "confirmed" ? "Баталгаажсан" :
+                                o.delivery_status === "phone_confirmed" ? "Утсаар баталгаажсан" :
+                                o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд гарсан" :
+                                o.delivery_status === "delivered" ? "Хүргэгдсэн" :
+                                o.delivery_status === "cancelled" ? "Цуцлагдсан" :
+                                o.delivery_status === "processing" ? "Боловсруулж байна" : o.delivery_status
+                              }</span></p>}
                             </div>
                           </div>
                         )}
