@@ -113,7 +113,9 @@ export type Database = {
           delivery_completed_photo: string | null
           delivery_fee: number | null
           delivery_option_id: string | null
+          delivery_order_id: string | null
           delivery_pickup_photo: string | null
+          delivery_status: string | null
           guest_name: string | null
           id: string
           is_guest: boolean | null
@@ -134,7 +136,9 @@ export type Database = {
           delivery_completed_photo?: string | null
           delivery_fee?: number | null
           delivery_option_id?: string | null
+          delivery_order_id?: string | null
           delivery_pickup_photo?: string | null
+          delivery_status?: string | null
           guest_name?: string | null
           id?: string
           is_guest?: boolean | null
@@ -155,7 +159,9 @@ export type Database = {
           delivery_completed_photo?: string | null
           delivery_fee?: number | null
           delivery_option_id?: string | null
+          delivery_order_id?: string | null
           delivery_pickup_photo?: string | null
+          delivery_status?: string | null
           guest_name?: string | null
           id?: string
           is_guest?: boolean | null
