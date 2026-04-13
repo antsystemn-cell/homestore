@@ -334,6 +334,47 @@ const AdminPage = () => {
     } else {
       toast.success(`Захиалгын төлөв "${statusLabels[newStatus]}" болж өөрчлөгдлөө`);
       setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status: newStatus } : o));
+
+      // Notify delivery system on cancellation
+      if (newStatus === "cancelled") {
+        const order = orders.find(o => o.id === orderId);
+        if (order?.delivery_order_id) {
+          supabase.functions.invoke("notify-delivery-status", {
+            body: { order_id: orderId, fulfillment_status: "cancelled", note: "Easyshop дээр цуцлагдсан" },
+          }).catch(console.error);
+        }
+      }
+      // Notify delivery system when payment confirmed
+      if (newStatus === "confirmed") {
+        const order = orders.find(o => o.id === orderId);
+        if (order?.delivery_order_id) {
+          supabase.functions.invoke("notify-delivery-status", {
+            body: { order_id: orderId, payment_status: "paid" },
+          }).catch(console.error);
+        }
+      }
+    }
+  };
+
+  const [sendingDelivery, setSendingDelivery] = useState<string | null>(null);
+
+  const sendToDelivery = async (orderId: string) => {
+    setSendingDelivery(orderId);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-to-delivery", {
+        body: { order_id: orderId },
+      });
+      if (error) throw error;
+      if (data?.success) {
+        toast.success(`Хүргэлтэнд илгээгдлээ: ${data.delivery_order_id || ""}`);
+        setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, delivery_order_id: data.delivery_order_id, delivery_status: "processing" } : o));
+      } else {
+        toast.error("Хүргэлтэнд илгээхэд алдаа: " + (data?.error || "Unknown"));
+      }
+    } catch (e: any) {
+      toast.error("Хүргэлтэнд илгээхэд алдаа: " + e.message);
+    } finally {
+      setSendingDelivery(null);
     }
   };
 
