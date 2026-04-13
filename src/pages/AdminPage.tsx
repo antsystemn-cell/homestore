@@ -1690,6 +1690,26 @@ const AdminPage = () => {
                             </span>
                           </div>
                         )}
+                        {o.delivery_order_id && (
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <span className="text-[10px] font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded">{o.delivery_order_id}</span>
+                            {o.delivery_status && (
+                              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                                o.delivery_status === "delivered" ? "bg-green-500/10 text-green-600" :
+                                o.delivery_status === "out_for_delivery" ? "bg-violet-500/10 text-violet-600" :
+                                o.delivery_status === "cancelled" ? "bg-red-500/10 text-red-600" :
+                                "bg-blue-500/10 text-blue-600"
+                              }`}>
+                                {o.delivery_status === "confirmed" ? "Баталгаажсан" :
+                                 o.delivery_status === "phone_confirmed" ? "Утсаар баталгаажсан" :
+                                 o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
+                                 o.delivery_status === "delivered" ? "Хүргэгдсэн" :
+                                 o.delivery_status === "cancelled" ? "Цуцлагдсан" :
+                                 o.delivery_status === "processing" ? "Боловсруулж байна" : o.delivery_status}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <button
