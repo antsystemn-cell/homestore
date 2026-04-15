@@ -72,7 +72,7 @@ const AdminPage = () => {
     product_code: "", slug: "", specifications: [] as { key: string; value: string }[],
     detail_media: [] as { type: "image" | "video"; url: string; caption: string; thumbnail?: string }[],
     brand_id: "",
-    colors: [] as { name: string; image: string }[],
+    colors: [] as { name: string; image: string; sku: string }[],
     sizes: [] as string[],
   });
   const [newColor, setNewColor] = useState("");
@@ -664,7 +664,7 @@ const AdminPage = () => {
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
       detail_media: media.map((m: any) => ({ type: m.type || "image", url: m.url || "", caption: m.caption || "", thumbnail: m.thumbnail || "" })),
       brand_id: p.brand_id || "",
-      colors: Array.isArray(full.colors) ? full.colors.map((c: any) => typeof c === 'string' ? { name: c, image: '' } : { name: c.name || '', image: c.image || '' }) : [],
+      colors: Array.isArray(full.colors) ? full.colors.map((c: any) => typeof c === 'string' ? { name: c, image: '', sku: '' } : { name: c.name || '', image: c.image || '', sku: c.sku || '' }) : [],
       sizes: Array.isArray(full.sizes) ? full.sizes : [],
     });
     setEditId(p.id);
@@ -1425,13 +1425,22 @@ const AdminPage = () => {
                               <Upload className="h-4 w-4 text-muted-foreground/60" />
                             )}
                           </div>
-                          <input placeholder="Өнгөний нэр" value={color.name}
-                            onChange={(e) => {
-                              const updated = [...form.colors];
-                              updated[idx] = { ...updated[idx], name: e.target.value };
-                              setForm({ ...form, colors: updated });
-                            }}
-                            className="flex-1 rounded-lg bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary/20" />
+                          <div className="flex-1 flex flex-col gap-1.5">
+                            <input placeholder="Өнгөний нэр" value={color.name}
+                              onChange={(e) => {
+                                const updated = [...form.colors];
+                                updated[idx] = { ...updated[idx], name: e.target.value };
+                                setForm({ ...form, colors: updated });
+                              }}
+                              className="w-full rounded-lg bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary/20" />
+                            <input placeholder="SKU код (жишээ: ES-001-BLK)" value={color.sku || ""}
+                              onChange={(e) => {
+                                const updated = [...form.colors];
+                                updated[idx] = { ...updated[idx], sku: e.target.value };
+                                setForm({ ...form, colors: updated });
+                              }}
+                              className="w-full rounded-lg bg-secondary px-3 py-1.5 text-xs text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/20 font-mono" />
+                          </div>
                           <button type="button" onClick={() => setForm({ ...form, colors: form.colors.filter((_, i) => i !== idx) })}
                             className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
                             <X className="h-4 w-4" />
@@ -1440,7 +1449,7 @@ const AdminPage = () => {
                       ))}
                     </div>
                     <button type="button"
-                      onClick={() => setForm({ ...form, colors: [...form.colors, { name: "", image: "" }] })}
+                      onClick={() => setForm({ ...form, colors: [...form.colors, { name: "", image: "", sku: "" }] })}
                       className="flex items-center gap-1.5 text-xs text-primary font-medium hover:text-primary/80 transition-colors py-1">
                       <Plus className="h-3.5 w-3.5" /> Өнгө нэмэх
                     </button>
