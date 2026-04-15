@@ -8,7 +8,7 @@ import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 
 // Maintenance mode — set to true to block public access
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 // Eagerly load Index (critical landing page)
 import Index from "./pages/Index";
