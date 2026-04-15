@@ -8,12 +8,14 @@ import ErrorBoundary from "@/components/store/ErrorBoundary";
 import SaleCarousel from "@/components/store/SaleCarousel";
 import PromoBanner from "@/components/store/PromoBanner";
 import BrandLogos from "@/components/store/BrandLogos";
+import NewArrivals from "@/components/store/NewArrivals";
 import { Product, mapDbProduct } from "@/data/products";
 import {
   fetchPublicBrands,
   fetchPublicProducts,
   fetchSaleProducts,
   fetchFeaturedProducts,
+  fetchNewProducts,
 } from "@/lib/publicStoreApi";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -34,6 +36,7 @@ const Index = () => {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [saleProducts, setSaleProducts] = useState<Product[]>([]);
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [newProducts, setNewProducts] = useState<Product[]>([]);
   const [brands, setBrands] = useState<{ id: string; name: string; logo_url?: string | null }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -76,11 +79,12 @@ const Index = () => {
     setError(false);
 
     try {
-      const [prodRes, brandRes, saleRes, featuredRes] = await Promise.all([
+      const [prodRes, brandRes, saleRes, featuredRes, newRes] = await Promise.all([
         fetchPublicProducts(),
         fetchPublicBrands(),
         fetchSaleProducts(),
         fetchFeaturedProducts(),
+        fetchNewProducts(),
       ]);
       const brandMap = new Map((brandRes || []).map((b: any) => [b.id, b]));
 
@@ -97,10 +101,12 @@ const Index = () => {
       const mappedProducts = shuffle((prodRes || []).map(mapWithBrand));
       const mappedSale = (saleRes || []).map(mapWithBrand);
       const mappedFeatured = (featuredRes || []).map(mapWithBrand);
+      const mappedNew = (newRes || []).map(mapWithBrand);
 
       setAllProducts(mappedProducts);
       setSaleProducts(mappedSale);
       setFeaturedProducts(mappedFeatured);
+      setNewProducts(mappedNew);
       setBrands((brandRes || []).map((b: any) => ({ id: b.id, name: b.name, logo_url: b.logo_url })));
       setPage(1);
       setMobileVisibleCount(MOBILE_LOAD_SIZE);
@@ -165,7 +171,14 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
-          {/* Sale carousel - below brands */}
+          {/* New arrivals - between brands and sale */}
+          {newProducts.length > 0 && (
+            <ErrorBoundary>
+              <NewArrivals products={newProducts} />
+            </ErrorBoundary>
+          )}
+
+          {/* Sale carousel - below new arrivals */}
           {saleProducts.length > 0 && (
             <ErrorBoundary>
               <SaleCarousel products={saleProducts} />
