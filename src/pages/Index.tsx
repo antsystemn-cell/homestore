@@ -171,7 +171,14 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
-          {/* Sale carousel - below brands */}
+          {/* New arrivals - between brands and sale */}
+          {newProducts.length > 0 && (
+            <ErrorBoundary>
+              <NewArrivals products={newProducts} />
+            </ErrorBoundary>
+          )}
+
+          {/* Sale carousel - below new arrivals */}
           {saleProducts.length > 0 && (
             <ErrorBoundary>
               <SaleCarousel products={saleProducts} />
