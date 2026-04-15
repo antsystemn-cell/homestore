@@ -84,15 +84,15 @@ const NewArrivals = React.memo(({ products }: Props) => {
               >
                 <div className="relative rounded-2xl overflow-hidden bg-card border border-border/60 hover:border-primary/40 shadow-sm hover:shadow-lg transition-all duration-300">
                   {/* Image */}
-                  <div className="relative aspect-[3/4] bg-secondary overflow-hidden">
+                  <div className="relative aspect-square bg-secondary overflow-hidden flex items-center justify-center">
                     <img
                       src={imgErrors[p.id] ? "/placeholder.svg" : (p.thumbnail || p.image)}
                       alt={p.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
                       decoding="async"
                       width={300}
-                      height={400}
+                      height={300}
                       onError={() => handleImgError(p.id)}
                     />
 
