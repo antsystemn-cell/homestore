@@ -7,8 +7,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 
+// Maintenance mode — set to true to block public access
+const MAINTENANCE_MODE = true;
+
 // Eagerly load Index (critical landing page)
 import Index from "./pages/Index";
+import MaintenancePage from "./components/MaintenancePage";
 
 // Retry wrapper for lazy imports (handles stale chunk hashes after redeploy)
 function lazyRetry<T extends { default: React.ComponentType<any> }>(
@@ -64,19 +68,30 @@ const App = () => (
           <CartProvider>
             <Suspense fallback={<PageFallback />}>
               <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/shop" element={<ShopPage />} />
-                <Route path="/:brandName" element={<ShopPage />} />
-                <Route path="/sales" element={<SalesPage />} />
-                <Route path="/wishlist" element={<WishlistPage />} />
-                <Route path="/cart" element={<CartPage />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
-                <Route path="/product/:slug" element={<ProductPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/auth" element={<AuthPage />} />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
-                <Route path="/admin" element={<AdminPage />} />
-                <Route path="*" element={<NotFound />} />
+                {MAINTENANCE_MODE ? (
+                  <>
+                    <Route path="/admin" element={<AdminPage />} />
+                    <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
+                    <Route path="*" element={<MaintenancePage />} />
+                  </>
+                ) : (
+                  <>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/shop" element={<ShopPage />} />
+                    <Route path="/:brandName" element={<ShopPage />} />
+                    <Route path="/sales" element={<SalesPage />} />
+                    <Route path="/wishlist" element={<WishlistPage />} />
+                    <Route path="/cart" element={<CartPage />} />
+                    <Route path="/checkout" element={<CheckoutPage />} />
+                    <Route path="/product/:slug" element={<ProductPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
+                    <Route path="/admin" element={<AdminPage />} />
+                    <Route path="*" element={<NotFound />} />
+                  </>
+                )}
               </Routes>
             </Suspense>
           </CartProvider>
