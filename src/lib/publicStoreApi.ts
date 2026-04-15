@@ -298,11 +298,10 @@ export const fetchNewProducts = async () => {
       is_new: "eq.true",
       is_active: "eq.true",
       order: "created_at.desc",
-      limit: 4,
     });
   } catch (error) {
     logFallback("newProducts", error);
-    return FALLBACK_PRODUCTS.filter((p) => p.is_new).slice(0, 4);
+    return FALLBACK_PRODUCTS.filter((p) => p.is_new);
   }
 };
 

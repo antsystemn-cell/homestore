@@ -1,7 +1,7 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Product, formatPrice } from "@/data/products";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Props {
   products: Product[];
@@ -9,31 +9,60 @@ interface Props {
 
 const NewArrivals = React.memo(({ products }: Props) => {
   const navigate = useNavigate();
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
   const handleImgError = useCallback((id: string) => {
     setImgErrors((prev) => ({ ...prev, [id]: true }));
   }, []);
 
-  const items = products.slice(0, 4);
-  if (items.length === 0) return null;
+  const scroll = useCallback((dir: "left" | "right") => {
+    if (!scrollRef.current) return;
+    const amount = scrollRef.current.clientWidth * 0.6;
+    scrollRef.current.scrollBy({
+      left: dir === "left" ? -amount : amount,
+      behavior: "smooth",
+    });
+  }, []);
+
+  if (products.length === 0) return null;
 
   return (
     <section className="py-5 md:py-8">
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         {/* Header */}
-        <div className="flex items-center gap-2.5 mb-4">
-          <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Sparkles className="h-5 w-5 text-primary" />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-primary" />
+            </div>
+            <h2 className="text-sm md:text-base font-bold text-foreground tracking-tight">
+              Шинэ бараа
+            </h2>
           </div>
-          <h2 className="text-sm md:text-base font-bold text-foreground tracking-tight">
-            Шинэ бараа
-          </h2>
+
+          <div className="hidden md:flex items-center gap-1.5">
+            <button
+              onClick={() => scroll("left")}
+              className="p-1.5 rounded-full border border-border hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground hover:text-primary"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => scroll("right")}
+              className="p-1.5 rounded-full border border-border hover:border-primary/40 hover:bg-primary/5 transition-colors text-muted-foreground hover:text-primary"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
-        {/* Grid – 2x2 on mobile, 4 columns on desktop */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-4">
-          {items.map((p, index) => {
+        {/* Scrollable row */}
+        <div
+          ref={scrollRef}
+          className="flex gap-2.5 md:gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1"
+        >
+          {products.map((p, index) => {
             const productUrl = `/product/${p.slug || p.id}`;
             const discountPct =
               p.originalPrice && p.originalPrice > p.price
@@ -50,7 +79,7 @@ const NewArrivals = React.memo(({ products }: Props) => {
                     navigate(productUrl);
                   }
                 }}
-                className="group block no-underline text-inherit animate-fade-in"
+                className="flex-shrink-0 w-[46vw] md:w-[calc(25%-12px)] snap-start group block no-underline text-inherit animate-fade-in"
                 style={{ animationDelay: `${index * 60}ms` }}
               >
                 <div className="relative rounded-2xl overflow-hidden bg-card border border-border/60 hover:border-primary/40 shadow-sm hover:shadow-lg transition-all duration-300">
@@ -83,7 +112,7 @@ const NewArrivals = React.memo(({ products }: Props) => {
                       </div>
                     )}
 
-                    {/* Bottom gradient overlay */}
+                    {/* Bottom gradient */}
                     <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/40 to-transparent" />
                   </div>
 
