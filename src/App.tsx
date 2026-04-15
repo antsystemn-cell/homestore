@@ -7,8 +7,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 
+// Maintenance mode — set to true to block public access
+const MAINTENANCE_MODE = true;
+
 // Eagerly load Index (critical landing page)
 import Index from "./pages/Index";
+import MaintenancePage from "./components/MaintenancePage";
 
 // Retry wrapper for lazy imports (handles stale chunk hashes after redeploy)
 function lazyRetry<T extends { default: React.ComponentType<any> }>(
