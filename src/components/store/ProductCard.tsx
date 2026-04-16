@@ -6,6 +6,25 @@ interface Props {
   product: Product;
 }
 
+// Map Mongolian / common color names to hex
+const COLOR_HEX: Record<string, string> = {
+  "хар": "#1a1a1a", "цагаан": "#f5f5f5", "улаан": "#e53e3e", "шар": "#ecc94b",
+  "ногоон": "#38a169", "цэнхэр": "#3182ce", "хөх": "#2b6cb0", "ягаан": "#d53f8c",
+  "саарал": "#a0aec0", "бор": "#8B4513", "ягаан алтан": "#e8a0bf",
+  "алтан": "#d4a84b", "мөнгөн": "#c0c0c0", "улбар шар": "#ed8936",
+  "нил ягаан": "#805ad5", "тунгалаг": "#e2e8f0",
+  "black": "#1a1a1a", "white": "#f5f5f5", "red": "#e53e3e", "blue": "#3182ce",
+  "green": "#38a169", "yellow": "#ecc94b", "pink": "#d53f8c", "gray": "#a0aec0",
+  "grey": "#a0aec0", "brown": "#8B4513", "orange": "#ed8936", "purple": "#805ad5",
+  "gold": "#d4a84b", "silver": "#c0c0c0", "beige": "#f5f0e1", "navy": "#1a365d",
+  "cream": "#fffdd0", "rose": "#e8a0bf", "coral": "#f56565",
+};
+
+function getColorHex(name: string): string | null {
+  const lower = name.toLowerCase().trim();
+  return COLOR_HEX[lower] || null;
+}
+
 const ProductCard = React.memo(({ product }: Props) => {
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
@@ -60,33 +79,33 @@ const ProductCard = React.memo(({ product }: Props) => {
 
         {/* Color swatches overlay */}
         {hasColors && (
-          <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1 flex-wrap">
-            {colors.slice(0, 6).map((c, i) => (
-              <button
-                key={i}
-                type="button"
-                title={c.name}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setActiveColorIdx(activeColorIdx === i ? null : i);
-                }}
-                className={`w-5 h-5 md:w-6 md:h-6 rounded-full border-2 transition-all duration-200 overflow-hidden flex-shrink-0 ${
-                  activeColorIdx === i
-                    ? "border-primary ring-2 ring-primary/30 scale-110"
-                    : "border-white/80 hover:border-primary/60"
-                }`}
-                style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }}
-              >
-                <img
-                  src={c.image}
-                  alt={c.name}
-                  className="w-full h-full object-cover rounded-full"
-                  loading="lazy"
-                  decoding="async"
+          <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1">
+            {colors.slice(0, 6).map((c, i) => {
+              const hex = getColorHex(c.name);
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  title={c.name}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setActiveColorIdx(activeColorIdx === i ? null : i);
+                  }}
+                  className={`rounded-full border-2 transition-all duration-200 flex-shrink-0 ${
+                    activeColorIdx === i
+                      ? "border-primary ring-2 ring-primary/30 scale-110"
+                      : "border-white/80 hover:border-primary/60"
+                  }`}
+                  style={{
+                    backgroundColor: hex || "#ccc",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+                    width: 18,
+                    height: 18,
+                  }}
                 />
-              </button>
-            ))}
+              );
+            })}
             {colors.length > 6 && (
               <span className="text-[9px] text-white font-medium bg-black/50 rounded-full px-1.5 py-0.5">
                 +{colors.length - 6}
