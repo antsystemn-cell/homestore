@@ -6,6 +6,25 @@ interface Props {
   product: Product;
 }
 
+// Map Mongolian / common color names to hex
+const COLOR_HEX: Record<string, string> = {
+  "хар": "#1a1a1a", "цагаан": "#f5f5f5", "улаан": "#e53e3e", "шар": "#ecc94b",
+  "ногоон": "#38a169", "цэнхэр": "#3182ce", "хөх": "#2b6cb0", "ягаан": "#d53f8c",
+  "саарал": "#a0aec0", "бор": "#8B4513", "ягаан алтан": "#e8a0bf",
+  "алтан": "#d4a84b", "мөнгөн": "#c0c0c0", "улбар шар": "#ed8936",
+  "нил ягаан": "#805ad5", "тунгалаг": "#e2e8f0",
+  "black": "#1a1a1a", "white": "#f5f5f5", "red": "#e53e3e", "blue": "#3182ce",
+  "green": "#38a169", "yellow": "#ecc94b", "pink": "#d53f8c", "gray": "#a0aec0",
+  "grey": "#a0aec0", "brown": "#8B4513", "orange": "#ed8936", "purple": "#805ad5",
+  "gold": "#d4a84b", "silver": "#c0c0c0", "beige": "#f5f0e1", "navy": "#1a365d",
+  "cream": "#fffdd0", "rose": "#e8a0bf", "coral": "#f56565",
+};
+
+function getColorHex(name: string): string | null {
+  const lower = name.toLowerCase().trim();
+  return COLOR_HEX[lower] || null;
+}
+
 const ProductCard = React.memo(({ product }: Props) => {
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
