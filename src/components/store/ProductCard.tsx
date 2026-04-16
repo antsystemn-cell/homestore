@@ -79,33 +79,32 @@ const ProductCard = React.memo(({ product }: Props) => {
 
         {/* Color swatches overlay */}
         {hasColors && (
-          <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1 flex-wrap">
-            {colors.slice(0, 6).map((c, i) => (
-              <button
-                key={i}
-                type="button"
-                title={c.name}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setActiveColorIdx(activeColorIdx === i ? null : i);
-                }}
-                className={`w-5 h-5 md:w-6 md:h-6 rounded-full border-2 transition-all duration-200 overflow-hidden flex-shrink-0 ${
-                  activeColorIdx === i
-                    ? "border-primary ring-2 ring-primary/30 scale-110"
-                    : "border-white/80 hover:border-primary/60"
-                }`}
-                style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }}
-              >
-                <img
-                  src={c.image}
-                  alt={c.name}
-                  className="w-full h-full object-cover rounded-full"
-                  loading="lazy"
-                  decoding="async"
+          <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1">
+            {colors.slice(0, 6).map((c, i) => {
+              const hex = getColorHex(c.name);
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  title={c.name}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setActiveColorIdx(activeColorIdx === i ? null : i);
+                  }}
+                  className={`w-4.5 h-4.5 md:w-5.5 md:h-5.5 rounded-full border-2 transition-all duration-200 flex-shrink-0 ${
+                    activeColorIdx === i
+                      ? "border-primary ring-2 ring-primary/30 scale-110"
+                      : "border-white/80 hover:border-primary/60"
+                  }`}
+                  style={{
+                    backgroundColor: hex || "#ccc",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+                    width: hex ? undefined : undefined,
+                  }}
                 />
-              </button>
-            ))}
+              );
+            })}
             {colors.length > 6 && (
               <span className="text-[9px] text-white font-medium bg-black/50 rounded-full px-1.5 py-0.5">
                 +{colors.length - 6}
