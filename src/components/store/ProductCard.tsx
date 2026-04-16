@@ -9,14 +9,9 @@ interface Props {
 const ProductCard = React.memo(({ product }: Props) => {
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
-
-  const handleClick = useCallback(() => {
-    navigate(`/product/${product.slug || product.id}`);
-  }, [navigate, product.slug, product.id]);
+  const [activeColorIdx, setActiveColorIdx] = useState<number | null>(null);
 
   const handleImgError = useCallback(() => setImgError(true), []);
-
-  const imgSrc = imgError ? "/placeholder.svg" : (product.thumbnail || product.image);
 
   const productUrl = `/product/${product.slug || product.id}`;
 
@@ -27,6 +22,14 @@ const ProductCard = React.memo(({ product }: Props) => {
     }
   }, [navigate, productUrl]);
 
+  // Determine displayed image: active color image or default
+  const colors = product.colors;
+  const hasColors = colors && colors.length > 1;
+  const colorImage = activeColorIdx !== null && colors?.[activeColorIdx]?.image;
+  const displaySrc = imgError
+    ? "/placeholder.svg"
+    : colorImage || product.thumbnail || product.image;
+
   return (
     <a
       href={productUrl}
@@ -35,7 +38,7 @@ const ProductCard = React.memo(({ product }: Props) => {
     >
       <div className="relative aspect-square bg-secondary overflow-hidden">
         <img
-          src={imgSrc}
+          src={displaySrc}
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
@@ -53,6 +56,43 @@ const ProductCard = React.memo(({ product }: Props) => {
           <span className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded">
             -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
           </span>
+        )}
+
+        {/* Color swatches overlay */}
+        {hasColors && (
+          <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1 flex-wrap">
+            {colors.slice(0, 6).map((c, i) => (
+              <button
+                key={i}
+                type="button"
+                title={c.name}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setActiveColorIdx(activeColorIdx === i ? null : i);
+                }}
+                className={`w-5 h-5 md:w-6 md:h-6 rounded-full border-2 transition-all duration-200 overflow-hidden flex-shrink-0 ${
+                  activeColorIdx === i
+                    ? "border-primary ring-2 ring-primary/30 scale-110"
+                    : "border-white/80 hover:border-primary/60"
+                }`}
+                style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }}
+              >
+                <img
+                  src={c.image}
+                  alt={c.name}
+                  className="w-full h-full object-cover rounded-full"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </button>
+            ))}
+            {colors.length > 6 && (
+              <span className="text-[9px] text-white font-medium bg-black/50 rounded-full px-1.5 py-0.5">
+                +{colors.length - 6}
+              </span>
+            )}
+          </div>
         )}
       </div>
       <div className="px-3 py-2.5 md:px-4 md:py-3">
