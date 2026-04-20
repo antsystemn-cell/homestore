@@ -220,9 +220,13 @@ const StoryVideosAdmin = () => {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm line-clamp-1">{s.title}</p>
                     <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">{s.video_url}</p>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary">{detectProvider(s.video_url)}</span>
                       <span className="text-[10px] text-muted-foreground">#{s.position || 0}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary inline-flex items-center gap-1" title="Үзсэн тоо">
+                        <BarChart3 className="h-3 w-3" />
+                        {s.view_count ?? 0}
+                      </span>
                       {!s.is_active && <span className="text-[10px] px-2 py-0.5 rounded-full bg-destructive/10 text-destructive">Идэвхгүй</span>}
                     </div>
                   </div>
