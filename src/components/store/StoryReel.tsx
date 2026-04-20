@@ -88,7 +88,7 @@ const StoryReel = () => {
               <button
                 key={s.id}
                 onClick={() => openStory(i)}
-                className="group relative flex-shrink-0 w-[150px] md:w-[180px] aspect-[9/16] rounded-2xl overflow-hidden bg-muted ring-2 ring-primary/50 hover:ring-primary hover:shadow-xl transition-all duration-300 active:scale-95 snap-start"
+                className="group relative flex-shrink-0 w-[150px] md:w-[180px] aspect-[9/16] overflow-hidden bg-muted ring-2 ring-primary/50 hover:ring-primary hover:shadow-xl transition-all duration-300 active:scale-95 snap-start"
                 aria-label={`Story: ${s.title}`}
               >
                 <img
