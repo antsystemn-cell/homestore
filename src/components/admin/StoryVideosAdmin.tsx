@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Pencil, Trash2, Eye, EyeOff, Loader2, BarChart3, Download } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, Loader2, BarChart3, Download, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { getAutoThumbnail, detectProvider } from "@/lib/storyVideoUrl";
 
