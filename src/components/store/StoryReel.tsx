@@ -31,10 +31,26 @@ const StoryReel = () => {
     return () => { mounted = false; };
   }, []);
 
+  const openStory = useCallback((idx: number) => {
+    setActiveIdx(idx);
+    const s = stories[idx];
+    if (s?.id) {
+      supabase.rpc("increment_story_view", { _story_id: s.id }).then(() => {});
+    }
+  }, [stories]);
+
   const close = useCallback(() => setActiveIdx(null), []);
   const next = useCallback(() => {
-    setActiveIdx((i) => (i === null ? null : Math.min(i + 1, stories.length - 1)));
-  }, [stories.length]);
+    setActiveIdx((i) => {
+      if (i === null) return null;
+      const newIdx = Math.min(i + 1, stories.length - 1);
+      if (newIdx !== i) {
+        const s = stories[newIdx];
+        if (s?.id) supabase.rpc("increment_story_view", { _story_id: s.id }).then(() => {});
+      }
+      return newIdx;
+    });
+  }, [stories]);
   const prev = useCallback(() => {
     setActiveIdx((i) => (i === null || i === 0 ? i : i - 1));
   }, []);
@@ -69,7 +85,7 @@ const StoryReel = () => {
             return (
               <button
                 key={s.id}
-                onClick={() => setActiveIdx(i)}
+                onClick={() => openStory(i)}
                 className="group relative flex-shrink-0 w-[110px] md:w-[140px] aspect-[9/16] rounded-2xl overflow-hidden bg-muted ring-2 ring-primary/60 hover:ring-primary transition-all active:scale-95"
                 aria-label={`Story: ${s.title}`}
               >
