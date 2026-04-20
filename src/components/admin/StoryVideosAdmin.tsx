@@ -24,8 +24,33 @@ const StoryVideosAdmin = () => {
   const [products, setProducts] = useState<ProductOpt[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [fetchingThumb, setFetchingThumb] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+
+  const handleAutoFetchThumbnail = async () => {
+    if (!form.video_url.trim()) {
+      toast.error("Эхлээд видеоны линк оруулна уу");
+      return;
+    }
+    setFetchingThumb(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("fetch-video-thumbnail", {
+        body: { video_url: form.video_url.trim() },
+      });
+      if (error) throw error;
+      if (data?.thumbnail_url) {
+        setForm((f) => ({ ...f, thumbnail_url: data.thumbnail_url }));
+        toast.success("Thumbnail амжилттай татлаа");
+      } else {
+        toast.error("Thumbnail олдсонгүй — гараар оруулна уу");
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Татаж чадсангүй");
+    } finally {
+      setFetchingThumb(false);
+    }
+  };
 
   const load = async () => {
     setLoading(true);
