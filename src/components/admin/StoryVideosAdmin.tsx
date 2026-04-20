@@ -55,6 +55,7 @@ const StoryVideosAdmin = () => {
       thumbnail_url: form.thumbnail_url.trim() || null,
       is_active: form.is_active,
       position: Number(form.position) || 0,
+      product_id: form.product_id || null,
     };
     const { error } = editId
       ? await supabase.from("story_videos").update(payload).eq("id", editId)
@@ -74,6 +75,7 @@ const StoryVideosAdmin = () => {
       thumbnail_url: s.thumbnail_url || "",
       is_active: s.is_active,
       position: s.position || 0,
+      product_id: s.product_id || "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
