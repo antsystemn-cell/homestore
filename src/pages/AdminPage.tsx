@@ -34,6 +34,7 @@ const AdminPage = () => {
   const [deliveryOptions, setDeliveryOptions] = useState<any[]>([]);
   const [paymentProviders, setPaymentProviders] = useState<any[]>([]);
   const [promoBanners, setPromoBanners] = useState<any[]>([]);
+  const [storyStats, setStoryStats] = useState<{ total_views: number; story_count: number; top: { id: string; title: string; view_count: number }[] }>({ total_views: 0, story_count: 0, top: [] });
   const [loading, setLoading] = useState(false);
 
   // Promo banner form state
@@ -211,6 +212,23 @@ const AdminPage = () => {
     if (authLoading || !hasAdminAccess) return;
     loadAdminData();
   }, [authLoading, isAdmin]);
+
+  useEffect(() => {
+    if (authLoading || !hasAdminAccess) return;
+    (async () => {
+      const { data } = await supabase
+        .from("story_videos")
+        .select("id,title,view_count")
+        .order("view_count", { ascending: false });
+      const list = (data || []) as { id: string; title: string; view_count: number | null }[];
+      const total = list.reduce((s, x) => s + (x.view_count || 0), 0);
+      setStoryStats({
+        total_views: total,
+        story_count: list.length,
+        top: list.slice(0, 5).map((x) => ({ id: x.id, title: x.title, view_count: x.view_count || 0 })),
+      });
+    })();
+  }, [authLoading, isAdmin, tab]);
 
   const fetchPromoBanners = async () => {
     try {
@@ -990,6 +1008,39 @@ const AdminPage = () => {
                 </div>
               </div>
 
+              {/* Story analytics */}
+              <div onClick={() => setTab("stories")} className="bg-card rounded-2xl p-5 border border-border mt-3 md:mt-4 cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-xl bg-pink-500/10 text-pink-600 flex items-center justify-center">
+                      <Video className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold">Сторис статистик</h3>
+                      <p className="text-[11px] text-muted-foreground">Нийт {storyStats.story_count} story</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] text-muted-foreground">Нийт үзэлт</p>
+                    <p className="text-xl md:text-2xl font-extrabold text-primary">{storyStats.total_views.toLocaleString()}</p>
+                  </div>
+                </div>
+                {storyStats.top.length > 0 ? (
+                  <div className="space-y-2">
+                    <p className="text-[11px] font-semibold text-muted-foreground">Шилдэг story-ууд</p>
+                    {storyStats.top.map((s, i) => (
+                      <div key={s.id} className="flex items-center gap-3 py-1.5 border-b border-border last:border-0">
+                        <span className="text-xs font-bold text-muted-foreground w-5">{i + 1}</span>
+                        <span className="text-sm flex-1 truncate">{s.title}</span>
+                        <span className="text-xs font-bold text-foreground tabular-nums">{(s.view_count || 0).toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-3">Story алга байна</p>
+                )}
+              </div>
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
                 <div className="bg-card rounded-2xl p-5 border border-border">
                   <h3 className="text-sm font-bold mb-4">Сарын орлого</h3>
@@ -1480,7 +1531,7 @@ const AdminPage = () => {
                         <Plus className="h-4 w-4" />
                       </button>
                     </div>
-                  </div>
+              </div>
 
 
                   <div className="flex gap-6">
