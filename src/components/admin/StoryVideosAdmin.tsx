@@ -25,8 +25,36 @@ const StoryVideosAdmin = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [fetchingThumb, setFetchingThumb] = useState(false);
+  const [uploadingThumb, setUploadingThumb] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+
+  const handleUploadThumbnail = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Зөвхөн зураг оруулна уу");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Зургийн хэмжээ 5MB-аас бага байх ёстой");
+      return;
+    }
+    setUploadingThumb(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("story-thumbnails")
+        .upload(fileName, file, { cacheControl: "3600", upsert: false });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("story-thumbnails").getPublicUrl(fileName);
+      setForm((f) => ({ ...f, thumbnail_url: pub.publicUrl }));
+      toast.success("Зураг амжилттай байршууллаа");
+    } catch (e: any) {
+      toast.error(e.message || "Зураг байршуулж чадсангүй");
+    } finally {
+      setUploadingThumb(false);
+    }
+  };
 
   const handleAutoFetchThumbnail = async () => {
     if (!form.video_url.trim()) {
