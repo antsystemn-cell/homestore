@@ -85,7 +85,7 @@ const StoryReel = () => {
             return (
               <button
                 key={s.id}
-                onClick={() => setActiveIdx(i)}
+                onClick={() => openStory(i)}
                 className="group relative flex-shrink-0 w-[110px] md:w-[140px] aspect-[9/16] rounded-2xl overflow-hidden bg-muted ring-2 ring-primary/60 hover:ring-primary transition-all active:scale-95"
                 aria-label={`Story: ${s.title}`}
               >
