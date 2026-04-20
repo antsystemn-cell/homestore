@@ -12,6 +12,7 @@ type StoryVideo = {
   is_active: boolean;
   position: number | null;
   product_id: string | null;
+  view_count?: number | null;
 };
 
 type ProductOpt = { id: string; name: string };
