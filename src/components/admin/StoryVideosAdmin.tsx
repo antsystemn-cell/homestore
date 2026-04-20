@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Pencil, Trash2, Eye, EyeOff, Loader2, BarChart3, Download } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, Loader2, BarChart3, Download, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { getAutoThumbnail, detectProvider } from "@/lib/storyVideoUrl";
 
@@ -25,8 +25,36 @@ const StoryVideosAdmin = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [fetchingThumb, setFetchingThumb] = useState(false);
+  const [uploadingThumb, setUploadingThumb] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+
+  const handleUploadThumbnail = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Зөвхөн зураг оруулна уу");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Зургийн хэмжээ 5MB-аас бага байх ёстой");
+      return;
+    }
+    setUploadingThumb(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("story-thumbnails")
+        .upload(fileName, file, { cacheControl: "3600", upsert: false });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("story-thumbnails").getPublicUrl(fileName);
+      setForm((f) => ({ ...f, thumbnail_url: pub.publicUrl }));
+      toast.success("Зураг амжилттай байршууллаа");
+    } catch (e: any) {
+      toast.error(e.message || "Зураг байршуулж чадсангүй");
+    } finally {
+      setUploadingThumb(false);
+    }
+  };
 
   const handleAutoFetchThumbnail = async () => {
     if (!form.video_url.trim()) {
@@ -164,14 +192,46 @@ const StoryVideosAdmin = () => {
 
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">
-            Thumbnail зургийн URL (заавал биш — YouTube бол автомат)
+            Thumbnail зураг (заавал биш — YouTube бол автомат)
           </label>
-          <div className="flex gap-2">
+
+          {/* Upload zone */}
+          <label
+            htmlFor="story-thumb-upload"
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 border-dashed border-border bg-background hover:bg-secondary/50 cursor-pointer transition-colors ${uploadingThumb ? "opacity-60 pointer-events-none" : ""}`}
+          >
+            {uploadingThumb ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm">Байршуулж байна...</span>
+              </>
+            ) : (
+              <>
+                <Upload className="h-4 w-4" />
+                <span className="text-sm font-medium">Зураг сонгох (макс 5MB)</span>
+              </>
+            )}
+            <input
+              id="story-thumb-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleUploadThumbnail(f);
+                e.target.value = "";
+              }}
+              disabled={uploadingThumb}
+            />
+          </label>
+
+          {/* URL input + Auto-fetch */}
+          <div className="flex gap-2 mt-2">
             <input
               value={form.thumbnail_url}
               onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })}
               className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm"
-              placeholder="https://..."
+              placeholder="эсвэл URL: https://..."
             />
             <button
               type="button"
@@ -184,11 +244,24 @@ const StoryVideosAdmin = () => {
               Авто татах
             </button>
           </div>
-          {!form.thumbnail_url && form.video_url && getAutoThumbnail(form.video_url) && (
-            <img src={getAutoThumbnail(form.video_url)!} alt="auto" className="mt-2 h-20 rounded-lg object-cover" />
-          )}
-          {form.thumbnail_url && (
-            <img src={form.thumbnail_url} alt="preview" className="mt-2 h-20 rounded-lg object-cover" />
+
+          {/* Preview */}
+          {form.thumbnail_url ? (
+            <div className="mt-2 relative inline-block">
+              <img src={form.thumbnail_url} alt="preview" className="h-24 rounded-lg object-cover border border-border" />
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, thumbnail_url: "" })}
+                className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center shadow-md hover:scale-110 transition-transform"
+                title="Зураг устгах"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            form.video_url && getAutoThumbnail(form.video_url) && (
+              <img src={getAutoThumbnail(form.video_url)!} alt="auto" className="mt-2 h-24 rounded-lg object-cover border border-border opacity-70" />
+            )
           )}
         </div>
 
