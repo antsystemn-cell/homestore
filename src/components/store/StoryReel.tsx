@@ -89,7 +89,7 @@ const StoryReel = () => {
               <button
                 key={s.id}
                 onClick={() => openStory(i)}
-                className="group relative flex-shrink-0 w-[230px] md:w-[270px] aspect-[3/4] overflow-hidden bg-muted rounded-lg hover:shadow-xl transition-all duration-300 active:scale-[0.98] snap-start"
+                className="group relative flex-shrink-0 w-[180px] md:w-[220px] aspect-[3/6] overflow-hidden bg-muted rounded-lg hover:shadow-xl transition-all duration-300 active:scale-[0.98] snap-start"
                 aria-label={`Story: ${s.title}`}
               >
                 {previewUrl ? (
