@@ -53,8 +53,25 @@ const queryClient = new QueryClient({
 });
 
 const PageFallback = () => (
-  <div className="min-h-screen bg-background flex items-center justify-center">
-    <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+  <div className="min-h-screen bg-background">
+    {/* Header skeleton */}
+    <div className="h-14 md:h-16 border-b border-border bg-card animate-pulse" />
+    {/* Content skeleton grid */}
+    <div className="max-w-6xl mx-auto md:px-8 md:py-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 md:gap-5">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="p-2 md:p-0">
+            <div className="bg-card rounded-xl md:rounded-2xl border border-border overflow-hidden">
+              <div className="w-full aspect-square bg-muted animate-pulse" />
+              <div className="p-3 space-y-2">
+                <div className="h-3 w-3/4 bg-muted rounded animate-pulse" />
+                <div className="h-4 w-1/2 bg-muted rounded animate-pulse" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   </div>
 );
 
