@@ -151,6 +151,25 @@ const StoryVideosAdmin = () => {
           )}
         </div>
 
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">
+            Холбогдох бараа (заавал биш)
+          </label>
+          <select
+            value={form.product_id}
+            onChange={(e) => setForm({ ...form, product_id: e.target.value })}
+            className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm"
+          >
+            <option value="">— Сонгоогүй —</option>
+            {products.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+          <p className="text-[11px] text-muted-foreground mt-1">
+            Сонгосон бол modal дотор "Энэ бараа руу очих" товч гарна.
+          </p>
+        </div>
+
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
