@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, memo } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Play, X, ExternalLink, ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
-import { getEmbedUrl, getAutoThumbnail, detectProvider } from "@/lib/storyVideoUrl";
+import { getEmbedUrl, getAutoThumbnail, getYoutubeThumbnailFallback, detectProvider } from "@/lib/storyVideoUrl";
 
 type StoryVideo = {
   id: string;
