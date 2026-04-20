@@ -81,9 +81,7 @@ const StoryReel = () => {
         <h2 className="text-lg md:text-2xl font-bold mb-4 md:mb-5 text-foreground text-center md:text-left">Сторис</h2>
         <div className="flex gap-4 md:gap-5 overflow-x-auto pb-3 px-1 scrollbar-hide justify-start md:justify-center snap-x snap-mandatory">
           {stories.map((s, i) => {
-            const autoThumb = getAutoThumbnail(s.video_url);
-            const thumb = s.thumbnail_url || autoThumb || "/placeholder.svg";
-            const fallback = getYoutubeThumbnailFallback(s.video_url) || "/placeholder.svg";
+            const previewUrl = getEmbedUrl(s.video_url);
             return (
               <button
                 key={s.id}
@@ -91,27 +89,25 @@ const StoryReel = () => {
                 className="group relative flex-shrink-0 w-[150px] md:w-[180px] aspect-[9/16] overflow-hidden bg-muted ring-2 ring-primary/50 hover:ring-primary hover:shadow-xl transition-all duration-300 active:scale-95 snap-start"
                 aria-label={`Story: ${s.title}`}
               >
-                <img
-                  src={thumb}
-                  alt={s.title}
-                  loading="lazy"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  onError={(e) => {
-                    const img = e.currentTarget as HTMLImageElement;
-                    if (img.src !== fallback && fallback !== "/placeholder.svg") {
-                      img.src = fallback;
-                    } else {
-                      img.src = "/placeholder.svg";
-                    }
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-                <div className="absolute inset-0 flex items-center justify-center">
+                {previewUrl ? (
+                  <iframe
+                    src={previewUrl.replace("autoplay=1", "autoplay=1&mute=1&controls=0&loop=1")}
+                    className="w-full h-full pointer-events-none"
+                    allow="autoplay; encrypted-media"
+                    title={s.title}
+                    loading="lazy"
+                    tabIndex={-1}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-muted" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent pointer-events-none" />
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/25 backdrop-blur-md flex items-center justify-center group-hover:bg-white/40 group-hover:scale-110 transition-all duration-300">
                     <Play className="w-5 h-5 md:w-6 md:h-6 text-white fill-white ml-0.5" />
                   </div>
                 </div>
-                <div className="absolute bottom-2.5 left-2.5 right-2.5">
+                <div className="absolute bottom-2.5 left-2.5 right-2.5 pointer-events-none">
                   <p className="text-white text-xs md:text-sm font-semibold line-clamp-2 drop-shadow-lg text-center">{s.title}</p>
                 </div>
               </button>
