@@ -213,6 +213,23 @@ const AdminPage = () => {
     loadAdminData();
   }, [authLoading, isAdmin]);
 
+  useEffect(() => {
+    if (authLoading || !hasAdminAccess) return;
+    (async () => {
+      const { data } = await supabase
+        .from("story_videos")
+        .select("id,title,view_count")
+        .order("view_count", { ascending: false });
+      const list = (data || []) as { id: string; title: string; view_count: number | null }[];
+      const total = list.reduce((s, x) => s + (x.view_count || 0), 0);
+      setStoryStats({
+        total_views: total,
+        story_count: list.length,
+        top: list.slice(0, 5).map((x) => ({ id: x.id, title: x.title, view_count: x.view_count || 0 })),
+      });
+    })();
+  }, [authLoading, isAdmin, tab]);
+
   const fetchPromoBanners = async () => {
     try {
       const { data } = await supabase.from("promo_banners").select("*").order("position");
