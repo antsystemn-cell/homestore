@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, memo } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Play, X, ExternalLink, ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
+import { Play, X, ExternalLink, ChevronLeft, ChevronRight, ShoppingBag, Film } from "lucide-react";
 import { getEmbedUrl, getAutoThumbnail, getYoutubeThumbnailFallback, detectProvider } from "@/lib/storyVideoUrl";
 
 type StoryVideo = {
@@ -78,15 +78,18 @@ const StoryReel = () => {
   return (
     <section className="py-5 md:py-8">
       <div className="max-w-6xl mx-auto px-3 md:px-8">
-        <h2 className="text-lg md:text-2xl font-bold mb-4 md:mb-5 text-foreground text-center md:text-left">Сторис</h2>
-        <div className="flex gap-4 md:gap-5 overflow-x-auto pb-3 px-1 scrollbar-hide justify-start md:justify-center snap-x snap-mandatory">
+        <div className="flex items-center gap-2 mb-3 md:mb-4">
+          <Film className="w-6 h-6 md:w-7 md:h-7 text-foreground" strokeWidth={2.5} />
+          <h2 className="text-xl md:text-2xl font-bold text-foreground">Reels</h2>
+        </div>
+        <div className="flex gap-2 md:gap-3 overflow-x-auto pb-3 scrollbar-hide snap-x snap-mandatory">
           {stories.map((s, i) => {
             const previewUrl = getEmbedUrl(s.video_url);
             return (
               <button
                 key={s.id}
                 onClick={() => openStory(i)}
-                className="group relative flex-shrink-0 w-[150px] md:w-[180px] aspect-[9/16] overflow-hidden bg-muted ring-2 ring-primary/50 hover:ring-primary hover:shadow-xl transition-all duration-300 active:scale-95 snap-start"
+                className="group relative flex-shrink-0 w-[230px] md:w-[270px] aspect-[3/4] overflow-hidden bg-muted rounded-lg hover:shadow-xl transition-all duration-300 active:scale-[0.98] snap-start"
                 aria-label={`Story: ${s.title}`}
               >
                 {previewUrl ? (
@@ -101,10 +104,6 @@ const StoryReel = () => {
                 ) : (
                   <div className="w-full h-full bg-muted" />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent pointer-events-none" />
-                <div className="absolute bottom-2.5 left-2.5 right-2.5 pointer-events-none">
-                  <p className="text-white text-xs md:text-sm font-semibold line-clamp-2 drop-shadow-lg text-center">{s.title}</p>
-                </div>
               </button>
             );
           })}
