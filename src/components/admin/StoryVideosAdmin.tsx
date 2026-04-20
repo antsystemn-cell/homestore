@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Pencil, Trash2, Eye, EyeOff, Loader2, BarChart3 } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, Loader2, BarChart3, Download } from "lucide-react";
 import { toast } from "sonner";
 import { getAutoThumbnail, detectProvider } from "@/lib/storyVideoUrl";
 
@@ -24,8 +24,33 @@ const StoryVideosAdmin = () => {
   const [products, setProducts] = useState<ProductOpt[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [fetchingThumb, setFetchingThumb] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+
+  const handleAutoFetchThumbnail = async () => {
+    if (!form.video_url.trim()) {
+      toast.error("Эхлээд видеоны линк оруулна уу");
+      return;
+    }
+    setFetchingThumb(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("fetch-video-thumbnail", {
+        body: { video_url: form.video_url.trim() },
+      });
+      if (error) throw error;
+      if (data?.thumbnail_url) {
+        setForm((f) => ({ ...f, thumbnail_url: data.thumbnail_url }));
+        toast.success("Thumbnail амжилттай татлаа");
+      } else {
+        toast.error("Thumbnail олдсонгүй — гараар оруулна уу");
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Татаж чадсангүй");
+    } finally {
+      setFetchingThumb(false);
+    }
+  };
 
   const load = async () => {
     setLoading(true);
@@ -141,14 +166,29 @@ const StoryVideosAdmin = () => {
           <label className="text-xs font-medium text-muted-foreground mb-1 block">
             Thumbnail зургийн URL (заавал биш — YouTube бол автомат)
           </label>
-          <input
-            value={form.thumbnail_url}
-            onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })}
-            className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm"
-            placeholder="https://..."
-          />
+          <div className="flex gap-2">
+            <input
+              value={form.thumbnail_url}
+              onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })}
+              className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm"
+              placeholder="https://..."
+            />
+            <button
+              type="button"
+              onClick={handleAutoFetchThumbnail}
+              disabled={fetchingThumb || !form.video_url.trim()}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary hover:bg-accent text-sm font-medium disabled:opacity-50 whitespace-nowrap"
+              title="TikTok/Facebook/Instagram-ээс жинхэнэ thumbnail татах"
+            >
+              {fetchingThumb ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              Авто татах
+            </button>
+          </div>
           {!form.thumbnail_url && form.video_url && getAutoThumbnail(form.video_url) && (
             <img src={getAutoThumbnail(form.video_url)!} alt="auto" className="mt-2 h-20 rounded-lg object-cover" />
+          )}
+          {form.thumbnail_url && (
+            <img src={form.thumbnail_url} alt="preview" className="mt-2 h-20 rounded-lg object-cover" />
           )}
         </div>
 
