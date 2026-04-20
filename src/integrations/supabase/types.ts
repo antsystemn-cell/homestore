@@ -518,6 +518,7 @@ export type Database = {
           title: string
           updated_at: string
           video_url: string
+          view_count: number
         }
         Insert: {
           created_at?: string
@@ -529,6 +530,7 @@ export type Database = {
           title: string
           updated_at?: string
           video_url: string
+          view_count?: number
         }
         Update: {
           created_at?: string
@@ -540,6 +542,7 @@ export type Database = {
           title?: string
           updated_at?: string
           video_url?: string
+          view_count?: number
         }
         Relationships: [
           {
@@ -582,6 +585,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_story_view: { Args: { _story_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
