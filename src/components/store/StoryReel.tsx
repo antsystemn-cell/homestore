@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, memo } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Play, X, ExternalLink, ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
-import { getEmbedUrl, getAutoThumbnail, detectProvider } from "@/lib/storyVideoUrl";
+import { getEmbedUrl, getAutoThumbnail, getYoutubeThumbnailFallback, detectProvider } from "@/lib/storyVideoUrl";
 
 type StoryVideo = {
   id: string;
@@ -76,34 +76,43 @@ const StoryReel = () => {
   const embedUrl = active ? getEmbedUrl(active.video_url) : null;
 
   return (
-    <section className="py-4 md:py-6">
+    <section className="py-5 md:py-8">
       <div className="max-w-6xl mx-auto px-3 md:px-8">
-        <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4 text-foreground">Сторис</h2>
-        <div className="flex gap-3 md:gap-4 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+        <h2 className="text-lg md:text-2xl font-bold mb-4 md:mb-5 text-foreground text-center md:text-left">Сторис</h2>
+        <div className="flex gap-4 md:gap-5 overflow-x-auto pb-3 px-1 scrollbar-hide justify-start md:justify-center snap-x snap-mandatory">
           {stories.map((s, i) => {
-            const thumb = s.thumbnail_url || getAutoThumbnail(s.video_url) || "/placeholder.svg";
+            const autoThumb = getAutoThumbnail(s.video_url);
+            const thumb = s.thumbnail_url || autoThumb || "/placeholder.svg";
+            const fallback = getYoutubeThumbnailFallback(s.video_url) || "/placeholder.svg";
             return (
               <button
                 key={s.id}
                 onClick={() => openStory(i)}
-                className="group relative flex-shrink-0 w-[110px] md:w-[140px] aspect-[9/16] rounded-2xl overflow-hidden bg-muted ring-2 ring-primary/60 hover:ring-primary transition-all active:scale-95"
+                className="group relative flex-shrink-0 w-[150px] md:w-[180px] aspect-[9/16] rounded-2xl overflow-hidden bg-muted ring-2 ring-primary/50 hover:ring-primary hover:shadow-xl transition-all duration-300 active:scale-95 snap-start"
                 aria-label={`Story: ${s.title}`}
               >
                 <img
                   src={thumb}
                   alt={s.title}
                   loading="lazy"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/placeholder.svg"; }}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  onError={(e) => {
+                    const img = e.currentTarget as HTMLImageElement;
+                    if (img.src !== fallback && fallback !== "/placeholder.svg") {
+                      img.src = fallback;
+                    } else {
+                      img.src = "/placeholder.svg";
+                    }
+                  }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/25 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/40 transition-colors">
-                    <Play className="w-5 h-5 md:w-6 md:h-6 text-white fill-white" />
+                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/25 backdrop-blur-md flex items-center justify-center group-hover:bg-white/40 group-hover:scale-110 transition-all duration-300">
+                    <Play className="w-5 h-5 md:w-6 md:h-6 text-white fill-white ml-0.5" />
                   </div>
                 </div>
-                <div className="absolute bottom-2 left-2 right-2">
-                  <p className="text-white text-xs md:text-sm font-medium line-clamp-2 drop-shadow-md">{s.title}</p>
+                <div className="absolute bottom-2.5 left-2.5 right-2.5">
+                  <p className="text-white text-xs md:text-sm font-semibold line-clamp-2 drop-shadow-lg text-center">{s.title}</p>
                 </div>
               </button>
             );
