@@ -513,6 +513,7 @@ export type Database = {
           id: string
           is_active: boolean
           position: number | null
+          product_id: string | null
           thumbnail_url: string | null
           title: string
           updated_at: string
@@ -523,6 +524,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           position?: number | null
+          product_id?: string | null
           thumbnail_url?: string | null
           title: string
           updated_at?: string
@@ -533,12 +535,21 @@ export type Database = {
           id?: string
           is_active?: boolean
           position?: number | null
+          product_id?: string | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
           video_url?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "story_videos_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
