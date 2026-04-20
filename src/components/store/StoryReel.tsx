@@ -147,23 +147,34 @@ const StoryReel = () => {
               </div>
             )}
 
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent pointer-events-none">
-              <p className="text-white font-semibold text-base mb-2 line-clamp-2">{active.title}</p>
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
+              <p className="text-white font-semibold text-base mb-2 line-clamp-2 pointer-events-none">{active.title}</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                {active.product_id && active.product?.slug && (
+                  <Link
+                    to={`/product/${active.product.slug}`}
+                    onClick={(e) => { e.stopPropagation(); close(); }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition-opacity"
+                  >
+                    <ShoppingBag className="w-3.5 h-3.5" />
+                    Энэ бараа руу очих
+                  </Link>
+                )}
+                <a
+                  href={active.video_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 hover:bg-white text-black text-xs font-medium backdrop-blur transition-colors"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  {detectProvider(active.video_url) === "youtube" ? "YouTube" :
+                   detectProvider(active.video_url) === "tiktok" ? "TikTok" :
+                   detectProvider(active.video_url) === "facebook" ? "Facebook" :
+                   detectProvider(active.video_url) === "instagram" ? "Instagram" : "Эх сурвалж"}
+                </a>
+              </div>
             </div>
-
-            <a
-              href={active.video_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="absolute bottom-4 right-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 hover:bg-white text-black text-xs font-medium backdrop-blur transition-colors"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              {detectProvider(active.video_url) === "youtube" ? "YouTube" :
-               detectProvider(active.video_url) === "tiktok" ? "TikTok" :
-               detectProvider(active.video_url) === "facebook" ? "Facebook" :
-               detectProvider(active.video_url) === "instagram" ? "Instagram" : "Эх сурвалж"}
-            </a>
           </div>
         </div>
       )}
