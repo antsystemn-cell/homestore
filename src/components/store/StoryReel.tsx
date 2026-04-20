@@ -102,11 +102,6 @@ const StoryReel = () => {
                   <div className="w-full h-full bg-muted" />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent pointer-events-none" />
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/25 backdrop-blur-md flex items-center justify-center group-hover:bg-white/40 group-hover:scale-110 transition-all duration-300">
-                    <Play className="w-5 h-5 md:w-6 md:h-6 text-white fill-white ml-0.5" />
-                  </div>
-                </div>
                 <div className="absolute bottom-2.5 left-2.5 right-2.5 pointer-events-none">
                   <p className="text-white text-xs md:text-sm font-semibold line-clamp-2 drop-shadow-lg text-center">{s.title}</p>
                 </div>
