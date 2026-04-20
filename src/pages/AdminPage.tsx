@@ -34,6 +34,7 @@ const AdminPage = () => {
   const [deliveryOptions, setDeliveryOptions] = useState<any[]>([]);
   const [paymentProviders, setPaymentProviders] = useState<any[]>([]);
   const [promoBanners, setPromoBanners] = useState<any[]>([]);
+  const [storyStats, setStoryStats] = useState<{ total_views: number; story_count: number; top: { id: string; title: string; view_count: number }[] }>({ total_views: 0, story_count: 0, top: [] });
   const [loading, setLoading] = useState(false);
 
   // Promo banner form state
