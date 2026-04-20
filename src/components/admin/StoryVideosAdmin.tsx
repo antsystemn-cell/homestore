@@ -11,12 +11,16 @@ type StoryVideo = {
   thumbnail_url: string | null;
   is_active: boolean;
   position: number | null;
+  product_id: string | null;
 };
 
-const emptyForm = { title: "", video_url: "", thumbnail_url: "", is_active: true, position: 0 };
+type ProductOpt = { id: string; name: string };
+
+const emptyForm = { title: "", video_url: "", thumbnail_url: "", is_active: true, position: 0, product_id: "" };
 
 const StoryVideosAdmin = () => {
   const [stories, setStories] = useState<StoryVideo[]>([]);
+  const [products, setProducts] = useState<ProductOpt[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -24,13 +28,13 @@ const StoryVideosAdmin = () => {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("story_videos")
-      .select("*")
-      .order("position", { ascending: true })
-      .order("created_at", { ascending: false });
-    if (error) toast.error("Story татаж чадсангүй");
-    else setStories((data || []) as StoryVideo[]);
+    const [s, p] = await Promise.all([
+      supabase.from("story_videos").select("*").order("position", { ascending: true }).order("created_at", { ascending: false }),
+      supabase.from("products").select("id,name").eq("is_active", true).order("name", { ascending: true }),
+    ]);
+    if (s.error) toast.error("Story татаж чадсангүй");
+    else setStories((s.data || []) as StoryVideo[]);
+    if (!p.error) setProducts((p.data || []) as ProductOpt[]);
     setLoading(false);
   };
 
