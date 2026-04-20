@@ -1042,7 +1042,8 @@ const AdminPage = () => {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
-
+                <div className="bg-card rounded-2xl p-5 border border-border">
+                  <h3 className="text-sm font-bold mb-4">Сарын орлого</h3>
                   <div className="h-52">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={monthlyData}>
