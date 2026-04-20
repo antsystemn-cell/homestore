@@ -1971,6 +1971,7 @@ const AdminPage = () => {
 
           {/* Web Analytics */}
           {tab === "analytics" && <WebAnalytics />}
+          {tab === "stories" && <StoryVideosAdmin />}
 
           {/* Diagnostics Tab */}
           {tab === "diagnostics" && (() => {
