@@ -7,6 +7,7 @@ import {
   BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
+import StoryVideosAdmin from "@/components/admin/StoryVideosAdmin";
 import { useRef } from "react";
 import { toast } from "sonner";
 import { formatPrice } from "@/data/products";
@@ -18,7 +19,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "analytics" | "diagnostics";
+type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "stories" | "analytics" | "diagnostics";
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -698,6 +699,7 @@ const AdminPage = () => {
     { id: "delivery", label: "Хүргэлт", icon: Truck },
     { id: "payments", label: "Төлбөр", icon: CreditCard },
     { id: "banner", label: "Баннер", icon: Megaphone },
+    { id: "stories", label: "Сторис", icon: Video },
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
     { id: "users", label: "Хэрэглэгч", icon: Users },
     { id: "analytics", label: "Хандалт", icon: Globe },
@@ -934,6 +936,7 @@ const AdminPage = () => {
               {tab === "delivery" && `Нийт ${deliveryOptions.length} хүргэлтийн сонголт`}
               {tab === "banner" && `Баннер болон ${paymentProviders.length} лого`}
               {tab === "payments" && `Нийт ${paymentProviders.length} төлбөрийн суваг`}
+              {tab === "stories" && "Facebook story хэлбэрийн босоо видеонууд"}
               {tab === "analytics" && "Вэб сайтын хандалтын мэдээлэл"}
               {tab === "diagnostics" && "Зургийн оношлогоо & Cloud зардал"}
             </p>
@@ -1969,6 +1972,7 @@ const AdminPage = () => {
 
           {/* Web Analytics */}
           {tab === "analytics" && <WebAnalytics />}
+          {tab === "stories" && <StoryVideosAdmin />}
 
           {/* Diagnostics Tab */}
           {tab === "diagnostics" && (() => {

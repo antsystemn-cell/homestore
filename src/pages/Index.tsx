@@ -9,6 +9,7 @@ import SaleCarousel from "@/components/store/SaleCarousel";
 import PromoBanner from "@/components/store/PromoBanner";
 import BrandLogos from "@/components/store/BrandLogos";
 import NewArrivals from "@/components/store/NewArrivals";
+import StoryReel from "@/components/store/StoryReel";
 import { Product, mapDbProduct } from "@/data/products";
 import {
   fetchPublicBrands,
@@ -178,7 +179,12 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
-          {/* Sale carousel - below new arrivals */}
+          {/* Story reel - between new arrivals and sale */}
+          <ErrorBoundary>
+            <StoryReel />
+          </ErrorBoundary>
+
+          {/* Sale carousel - below stories */}
           {saleProducts.length > 0 && (
             <ErrorBoundary>
               <SaleCarousel products={saleProducts} />
