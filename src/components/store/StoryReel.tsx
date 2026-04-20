@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, memo } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Play, X, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
+import { Play, X, ExternalLink, ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import { getEmbedUrl, getAutoThumbnail, detectProvider } from "@/lib/storyVideoUrl";
 
 type StoryVideo = {
@@ -8,6 +9,8 @@ type StoryVideo = {
   title: string;
   video_url: string;
   thumbnail_url: string | null;
+  product_id: string | null;
+  product?: { slug: string; name: string } | null;
 };
 
 const StoryReel = () => {
@@ -19,11 +22,11 @@ const StoryReel = () => {
     (async () => {
       const { data, error } = await supabase
         .from("story_videos")
-        .select("id,title,video_url,thumbnail_url")
+        .select("id,title,video_url,thumbnail_url,product_id,product:products(slug,name)")
         .eq("is_active", true)
         .order("position", { ascending: true })
         .order("created_at", { ascending: false });
-      if (!error && mounted) setStories(data || []);
+      if (!error && mounted) setStories((data as any) || []);
     })();
     return () => { mounted = false; };
   }, []);
