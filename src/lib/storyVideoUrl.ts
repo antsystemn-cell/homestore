@@ -46,7 +46,14 @@ export const getAutoThumbnail = (url: string): string | null => {
   const provider = detectProvider(url);
   if (provider === "youtube") {
     const id = getYoutubeId(url);
-    return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : null;
+    // maxresdefault = HD; fallback нь <img onError>-оор хийгдэнэ
+    return id ? `https://i.ytimg.com/vi/${id}/maxresdefault.jpg` : null;
   }
   return null;
+};
+
+// YouTube thumbnail аль нэг хэмжээ ажиллахгүй бол доорх хувилбар руу шилжих
+export const getYoutubeThumbnailFallback = (url: string): string | null => {
+  const id = getYoutubeId(url);
+  return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : null;
 };
