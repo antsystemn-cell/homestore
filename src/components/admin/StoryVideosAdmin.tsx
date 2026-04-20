@@ -11,12 +11,16 @@ type StoryVideo = {
   thumbnail_url: string | null;
   is_active: boolean;
   position: number | null;
+  product_id: string | null;
 };
 
-const emptyForm = { title: "", video_url: "", thumbnail_url: "", is_active: true, position: 0 };
+type ProductOpt = { id: string; name: string };
+
+const emptyForm = { title: "", video_url: "", thumbnail_url: "", is_active: true, position: 0, product_id: "" };
 
 const StoryVideosAdmin = () => {
   const [stories, setStories] = useState<StoryVideo[]>([]);
+  const [products, setProducts] = useState<ProductOpt[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -24,13 +28,13 @@ const StoryVideosAdmin = () => {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("story_videos")
-      .select("*")
-      .order("position", { ascending: true })
-      .order("created_at", { ascending: false });
-    if (error) toast.error("Story татаж чадсангүй");
-    else setStories((data || []) as StoryVideo[]);
+    const [s, p] = await Promise.all([
+      supabase.from("story_videos").select("*").order("position", { ascending: true }).order("created_at", { ascending: false }),
+      supabase.from("products").select("id,name").eq("is_active", true).order("name", { ascending: true }),
+    ]);
+    if (s.error) toast.error("Story татаж чадсангүй");
+    else setStories((s.data || []) as StoryVideo[]);
+    if (!p.error) setProducts((p.data || []) as ProductOpt[]);
     setLoading(false);
   };
 
@@ -51,6 +55,7 @@ const StoryVideosAdmin = () => {
       thumbnail_url: form.thumbnail_url.trim() || null,
       is_active: form.is_active,
       position: Number(form.position) || 0,
+      product_id: form.product_id || null,
     };
     const { error } = editId
       ? await supabase.from("story_videos").update(payload).eq("id", editId)
@@ -70,6 +75,7 @@ const StoryVideosAdmin = () => {
       thumbnail_url: s.thumbnail_url || "",
       is_active: s.is_active,
       position: s.position || 0,
+      product_id: s.product_id || "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -143,6 +149,25 @@ const StoryVideosAdmin = () => {
           {!form.thumbnail_url && form.video_url && getAutoThumbnail(form.video_url) && (
             <img src={getAutoThumbnail(form.video_url)!} alt="auto" className="mt-2 h-20 rounded-lg object-cover" />
           )}
+        </div>
+
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">
+            Холбогдох бараа (заавал биш)
+          </label>
+          <select
+            value={form.product_id}
+            onChange={(e) => setForm({ ...form, product_id: e.target.value })}
+            className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm"
+          >
+            <option value="">— Сонгоогүй —</option>
+            {products.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+          <p className="text-[11px] text-muted-foreground mt-1">
+            Сонгосон бол modal дотор "Энэ бараа руу очих" товч гарна.
+          </p>
         </div>
 
         <label className="flex items-center gap-2 text-sm">
