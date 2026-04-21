@@ -1906,6 +1906,7 @@ const AdminPage = () => {
                         <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`} />
                       </div>
                     </button>
+                  </div>
 
                     {/* Expanded details */}
                     {isExpanded && (
@@ -2048,6 +2049,9 @@ const AdminPage = () => {
                   </div>
                 );
               })}
+                  </>
+                );
+              })()}
               {orders.length === 0 && !loading && (
                 <p className="text-center text-sm text-muted-foreground py-12">Захиалга байхгүй</p>
               )}
