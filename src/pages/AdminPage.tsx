@@ -2762,6 +2762,7 @@ const AdminPage = () => {
           )}
         </div>
       </main>
+      <NiimbotInstructionsModal open={showXlsxHelp} onOpenChange={setShowXlsxHelp} mode="xlsx" />
     </div>
   );
 };
