@@ -142,6 +142,8 @@ const AdminPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [orderSearchPhone, setOrderSearchPhone] = useState("");
+  const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
+  const [showXlsxHelp, setShowXlsxHelp] = useState(false);
 
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
