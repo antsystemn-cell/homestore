@@ -1712,17 +1712,97 @@ const AdminPage = () => {
                   {orders.filter(o => o.phone?.includes(orderSearchPhone) || o.order_ref?.toLowerCase().includes(orderSearchPhone.toLowerCase())).length} захиалга олдлоо
                 </p>
               )}
-              {(orderSearchPhone ? orders.filter(o => o.phone?.includes(orderSearchPhone) || o.order_ref?.toLowerCase().includes(orderSearchPhone.toLowerCase())) : orders).map((o) => {
-                const delOpt = deliveryOptions.find((d: any) => d.id === o.delivery_option_id);
-                const isExpanded = expandedOrderId === o.id;
-                const orderItems = Array.isArray(o.items) ? o.items : [];
+
+              {(() => {
+                const filteredOrders = orderSearchPhone
+                  ? orders.filter(o => o.phone?.includes(orderSearchPhone) || o.order_ref?.toLowerCase().includes(orderSearchPhone.toLowerCase()))
+                  : orders;
+                const filteredIds = filteredOrders.map((o: any) => o.id);
+                const allChecked = filteredIds.length > 0 && filteredIds.every((id: string) => bulkSelected.has(id));
+                const someChecked = filteredIds.some((id: string) => bulkSelected.has(id));
+
+                const toggleAll = () => {
+                  setBulkSelected((prev) => {
+                    const next = new Set(prev);
+                    if (allChecked) {
+                      filteredIds.forEach((id: string) => next.delete(id));
+                    } else {
+                      filteredIds.forEach((id: string) => next.add(id));
+                    }
+                    return next;
+                  });
+                };
+
+                const handleBulkXlsx = async () => {
+                  const chosen = orders.filter((o: any) => bulkSelected.has(o.id));
+                  if (chosen.length === 0) {
+                    toast.error("Захиалга сонгоно уу");
+                    return;
+                  }
+                  try {
+                    const rows = chosen.map(mapOrderToLabelData);
+                    const blob = generateNiimbotXlsx(rows);
+                    downloadBlob(blob, buildXlsxFilename(rows.length));
+                    toast.success("Excel файл татагдлаа");
+                    setShowXlsxHelp(true);
+                  } catch (e) {
+                    console.error(e);
+                    toast.error("Excel үүсгэхэд алдаа гарлаа");
+                  }
+                };
+
                 return (
-                  <div key={o.id} className="bg-card rounded-xl border border-border overflow-hidden">
-                    {/* Order header - clickable */}
-                    <button
-                      onClick={() => setExpandedOrderId(isExpanded ? null : o.id)}
-                      className="w-full flex items-center gap-3 p-4 text-left hover:bg-secondary/30 transition-colors"
-                    >
+                  <>
+                    {/* Niimbot bulk action bar */}
+                    <div className="bg-card rounded-xl border border-border p-3 md:p-4 space-y-2">
+                      <div className="flex items-center justify-between gap-3 flex-wrap">
+                        <div className="flex items-center gap-3">
+                          <Checkbox
+                            checked={allChecked ? true : someChecked ? "indeterminate" : false}
+                            onCheckedChange={toggleAll}
+                            id="bulk-select-all"
+                          />
+                          <label htmlFor="bulk-select-all" className="text-sm font-medium cursor-pointer select-none">
+                            Бүгдийг сонгох
+                          </label>
+                          <span className="text-xs text-muted-foreground">
+                            {bulkSelected.size} сонгосон
+                          </span>
+                        </div>
+                        <NiimbotBulkXlsxButton onExport={handleBulkXlsx} count={bulkSelected.size} />
+                      </div>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">
+                        Niimbot аппын <span className="font-semibold text-foreground">Import Data Source</span> функцэд ашиглана. Олон захиалгыг нэг загвар руу импортолж бөөнөөр хэвлэнэ.
+                      </p>
+                    </div>
+
+                    {filteredOrders.map((o: any) => {
+                      const delOpt = deliveryOptions.find((d: any) => d.id === o.delivery_option_id);
+                      const isExpanded = expandedOrderId === o.id;
+                      const orderItems = Array.isArray(o.items) ? o.items : [];
+                      const isChecked = bulkSelected.has(o.id);
+                      return (
+                        <div key={o.id} className="bg-card rounded-xl border border-border overflow-hidden">
+                          {/* Order header - clickable */}
+                          <div className="flex items-stretch">
+                            <div className="flex items-center pl-3" onClick={(e) => e.stopPropagation()}>
+                              <Checkbox
+                                checked={isChecked}
+                                onCheckedChange={(v) => {
+                                  setBulkSelected((prev) => {
+                                    const next = new Set(prev);
+                                    if (v) next.add(o.id);
+                                    else next.delete(o.id);
+                                    return next;
+                                  });
+                                }}
+                              />
+                            </div>
+                            <button
+                              onClick={() => setExpandedOrderId(isExpanded ? null : o.id)}
+                              className="flex-1 flex items-center gap-3 p-4 text-left hover:bg-secondary/30 transition-colors"
+                            >
+
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-sm font-bold">#{o.id.slice(0, 8)}</span>
