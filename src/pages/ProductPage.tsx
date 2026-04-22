@@ -88,6 +88,36 @@ const ProductPage = () => {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const galleryRef = useRef<HTMLDivElement | null>(null);
+
+  // Number of color variants with images — controls auto-scroll behavior
+  const colorImageCount = (product?.colors || []).filter((c) => !!c.image).length;
+  const shouldAutoScroll = colorImageCount >= 2 && allImages.length >= 2 && !selectedColor;
+
+  // Auto-advance gallery when product has 2+ color images
+  useEffect(() => {
+    if (!shouldAutoScroll) return;
+    const id = window.setInterval(() => {
+      setActiveImg((i) => (i + 1) % allImages.length);
+    }, 2800);
+    return () => window.clearInterval(id);
+  }, [shouldAutoScroll, allImages.length]);
+
+  // Sync scroll position with activeImg
+  useEffect(() => {
+    const el = galleryRef.current;
+    if (!el) return;
+    el.scrollTo({ left: activeImg * el.clientWidth, behavior: "smooth" });
+  }, [activeImg]);
+
+  // When user selects a color, jump to that color's image
+  useEffect(() => {
+    if (!selectedColor || !product) return;
+    const img = product.colors?.find((c) => c.name === selectedColor)?.image;
+    if (!img) return;
+    const idx = allImages.indexOf(img);
+    if (idx >= 0) setActiveImg(idx);
+  }, [selectedColor, product, allImages]);
 
   const handleAddToCart = (andNavigate?: boolean) => {
     if (product?.colors && product.colors.length > 0 && !selectedColor) {
