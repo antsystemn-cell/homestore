@@ -9,20 +9,39 @@ interface Props {
 // Map Mongolian / common color names to hex
 const COLOR_HEX: Record<string, string> = {
   "хар": "#1a1a1a", "цагаан": "#f5f5f5", "улаан": "#e53e3e", "шар": "#ecc94b",
-  "ногоон": "#38a169", "цэнхэр": "#3182ce", "хөх": "#2b6cb0", "ягаан": "#d53f8c",
+  "ногоон": "#38a169", "цэнхэр": "#3182ce", "хөх": "#2b6cb0", "ягаан": "#f4a6c0",
   "саарал": "#a0aec0", "бор": "#8B4513", "ягаан алтан": "#e8a0bf",
-  "алтан": "#d4a84b", "мөнгөн": "#c0c0c0", "улбар шар": "#ed8936",
-  "нил ягаан": "#805ad5", "тунгалаг": "#e2e8f0",
+  "алтан": "#d4a84b", "мөнгөн": "#c0c0c0", "мөнгөлөг": "#c0c0c0",
+  "улбар шар": "#ed8936", "нил ягаан": "#805ad5", "тунгалаг": "#e2e8f0",
+  "ил": "#e2e8f0", "цайвар": "#f5f0e1", "хүрэн": "#7b3f00",
   "black": "#1a1a1a", "white": "#f5f5f5", "red": "#e53e3e", "blue": "#3182ce",
-  "green": "#38a169", "yellow": "#ecc94b", "pink": "#d53f8c", "gray": "#a0aec0",
+  "green": "#38a169", "yellow": "#ecc94b", "pink": "#f4a6c0", "gray": "#a0aec0",
   "grey": "#a0aec0", "brown": "#8B4513", "orange": "#ed8936", "purple": "#805ad5",
   "gold": "#d4a84b", "silver": "#c0c0c0", "beige": "#f5f0e1", "navy": "#1a365d",
   "cream": "#fffdd0", "rose": "#e8a0bf", "coral": "#f56565",
 };
 
+function normalizeColorName(name: string): string {
+  return (name || "")
+    .toLowerCase()
+    .replace(/ө?нгө/g, "") // remove "өнгө" suffix
+    .replace(/[^a-zа-яёөү\s]/gi, "")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
 function getColorHex(name: string): string | null {
-  const lower = (name || "").toLowerCase().trim();
-  return COLOR_HEX[lower] || null;
+  const raw = (name || "").toLowerCase().trim();
+  if (COLOR_HEX[raw]) return COLOR_HEX[raw];
+
+  const normalized = normalizeColorName(name);
+  if (COLOR_HEX[normalized]) return COLOR_HEX[normalized];
+
+  // Try matching individual words
+  for (const word of normalized.split(" ")) {
+    if (COLOR_HEX[word]) return COLOR_HEX[word];
+  }
+  return null;
 }
 
 const ProductCard = React.memo(({ product }: Props) => {
@@ -215,14 +234,14 @@ const ProductCard = React.memo(({ product }: Props) => {
                     e.stopPropagation();
                     setPinnedColorIdx(isPinned ? null : i);
                   }}
-                  className={`rounded-full border-2 transition-all duration-200 flex-shrink-0 ${
+                  className={`rounded-full border transition-all duration-200 flex-shrink-0 ${
                     isPinned
-                      ? "border-primary ring-2 ring-primary/30 scale-110"
-                      : "border-white/80 hover:border-primary/60"
+                      ? "border-primary ring-2 ring-primary/40 scale-110"
+                      : "border-black/20 hover:border-primary/60"
                   }`}
                   style={{
                     backgroundColor: hex || "#ccc",
-                    boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+                    boxShadow: "0 0 0 1.5px rgba(255,255,255,0.95), 0 1px 3px rgba(0,0,0,0.4)",
                     width: 18,
                     height: 18,
                   }}
