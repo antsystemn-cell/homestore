@@ -294,7 +294,7 @@ export const fetchSaleProducts = async () => {
 export const fetchNewProducts = async () => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,slug,name,price,original_price,image_url,thumbnail_url,category,is_on_sale,discount,brand_id,is_new,is_bogo",
+      select: "id,slug,name,price,original_price,image_url,thumbnail_url,category,is_on_sale,discount,brand_id,is_new,is_bogo,colors",
       is_new: "eq.true",
       is_active: "eq.true",
       order: "created_at.desc",
