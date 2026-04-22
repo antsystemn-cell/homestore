@@ -185,7 +185,8 @@ const ProductCard = React.memo(({ product }: Props) => {
         {hasSwatches && (
           <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1 z-10">
             {colors!.slice(0, 6).map((c, i) => {
-              const hex = getColorHex(c.name);
+              const scope = `${(product as any).product_code || product.id}::${(c as any).id ?? i}`;
+              const hex = getColorHex(c.name, scope);
               const isPinned = pinnedColorIdx === i;
               return (
                 <button
