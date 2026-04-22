@@ -29,8 +29,10 @@ const ProductCard = React.memo(({ product }: Props) => {
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
   const [activeColorIdx, setActiveColorIdx] = useState<number | null>(null);
-  const [autoIdx, setAutoIdx] = useState(0);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [isHovering, setIsHovering] = useState(false);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const hoverIntervalRef = useRef<number | null>(null);
 
   const handleImgError = useCallback(() => setImgError(true), []);
 
@@ -46,7 +48,7 @@ const ProductCard = React.memo(({ product }: Props) => {
   const colors = product.colors;
   const hasColors = colors && colors.length > 1;
 
-  // Color images available for auto-scroll (only colors with images)
+  // Color images available (only colors with images)
   const colorImages = useMemo(() => {
     if (!colors) return [] as string[];
     return colors.map((c) => c.image).filter((url): url is string => !!url);
@@ -61,22 +63,37 @@ const ProductCard = React.memo(({ product }: Props) => {
     return [base, ...colorImages];
   }, [product.thumbnail, product.image, colorImages, hasMultiColorImages]);
 
-  // Auto-advance through slides every 2.5s when user hasn't manually picked a color
-  useEffect(() => {
-    if (!hasMultiColorImages || activeColorIdx !== null) return;
-    const id = window.setInterval(() => {
-      setAutoIdx((i) => (i + 1) % slides.length);
-    }, 2500);
-    return () => window.clearInterval(id);
-  }, [hasMultiColorImages, activeColorIdx, slides.length]);
-
-  // Sync scroll position with auto-advancing index
-  useEffect(() => {
-    if (!hasMultiColorImages || activeColorIdx !== null) return;
+  // Scroll the mobile scroller to a given slide index
+  const scrollToIndex = useCallback((idx: number) => {
     const el = scrollerRef.current;
     if (!el) return;
-    el.scrollTo({ left: autoIdx * el.clientWidth, behavior: "smooth" });
-  }, [autoIdx, hasMultiColorImages, activeColorIdx]);
+    el.scrollTo({ left: idx * el.clientWidth, behavior: "smooth" });
+  }, []);
+
+  // Desktop hover: cycle through slides every 1s while hovering
+  useEffect(() => {
+    if (!hasMultiColorImages || !isHovering || activeColorIdx !== null) return;
+    hoverIntervalRef.current = window.setInterval(() => {
+      setActiveIdx((i) => {
+        const next = (i + 1) % slides.length;
+        scrollToIndex(next);
+        return next;
+      });
+    }, 1000);
+    return () => {
+      if (hoverIntervalRef.current) {
+        window.clearInterval(hoverIntervalRef.current);
+        hoverIntervalRef.current = null;
+      }
+    };
+  }, [hasMultiColorImages, isHovering, activeColorIdx, slides.length, scrollToIndex]);
+
+  // Reset to first slide when hover ends (and no color manually chosen)
+  useEffect(() => {
+    if (isHovering || activeColorIdx !== null || !hasMultiColorImages) return;
+    setActiveIdx(0);
+    scrollToIndex(0);
+  }, [isHovering, activeColorIdx, hasMultiColorImages, scrollToIndex]);
 
   // When user picks a color, jump to that color's slide
   useEffect(() => {
@@ -85,10 +102,9 @@ const ProductCard = React.memo(({ product }: Props) => {
     if (!colorImg) return;
     const slideIndex = slides.indexOf(colorImg);
     if (slideIndex < 0) return;
-    const el = scrollerRef.current;
-    if (!el) return;
-    el.scrollTo({ left: slideIndex * el.clientWidth, behavior: "smooth" });
-  }, [activeColorIdx, colors, slides, hasMultiColorImages]);
+    setActiveIdx(slideIndex);
+    scrollToIndex(slideIndex);
+  }, [activeColorIdx, colors, slides, hasMultiColorImages, scrollToIndex]);
 
   const fallbackSrc = imgError ? "/placeholder.svg" : (product.thumbnail || product.image);
 
