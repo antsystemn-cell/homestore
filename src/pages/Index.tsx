@@ -80,12 +80,11 @@ const Index = () => {
     setError(false);
 
     try {
-      const [prodRes, brandRes, saleRes, featuredRes, newRes] = await Promise.all([
+      // Single combined fetch — derive sale/new/featured client-side from the full list to avoid
+      // re-downloading overlapping rows (saves ~75% of egress on the home page).
+      const [prodRes, brandRes] = await Promise.all([
         fetchPublicProducts(),
         fetchPublicBrands(),
-        fetchSaleProducts(),
-        fetchFeaturedProducts(),
-        fetchNewProducts(),
       ]);
       const brandMap = new Map((brandRes || []).map((b: any) => [b.id, b]));
 
@@ -99,10 +98,15 @@ const Index = () => {
         return p;
       };
 
-      const mappedProducts = shuffle((prodRes || []).map(mapWithBrand));
-      const mappedSale = (saleRes || []).map(mapWithBrand);
-      const mappedFeatured = (featuredRes || []).map(mapWithBrand);
-      const mappedNew = (newRes || []).map(mapWithBrand);
+      const allMapped = (prodRes || []).map(mapWithBrand);
+      const mappedProducts = shuffle(allMapped);
+      const mappedSale = allMapped
+        .filter((p) => p.isOnSale)
+        .sort((a, b) => (b.discount || 0) - (a.discount || 0));
+      const mappedFeatured = [...allMapped]
+        .sort((a, b) => (b.sales || 0) - (a.sales || 0))
+        .slice(0, 8);
+      const mappedNew = allMapped.filter((p) => p.isNew);
 
       setAllProducts(mappedProducts);
       setSaleProducts(mappedSale);
@@ -111,7 +115,6 @@ const Index = () => {
       setBrands((brandRes || []).map((b: any) => ({ id: b.id, name: b.name, logo_url: b.logo_url })));
       setPage(1);
       setMobileVisibleCount(MOBILE_LOAD_SIZE);
-      // Only show error if absolutely no data was loaded
       setError(mappedProducts.length === 0 && mappedSale.length === 0 && mappedFeatured.length === 0);
     } catch (err) {
       console.error("Failed to load products", err);
