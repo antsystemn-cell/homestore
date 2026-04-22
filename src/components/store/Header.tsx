@@ -43,10 +43,18 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
-      <div className="max-w-6xl mx-auto px-4 md:px-8 py-3 flex items-center gap-4 md:gap-8">
+      <div
+        className={`max-w-6xl mx-auto px-4 md:px-8 flex items-center gap-4 md:gap-8 transition-[padding] duration-300 ease-out ${
+          collapsed ? "py-1.5 md:py-3" : "py-3"
+        }`}
+      >
         <span
-          className="text-xl md:text-2xl cursor-pointer shrink-0 text-foreground"
           onClick={() => navigate("/")}
+          className={`cursor-pointer shrink-0 text-foreground overflow-hidden whitespace-nowrap transition-all duration-300 ease-out md:!max-w-none md:!opacity-100 md:!ml-0 md:text-2xl ${
+            collapsed
+              ? "max-w-0 opacity-0 -ml-4 text-base"
+              : "max-w-[180px] opacity-100 ml-0 text-xl"
+          }`}
         >
           <span className="font-bold">Easy</span><span className="font-light text-muted-foreground">Shop</span>
         </span>
@@ -59,7 +67,7 @@ const Header = () => {
           <button onClick={() => navigate("/cart")} className="hover:text-foreground transition-colors">Сагс</button>
         </nav>
 
-        <div className="relative flex-1 max-w-md ml-auto">
+        <div className="relative flex-1 max-w-md ml-auto transition-all duration-300 ease-out">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
@@ -68,7 +76,9 @@ const Header = () => {
             onChange={(e) => handleSearch(e.target.value)}
             onFocus={() => query.trim() && setShowResults(true)}
             onBlur={() => setTimeout(() => setShowResults(false), 200)}
-            className="w-full rounded-full bg-secondary pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-shadow"
+            className={`w-full rounded-full bg-secondary pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-300 ease-out md:!py-2.5 ${
+              collapsed ? "py-1.5" : "py-2.5"
+            }`}
           />
           {showResults && results.length > 0 && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-card rounded-xl border border-border shadow-lg max-h-64 overflow-y-auto z-50">
