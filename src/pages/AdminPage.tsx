@@ -2228,10 +2228,6 @@ const AdminPage = () => {
                     </div>
                   </div>
                 )}
-                {oversizedProducts.length > 0 && (
-                  // ... keep existing code (oversized product list)
-                  null
-                )}
 
                 {/* Color name audit */}
                 {(() => {
