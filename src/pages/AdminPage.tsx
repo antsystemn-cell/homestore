@@ -2234,6 +2234,10 @@ const AdminPage = () => {
                   type Row = {
                     productId: string;
                     productName: string;
+                    productCode: string;
+                    colorId: string;
+                    colorIndex: number;
+                    scope: string;
                     raw: string;
                     normalized: string;
                     hex: string;
@@ -2242,13 +2246,14 @@ const AdminPage = () => {
                   };
                   const rows: Row[] = [];
                   const seen = new Set<string>();
-                    for (const p of products) {
+                  for (const p of products) {
                     const colors = Array.isArray(p.colors) ? p.colors : [];
                     for (let i = 0; i < colors.length; i++) {
                       const c = colors[i];
                       const name = (c?.name || "").toString();
                       if (!name.trim()) continue;
-                      const scope = `${p.product_code || p.id}::${c?.id ?? i}`;
+                      const colorId = c?.id ? String(c.id) : "";
+                      const scope = `${p.product_code || p.id}::${colorId || i}`;
                       const r = resolveColor(name, scope);
                       const key = `${p.id}::${name}::${scope}`;
                       if (seen.has(key)) continue;
@@ -2256,6 +2261,10 @@ const AdminPage = () => {
                       rows.push({
                         productId: p.id,
                         productName: p.name,
+                        productCode: p.product_code || "",
+                        colorId,
+                        colorIndex: i,
+                        scope,
                         raw: name,
                         normalized: r.normalized,
                         hex: r.hex,
@@ -2284,40 +2293,54 @@ const AdminPage = () => {
                         <>
                           {fallbackRows.length > 0 && (
                             <div className="mb-4">
-                              <p className="text-xs font-semibold text-destructive mb-2">
-                                ⚠ Танигдаагүй / fallback өнгө ({fallbackRows.length})
-                              </p>
-                              <div className="overflow-x-auto rounded-xl border border-destructive/20">
-                                <table className="w-full text-xs">
-                                  <thead className="bg-destructive/5 text-left">
-                                    <tr>
-                                      <th className="px-3 py-2 font-semibold">Өнгө</th>
-                                      <th className="px-3 py-2 font-semibold">Эх нэр</th>
-                                      <th className="px-3 py-2 font-semibold">Normalize</th>
-                                      <th className="px-3 py-2 font-semibold">Fallback hex</th>
-                                      <th className="px-3 py-2 font-semibold">Бараа</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {fallbackRows.slice(0, 100).map((r, i) => (
-                                      <tr key={i} className="border-t border-border">
-                                        <td className="px-3 py-2">
-                                          <span
-                                            className="inline-block w-5 h-5 rounded-full border border-border align-middle"
-                                            style={{ backgroundColor: r.hex }}
-                                          />
-                                        </td>
-                                        <td className="px-3 py-2 font-mono">{r.raw}</td>
-                                        <td className="px-3 py-2 font-mono text-muted-foreground">{r.normalized || "—"}</td>
-                                        <td className="px-3 py-2 font-mono text-muted-foreground">{r.hex}</td>
-                                        <td className="px-3 py-2 truncate max-w-[200px]">{r.productName}</td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
+                              <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
+                                <p className="text-xs font-semibold text-destructive">
+                                  ⚠ Танигдаагүй / fallback өнгө ({fallbackRows.length})
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const text = fallbackRows.map((r) =>
+                                      `[${r.productCode || r.productId}] "${r.productName}" | color#${r.colorIndex}${r.colorId ? ` id=${r.colorId}` : ""} | name="${r.raw}" | norm="${r.normalized}" | scope=${r.scope} | hex=${r.hex}`
+                                    ).join("\n");
+                                    navigator.clipboard.writeText(text);
+                                    toast.success(`${fallbackRows.length} мөр хуулагдлаа`);
+                                  }}
+                                  className="text-[11px] bg-secondary hover:bg-secondary/80 px-2 py-1 rounded-md font-medium"
+                                >
+                                  📋 Лог хуулах
+                                </button>
                               </div>
-                              {fallbackRows.length > 100 && (
-                                <p className="text-[11px] text-muted-foreground mt-1">Эхний 100 мөрийг харууллаа.</p>
+                              <div className="space-y-1.5 max-h-96 overflow-y-auto rounded-xl border border-destructive/20 bg-destructive/5 p-2">
+                                {fallbackRows.slice(0, 200).map((r, i) => (
+                                  <div
+                                    key={i}
+                                    className="font-mono text-[11px] leading-relaxed bg-card rounded-lg px-3 py-2 border border-border"
+                                  >
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span
+                                        className="inline-block w-4 h-4 rounded-full border border-border shrink-0"
+                                        style={{ backgroundColor: r.hex }}
+                                      />
+                                      <span className="font-semibold text-foreground truncate">
+                                        {r.productName}
+                                      </span>
+                                      <span className="text-muted-foreground shrink-0">
+                                        [{r.productCode || r.productId.slice(0, 8)}]
+                                      </span>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-0.5 text-muted-foreground pl-6">
+                                      <div><span className="text-foreground/70">name:</span> "{r.raw}"</div>
+                                      <div><span className="text-foreground/70">normalized:</span> "{r.normalized || "—"}"</div>
+                                      <div><span className="text-foreground/70">color_index:</span> #{r.colorIndex}{r.colorId && ` (id=${r.colorId})`}</div>
+                                      <div><span className="text-foreground/70">scope:</span> {r.scope}</div>
+                                      <div className="md:col-span-2"><span className="text-foreground/70">fallback_hex:</span> <span className="text-destructive font-semibold">{r.hex}</span></div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                              {fallbackRows.length > 200 && (
+                                <p className="text-[11px] text-muted-foreground mt-1">Эхний 200 мөрийг харууллаа.</p>
                               )}
                             </div>
                           )}
