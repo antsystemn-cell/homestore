@@ -1,8 +1,9 @@
 import { Search, Bell } from "lucide-react";
 import { useState, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Product, mapDbProduct } from "@/data/products";
 import { searchPublicProducts } from "@/lib/publicStoreApi";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
 
 const DEBOUNCE_MS = 300;
 
@@ -11,7 +12,13 @@ const Header = () => {
   const [results, setResults] = useState<Product[]>([]);
   const [showResults, setShowResults] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // Mobile scroll-aware shrink effect — only on the home page (matches video reference).
+  const { isScrolled, direction } = useScrollDirection(40);
+  const isHome = location.pathname === "/";
+  const collapsed = isHome && isScrolled && direction === "down";
 
   const doSearch = useCallback(async (value: string) => {
     if (value.trim().length > 0) {
