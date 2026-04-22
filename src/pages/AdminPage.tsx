@@ -1682,6 +1682,10 @@ const AdminPage = () => {
                                 className="p-2 rounded-lg hover:bg-secondary transition-colors" title="Засах">
                                 <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                               </button>
+                              <button onClick={() => handleDuplicateProduct(p)}
+                                className="p-2 rounded-lg hover:bg-secondary transition-colors" title="Хуулбарлах">
+                                <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                              </button>
                               <button onClick={() => setDeleteTarget({ id: p.id, name: p.name })}
                                 className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors" title="Устгах">
                                 <Trash2 className="h-3.5 w-3.5" />
@@ -1720,8 +1724,9 @@ const AdminPage = () => {
                         {p.discount > 0 && <span className="text-[10px] text-destructive font-bold">-{p.discount}%</span>}
                       </div>
                     </div>
-                    <button onClick={() => handleEditProduct(p)} className="p-2 rounded-lg bg-secondary"><Pencil className="h-3.5 w-3.5" /></button>
-                    <button onClick={() => setDeleteTarget({ id: p.id, name: p.name })} className="p-2 rounded-lg bg-destructive/10 text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
+                    <button onClick={() => handleEditProduct(p)} className="p-2 rounded-lg bg-secondary" title="Засах"><Pencil className="h-3.5 w-3.5" /></button>
+                    <button onClick={() => handleDuplicateProduct(p)} className="p-2 rounded-lg bg-secondary" title="Хуулбарлах"><Copy className="h-3.5 w-3.5" /></button>
+                    <button onClick={() => setDeleteTarget({ id: p.id, name: p.name })} className="p-2 rounded-lg bg-destructive/10 text-destructive" title="Устгах"><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
                 ))}
                 {filteredProducts.length === 0 && !loading && (
