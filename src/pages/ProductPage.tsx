@@ -231,11 +231,26 @@ const ProductPage = () => {
           <div className="relative md:sticky md:top-20 md:self-start space-y-4">
             {/* Main product image */}
             <div className="relative">
-              {(() => {
-                const colorImg = selectedColor && product.colors?.find(c => c.name === selectedColor)?.image;
-                const displayImg = colorImg || allImages[activeImg] || product.image;
-                return <img src={displayImg} alt={product.name} className="w-full aspect-square object-cover bg-secondary md:rounded-2xl" />;
-              })()}
+              <div
+                ref={galleryRef}
+                className="w-full aspect-square overflow-x-auto flex snap-x snap-mandatory no-scrollbar bg-secondary md:rounded-2xl scroll-smooth"
+                onScroll={(e) => {
+                  const el = e.currentTarget;
+                  const i = Math.round(el.scrollLeft / el.clientWidth);
+                  if (i !== activeImg) setActiveImg(i);
+                }}
+              >
+                {(allImages.length > 0 ? allImages : [product.image]).map((src, idx) => (
+                  <img
+                    key={idx}
+                    src={src}
+                    alt={`${product.name}${idx > 0 ? ` - ${idx + 1}` : ""}`}
+                    className="w-full h-full flex-shrink-0 object-cover snap-start"
+                    style={{ minWidth: "100%" }}
+                    loading={idx === 0 ? "eager" : "lazy"}
+                  />
+                ))}
+              </div>
               {allImages.length > 1 && (
                 <>
                   <button
