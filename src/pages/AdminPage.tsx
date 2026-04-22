@@ -2242,13 +2242,15 @@ const AdminPage = () => {
                   };
                   const rows: Row[] = [];
                   const seen = new Set<string>();
-                  for (const p of products) {
+                    for (const p of products) {
                     const colors = Array.isArray(p.colors) ? p.colors : [];
-                    for (const c of colors) {
+                    for (let i = 0; i < colors.length; i++) {
+                      const c = colors[i];
                       const name = (c?.name || "").toString();
                       if (!name.trim()) continue;
-                      const r = resolveColor(name);
-                      const key = `${p.id}::${name}`;
+                      const scope = `${p.product_code || p.id}::${c?.id ?? i}`;
+                      const r = resolveColor(name, scope);
+                      const key = `${p.id}::${name}::${scope}`;
                       if (seen.has(key)) continue;
                       seen.add(key);
                       rows.push({
