@@ -113,34 +113,49 @@ const ProductCard = React.memo(({ product }: Props) => {
       href={productUrl}
       className="bg-card overflow-hidden cursor-pointer group transition-all duration-200 hover:shadow-lg rounded-none md:rounded-xl animate-fade-in block no-underline text-inherit"
       onClick={handleLinkClick}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
     >
       <div className="relative aspect-square bg-secondary overflow-hidden">
         {hasMultiColorImages ? (
-          <div
-            ref={scrollerRef}
-            className="w-full h-full flex overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth"
-            onScroll={(e) => {
-              if (activeColorIdx !== null) return;
-              const el = e.currentTarget;
-              const i = Math.round(el.scrollLeft / el.clientWidth);
-              if (i !== autoIdx) setAutoIdx(i);
-            }}
-          >
-            {slides.map((src, i) => (
-              <img
-                key={i}
-                src={imgError ? "/placeholder.svg" : src}
-                alt={`${product.name}${i > 0 ? ` - ${i}` : ""}`}
-                className="w-full h-full flex-shrink-0 object-cover snap-start group-hover:scale-105 transition-transform duration-300"
-                loading="lazy"
-                decoding="async"
-                width={300}
-                height={300}
-                onError={handleImgError}
-                style={{ minWidth: "100%" }}
-              />
-            ))}
-          </div>
+          <>
+            <div
+              ref={scrollerRef}
+              className="w-full h-full flex overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth md:overflow-hidden"
+              onScroll={(e) => {
+                const el = e.currentTarget;
+                const i = Math.round(el.scrollLeft / el.clientWidth);
+                if (i !== activeIdx) setActiveIdx(i);
+              }}
+            >
+              {slides.map((src, i) => (
+                <img
+                  key={i}
+                  src={imgError ? "/placeholder.svg" : src}
+                  alt={`${product.name}${i > 0 ? ` - ${i}` : ""}`}
+                  className="w-full h-full flex-shrink-0 object-cover snap-start group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                  decoding="async"
+                  width={300}
+                  height={300}
+                  onError={handleImgError}
+                  style={{ minWidth: "100%" }}
+                />
+              ))}
+            </div>
+            {/* Slide indicator dots */}
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 flex gap-1 pointer-events-none z-10">
+              {slides.map((_, i) => (
+                <span
+                  key={i}
+                  className={`h-1 rounded-full transition-all duration-300 ${
+                    i === activeIdx ? "w-4 bg-white" : "w-1 bg-white/60"
+                  }`}
+                  style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.3)" }}
+                />
+              ))}
+            </div>
+          </>
         ) : (
           <img
             src={fallbackSrc}
