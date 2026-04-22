@@ -182,12 +182,29 @@ const logFallback = (scope: string, error: unknown) => {
   console.error(`${scope} fallback activated`, error);
 };
 
+// Lightweight column set for list views — омит heavy Base64 columns (image_url ~9MB, colors ~5.6MB).
+// thumbnail_url (small) is enough for cards; full image_url is loaded on the product detail page.
+const LIST_SELECT = "id,slug,name,price,original_price,thumbnail_url,category,is_on_sale,discount,brand_id,is_new,is_bogo,sales,colors_meta:colors";
+
+// Strip heavy `image` field from colors so list payloads stay tiny while names (for swatches) remain.
+const stripColorImages = (rows: any[]) =>
+  (rows || []).map((r) => {
+    if (Array.isArray(r?.colors_meta)) {
+      r.colors = r.colors_meta.map((c: any) =>
+        typeof c === "string" ? { name: c } : { name: c?.name || "", sku: c?.sku, id: c?.id }
+      );
+      delete r.colors_meta;
+    }
+    return r;
+  });
+
 export const fetchPublicProducts = async () => {
   try {
-    return await fetchPublic<any[]>("products", {
-      select: "id,slug,name,price,original_price,image_url,thumbnail_url,category,is_on_sale,discount,brand_id,is_bogo,colors",
+    const rows = await fetchPublic<any[]>("products", {
+      select: LIST_SELECT,
       is_active: "eq.true",
     });
+    return stripColorImages(rows);
   } catch (error) {
     logFallback("products", error);
     return FALLBACK_PRODUCTS;
@@ -264,13 +281,14 @@ export const fetchPublicProductImages = async (productId: string) => {
 
 export const fetchRelatedPublicProducts = async (category: string, excludeId: string) => {
   try {
-    return await fetchPublic<any[]>("products", {
-      select: "id,slug,name,price,original_price,image_url,thumbnail_url,category,is_on_sale,discount,brand_id,is_bogo,colors",
+    const rows = await fetchPublic<any[]>("products", {
+      select: LIST_SELECT,
       category: `eq.${category}`,
       id: `neq.${excludeId}`,
       is_active: "eq.true",
       limit: 4,
     });
+    return stripColorImages(rows);
   } catch (error) {
     logFallback("relatedProducts", error);
     return FALLBACK_PRODUCTS.filter((product) => product.category === category && product.id !== excludeId).slice(0, 4);
@@ -279,12 +297,13 @@ export const fetchRelatedPublicProducts = async (category: string, excludeId: st
 
 export const fetchSaleProducts = async () => {
   try {
-    return await fetchPublic<any[]>("products", {
-      select: "id,slug,name,price,original_price,image_url,thumbnail_url,category,is_on_sale,discount,brand_id,is_bogo,colors",
+    const rows = await fetchPublic<any[]>("products", {
+      select: LIST_SELECT,
       is_on_sale: "eq.true",
       is_active: "eq.true",
       order: "discount.desc.nullslast",
     });
+    return stripColorImages(rows);
   } catch (error) {
     logFallback("saleProducts", error);
     return FALLBACK_PRODUCTS.filter((p) => p.is_on_sale);
@@ -293,12 +312,13 @@ export const fetchSaleProducts = async () => {
 
 export const fetchNewProducts = async () => {
   try {
-    return await fetchPublic<any[]>("products", {
-      select: "id,slug,name,price,original_price,image_url,thumbnail_url,category,is_on_sale,discount,brand_id,is_new,is_bogo,colors",
+    const rows = await fetchPublic<any[]>("products", {
+      select: LIST_SELECT,
       is_new: "eq.true",
       is_active: "eq.true",
       order: "created_at.desc",
     });
+    return stripColorImages(rows);
   } catch (error) {
     logFallback("newProducts", error);
     return FALLBACK_PRODUCTS.filter((p) => p.is_new);
@@ -307,12 +327,13 @@ export const fetchNewProducts = async () => {
 
 export const fetchFeaturedProducts = async () => {
   try {
-    return await fetchPublic<any[]>("products", {
-      select: "id,slug,name,price,original_price,image_url,thumbnail_url,category,is_on_sale,discount,brand_id,is_new,sales,is_bogo,colors",
+    const rows = await fetchPublic<any[]>("products", {
+      select: LIST_SELECT,
       is_active: "eq.true",
       order: "sales.desc.nullslast",
       limit: 8,
     });
+    return stripColorImages(rows);
   } catch (error) {
     logFallback("featuredProducts", error);
     return FALLBACK_PRODUCTS.slice(0, 8);
