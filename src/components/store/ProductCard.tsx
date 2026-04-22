@@ -20,9 +20,27 @@ const COLOR_HEX: Record<string, string> = {
   "cream": "#fffdd0", "rose": "#e8a0bf", "coral": "#f56565",
 };
 
+function normalizeColorName(name: string): string {
+  return (name || "")
+    .toLowerCase()
+    .replace(/ө?нгө/g, "") // remove "өнгө" suffix
+    .replace(/[^a-zа-яёөү\s]/gi, "")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
 function getColorHex(name: string): string | null {
-  const lower = (name || "").toLowerCase().trim();
-  return COLOR_HEX[lower] || null;
+  const raw = (name || "").toLowerCase().trim();
+  if (COLOR_HEX[raw]) return COLOR_HEX[raw];
+
+  const normalized = normalizeColorName(name);
+  if (COLOR_HEX[normalized]) return COLOR_HEX[normalized];
+
+  // Try matching individual words
+  for (const word of normalized.split(" ")) {
+    if (COLOR_HEX[word]) return COLOR_HEX[word];
+  }
+  return null;
 }
 
 const ProductCard = React.memo(({ product }: Props) => {
