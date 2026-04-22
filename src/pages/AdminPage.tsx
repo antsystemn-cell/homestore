@@ -2234,6 +2234,10 @@ const AdminPage = () => {
                   type Row = {
                     productId: string;
                     productName: string;
+                    productCode: string;
+                    colorId: string;
+                    colorIndex: number;
+                    scope: string;
                     raw: string;
                     normalized: string;
                     hex: string;
@@ -2242,13 +2246,14 @@ const AdminPage = () => {
                   };
                   const rows: Row[] = [];
                   const seen = new Set<string>();
-                    for (const p of products) {
+                  for (const p of products) {
                     const colors = Array.isArray(p.colors) ? p.colors : [];
                     for (let i = 0; i < colors.length; i++) {
                       const c = colors[i];
                       const name = (c?.name || "").toString();
                       if (!name.trim()) continue;
-                      const scope = `${p.product_code || p.id}::${c?.id ?? i}`;
+                      const colorId = c?.id ? String(c.id) : "";
+                      const scope = `${p.product_code || p.id}::${colorId || i}`;
                       const r = resolveColor(name, scope);
                       const key = `${p.id}::${name}::${scope}`;
                       if (seen.has(key)) continue;
@@ -2256,6 +2261,10 @@ const AdminPage = () => {
                       rows.push({
                         productId: p.id,
                         productName: p.name,
+                        productCode: p.product_code || "",
+                        colorId,
+                        colorIndex: i,
+                        scope,
                         raw: name,
                         normalized: r.normalized,
                         hex: r.hex,
