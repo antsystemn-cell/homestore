@@ -126,7 +126,15 @@ const ProductPage = () => {
 
           const imgs = await fetchPublicProductImages(data.id);
           const extras = (imgs || []).map((r: any) => r.image_url);
-          setAllImages([p.image, ...extras]);
+          const colorImgs = (p.colors || []).map((c) => c.image).filter(Boolean) as string[];
+          const combined = [p.image, ...extras, ...colorImgs];
+          const seen = new Set<string>();
+          const unique = combined.filter((u) => {
+            if (!u || seen.has(u)) return false;
+            seen.add(u);
+            return true;
+          });
+          setAllImages(unique);
           setActiveImg(0);
 
           const rel = await fetchRelatedPublicProducts(data.category, data.id);
