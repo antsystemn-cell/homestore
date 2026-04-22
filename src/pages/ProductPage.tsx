@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Heart, ShoppingCart, Truck, Shield, RotateCcw, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { Product, formatPrice, mapDbProduct, DetailMedia } from "@/data/products";
@@ -88,6 +88,36 @@ const ProductPage = () => {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const galleryRef = useRef<HTMLDivElement | null>(null);
+
+  // Number of color variants with images — controls auto-scroll behavior
+  const colorImageCount = (product?.colors || []).filter((c) => !!c.image).length;
+  const shouldAutoScroll = colorImageCount >= 2 && allImages.length >= 2 && !selectedColor;
+
+  // Auto-advance gallery when product has 2+ color images
+  useEffect(() => {
+    if (!shouldAutoScroll) return;
+    const id = window.setInterval(() => {
+      setActiveImg((i) => (i + 1) % allImages.length);
+    }, 2800);
+    return () => window.clearInterval(id);
+  }, [shouldAutoScroll, allImages.length]);
+
+  // Sync scroll position with activeImg
+  useEffect(() => {
+    const el = galleryRef.current;
+    if (!el) return;
+    el.scrollTo({ left: activeImg * el.clientWidth, behavior: "smooth" });
+  }, [activeImg]);
+
+  // When user selects a color, jump to that color's image
+  useEffect(() => {
+    if (!selectedColor || !product) return;
+    const img = product.colors?.find((c) => c.name === selectedColor)?.image;
+    if (!img) return;
+    const idx = allImages.indexOf(img);
+    if (idx >= 0) setActiveImg(idx);
+  }, [selectedColor, product, allImages]);
 
   const handleAddToCart = (andNavigate?: boolean) => {
     if (product?.colors && product.colors.length > 0 && !selectedColor) {
@@ -126,7 +156,15 @@ const ProductPage = () => {
 
           const imgs = await fetchPublicProductImages(data.id);
           const extras = (imgs || []).map((r: any) => r.image_url);
-          setAllImages([p.image, ...extras]);
+          const colorImgs = (p.colors || []).map((c) => c.image).filter(Boolean) as string[];
+          const combined = [p.image, ...extras, ...colorImgs];
+          const seen = new Set<string>();
+          const unique = combined.filter((u) => {
+            if (!u || seen.has(u)) return false;
+            seen.add(u);
+            return true;
+          });
+          setAllImages(unique);
           setActiveImg(0);
 
           const rel = await fetchRelatedPublicProducts(data.category, data.id);
@@ -193,11 +231,26 @@ const ProductPage = () => {
           <div className="relative md:sticky md:top-20 md:self-start space-y-4">
             {/* Main product image */}
             <div className="relative">
-              {(() => {
-                const colorImg = selectedColor && product.colors?.find(c => c.name === selectedColor)?.image;
-                const displayImg = colorImg || allImages[activeImg] || product.image;
-                return <img src={displayImg} alt={product.name} className="w-full aspect-square object-cover bg-secondary md:rounded-2xl" />;
-              })()}
+              <div
+                ref={galleryRef}
+                className="w-full aspect-square overflow-x-auto flex snap-x snap-mandatory no-scrollbar bg-secondary md:rounded-2xl scroll-smooth"
+                onScroll={(e) => {
+                  const el = e.currentTarget;
+                  const i = Math.round(el.scrollLeft / el.clientWidth);
+                  if (i !== activeImg) setActiveImg(i);
+                }}
+              >
+                {(allImages.length > 0 ? allImages : [product.image]).map((src, idx) => (
+                  <img
+                    key={idx}
+                    src={src}
+                    alt={`${product.name}${idx > 0 ? ` - ${idx + 1}` : ""}`}
+                    className="w-full h-full flex-shrink-0 object-cover snap-start"
+                    style={{ minWidth: "100%" }}
+                    loading={idx === 0 ? "eager" : "lazy"}
+                  />
+                ))}
+              </div>
               {allImages.length > 1 && (
                 <>
                   <button
