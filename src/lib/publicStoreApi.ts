@@ -185,7 +185,7 @@ const logFallback = (scope: string, error: unknown) => {
 export const fetchPublicProducts = async () => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,slug,name,price,original_price,image_url,thumbnail_url,category,is_on_sale,discount,brand_id,is_bogo",
+      select: "id,slug,name,price,original_price,image_url,thumbnail_url,category,is_on_sale,discount,brand_id,is_bogo,colors",
       is_active: "eq.true",
     });
   } catch (error) {
@@ -265,7 +265,7 @@ export const fetchPublicProductImages = async (productId: string) => {
 export const fetchRelatedPublicProducts = async (category: string, excludeId: string) => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,slug,name,price,original_price,image_url,thumbnail_url,category,is_on_sale,discount,brand_id,is_bogo",
+      select: "id,slug,name,price,original_price,image_url,thumbnail_url,category,is_on_sale,discount,brand_id,is_bogo,colors",
       category: `eq.${category}`,
       id: `neq.${excludeId}`,
       is_active: "eq.true",
@@ -280,7 +280,7 @@ export const fetchRelatedPublicProducts = async (category: string, excludeId: st
 export const fetchSaleProducts = async () => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,slug,name,price,original_price,image_url,thumbnail_url,category,is_on_sale,discount,brand_id,is_bogo",
+      select: "id,slug,name,price,original_price,image_url,thumbnail_url,category,is_on_sale,discount,brand_id,is_bogo,colors",
       is_on_sale: "eq.true",
       is_active: "eq.true",
       order: "discount.desc.nullslast",
@@ -294,7 +294,7 @@ export const fetchSaleProducts = async () => {
 export const fetchNewProducts = async () => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,slug,name,price,original_price,image_url,thumbnail_url,category,is_on_sale,discount,brand_id,is_new,is_bogo",
+      select: "id,slug,name,price,original_price,image_url,thumbnail_url,category,is_on_sale,discount,brand_id,is_new,is_bogo,colors",
       is_new: "eq.true",
       is_active: "eq.true",
       order: "created_at.desc",
@@ -308,7 +308,7 @@ export const fetchNewProducts = async () => {
 export const fetchFeaturedProducts = async () => {
   try {
     return await fetchPublic<any[]>("products", {
-      select: "id,slug,name,price,original_price,image_url,thumbnail_url,category,is_on_sale,discount,brand_id,is_new,sales,is_bogo",
+      select: "id,slug,name,price,original_price,image_url,thumbnail_url,category,is_on_sale,discount,brand_id,is_new,sales,is_bogo,colors",
       is_active: "eq.true",
       order: "sales.desc.nullslast",
       limit: 8,
