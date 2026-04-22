@@ -182,12 +182,29 @@ const logFallback = (scope: string, error: unknown) => {
   console.error(`${scope} fallback activated`, error);
 };
 
+// Lightweight column set for list views — омит heavy Base64 columns (image_url ~9MB, colors ~5.6MB).
+// thumbnail_url (small) is enough for cards; full image_url is loaded on the product detail page.
+const LIST_SELECT = "id,slug,name,price,original_price,thumbnail_url,category,is_on_sale,discount,brand_id,is_new,is_bogo,sales,colors_meta:colors";
+
+// Strip heavy `image` field from colors so list payloads stay tiny while names (for swatches) remain.
+const stripColorImages = (rows: any[]) =>
+  (rows || []).map((r) => {
+    if (Array.isArray(r?.colors_meta)) {
+      r.colors = r.colors_meta.map((c: any) =>
+        typeof c === "string" ? { name: c } : { name: c?.name || "", sku: c?.sku, id: c?.id }
+      );
+      delete r.colors_meta;
+    }
+    return r;
+  });
+
 export const fetchPublicProducts = async () => {
   try {
-    return await fetchPublic<any[]>("products", {
-      select: "id,slug,name,price,original_price,image_url,thumbnail_url,category,is_on_sale,discount,brand_id,is_bogo,colors",
+    const rows = await fetchPublic<any[]>("products", {
+      select: LIST_SELECT,
       is_active: "eq.true",
     });
+    return stripColorImages(rows);
   } catch (error) {
     logFallback("products", error);
     return FALLBACK_PRODUCTS;
