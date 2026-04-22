@@ -37,11 +37,23 @@ export function normalizeColorName(name: string): string {
     .trim();
 }
 
-function hashToHex(str: string): string {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+// FNV-1a 32-bit — better distribution than naive hash, deterministic
+function fnv1a(str: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h >>> 0;
+}
+
+function hashToHsl(seed: string): string {
+  const h = fnv1a(seed);
   const hue = h % 360;
-  return `hsl(${hue}, 55%, 55%)`;
+  // Vary saturation/lightness slightly so similar hues still differ
+  const sat = 45 + ((h >>> 9) % 25);   // 45–69%
+  const light = 45 + ((h >>> 17) % 20); // 45–64%
+  return `hsl(${hue}, ${sat}%, ${light}%)`;
 }
 
 export type ColorResolution = {
@@ -49,9 +61,17 @@ export type ColorResolution = {
   normalized: string;
   hex: string;
   source: "exact" | "normalized" | "combo" | "inline-hex" | "fallback";
+  seed?: string;
 };
 
-export function resolveColor(name: string): ColorResolution {
+/**
+ * Resolve a color name to a hex/hsl value.
+ * @param name  Color label (e.g. "Хар өнгө")
+ * @param scope Optional stable identifier (product SKU, color id, etc.) used
+ *              ONLY for fallback hashing so unknown names don't collide across
+ *              different products.
+ */
+export function resolveColor(name: string, scope?: string): ColorResolution {
   const raw = (name || "").toLowerCase().trim();
   const normalized = normalizeColorName(name);
 
@@ -70,9 +90,13 @@ export function resolveColor(name: string): ColorResolution {
   const hexMatch = raw.match(/#([0-9a-f]{3}|[0-9a-f]{6})\b/i);
   if (hexMatch) return { raw, normalized, hex: hexMatch[0], source: "inline-hex" };
 
-  return { raw, normalized, hex: hashToHex(normalized || raw), source: "fallback" };
+  // Combine name + scope so the same unknown label still gets the SAME color
+  // for the same product, but a DIFFERENT one across products.
+  const seed = `${normalized || raw}::${(scope || "").toString().toLowerCase()}`;
+  return { raw, normalized, hex: hashToHsl(seed), source: "fallback", seed };
 }
 
-export function getColorHex(name: string): string {
-  return resolveColor(name).hex;
+export function getColorHex(name: string, scope?: string): string {
+  return resolveColor(name, scope).hex;
 }
+
