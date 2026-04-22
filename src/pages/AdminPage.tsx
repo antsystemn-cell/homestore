@@ -1866,7 +1866,10 @@ const AdminPage = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            const itemNames = orderItems.map((item: any) => item.name).join(", ");
+                            const itemNames = orderItems.map((item: any) => {
+                              const code = item.product_code || item.sku || "";
+                              return code ? `${item.name} — ${code}` : item.name;
+                            }).join(" | ");
                             const clipText = [
                               o.phone || "",
                               "",
