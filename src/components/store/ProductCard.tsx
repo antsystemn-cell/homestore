@@ -21,18 +21,18 @@ const COLOR_HEX: Record<string, string> = {
 };
 
 function getColorHex(name: string): string | null {
-  const lower = name.toLowerCase().trim();
+  const lower = (name || "").toLowerCase().trim();
   return COLOR_HEX[lower] || null;
 }
 
 const ProductCard = React.memo(({ product }: Props) => {
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
-  const [activeColorIdx, setActiveColorIdx] = useState<number | null>(null);
   const [activeIdx, setActiveIdx] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
+  const [pinnedColorIdx, setPinnedColorIdx] = useState<number | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
-  const hoverIntervalRef = useRef<number | null>(null);
+  const hoverTimerRef = useRef<number | null>(null);
 
   const handleImgError = useCallback(() => setImgError(true), []);
 
@@ -46,67 +46,86 @@ const ProductCard = React.memo(({ product }: Props) => {
   }, [navigate, productUrl]);
 
   const colors = product.colors;
-  const hasColors = colors && colors.length > 1;
+  const baseImage = product.thumbnail || product.image || "/placeholder.svg";
 
-  // Color images available (only colors with images)
-  const colorImages = useMemo(() => {
-    if (!colors) return [] as string[];
-    return colors.map((c) => c.image).filter((url): url is string => !!url);
-  }, [colors]);
+  // Build slides: base image + every distinct color image
+  const { slides, colorSlideMap } = useMemo(() => {
+    const list: string[] = [baseImage];
+    const map = new Map<number, number>(); // colorIdx -> slideIdx
+    if (colors && colors.length) {
+      colors.forEach((c, ci) => {
+        if (c.image && c.image.trim()) {
+          const existing = list.indexOf(c.image);
+          if (existing >= 0) {
+            map.set(ci, existing);
+          } else {
+            list.push(c.image);
+            map.set(ci, list.length - 1);
+          }
+        }
+      });
+    }
+    return { slides: list, colorSlideMap: map };
+  }, [baseImage, colors]);
 
-  const hasMultiColorImages = colorImages.length >= 2;
+  const hasMultipleSlides = slides.length > 1;
+  const hasSwatches = !!(colors && colors.length > 1);
 
-  // Build slide list: default thumbnail + each color image
-  const slides = useMemo(() => {
-    const base = product.thumbnail || product.image;
-    if (!hasMultiColorImages) return [base];
-    return [base, ...colorImages];
-  }, [product.thumbnail, product.image, colorImages, hasMultiColorImages]);
-
-  // Scroll the mobile scroller to a given slide index
-  const scrollToIndex = useCallback((idx: number) => {
+  // Smoothly scroll mobile snap container to a slide
+  const scrollToIndex = useCallback((idx: number, smooth = true) => {
     const el = scrollerRef.current;
     if (!el) return;
-    el.scrollTo({ left: idx * el.clientWidth, behavior: "smooth" });
+    el.scrollTo({ left: idx * el.clientWidth, behavior: smooth ? "smooth" : "auto" });
   }, []);
 
-  // Desktop hover: cycle through slides every 1s while hovering
+  // Desktop hover auto-cycle (only if multiple slides and not pinned)
   useEffect(() => {
-    if (!hasMultiColorImages || !isHovering || activeColorIdx !== null) return;
-    hoverIntervalRef.current = window.setInterval(() => {
+    if (!hasMultipleSlides) return;
+    if (!isHovering) return;
+    if (pinnedColorIdx !== null) return;
+
+    hoverTimerRef.current = window.setInterval(() => {
       setActiveIdx((i) => {
         const next = (i + 1) % slides.length;
         scrollToIndex(next);
         return next;
       });
-    }, 1000);
+    }, 1100);
+
     return () => {
-      if (hoverIntervalRef.current) {
-        window.clearInterval(hoverIntervalRef.current);
-        hoverIntervalRef.current = null;
+      if (hoverTimerRef.current) {
+        window.clearInterval(hoverTimerRef.current);
+        hoverTimerRef.current = null;
       }
     };
-  }, [hasMultiColorImages, isHovering, activeColorIdx, slides.length, scrollToIndex]);
+  }, [hasMultipleSlides, isHovering, pinnedColorIdx, slides.length, scrollToIndex]);
 
-  // Reset to first slide when hover ends (and no color manually chosen)
+  // Reset to first slide when hover ends and no color pinned
   useEffect(() => {
-    if (isHovering || activeColorIdx !== null || !hasMultiColorImages) return;
+    if (isHovering || pinnedColorIdx !== null) return;
+    if (!hasMultipleSlides) return;
     setActiveIdx(0);
     scrollToIndex(0);
-  }, [isHovering, activeColorIdx, hasMultiColorImages, scrollToIndex]);
+  }, [isHovering, pinnedColorIdx, hasMultipleSlides, scrollToIndex]);
 
-  // When user picks a color, jump to that color's slide
+  // When user pins a color, jump to its slide
   useEffect(() => {
-    if (activeColorIdx === null || !hasMultiColorImages) return;
-    const colorImg = colors?.[activeColorIdx]?.image;
-    if (!colorImg) return;
-    const slideIndex = slides.indexOf(colorImg);
-    if (slideIndex < 0) return;
-    setActiveIdx(slideIndex);
-    scrollToIndex(slideIndex);
-  }, [activeColorIdx, colors, slides, hasMultiColorImages, scrollToIndex]);
+    if (pinnedColorIdx === null) return;
+    const target = colorSlideMap.get(pinnedColorIdx);
+    if (target === undefined) return;
+    setActiveIdx(target);
+    scrollToIndex(target);
+  }, [pinnedColorIdx, colorSlideMap, scrollToIndex]);
 
-  const fallbackSrc = imgError ? "/placeholder.svg" : (product.thumbnail || product.image);
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    const i = Math.round(el.scrollLeft / Math.max(el.clientWidth, 1));
+    if (i !== activeIdx && i >= 0 && i < slides.length) {
+      setActiveIdx(i);
+    }
+  }, [activeIdx, slides.length]);
+
+  const fallbackSrc = imgError ? "/placeholder.svg" : baseImage;
 
   return (
     <a
@@ -117,30 +136,30 @@ const ProductCard = React.memo(({ product }: Props) => {
       onMouseLeave={() => setIsHovering(false)}
     >
       <div className="relative aspect-square bg-secondary overflow-hidden">
-        {hasMultiColorImages ? (
+        {hasMultipleSlides ? (
           <>
             <div
               ref={scrollerRef}
-              className="w-full h-full flex overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth md:overflow-hidden"
-              onScroll={(e) => {
-                const el = e.currentTarget;
-                const i = Math.round(el.scrollLeft / el.clientWidth);
-                if (i !== activeIdx) setActiveIdx(i);
-              }}
+              className="w-full h-full flex overflow-x-auto md:overflow-hidden snap-x snap-mandatory no-scrollbar scroll-smooth"
+              onScroll={handleScroll}
             >
               {slides.map((src, i) => (
-                <img
+                <div
                   key={i}
-                  src={imgError ? "/placeholder.svg" : src}
-                  alt={`${product.name}${i > 0 ? ` - ${i}` : ""}`}
-                  className="w-full h-full flex-shrink-0 object-cover snap-start group-hover:scale-105 transition-transform duration-300"
-                  loading="lazy"
-                  decoding="async"
-                  width={300}
-                  height={300}
-                  onError={handleImgError}
+                  className="w-full h-full flex-shrink-0 snap-start"
                   style={{ minWidth: "100%" }}
-                />
+                >
+                  <img
+                    src={imgError ? "/placeholder.svg" : src}
+                    alt={`${product.name}${i > 0 ? ` - ${i + 1}` : ""}`}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                    decoding="async"
+                    width={300}
+                    height={300}
+                    onError={handleImgError}
+                  />
+                </div>
               ))}
             </div>
             {/* Slide indicator dots */}
@@ -168,22 +187,24 @@ const ProductCard = React.memo(({ product }: Props) => {
             onError={handleImgError}
           />
         )}
+
         {product.isBogo && (
-          <span className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded">
+          <span className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded z-10">
             1+1
           </span>
         )}
         {product.originalPrice != null && product.originalPrice > product.price && (
-          <span className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded">
+          <span className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded z-10">
             -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
           </span>
         )}
 
         {/* Color swatches overlay */}
-        {hasColors && (
-          <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1">
-            {colors.slice(0, 6).map((c, i) => {
+        {hasSwatches && (
+          <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1 z-10">
+            {colors!.slice(0, 6).map((c, i) => {
               const hex = getColorHex(c.name);
+              const isPinned = pinnedColorIdx === i;
               return (
                 <button
                   key={i}
@@ -192,10 +213,10 @@ const ProductCard = React.memo(({ product }: Props) => {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    setActiveColorIdx(activeColorIdx === i ? null : i);
+                    setPinnedColorIdx(isPinned ? null : i);
                   }}
                   className={`rounded-full border-2 transition-all duration-200 flex-shrink-0 ${
-                    activeColorIdx === i
+                    isPinned
                       ? "border-primary ring-2 ring-primary/30 scale-110"
                       : "border-white/80 hover:border-primary/60"
                   }`}
@@ -208,9 +229,9 @@ const ProductCard = React.memo(({ product }: Props) => {
                 />
               );
             })}
-            {colors.length > 6 && (
+            {colors!.length > 6 && (
               <span className="text-[9px] text-white font-medium bg-black/50 rounded-full px-1.5 py-0.5">
-                +{colors.length - 6}
+                +{colors!.length - 6}
               </span>
             )}
           </div>
