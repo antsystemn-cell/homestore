@@ -99,16 +99,44 @@ const ProductCard = React.memo(({ product }: Props) => {
       onClick={handleLinkClick}
     >
       <div className="relative aspect-square bg-secondary overflow-hidden">
-        <img
-          src={displaySrc}
-          alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          loading="lazy"
-          decoding="async"
-          width={300}
-          height={300}
-          onError={handleImgError}
-        />
+        {hasMultiColorImages ? (
+          <div
+            ref={scrollerRef}
+            className="w-full h-full flex overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth"
+            onScroll={(e) => {
+              if (activeColorIdx !== null) return;
+              const el = e.currentTarget;
+              const i = Math.round(el.scrollLeft / el.clientWidth);
+              if (i !== autoIdx) setAutoIdx(i);
+            }}
+          >
+            {slides.map((src, i) => (
+              <img
+                key={i}
+                src={imgError ? "/placeholder.svg" : src}
+                alt={`${product.name}${i > 0 ? ` - ${i}` : ""}`}
+                className="w-full h-full flex-shrink-0 object-cover snap-start group-hover:scale-105 transition-transform duration-300"
+                loading="lazy"
+                decoding="async"
+                width={300}
+                height={300}
+                onError={handleImgError}
+                style={{ minWidth: "100%" }}
+              />
+            ))}
+          </div>
+        ) : (
+          <img
+            src={fallbackSrc}
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+            decoding="async"
+            width={300}
+            height={300}
+            onError={handleImgError}
+          />
+        )}
         {product.isBogo && (
           <span className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded">
             1+1
