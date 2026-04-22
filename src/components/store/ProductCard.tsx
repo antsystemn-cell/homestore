@@ -273,7 +273,7 @@ const ProductCard = React.memo(({ product }: Props) => {
                       : "border-black/20 hover:border-primary/60"
                   }`}
                   style={{
-                    backgroundColor: hex || "#ccc",
+                    backgroundColor: hex,
                     boxShadow: "0 0 0 1.5px rgba(255,255,255,0.95), 0 1px 3px rgba(0,0,0,0.4)",
                     width: 18,
                     height: 18,
