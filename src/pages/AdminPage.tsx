@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
-  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe
+  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import StoryVideosAdmin from "@/components/admin/StoryVideosAdmin";
@@ -704,6 +704,50 @@ const AdminPage = () => {
       .eq("product_id", p.id)
       .order("position");
     setExtraImages((data || []).map((r: any) => r.image_url));
+  };
+
+  const handleDuplicateProduct = async (p: any) => {
+    // Fetch heavy data so duplicate carries everything
+    const { data: fullProduct } = await supabase
+      .from("products")
+      .select("description, colors, sizes, specifications, detail_media")
+      .eq("id", p.id)
+      .single();
+
+    const full: any = fullProduct || {};
+    const specs = Array.isArray(full.specifications) ? full.specifications : [];
+    const media = Array.isArray(full.detail_media) ? full.detail_media : [];
+    setForm({
+      name: `${p.name} (хуулбар)`,
+      description: full.description || "",
+      price: p.price,
+      original_price: p.original_price || 0,
+      image_url: p.image_url || "",
+      category: p.category,
+      discount: p.discount || 0,
+      is_new: p.is_new,
+      is_on_sale: p.is_on_sale,
+      is_bogo: p.is_bogo || false,
+      is_active: p.is_active !== false,
+      product_code: "", // clear SKU — must be unique
+      slug: "",          // auto-generated on save
+      specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
+      detail_media: media.map((m: any) => ({ type: m.type || "image", url: m.url || "", caption: m.caption || "", thumbnail: m.thumbnail || "" })),
+      brand_id: p.brand_id || "",
+      colors: Array.isArray(full.colors) ? full.colors.map((c: any) => typeof c === 'string' ? { name: c, image: '', sku: '' } : { name: c.name || '', image: c.image || '', sku: c.sku || '' }) : [],
+      sizes: Array.isArray(full.sizes) ? full.sizes : [],
+    });
+    setEditId(null); // important: create new, don't update
+    setShowForm(true);
+    // Copy extra images too
+    const { data } = await supabase
+      .from("product_images")
+      .select("image_url")
+      .eq("product_id", p.id)
+      .order("position");
+    setExtraImages((data || []).map((r: any) => r.image_url));
+    toast.success("Бараа хуулагдлаа. SKU-г шалгаад хадгална уу.");
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Filtered products
@@ -1638,6 +1682,10 @@ const AdminPage = () => {
                                 className="p-2 rounded-lg hover:bg-secondary transition-colors" title="Засах">
                                 <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                               </button>
+                              <button onClick={() => handleDuplicateProduct(p)}
+                                className="p-2 rounded-lg hover:bg-secondary transition-colors" title="Хуулбарлах">
+                                <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                              </button>
                               <button onClick={() => setDeleteTarget({ id: p.id, name: p.name })}
                                 className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors" title="Устгах">
                                 <Trash2 className="h-3.5 w-3.5" />
@@ -1676,8 +1724,9 @@ const AdminPage = () => {
                         {p.discount > 0 && <span className="text-[10px] text-destructive font-bold">-{p.discount}%</span>}
                       </div>
                     </div>
-                    <button onClick={() => handleEditProduct(p)} className="p-2 rounded-lg bg-secondary"><Pencil className="h-3.5 w-3.5" /></button>
-                    <button onClick={() => setDeleteTarget({ id: p.id, name: p.name })} className="p-2 rounded-lg bg-destructive/10 text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
+                    <button onClick={() => handleEditProduct(p)} className="p-2 rounded-lg bg-secondary" title="Засах"><Pencil className="h-3.5 w-3.5" /></button>
+                    <button onClick={() => handleDuplicateProduct(p)} className="p-2 rounded-lg bg-secondary" title="Хуулбарлах"><Copy className="h-3.5 w-3.5" /></button>
+                    <button onClick={() => setDeleteTarget({ id: p.id, name: p.name })} className="p-2 rounded-lg bg-destructive/10 text-destructive" title="Устгах"><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
                 ))}
                 {filteredProducts.length === 0 && !loading && (
