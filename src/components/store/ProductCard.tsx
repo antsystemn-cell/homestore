@@ -29,6 +29,8 @@ const ProductCard = React.memo(({ product }: Props) => {
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
   const [activeColorIdx, setActiveColorIdx] = useState<number | null>(null);
+  const [autoIdx, setAutoIdx] = useState(0);
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
 
   const handleImgError = useCallback(() => setImgError(true), []);
 
@@ -41,13 +43,54 @@ const ProductCard = React.memo(({ product }: Props) => {
     }
   }, [navigate, productUrl]);
 
-  // Determine displayed image: active color image or default
   const colors = product.colors;
   const hasColors = colors && colors.length > 1;
-  const colorImage = activeColorIdx !== null && colors?.[activeColorIdx]?.image;
-  const displaySrc = imgError
-    ? "/placeholder.svg"
-    : colorImage || product.thumbnail || product.image;
+
+  // Color images available for auto-scroll (only colors with images)
+  const colorImages = useMemo(() => {
+    if (!colors) return [] as string[];
+    return colors.map((c) => c.image).filter((url): url is string => !!url);
+  }, [colors]);
+
+  const hasMultiColorImages = colorImages.length >= 2;
+
+  // Build slide list: default thumbnail + each color image
+  const slides = useMemo(() => {
+    const base = product.thumbnail || product.image;
+    if (!hasMultiColorImages) return [base];
+    return [base, ...colorImages];
+  }, [product.thumbnail, product.image, colorImages, hasMultiColorImages]);
+
+  // Auto-advance through slides every 2.5s when user hasn't manually picked a color
+  useEffect(() => {
+    if (!hasMultiColorImages || activeColorIdx !== null) return;
+    const id = window.setInterval(() => {
+      setAutoIdx((i) => (i + 1) % slides.length);
+    }, 2500);
+    return () => window.clearInterval(id);
+  }, [hasMultiColorImages, activeColorIdx, slides.length]);
+
+  // Sync scroll position with auto-advancing index
+  useEffect(() => {
+    if (!hasMultiColorImages || activeColorIdx !== null) return;
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollTo({ left: autoIdx * el.clientWidth, behavior: "smooth" });
+  }, [autoIdx, hasMultiColorImages, activeColorIdx]);
+
+  // When user picks a color, jump to that color's slide
+  useEffect(() => {
+    if (activeColorIdx === null || !hasMultiColorImages) return;
+    const colorImg = colors?.[activeColorIdx]?.image;
+    if (!colorImg) return;
+    const slideIndex = slides.indexOf(colorImg);
+    if (slideIndex < 0) return;
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollTo({ left: slideIndex * el.clientWidth, behavior: "smooth" });
+  }, [activeColorIdx, colors, slides, hasMultiColorImages]);
+
+  const fallbackSrc = imgError ? "/placeholder.svg" : (product.thumbnail || product.image);
 
   return (
     <a
