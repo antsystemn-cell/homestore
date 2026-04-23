@@ -38,6 +38,7 @@ const Index = () => {
   const [newProducts, setNewProducts] = useState<Product[]>([]);
   const [brands, setBrands] = useState<{ id: string; name: string; logo_url?: string | null }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [gridLoading, setGridLoading] = useState(true);
   const [error, setError] = useState(false);
   const [page, setPage] = useState(1);
   const [mobileVisibleCount, setMobileVisibleCount] = useState(MOBILE_LOAD_SIZE);
@@ -75,17 +76,17 @@ const Index = () => {
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
+    setGridLoading(true);
     setError(false);
 
     try {
-      // Single combined fetch — derive sale/new/featured client-side from the full list to avoid
-      // re-downloading overlapping rows (saves ~75% of egress on the home page).
-      const [prodRes, brandRes] = await Promise.all([
-        fetchPublicProducts(),
+      // STAGE 1: Fast above-fold data — brands + small set of new products.
+      // Renders header/banner/brands/new-arrivals immediately so users see content fast.
+      const [brandRes, newRes] = await Promise.all([
         fetchPublicBrands(),
+        fetchNewProducts(10),
       ]);
       const brandMap = new Map((brandRes || []).map((b: any) => [b.id, b]));
-
       const mapWithBrand = (row: any) => {
         const p = mapDbProduct(row);
         const brand = brandMap.get(p.brand_id || "");
@@ -96,6 +97,12 @@ const Index = () => {
         return p;
       };
 
+      setBrands((brandRes || []).map((b: any) => ({ id: b.id, name: b.name, logo_url: b.logo_url })));
+      setNewProducts((newRes || []).map(mapWithBrand));
+      setLoading(false); // above-fold ready — hide skeleton
+
+      // STAGE 2: Background fetch full catalog for grid + sale carousel + featured.
+      const prodRes = await fetchPublicProducts();
       const allMapped = (prodRes || []).map(mapWithBrand);
       const mappedProducts = shuffle(allMapped);
       const mappedSale = allMapped
@@ -104,16 +111,13 @@ const Index = () => {
       const mappedFeatured = [...allMapped]
         .sort((a, b) => (b.sales || 0) - (a.sales || 0))
         .slice(0, 8);
-      const mappedNew = allMapped.filter((p) => p.isNew);
 
       setAllProducts(mappedProducts);
       setSaleProducts(mappedSale);
       setFeaturedProducts(mappedFeatured);
-      setNewProducts(mappedNew);
-      setBrands((brandRes || []).map((b: any) => ({ id: b.id, name: b.name, logo_url: b.logo_url })));
       setPage(1);
       setMobileVisibleCount(MOBILE_LOAD_SIZE);
-      setError(mappedProducts.length === 0 && mappedSale.length === 0 && mappedFeatured.length === 0);
+      setError(mappedProducts.length === 0 && mappedSale.length === 0 && (newRes || []).length === 0);
     } catch (err) {
       console.error("Failed to load products", err);
       setAllProducts([]);
@@ -122,6 +126,7 @@ const Index = () => {
       setError(true);
     } finally {
       setLoading(false);
+      setGridLoading(false);
     }
   }, []);
 
