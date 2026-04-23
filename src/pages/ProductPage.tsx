@@ -310,12 +310,12 @@ const ProductPage = () => {
 
             <div className="flex items-baseline gap-3 flex-wrap">
               <span className="text-2xl md:text-3xl font-extrabold text-foreground">{formatPrice(product.price)}</span>
-              {product.originalPrice && (
+              {product.originalPrice ? (
                 <span className="text-muted-foreground line-through text-lg">{formatPrice(product.originalPrice)}</span>
-              )}
-              {product.isBogo && (
+              ) : null}
+              {product.isBogo ? (
                 <span className="bg-primary text-primary-foreground text-xs font-bold px-2.5 py-1 rounded-lg">1+1 Үнэгүй</span>
-              )}
+              ) : null}
             </div>
 
             {/* Color selector */}
