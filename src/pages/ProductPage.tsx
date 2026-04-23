@@ -301,10 +301,10 @@ const ProductPage = () => {
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-foreground leading-tight">{product.name}</h1>
               <div className="flex items-center gap-3 mt-1">
-                {product.productCode && (
+                {product.productCode ? (
                   <span className="text-xs font-mono text-muted-foreground bg-secondary px-2 py-0.5 rounded">#{product.productCode}</span>
-                )}
-                {product.sales && <p className="text-muted-foreground text-sm">{product.sales} борлуулалт</p>}
+                ) : null}
+                {product.sales ? <p className="text-muted-foreground text-sm">{product.sales} борлуулалт</p> : null}
               </div>
             </div>
 
