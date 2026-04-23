@@ -209,10 +209,14 @@ const ProductCard = React.memo(({ product }: Props) => {
           </span>
         )}
 
-        {/* Color swatches overlay */}
+        {/* Color swatches overlay — horizontal scroll for many colors */}
         {hasSwatches && (
-          <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1 z-10">
-            {colors!.slice(0, 6).map((c, i) => {
+          <div
+            className="absolute bottom-2 left-2 right-2 z-10 flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5"
+            onClick={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+          >
+            {colors!.map((c, i) => {
               const scope = `${(product as any).product_code || product.id}::${(c as any).id ?? i}`;
               const hex = getColorHex(c.name, scope);
               const isPinned = pinnedColorIdx === i;
@@ -240,11 +244,6 @@ const ProductCard = React.memo(({ product }: Props) => {
                 />
               );
             })}
-            {colors!.length > 6 && (
-              <span className="text-[9px] text-white font-medium bg-black/50 rounded-full px-1.5 py-0.5">
-                +{colors!.length - 6}
-              </span>
-            )}
           </div>
         )}
       </div>
