@@ -179,10 +179,7 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
-          {/* Story reel - between new arrivals and sale */}
-          <ErrorBoundary>
-            <StoryReel />
-          </ErrorBoundary>
+          {/* Story reel disabled for performance */}
 
           {/* Sale carousel - below stories */}
           {saleProducts.length > 0 && (
