@@ -237,7 +237,7 @@ const ProductCard = React.memo(({ product }: Props) => {
                     setPinnedColorIdx(isPinned ? null : i);
                   }}
                   className={`rounded-full border transition-all duration-200 flex-shrink-0 ${
-                    isPinned
+                    isActive
                       ? "border-primary ring-2 ring-primary/40 scale-110"
                       : "border-black/20 hover:border-primary/60"
                   }`}
