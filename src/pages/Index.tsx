@@ -42,7 +42,7 @@ const Index = () => {
   const [gridLoading, setGridLoading] = useState(true);
   const [error, setError] = useState(false);
   const [page, setPage] = useState(1);
-  const [mobileVisibleCount, setMobileVisibleCount] = useState(MOBILE_LOAD_SIZE);
+  const [mobileVisibleCount, setMobileVisibleCount] = useState(MOBILE_INITIAL);
   const isMobile = useIsMobile();
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -61,7 +61,7 @@ const Index = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && mobileVisibleCount < allProducts.length) {
-          setMobileVisibleCount((prev) => Math.min(prev + MOBILE_LOAD_SIZE, allProducts.length));
+          setMobileVisibleCount((prev) => Math.min(prev + MOBILE_INITIAL, allProducts.length));
         }
       },
       { threshold: 0.1 }
@@ -117,7 +117,7 @@ const Index = () => {
       setSaleProducts(mappedSale);
       setFeaturedProducts(mappedFeatured);
       setPage(1);
-      setMobileVisibleCount(MOBILE_LOAD_SIZE);
+      setMobileVisibleCount(MOBILE_INITIAL);
       setError(mappedProducts.length === 0 && mappedSale.length === 0 && (newRes || []).length === 0);
     } catch (err) {
       console.error("Failed to load products", err);
@@ -196,7 +196,7 @@ const Index = () => {
           )}
 
           {gridLoading && visible.length === 0 ? (
-            <ProductGridSkeleton count={isMobile ? MOBILE_LOAD_SIZE : 8} />
+            <ProductGridSkeleton count={isMobile ? MOBILE_INITIAL : 8} />
           ) : visible.length > 0 ? (
             <>
 
