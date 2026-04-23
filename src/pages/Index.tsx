@@ -61,7 +61,7 @@ const Index = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && mobileVisibleCount < allProducts.length) {
-          setMobileVisibleCount((prev) => Math.min(prev + MOBILE_INITIAL, allProducts.length));
+          setMobileVisibleCount((prev) => Math.min(prev + MOBILE_LOAD_MORE, allProducts.length));
         }
       },
       { threshold: 0.1 }
