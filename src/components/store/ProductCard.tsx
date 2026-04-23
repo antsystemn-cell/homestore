@@ -20,7 +20,31 @@ const ProductCard = React.memo(({ product }: Props) => {
 
   const productUrl = `/product/${product.slug || product.id}`;
 
+  // Track touch/drag to prevent navigation when user is swiping the image carousel
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const swipedRef = useRef(false);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touchStartRef.current = { x: t.clientX, y: t.clientY };
+    swipedRef.current = false;
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    const start = touchStartRef.current;
+    if (!start) return;
+    const t = e.touches[0];
+    if (Math.abs(t.clientX - start.x) > 8 || Math.abs(t.clientY - start.y) > 8) {
+      swipedRef.current = true;
+    }
+  }, []);
+
   const handleLinkClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (swipedRef.current) {
+      e.preventDefault();
+      swipedRef.current = false;
+      return;
+    }
     if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
       e.preventDefault();
       navigate(productUrl);
