@@ -73,6 +73,10 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
   );
 
+  const url = new URL(req.url);
+  const offset = parseInt(url.searchParams.get("offset") ?? "0", 10);
+  const limit = parseInt(url.searchParams.get("limit") ?? "5", 10);
+
   const summary: Record<string, { scanned: number; migrated: number; failed: number }> = {
     products_image: { scanned: 0, migrated: 0, failed: 0 },
     products_thumbnail: { scanned: 0, migrated: 0, failed: 0 },
@@ -84,10 +88,12 @@ Deno.serve(async (req) => {
   };
 
   try {
-    // ---- products ----
-    const { data: products, error: pErr } = await supabase
+    // ---- products (paginated) ----
+    const { data: products, error: pErr, count } = await supabase
       .from("products")
-      .select("id,image_url,thumbnail_url,colors,detail_media");
+      .select("id,image_url,thumbnail_url,colors,detail_media", { count: "exact" })
+      .order("id")
+      .range(offset, offset + limit - 1);
     if (pErr) throw pErr;
 
     for (const p of products ?? []) {
