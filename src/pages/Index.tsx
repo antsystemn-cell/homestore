@@ -29,7 +29,8 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 const PAGE_SIZE = 20;
-const MOBILE_LOAD_SIZE = 12;
+const MOBILE_INITIAL = 10;
+const MOBILE_LOAD_MORE = 10;
 
 const Index = () => {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
