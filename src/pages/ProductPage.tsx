@@ -273,11 +273,11 @@ const ProductPage = () => {
               >
                 <Heart className={`h-5 w-5 ${liked ? "fill-sale text-sale" : "text-foreground"}`} />
               </button>
-              {product.discount && (
+              {product.discount ? (
                 <span className="absolute bottom-4 left-4 bg-sale text-sale-foreground text-xs font-bold px-3 py-1.5 rounded-full">
                   -{product.discount}% хямдрал
                 </span>
-              )}
+              ) : null}
             </div>
             {/* Thumbnails */}
             {allImages.length > 1 && (
@@ -301,21 +301,21 @@ const ProductPage = () => {
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-foreground leading-tight">{product.name}</h1>
               <div className="flex items-center gap-3 mt-1">
-                {product.productCode && (
+                {product.productCode ? (
                   <span className="text-xs font-mono text-muted-foreground bg-secondary px-2 py-0.5 rounded">#{product.productCode}</span>
-                )}
-                {product.sales && <p className="text-muted-foreground text-sm">{product.sales} борлуулалт</p>}
+                ) : null}
+                {product.sales ? <p className="text-muted-foreground text-sm">{product.sales} борлуулалт</p> : null}
               </div>
             </div>
 
             <div className="flex items-baseline gap-3 flex-wrap">
               <span className="text-2xl md:text-3xl font-extrabold text-foreground">{formatPrice(product.price)}</span>
-              {product.originalPrice && (
+              {product.originalPrice ? (
                 <span className="text-muted-foreground line-through text-lg">{formatPrice(product.originalPrice)}</span>
-              )}
-              {product.isBogo && (
+              ) : null}
+              {product.isBogo ? (
                 <span className="bg-primary text-primary-foreground text-xs font-bold px-2.5 py-1 rounded-lg">1+1 Үнэгүй</span>
-              )}
+              ) : null}
             </div>
 
             {/* Color selector */}
