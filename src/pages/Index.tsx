@@ -16,6 +16,7 @@ import {
   fetchPublicProducts,
   fetchNewProducts,
 } from "@/lib/publicStoreApi";
+import { transformImage } from "@/lib/imageUrl";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
