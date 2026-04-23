@@ -2,12 +2,15 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import { Product, formatPrice } from "@/data/products";
 import { getColorHex } from "@/lib/colorMap";
+import { transformImage, buildSrcSet } from "@/lib/imageUrl";
 
 interface Props {
   product: Product;
+  /** Set true for the first ~4 cards above the fold to preload eagerly with high priority. */
+  priority?: boolean;
 }
 
-const ProductCard = React.memo(({ product }: Props) => {
+const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -163,13 +166,16 @@ const ProductCard = React.memo(({ product }: Props) => {
                   style={{ minWidth: "100%" }}
                 >
                   <img
-                    src={imgError ? "/placeholder.svg" : src}
+                    src={imgError ? "/placeholder.svg" : transformImage(src, 400)}
+                    srcSet={imgError ? undefined : buildSrcSet(src, [200, 400, 800])}
+                    sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
                     alt={`${product.name}${i > 0 ? ` - ${i + 1}` : ""}`}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
-                    loading="lazy"
+                    loading={priority && i === 0 ? "eager" : "lazy"}
+                    fetchPriority={priority && i === 0 ? "high" : "auto"}
                     decoding="async"
-                    width={300}
-                    height={300}
+                    width={400}
+                    height={400}
                     draggable={false}
                     onError={handleImgError}
                   />
@@ -191,13 +197,16 @@ const ProductCard = React.memo(({ product }: Props) => {
           </>
         ) : (
           <img
-            src={fallbackSrc}
+            src={imgError ? "/placeholder.svg" : transformImage(fallbackSrc, 400)}
+            srcSet={imgError ? undefined : buildSrcSet(fallbackSrc, [200, 400, 800])}
+            sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            loading="lazy"
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
             decoding="async"
-            width={300}
-            height={300}
+            width={400}
+            height={400}
             onError={handleImgError}
           />
         )}

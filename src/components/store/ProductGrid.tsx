@@ -11,9 +11,9 @@ interface Props {
 const ProductGrid = React.memo(({ products }: Props) => (
   <div className="max-w-6xl mx-auto md:px-8 md:py-6">
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 md:gap-5">
-      {products.map((p) => (
+      {products.map((p, i) => (
         <ErrorBoundary key={p.id}>
-          <ProductCard product={p} />
+          <ProductCard product={p} priority={i < 4} />
         </ErrorBoundary>
       ))}
     </div>
