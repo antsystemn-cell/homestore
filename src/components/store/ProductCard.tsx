@@ -197,13 +197,16 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
           </>
         ) : (
           <img
-            src={fallbackSrc}
+            src={imgError ? "/placeholder.svg" : transformImage(fallbackSrc, 400)}
+            srcSet={imgError ? undefined : buildSrcSet(fallbackSrc, [200, 400, 800])}
+            sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            loading="lazy"
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
             decoding="async"
-            width={300}
-            height={300}
+            width={400}
+            height={400}
             onError={handleImgError}
           />
         )}
