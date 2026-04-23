@@ -54,10 +54,11 @@ const ProductCard = React.memo(({ product }: Props) => {
   const colors = product.colors;
   const baseImage = product.thumbnail || product.image || "/placeholder.svg";
 
-  // Build slides: base image + every distinct color image
+  // Build slides: base image + every distinct color image.
+  // colorSlideMap: colorIdx -> slideIdx. Colors without their own image fall back to slide 0.
   const { slides, colorSlideMap } = useMemo(() => {
     const list: string[] = [baseImage];
-    const map = new Map<number, number>(); // colorIdx -> slideIdx
+    const map = new Map<number, number>();
     if (colors && colors.length) {
       colors.forEach((c, ci) => {
         if (c.image && c.image.trim()) {
@@ -68,6 +69,9 @@ const ProductCard = React.memo(({ product }: Props) => {
             list.push(c.image);
             map.set(ci, list.length - 1);
           }
+        } else {
+          // No dedicated image — pin still selects the color but stays on base image.
+          map.set(ci, 0);
         }
       });
     }
