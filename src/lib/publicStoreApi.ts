@@ -45,13 +45,22 @@ const logError = (scope: string, error: unknown) => {
 // thumbnail_url (small) is enough for cards; full image_url is loaded on the product detail page.
 const LIST_SELECT = "id,slug,name,price,original_price,thumbnail_url,category,is_on_sale,discount,brand_id,is_new,is_bogo,sales,colors_meta:colors";
 
-// Strip heavy `image` field from colors so list payloads stay tiny while names (for swatches) remain.
+// Keep `image` URL — it's a small string (Storage URL) needed so card swatches can switch slides.
+// Only strip if a value looks like an inline base64 blob (legacy data) to keep payload tiny.
 const stripColorImages = (rows: any[]) =>
   (rows || []).map((r) => {
     if (Array.isArray(r?.colors_meta)) {
-      r.colors = r.colors_meta.map((c: any) =>
-        typeof c === "string" ? { name: c } : { name: c?.name || "", sku: c?.sku, id: c?.id }
-      );
+      r.colors = r.colors_meta.map((c: any) => {
+        if (typeof c === "string") return { name: c };
+        const img = typeof c?.image === "string" ? c.image : "";
+        const isInlineBlob = img.startsWith("data:");
+        return {
+          name: c?.name || "",
+          sku: c?.sku,
+          id: c?.id,
+          image: isInlineBlob ? "" : img,
+        };
+      });
       delete r.colors_meta;
     }
     return r;
