@@ -87,13 +87,16 @@ const NewArrivals = React.memo(({ products }: Props) => {
                   {/* Image */}
                   <div className="relative aspect-square bg-secondary overflow-hidden flex items-center justify-center">
                     <img
-                      src={imgErrors[p.id] ? "/placeholder.svg" : (p.thumbnail || p.image)}
+                      src={imgErrors[p.id] ? "/placeholder.svg" : transformImage(p.thumbnail || p.image, 200)}
+                      srcSet={imgErrors[p.id] ? undefined : buildSrcSet(p.thumbnail || p.image, [200, 400])}
+                      sizes="(min-width: 768px) 25vw, 46vw"
                       alt={p.name}
                       className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
+                      loading={index < 3 ? "eager" : "lazy"}
+                      fetchPriority={index < 3 ? "high" : "auto"}
                       decoding="async"
-                      width={300}
-                      height={300}
+                      width={200}
+                      height={200}
                       onError={() => handleImgError(p.id)}
                     />
 
