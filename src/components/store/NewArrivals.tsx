@@ -2,6 +2,7 @@ import React, { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Product, formatPrice } from "@/data/products";
 import { Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { transformImage, buildSrcSet } from "@/lib/imageUrl";
 
 interface Props {
   products: Product[];
