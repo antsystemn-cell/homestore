@@ -2,12 +2,15 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import { Product, formatPrice } from "@/data/products";
 import { getColorHex } from "@/lib/colorMap";
+import { transformImage, buildSrcSet } from "@/lib/imageUrl";
 
 interface Props {
   product: Product;
+  /** Set true for the first ~4 cards above the fold to preload eagerly with high priority. */
+  priority?: boolean;
 }
 
-const ProductCard = React.memo(({ product }: Props) => {
+const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
