@@ -212,8 +212,7 @@ const ProductCard = React.memo(({ product }: Props) => {
         {/* Color swatches overlay — horizontal scroll for many colors */}
         {hasSwatches && (
           <div
-            className="absolute bottom-2 left-2 right-2 z-10 flex items-center gap-1 overflow-x-auto scrollbar-none py-0.5"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            className="absolute bottom-2 left-2 right-2 z-10 flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5"
             onClick={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
           >
