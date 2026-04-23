@@ -122,8 +122,9 @@ const ProductCard = React.memo(({ product }: Props) => {
           <>
             <div
               ref={scrollerRef}
-              className="w-full h-full flex overflow-x-auto md:overflow-hidden snap-x snap-mandatory no-scrollbar scroll-smooth"
+              className="w-full h-full flex overflow-x-auto md:overflow-hidden snap-x snap-mandatory no-scrollbar scroll-smooth touch-pan-x"
               onScroll={handleScroll}
+              style={{ WebkitOverflowScrolling: "touch" }}
             >
               {slides.map((src, i) => (
                 <div
@@ -134,11 +135,12 @@ const ProductCard = React.memo(({ product }: Props) => {
                   <img
                     src={imgError ? "/placeholder.svg" : src}
                     alt={`${product.name}${i > 0 ? ` - ${i + 1}` : ""}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
                     loading="lazy"
                     decoding="async"
                     width={300}
                     height={300}
+                    draggable={false}
                     onError={handleImgError}
                   />
                 </div>
