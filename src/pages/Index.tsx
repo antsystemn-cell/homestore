@@ -136,6 +136,26 @@ const Index = () => {
     void fetchAll();
   }, [fetchAll]);
 
+  // Preload first 4 above-fold images (NewArrivals carousel) for instant rendering.
+  useEffect(() => {
+    if (!newProducts.length) return;
+    const links: HTMLLinkElement[] = [];
+    newProducts.slice(0, 4).forEach((p) => {
+      const url = transformImage(p.thumbnail || p.image, 200);
+      if (!url || url === "/placeholder.svg") return;
+      const link = document.createElement("link");
+      link.rel = "preload";
+      link.as = "image";
+      link.href = url;
+      link.fetchPriority = "high";
+      document.head.appendChild(link);
+      links.push(link);
+    });
+    return () => {
+      links.forEach((l) => l.parentNode?.removeChild(l));
+    };
+  }, [newProducts]);
+
   const goToPage = useCallback((p: number) => {
     setPage(p);
     window.scrollTo({ top: 0, behavior: "smooth" });
