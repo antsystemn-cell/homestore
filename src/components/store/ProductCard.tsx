@@ -166,13 +166,16 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
                   style={{ minWidth: "100%" }}
                 >
                   <img
-                    src={imgError ? "/placeholder.svg" : src}
+                    src={imgError ? "/placeholder.svg" : transformImage(src, 400)}
+                    srcSet={imgError ? undefined : buildSrcSet(src, [200, 400, 800])}
+                    sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
                     alt={`${product.name}${i > 0 ? ` - ${i + 1}` : ""}`}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
-                    loading="lazy"
+                    loading={priority && i === 0 ? "eager" : "lazy"}
+                    fetchPriority={priority && i === 0 ? "high" : "auto"}
                     decoding="async"
-                    width={300}
-                    height={300}
+                    width={400}
+                    height={400}
                     draggable={false}
                     onError={handleImgError}
                   />
