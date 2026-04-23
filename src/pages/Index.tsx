@@ -9,7 +9,7 @@ import SaleCarousel from "@/components/store/SaleCarousel";
 import PromoBanner from "@/components/store/PromoBanner";
 import BrandLogos from "@/components/store/BrandLogos";
 import NewArrivals from "@/components/store/NewArrivals";
-import StoryReel from "@/components/store/StoryReel";
+// StoryReel removed for performance
 import { Product, mapDbProduct } from "@/data/products";
 import {
   fetchPublicBrands,
