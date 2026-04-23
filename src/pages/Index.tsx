@@ -14,6 +14,7 @@ import { Product, mapDbProduct } from "@/data/products";
 import {
   fetchPublicBrands,
   fetchPublicProducts,
+  fetchNewProducts,
 } from "@/lib/publicStoreApi";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
