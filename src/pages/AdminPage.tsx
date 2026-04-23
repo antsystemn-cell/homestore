@@ -7,7 +7,7 @@ import {
   BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
-import StoryVideosAdmin from "@/components/admin/StoryVideosAdmin";
+
 import { useRef } from "react";
 import { toast } from "sonner";
 import { formatPrice } from "@/data/products";
@@ -26,7 +26,7 @@ import { mapOrderToLabelData } from "@/lib/niimbot/mapOrder";
 import { generateNiimbotXlsx, buildXlsxFilename } from "@/lib/niimbot/xlsx";
 import { downloadBlob } from "@/lib/niimbot/transfer";
 
-type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "stories" | "analytics" | "diagnostics";
+type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "analytics" | "diagnostics";
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -41,7 +41,7 @@ const AdminPage = () => {
   const [deliveryOptions, setDeliveryOptions] = useState<any[]>([]);
   const [paymentProviders, setPaymentProviders] = useState<any[]>([]);
   const [promoBanners, setPromoBanners] = useState<any[]>([]);
-  const [storyStats, setStoryStats] = useState<{ total_views: number; story_count: number; top: { id: string; title: string; view_count: number }[] }>({ total_views: 0, story_count: 0, top: [] });
+  
   const [loading, setLoading] = useState(false);
 
   // Promo banner form state
@@ -221,23 +221,6 @@ const AdminPage = () => {
     if (authLoading || !hasAdminAccess) return;
     loadAdminData();
   }, [authLoading, isAdmin]);
-
-  useEffect(() => {
-    if (authLoading || !hasAdminAccess) return;
-    (async () => {
-      const { data } = await supabase
-        .from("story_videos")
-        .select("id,title,view_count")
-        .order("view_count", { ascending: false });
-      const list = (data || []) as { id: string; title: string; view_count: number | null }[];
-      const total = list.reduce((s, x) => s + (x.view_count || 0), 0);
-      setStoryStats({
-        total_views: total,
-        story_count: list.length,
-        top: list.slice(0, 5).map((x) => ({ id: x.id, title: x.title, view_count: x.view_count || 0 })),
-      });
-    })();
-  }, [authLoading, isAdmin, tab]);
 
   const fetchPromoBanners = async () => {
     try {
