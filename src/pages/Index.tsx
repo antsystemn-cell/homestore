@@ -194,7 +194,9 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
-          {visible.length > 0 && (
+          {gridLoading && visible.length === 0 ? (
+            <ProductGridSkeleton count={isMobile ? MOBILE_LOAD_SIZE : 8} />
+          ) : visible.length > 0 ? (
             <>
 
               <ErrorBoundary>
@@ -249,9 +251,9 @@ const Index = () => {
                 </div>
               )}
             </>
-          )}
+          ) : null}
 
-          {visible.length === 0 && saleProducts.length === 0 && featuredProducts.length === 0 && (
+          {!gridLoading && visible.length === 0 && saleProducts.length === 0 && newProducts.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
               <p className="text-lg font-medium">Бараа байхгүй байна</p>
               <p className="text-sm mt-1">Удахгүй шинэ бараа нэмэгдэнэ</p>
