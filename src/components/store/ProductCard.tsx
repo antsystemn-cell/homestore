@@ -138,6 +138,8 @@ const ProductCard = React.memo(({ product }: Props) => {
       href={productUrl}
       className="bg-card overflow-hidden cursor-pointer group transition-all duration-200 hover:shadow-lg rounded-none md:rounded-xl animate-fade-in block no-underline text-inherit"
       onClick={handleLinkClick}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
