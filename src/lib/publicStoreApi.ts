@@ -165,13 +165,14 @@ export const fetchSaleProducts = async () => {
   }
 };
 
-export const fetchNewProducts = async () => {
+export const fetchNewProducts = async (limit = 10) => {
   try {
     const rows = await fetchPublic<any[]>("products", {
       select: LIST_SELECT,
       is_new: "eq.true",
       is_active: "eq.true",
       order: "created_at.desc",
+      limit,
     });
     return stripColorImages(rows);
   } catch (error) {
