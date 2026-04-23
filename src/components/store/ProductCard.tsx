@@ -221,6 +221,8 @@ const ProductCard = React.memo(({ product }: Props) => {
             onTouchStart={(e) => e.stopPropagation()}
           >
             {colors!.map((c, i) => {
+              const slideForColor = colorSlideMap.get(i) ?? 0;
+              const isActive = pinnedColorIdx === i || (pinnedColorIdx === null && slideForColor === activeIdx && slideForColor !== 0);
               const scope = `${(product as any).product_code || product.id}::${(c as any).id ?? i}`;
               const hex = getColorHex(c.name, scope);
               const isPinned = pinnedColorIdx === i;
