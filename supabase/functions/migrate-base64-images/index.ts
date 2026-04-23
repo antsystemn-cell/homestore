@@ -176,46 +176,50 @@ Deno.serve(async (req) => {
       }
     }
 
-    // ---- brands ----
-    const { data: brands } = await supabase.from("brands").select("id,logo_url");
-    for (const b of brands ?? []) {
-      if (typeof b.logo_url === "string" && b.logo_url.startsWith("data:")) {
-        summary.brands.scanned++;
-        const url = await uploadDataUrl(supabase, b.logo_url, "brands");
-        if (url) {
-          await supabase.from("brands").update({ logo_url: url }).eq("id", b.id);
-          summary.brands.migrated++;
-        } else summary.brands.failed++;
+    // ---- non-product tables (run only on first batch) ----
+    if (offset === 0) {
+      const { data: brands } = await supabase.from("brands").select("id,logo_url");
+      for (const b of brands ?? []) {
+        if (typeof b.logo_url === "string" && b.logo_url.startsWith("data:")) {
+          summary.brands.scanned++;
+          const url = await uploadDataUrl(supabase, b.logo_url, "brands");
+          if (url) {
+            await supabase.from("brands").update({ logo_url: url }).eq("id", b.id);
+            summary.brands.migrated++;
+          } else summary.brands.failed++;
+        }
+      }
+
+      const { data: banners } = await supabase.from("promo_banners").select("id,banner_image");
+      for (const b of banners ?? []) {
+        if (typeof b.banner_image === "string" && b.banner_image.startsWith("data:")) {
+          summary.promo_banners.scanned++;
+          const url = await uploadDataUrl(supabase, b.banner_image, "banners");
+          if (url) {
+            await supabase.from("promo_banners").update({ banner_image: url }).eq("id", b.id);
+            summary.promo_banners.migrated++;
+          } else summary.promo_banners.failed++;
+        }
+      }
+
+      const { data: providers } = await supabase.from("payment_providers").select("id,logo_url");
+      for (const p of providers ?? []) {
+        if (typeof p.logo_url === "string" && p.logo_url.startsWith("data:")) {
+          summary.payment_providers.scanned++;
+          const url = await uploadDataUrl(supabase, p.logo_url, "providers");
+          if (url) {
+            await supabase.from("payment_providers").update({ logo_url: url }).eq("id", p.id);
+            summary.payment_providers.migrated++;
+          } else summary.payment_providers.failed++;
+        }
       }
     }
 
-    // ---- promo_banners ----
-    const { data: banners } = await supabase.from("promo_banners").select("id,banner_image");
-    for (const b of banners ?? []) {
-      if (typeof b.banner_image === "string" && b.banner_image.startsWith("data:")) {
-        summary.promo_banners.scanned++;
-        const url = await uploadDataUrl(supabase, b.banner_image, "banners");
-        if (url) {
-          await supabase.from("promo_banners").update({ banner_image: url }).eq("id", b.id);
-          summary.promo_banners.migrated++;
-        } else summary.promo_banners.failed++;
-      }
-    }
+    const total = count ?? 0;
+    const nextOffset = offset + (products?.length ?? 0);
+    const hasMore = nextOffset < total;
 
-    // ---- payment_providers ----
-    const { data: providers } = await supabase.from("payment_providers").select("id,logo_url");
-    for (const p of providers ?? []) {
-      if (typeof p.logo_url === "string" && p.logo_url.startsWith("data:")) {
-        summary.payment_providers.scanned++;
-        const url = await uploadDataUrl(supabase, p.logo_url, "providers");
-        if (url) {
-          await supabase.from("payment_providers").update({ logo_url: url }).eq("id", p.id);
-          summary.payment_providers.migrated++;
-        } else summary.payment_providers.failed++;
-      }
-    }
-
-    return new Response(JSON.stringify({ ok: true, summary }), {
+    return new Response(JSON.stringify({ ok: true, summary, total, nextOffset, hasMore }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
