@@ -273,11 +273,11 @@ const ProductPage = () => {
               >
                 <Heart className={`h-5 w-5 ${liked ? "fill-sale text-sale" : "text-foreground"}`} />
               </button>
-              {product.discount && (
+              {product.discount ? (
                 <span className="absolute bottom-4 left-4 bg-sale text-sale-foreground text-xs font-bold px-3 py-1.5 rounded-full">
                   -{product.discount}% хямдрал
                 </span>
-              )}
+              ) : null}
             </div>
             {/* Thumbnails */}
             {allImages.length > 1 && (
