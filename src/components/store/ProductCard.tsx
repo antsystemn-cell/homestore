@@ -54,10 +54,11 @@ const ProductCard = React.memo(({ product }: Props) => {
   const colors = product.colors;
   const baseImage = product.thumbnail || product.image || "/placeholder.svg";
 
-  // Build slides: base image + every distinct color image
+  // Build slides: base image + every distinct color image.
+  // colorSlideMap: colorIdx -> slideIdx. Colors without their own image fall back to slide 0.
   const { slides, colorSlideMap } = useMemo(() => {
     const list: string[] = [baseImage];
-    const map = new Map<number, number>(); // colorIdx -> slideIdx
+    const map = new Map<number, number>();
     if (colors && colors.length) {
       colors.forEach((c, ci) => {
         if (c.image && c.image.trim()) {
@@ -68,6 +69,9 @@ const ProductCard = React.memo(({ product }: Props) => {
             list.push(c.image);
             map.set(ci, list.length - 1);
           }
+        } else {
+          // No dedicated image — pin still selects the color but stays on base image.
+          map.set(ci, 0);
         }
       });
     }
@@ -217,6 +221,8 @@ const ProductCard = React.memo(({ product }: Props) => {
             onTouchStart={(e) => e.stopPropagation()}
           >
             {colors!.map((c, i) => {
+              const slideForColor = colorSlideMap.get(i) ?? 0;
+              const isActive = pinnedColorIdx === i || (pinnedColorIdx === null && slideForColor === activeIdx && slideForColor !== 0);
               const scope = `${(product as any).product_code || product.id}::${(c as any).id ?? i}`;
               const hex = getColorHex(c.name, scope);
               const isPinned = pinnedColorIdx === i;
@@ -231,7 +237,7 @@ const ProductCard = React.memo(({ product }: Props) => {
                     setPinnedColorIdx(isPinned ? null : i);
                   }}
                   className={`rounded-full border transition-all duration-200 flex-shrink-0 ${
-                    isPinned
+                    isActive
                       ? "border-primary ring-2 ring-primary/40 scale-110"
                       : "border-black/20 hover:border-primary/60"
                   }`}
