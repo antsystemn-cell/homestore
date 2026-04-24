@@ -92,16 +92,29 @@ export default function ChatbotWidget() {
 
   useEffect(() => {
     let active = true;
-    (async () => {
+    const load = async () => {
       const { data } = await supabase
         .from("chatbot_settings")
         .select("bot_name, greeting_message, system_prompt, is_enabled")
         .eq("id", 1)
         .maybeSingle();
       if (active) setSettings(data ?? DEFAULT_SETTINGS);
-    })();
+    };
+    load();
+
+    // Realtime: тохиргоо өөрчлөгдөнгүүт widget шууд шинэчлэгдэнэ
+    const channel = supabase
+      .channel("chatbot_settings_changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "chatbot_settings" },
+        () => load(),
+      )
+      .subscribe();
+
     return () => {
       active = false;
+      supabase.removeChannel(channel);
     };
   }, []);
 
