@@ -41,9 +41,10 @@ const logError = (scope: string, error: unknown) => {
   console.error(`${scope} request failed`, error);
 };
 
-// Lightweight column set for list views — омит heavy Base64 columns (image_url ~9MB, colors ~5.6MB).
-// thumbnail_url (small) is enough for cards; full image_url is loaded on the product detail page.
-const LIST_SELECT = "id,slug,name,price,original_price,thumbnail_url,category,is_on_sale,discount,brand_id,is_new,is_bogo,sales,colors_meta:colors";
+// Lightweight column set for list views. Storage-hosted image_url is now just a short URL
+// (transformed/resized via Supabase render endpoint in <ProductCard>), so it's safe to include
+// as a fallback when thumbnail_url is missing. Heavy fields (detail_media, description) are still omitted.
+const LIST_SELECT = "id,slug,name,price,original_price,image_url,thumbnail_url,category,is_on_sale,discount,brand_id,is_new,is_bogo,sales,colors_meta:colors";
 
 // Keep `image` URL — it's a small string (Storage URL) needed so card swatches can switch slides.
 // Only strip if a value looks like an inline base64 blob (legacy data) to keep payload tiny.
