@@ -129,13 +129,13 @@ export default function ChatbotWidget() {
               >
                 <div
                   className={cn(
-                    "max-w-[80%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap break-words",
+                    "max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words",
                     m.role === "user"
-                      ? "bg-primary text-primary-foreground rounded-br-sm"
+                      ? "bg-primary text-primary-foreground rounded-br-sm whitespace-pre-wrap"
                       : "bg-muted text-foreground rounded-bl-sm",
                   )}
                 >
-                  {m.content}
+                  {m.role === "user" ? m.content : renderAssistant(m.content)}
                 </div>
               </div>
             ))}
