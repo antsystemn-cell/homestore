@@ -24,6 +24,64 @@ const DEFAULT_SETTINGS: ChatbotSettings = {
   is_enabled: true,
 };
 
+function renderInline(text: string, keyPrefix: string): (string | JSX.Element)[] {
+  const out: (string | JSX.Element)[] = [];
+  const regex = /\[([^\]]+)\]\(([^)]+)\)|\*\*([^*]+)\*\*/g;
+  let lastIdx = 0;
+  let match: RegExpExecArray | null;
+  let i = 0;
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIdx) out.push(text.slice(lastIdx, match.index));
+    if (match[1] && match[2]) {
+      const label = match[1];
+      const url = match[2];
+      const isProduct = /easyshop\.mn\/products?\//i.test(url);
+      if (isProduct) {
+        out.push(
+          <a
+            key={`${keyPrefix}-l-${i}`}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 my-1 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-opacity no-underline"
+          >
+            🛍️ {label} →
+          </a>,
+        );
+      } else {
+        out.push(
+          <a
+            key={`${keyPrefix}-l-${i}`}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline underline-offset-2 hover:opacity-80"
+          >
+            {label}
+          </a>,
+        );
+      }
+    } else if (match[3]) {
+      out.push(<strong key={`${keyPrefix}-b-${i}`}>{match[3]}</strong>);
+    }
+    lastIdx = match.index + match[0].length;
+    i++;
+  }
+  if (lastIdx < text.length) out.push(text.slice(lastIdx));
+  return out;
+}
+
+function renderAssistant(content: string): JSX.Element {
+  const lines = content.split("\n");
+  return (
+    <div className="space-y-1">
+      {lines.map((line, idx) => (
+        <div key={idx}>{line ? renderInline(line, `${idx}`) : <span>&nbsp;</span>}</div>
+      ))}
+    </div>
+  );
+}
+
 export default function ChatbotWidget() {
   const [settings, setSettings] = useState<ChatbotSettings | null>(null);
   const [open, setOpen] = useState(false);
@@ -129,13 +187,13 @@ export default function ChatbotWidget() {
               >
                 <div
                   className={cn(
-                    "max-w-[80%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap break-words",
+                    "max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words",
                     m.role === "user"
-                      ? "bg-primary text-primary-foreground rounded-br-sm"
+                      ? "bg-primary text-primary-foreground rounded-br-sm whitespace-pre-wrap"
                       : "bg-muted text-foreground rounded-bl-sm",
                   )}
                 >
-                  {m.content}
+                  {m.role === "user" ? m.content : renderAssistant(m.content)}
                 </div>
               </div>
             ))}
