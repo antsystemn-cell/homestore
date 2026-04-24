@@ -13,6 +13,7 @@ const MAINTENANCE_MODE = false;
 // Eagerly load Index (critical landing page)
 import Index from "./pages/Index";
 import MaintenancePage from "./components/MaintenancePage";
+import ChatbotWidget from "./components/ChatbotWidget";
 
 // Retry wrapper for lazy imports (handles stale chunk hashes after redeploy)
 function lazyRetry<T extends { default: React.ComponentType<any> }>(
@@ -113,6 +114,7 @@ const App = () => (
                 )}
               </Routes>
             </Suspense>
+            {!MAINTENANCE_MODE && <ChatbotWidget />}
           </CartProvider>
         </AuthProvider>
       </BrowserRouter>
