@@ -41,6 +41,7 @@ const AuthPage = lazy(() => lazyRetry(() => import("./pages/AuthPage")));
 const ResetPasswordPage = lazy(() => lazyRetry(() => import("./pages/ResetPasswordPage")));
 const AdminPage = lazy(() => lazyRetry(() => import("./pages/AdminPage")));
 const NotFound = lazy(() => lazyRetry(() => import("./pages/NotFound")));
+const CollectionPage = lazy(() => lazyRetry(() => import("./pages/CollectionPage")));
 
 const queryClient = new QueryClient({
   defaultOptions: {
