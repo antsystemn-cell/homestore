@@ -33,7 +33,7 @@ async function buildProductCatalog(): Promise<string> {
 
     const lines = filtered.map((p: any, i: number) => {
       const price = Number(p.price ?? 0).toLocaleString("mn-MN");
-      const url = `https://easyshop.mn/products/${p.slug}`;
+      const url = `https://easyshop.mn/product/${p.slug}`;
       return `${i + 1}. ${p.name} — ${price}₮\n   Ангилал: ${p.category ?? "—"}\n   Линк: ${url}`;
     });
 

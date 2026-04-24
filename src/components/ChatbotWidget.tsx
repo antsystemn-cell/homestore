@@ -35,7 +35,7 @@ function renderInline(text: string, keyPrefix: string): (string | JSX.Element)[]
     if (match[1] && match[2]) {
       const label = match[1];
       const url = match[2];
-      const isProduct = /easyshop\.mn\/products?\//i.test(url);
+      const isProduct = /\/products?\//i.test(url);
       if (isProduct) {
         out.push(
           <a
