@@ -1,3 +1,5 @@
+import { createClient } from "npm:@supabase/supabase-js@2";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -7,6 +9,38 @@ const corsHeaders = {
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
+}
+
+async function buildProductCatalog(): Promise<string> {
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, serviceKey);
+
+    const { data, error } = await supabase
+      .from("products")
+      .select("name, description, price, category, is_active")
+      .eq("is_active", true)
+      .order("sales", { ascending: false })
+      .limit(200);
+
+    if (error || !data || data.length === 0) {
+      if (error) console.error("Catalog fetch error:", error);
+      return "";
+    }
+
+    const lines = data.map((p: any, i: number) => {
+      const desc = (p.description ?? "").toString().replace(/\s+/g, " ").trim().slice(0, 160);
+      const price = Number(p.price ?? 0).toLocaleString("mn-MN");
+      const stock = p.is_active ? "байна" : "дууссан";
+      return `${i + 1}. ${p.name} — ${price}₮\n   Тайлбар: ${desc || "—"}\n   Ангилал: ${p.category ?? "—"}\n   Нөөц: ${stock}`;
+    });
+
+    return `\n\n=== ДЭЛГҮҮРИЙН БАРААНУУД ===\n${lines.join("\n")}\n=== ТӨГСГӨЛ ===\n`;
+  } catch (e) {
+    console.error("buildProductCatalog failed:", e);
+    return "";
+  }
 }
 
 Deno.serve(async (req) => {
@@ -25,7 +59,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const messages: ChatMessage[] = Array.isArray(body?.messages) ? body.messages : [];
-    const systemPrompt: string =
+    const baseSystemPrompt: string =
       typeof body?.systemPrompt === "string" && body.systemPrompt.trim().length > 0
         ? body.systemPrompt
         : "Та easyshop.mn онлайн дэлгүүрийн туслах ажилтан. Монгол хэлээр товч, найрсаг хариу өгнө.";
@@ -40,6 +74,14 @@ Deno.serve(async (req) => {
     const cleanMessages = messages
       .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
       .map((m) => ({ role: m.role, content: m.content }));
+
+    const catalog = await buildProductCatalog();
+    const systemPrompt =
+      baseSystemPrompt +
+      catalog +
+      (catalog
+        ? "\nДээрх жагсаалтаас хэрэглэгчид зөв бараа санал болго. Үнэ, ангилал, нөөцийг үнэн зөв хэлнэ үү."
+        : "");
 
     const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
