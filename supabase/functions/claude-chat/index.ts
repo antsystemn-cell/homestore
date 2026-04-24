@@ -19,7 +19,7 @@ async function buildProductCatalog(): Promise<string> {
 
     const { data, error } = await supabase
       .from("products")
-      .select("name, description, price, category, is_active")
+      .select("name, price, category, slug, is_active")
       .eq("is_active", true)
       .order("sales", { ascending: false })
       .limit(200);
@@ -29,11 +29,12 @@ async function buildProductCatalog(): Promise<string> {
       return "";
     }
 
-    const lines = data.map((p: any, i: number) => {
-      const desc = (p.description ?? "").toString().replace(/\s+/g, " ").trim().slice(0, 160);
+    const filtered = data.filter((p: any) => typeof p.slug === "string" && p.slug.trim().length > 0);
+
+    const lines = filtered.map((p: any, i: number) => {
       const price = Number(p.price ?? 0).toLocaleString("mn-MN");
-      const stock = p.is_active ? "байна" : "дууссан";
-      return `${i + 1}. ${p.name} — ${price}₮\n   Тайлбар: ${desc || "—"}\n   Ангилал: ${p.category ?? "—"}\n   Нөөц: ${stock}`;
+      const url = `https://easyshop.mn/products/${p.slug}`;
+      return `${i + 1}. ${p.name} — ${price}₮\n   Ангилал: ${p.category ?? "—"}\n   Линк: ${url}`;
     });
 
     return `\n\n=== ДЭЛГҮҮРИЙН БАРААНУУД ===\n${lines.join("\n")}\n=== ТӨГСГӨЛ ===\n`;
@@ -80,7 +81,7 @@ Deno.serve(async (req) => {
       baseSystemPrompt +
       catalog +
       (catalog
-        ? "\nДээрх жагсаалтаас хэрэглэгчид зөв бараа санал болго. Үнэ, ангилал, нөөцийг үнэн зөв хэлнэ үү."
+        ? "\nБараа санал болгохдоо заавал тухайн барааны линкийг markdown формататаар [Барааны нэр](линк) гэж оруулна. Линкийг товчлох эсвэл өөрчлөхгүй, яг тийм байдлаар явуулна."
         : "");
 
     const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
