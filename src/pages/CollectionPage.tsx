@@ -112,16 +112,8 @@ const CollectionPage = () => {
           )}
 
           {!loading && products.length > 0 && (
-            <div className="mt-6 flex flex-wrap items-center gap-4">
-              <div className="flex items-baseline gap-2">
-                <span className="text-sm text-muted-foreground">Нийт үнэ:</span>
-                <span className="text-2xl font-bold">{formatPrice(totalPrice)}</span>
-                <span className="text-sm text-muted-foreground">({products.length} бараа)</span>
-              </div>
-              <Button onClick={addAllToCart} size="lg" className="gap-2">
-                <ShoppingBag size={18} />
-                Бүгдийг сагсанд
-              </Button>
+            <div className="mt-6 text-sm text-muted-foreground">
+              {products.length} бараа
             </div>
           )}
         </div>
