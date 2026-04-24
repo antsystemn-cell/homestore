@@ -756,6 +756,7 @@ const AdminPage = () => {
     { id: "banner", label: "Баннер", icon: Megaphone },
     
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
+    { id: "collections", label: "Багц линк", icon: Link2 },
     { id: "users", label: "Хэрэглэгч", icon: Users },
     { id: "analytics", label: "Хандалт", icon: Globe },
     { id: "diagnostics", label: "Оношлогоо", icon: AlertTriangle },
