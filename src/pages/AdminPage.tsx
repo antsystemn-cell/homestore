@@ -2121,7 +2121,10 @@ const AdminPage = () => {
 
           {/* Web Analytics */}
           {tab === "analytics" && <WebAnalytics />}
-          
+
+          {/* Collections / Багц линк */}
+          {tab === "collections" && <CollectionsManager products={products} />}
+
 
           {/* Diagnostics Tab */}
           {tab === "diagnostics" && (() => {
