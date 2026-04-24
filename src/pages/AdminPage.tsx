@@ -4,9 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
-  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy
+  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
+import CollectionsManager from "@/components/admin/CollectionsManager";
 
 import { useRef } from "react";
 import { toast } from "sonner";
@@ -26,7 +27,7 @@ import { mapOrderToLabelData } from "@/lib/niimbot/mapOrder";
 import { generateNiimbotXlsx, buildXlsxFilename } from "@/lib/niimbot/xlsx";
 import { downloadBlob } from "@/lib/niimbot/transfer";
 
-type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "analytics" | "diagnostics";
+type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "collections" | "analytics" | "diagnostics";
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -755,6 +756,7 @@ const AdminPage = () => {
     { id: "banner", label: "Баннер", icon: Megaphone },
     
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
+    { id: "collections", label: "Багц линк", icon: Link2 },
     { id: "users", label: "Хэрэглэгч", icon: Users },
     { id: "analytics", label: "Хандалт", icon: Globe },
     { id: "diagnostics", label: "Оношлогоо", icon: AlertTriangle },
@@ -992,6 +994,7 @@ const AdminPage = () => {
               {tab === "payments" && `Нийт ${paymentProviders.length} төлбөрийн суваг`}
               
               {tab === "analytics" && "Вэб сайтын хандалтын мэдээлэл"}
+              {tab === "collections" && "Барааны багц үүсгэж линкээр хуваалцах"}
               {tab === "diagnostics" && "Зургийн оношлогоо & Cloud зардал"}
             </p>
           </div>
@@ -2118,7 +2121,10 @@ const AdminPage = () => {
 
           {/* Web Analytics */}
           {tab === "analytics" && <WebAnalytics />}
-          
+
+          {/* Collections / Багц линк */}
+          {tab === "collections" && <CollectionsManager products={products} />}
+
 
           {/* Diagnostics Tab */}
           {tab === "diagnostics" && (() => {

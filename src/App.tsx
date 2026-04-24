@@ -41,6 +41,7 @@ const AuthPage = lazy(() => lazyRetry(() => import("./pages/AuthPage")));
 const ResetPasswordPage = lazy(() => lazyRetry(() => import("./pages/ResetPasswordPage")));
 const AdminPage = lazy(() => lazyRetry(() => import("./pages/AdminPage")));
 const NotFound = lazy(() => lazyRetry(() => import("./pages/NotFound")));
+const CollectionPage = lazy(() => lazyRetry(() => import("./pages/CollectionPage")));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -96,6 +97,7 @@ const App = () => (
                   <>
                     <Route path="/" element={<Index />} />
                     <Route path="/shop" element={<ShopPage />} />
+                    <Route path="/c/:code" element={<CollectionPage />} />
                     <Route path="/:brandName" element={<ShopPage />} />
                     <Route path="/sales" element={<SalesPage />} />
                     <Route path="/wishlist" element={<WishlistPage />} />
