@@ -74,7 +74,7 @@ const CollectionPage = () => {
 
   const addAllToCart = () => {
     if (products.length === 0) return;
-    products.forEach((p) => addToCart(p, 1));
+    products.forEach((p) => addToCart(p, null, null, 1));
     toast.success(`${products.length} бараа сагсанд нэмэгдлээ`);
   };
 
