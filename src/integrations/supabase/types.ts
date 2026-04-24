@@ -279,6 +279,45 @@ export type Database = {
         }
         Relationships: []
       }
+      product_collections: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          product_ids: Json
+          short_code: string
+          title: string
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          product_ids?: Json
+          short_code: string
+          title: string
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          product_ids?: Json
+          short_code?: string
+          title?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
       product_images: {
         Row: {
           created_at: string
@@ -584,6 +623,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_collection_view: {
+        Args: { _short_code: string }
+        Returns: undefined
       }
       increment_story_view: { Args: { _story_id: string }; Returns: undefined }
     }
