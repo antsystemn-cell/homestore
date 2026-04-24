@@ -59,6 +59,33 @@ export type Database = {
         }
         Relationships: []
       }
+      chatbot_settings: {
+        Row: {
+          bot_name: string
+          greeting_message: string
+          id: number
+          is_enabled: boolean
+          system_prompt: string
+          updated_at: string
+        }
+        Insert: {
+          bot_name?: string
+          greeting_message?: string
+          id?: number
+          is_enabled?: boolean
+          system_prompt?: string
+          updated_at?: string
+        }
+        Update: {
+          bot_name?: string
+          greeting_message?: string
+          id?: number
+          is_enabled?: boolean
+          system_prompt?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       delivery_options: {
         Row: {
           address: string | null
