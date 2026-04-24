@@ -994,6 +994,7 @@ const AdminPage = () => {
               {tab === "payments" && `Нийт ${paymentProviders.length} төлбөрийн суваг`}
               
               {tab === "analytics" && "Вэб сайтын хандалтын мэдээлэл"}
+              {tab === "collections" && "Барааны багц үүсгэж линкээр хуваалцах"}
               {tab === "diagnostics" && "Зургийн оношлогоо & Cloud зардал"}
             </p>
           </div>
