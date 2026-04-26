@@ -129,6 +129,8 @@ export default function DriverPage() {
 
   const [tab, setTab] = useState<Tab>("available");
   const [orders, setOrders] = useState<Order[]>([]);
+  const [history, setHistory] = useState<StatusEvent[]>([]);
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
