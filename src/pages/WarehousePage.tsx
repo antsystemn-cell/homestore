@@ -718,7 +718,11 @@ export default function WarehousePage() {
                               minute: "2-digit",
                             })}{" "}
                             · {m.performed_by_email ?? "—"} ·{" "}
-                            {m.reason === "order_pick" ? "Захиалга" : "Гараар"}
+                            {m.reason === "order_pick"
+                              ? "Захиалга"
+                              : m.reason === "auto_pick"
+                              ? "Авто"
+                              : "Гараар"}
                           </div>
                         </div>
                         <div className="font-mono font-semibold text-destructive shrink-0">
