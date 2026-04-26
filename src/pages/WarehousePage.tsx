@@ -97,24 +97,55 @@ export default function WarehousePage() {
   // Per-order processing state
   const [processingOrderId, setProcessingOrderId] = useState<string | null>(null);
 
-  // Auto pick&pack settings
-  const [autoPick, setAutoPick] = useState<AutoPickSettings>(() => {
+  // Auto pick&pack settings — persisted in localStorage
+  const sanitizeAutoPick = (val: unknown): AutoPickSettings => {
+    const obj = (val ?? {}) as Partial<AutoPickSettings>;
+    const delay = Number(obj.delayMinutes);
+    return {
+      enabled: Boolean(obj.enabled),
+      delayMinutes: Number.isFinite(delay) && delay >= 1 ? Math.floor(delay) : DEFAULT_AUTO_PICK.delayMinutes,
+    };
+  };
+  const readStoredAutoPick = (): AutoPickSettings => {
     if (typeof window === "undefined") return DEFAULT_AUTO_PICK;
     try {
       const raw = localStorage.getItem(AUTO_PICK_STORAGE_KEY);
-      return raw ? { ...DEFAULT_AUTO_PICK, ...JSON.parse(raw) } : DEFAULT_AUTO_PICK;
+      if (!raw) return DEFAULT_AUTO_PICK;
+      return sanitizeAutoPick(JSON.parse(raw));
     } catch {
       return DEFAULT_AUTO_PICK;
     }
-  });
+  };
+  const [autoPick, setAutoPickState] = useState<AutoPickSettings>(readStoredAutoPick);
   const [autoRunning, setAutoRunning] = useState(false);
   const [lastAutoRun, setLastAutoRun] = useState<Date | null>(null);
 
+  const setAutoPick = (
+    updater: AutoPickSettings | ((prev: AutoPickSettings) => AutoPickSettings),
+  ) => {
+    setAutoPickState((prev) => {
+      const next = sanitizeAutoPick(
+        typeof updater === "function" ? (updater as (p: AutoPickSettings) => AutoPickSettings)(prev) : updater,
+      );
+      try {
+        localStorage.setItem(AUTO_PICK_STORAGE_KEY, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  // Sync settings across browser tabs / windows
   useEffect(() => {
-    try {
-      localStorage.setItem(AUTO_PICK_STORAGE_KEY, JSON.stringify(autoPick));
-    } catch {}
-  }, [autoPick]);
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== AUTO_PICK_STORAGE_KEY) return;
+      try {
+        const next = e.newValue ? sanitizeAutoPick(JSON.parse(e.newValue)) : DEFAULT_AUTO_PICK;
+        setAutoPickState(next);
+      } catch {}
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
