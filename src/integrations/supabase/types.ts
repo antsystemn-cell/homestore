@@ -136,13 +136,20 @@ export type Database = {
       }
       orders: {
         Row: {
+          assigned_at: string | null
           created_at: string
+          delivered_at: string | null
           delivery_completed_photo: string | null
           delivery_fee: number | null
+          delivery_gps_lat: number | null
+          delivery_gps_lng: number | null
           delivery_option_id: string | null
           delivery_order_id: string | null
           delivery_pickup_photo: string | null
+          delivery_proof_photo: string | null
+          delivery_signature_name: string | null
           delivery_status: string | null
+          driver_id: string | null
           guest_name: string | null
           id: string
           is_guest: boolean | null
@@ -152,6 +159,7 @@ export type Database = {
           payment_method: string | null
           payment_status: string | null
           phone: string | null
+          picked_up_at: string | null
           shipping_address: string | null
           status: string
           total: number
@@ -159,13 +167,20 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          assigned_at?: string | null
           created_at?: string
+          delivered_at?: string | null
           delivery_completed_photo?: string | null
           delivery_fee?: number | null
+          delivery_gps_lat?: number | null
+          delivery_gps_lng?: number | null
           delivery_option_id?: string | null
           delivery_order_id?: string | null
           delivery_pickup_photo?: string | null
+          delivery_proof_photo?: string | null
+          delivery_signature_name?: string | null
           delivery_status?: string | null
+          driver_id?: string | null
           guest_name?: string | null
           id?: string
           is_guest?: boolean | null
@@ -175,6 +190,7 @@ export type Database = {
           payment_method?: string | null
           payment_status?: string | null
           phone?: string | null
+          picked_up_at?: string | null
           shipping_address?: string | null
           status?: string
           total?: number
@@ -182,13 +198,20 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          assigned_at?: string | null
           created_at?: string
+          delivered_at?: string | null
           delivery_completed_photo?: string | null
           delivery_fee?: number | null
+          delivery_gps_lat?: number | null
+          delivery_gps_lng?: number | null
           delivery_option_id?: string | null
           delivery_order_id?: string | null
           delivery_pickup_photo?: string | null
+          delivery_proof_photo?: string | null
+          delivery_signature_name?: string | null
           delivery_status?: string | null
+          driver_id?: string | null
           guest_name?: string | null
           id?: string
           is_guest?: boolean | null
@@ -198,6 +221,7 @@ export type Database = {
           payment_method?: string | null
           payment_status?: string | null
           phone?: string | null
+          picked_up_at?: string | null
           shipping_address?: string | null
           status?: string
           total?: number
@@ -716,9 +740,18 @@ export type Database = {
         Returns: undefined
       }
       increment_story_view: { Args: { _story_id: string }; Returns: undefined }
+      list_drivers: {
+        Args: never
+        Returns: {
+          email: string
+          full_name: string
+          phone: string
+          user_id: string
+        }[]
+      }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "driver"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -846,7 +879,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "driver"],
     },
   },
 } as const

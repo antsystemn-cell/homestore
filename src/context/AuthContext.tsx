@@ -8,6 +8,7 @@ interface AuthContextType {
   loading: boolean;
   isAdmin: boolean;
   isModerator: boolean;
+  isDriver: boolean;
   authError: boolean;
   signOut: () => Promise<void>;
 }
@@ -40,6 +41,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isModerator, setIsModerator] = useState(false);
+  const [isDriver, setIsDriver] = useState(false);
   const [authError, setAuthError] = useState(false);
 
   const checkRoles = async (userId: string) => {
@@ -56,6 +58,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setAuthError(true);
         setIsAdmin(false);
         setIsModerator(false);
+        setIsDriver(false);
         return;
       }
 
@@ -64,6 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setAuthError(true);
         setIsAdmin(false);
         setIsModerator(false);
+        setIsDriver(false);
         return;
       }
 
@@ -71,11 +75,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const roles = (result.data || []).map((r: any) => r.role);
       setIsAdmin(roles.includes("admin"));
       setIsModerator(roles.includes("moderator"));
+      setIsDriver(roles.includes("driver"));
     } catch (error) {
       console.error("Failed to check roles", error);
       setAuthError(true);
       setIsAdmin(false);
       setIsModerator(false);
+      setIsDriver(false);
     }
   };
 
@@ -92,6 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setIsAdmin(false);
         setIsModerator(false);
+        setIsDriver(false);
       }
 
       if (mounted) setLoading(false);
@@ -142,13 +149,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null);
       setIsAdmin(false);
       setIsModerator(false);
+      setIsDriver(false);
       setAuthError(false);
       setLoading(false);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isAdmin, isModerator, authError, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isAdmin, isModerator, isDriver, authError, signOut }}>
       {children}
     </AuthContext.Provider>
   );
