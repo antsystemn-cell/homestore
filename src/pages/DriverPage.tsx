@@ -579,6 +579,34 @@ export default function DriverPage() {
           </div>
         </div>
       )}
+
+      {/* Image lightbox */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in"
+          onClick={() => setLightboxUrl(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightboxUrl(null);
+            }}
+            aria-label="Хаах"
+            className="absolute top-4 right-4 h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <img
+            src={lightboxUrl}
+            alt="Хүргэлтийн нотолгооны зураг"
+            className="max-h-[90vh] max-w-[95vw] object-contain rounded-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -592,6 +620,7 @@ function OrderCard({
   events,
   expanded,
   onToggleTimeline,
+  onZoom,
 }: {
   order: Order;
   tab: Tab;
@@ -601,6 +630,7 @@ function OrderCard({
   events: StatusEvent[];
   expanded: boolean;
   onToggleTimeline: () => void;
+  onZoom: (url: string) => void;
 }) {
   const itemCount = Array.isArray(order.items)
     ? order.items.reduce((s, it: any) => s + (it.quantity || 1), 0)
