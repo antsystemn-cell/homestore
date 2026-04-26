@@ -89,12 +89,16 @@ const ProductPage = () => {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const galleryRef = useRef<HTMLDivElement | null>(null);
+  const userInteractedRef = useRef(false);
+  const isProgrammaticScrollRef = useRef(false);
+  const scrollSyncTimerRef = useRef<number | null>(null);
 
   // Number of color variants with images — controls auto-scroll behavior
   const colorImageCount = (product?.colors || []).filter((c) => !!c.image).length;
-  const shouldAutoScroll = colorImageCount >= 2 && allImages.length >= 2 && !selectedColor;
+  const shouldAutoScroll =
+    colorImageCount >= 2 && allImages.length >= 2 && !selectedColor && !userInteractedRef.current;
 
-  // Auto-advance gallery when product has 2+ color images
+  // Auto-advance gallery when product has 2+ color images (stops once user interacts)
   useEffect(() => {
     if (!shouldAutoScroll) return;
     const id = window.setInterval(() => {
@@ -103,11 +107,18 @@ const ProductPage = () => {
     return () => window.clearInterval(id);
   }, [shouldAutoScroll, allImages.length]);
 
-  // Sync scroll position with activeImg
+  // Sync scroll position with activeImg (programmatic — guard against scroll handler echo)
   useEffect(() => {
     const el = galleryRef.current;
     if (!el) return;
-    el.scrollTo({ left: activeImg * el.clientWidth, behavior: "smooth" });
+    const target = activeImg * el.clientWidth;
+    if (Math.abs(el.scrollLeft - target) < 4) return;
+    isProgrammaticScrollRef.current = true;
+    el.scrollTo({ left: target, behavior: "smooth" });
+    if (scrollSyncTimerRef.current) window.clearTimeout(scrollSyncTimerRef.current);
+    scrollSyncTimerRef.current = window.setTimeout(() => {
+      isProgrammaticScrollRef.current = false;
+    }, 500);
   }, [activeImg]);
 
   // When user selects a color, jump to that color's image
@@ -166,6 +177,7 @@ const ProductPage = () => {
           });
           setAllImages(unique);
           setActiveImg(0);
+          userInteractedRef.current = false;
 
           const rel = await fetchRelatedPublicProducts(data.category, data.id);
           setRelated((rel || []).map(mapDbProduct));
@@ -236,9 +248,16 @@ const ProductPage = () => {
                 className="w-full aspect-square overflow-x-auto flex snap-x snap-mandatory no-scrollbar bg-secondary md:rounded-2xl scroll-smooth"
                 onScroll={(e) => {
                   const el = e.currentTarget;
-                  const i = Math.round(el.scrollLeft / el.clientWidth);
-                  if (i !== activeImg) setActiveImg(i);
+                  const i = Math.round(el.scrollLeft / Math.max(el.clientWidth, 1));
+                  if (!isProgrammaticScrollRef.current) {
+                    userInteractedRef.current = true;
+                  }
+                  if (i !== activeImg && i >= 0 && i < allImages.length) {
+                    setActiveImg(i);
+                  }
                 }}
+                onTouchStart={() => { userInteractedRef.current = true; }}
+                onPointerDown={() => { userInteractedRef.current = true; }}
               >
                 {(allImages.length > 0 ? allImages : [product.image]).map((src, idx) => (
                   <img
@@ -248,19 +267,26 @@ const ProductPage = () => {
                     className="w-full h-full flex-shrink-0 object-cover snap-start"
                     style={{ minWidth: "100%" }}
                     loading={idx === 0 ? "eager" : "lazy"}
+                    draggable={false}
                   />
                 ))}
               </div>
               {allImages.length > 1 && (
                 <>
                   <button
-                    onClick={() => setActiveImg((i) => (i - 1 + allImages.length) % allImages.length)}
+                    onClick={() => {
+                      userInteractedRef.current = true;
+                      setActiveImg((i) => (i - 1 + allImages.length) % allImages.length);
+                    }}
                     className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
                   >
                     <ChevronLeft className="h-4 w-4 text-foreground" />
                   </button>
                   <button
-                    onClick={() => setActiveImg((i) => (i + 1) % allImages.length)}
+                    onClick={() => {
+                      userInteractedRef.current = true;
+                      setActiveImg((i) => (i + 1) % allImages.length);
+                    }}
                     className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
                   >
                     <ChevronRight className="h-4 w-4 text-foreground" />
@@ -285,7 +311,7 @@ const ProductPage = () => {
                 {allImages.map((img, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setActiveImg(idx)}
+                    onClick={() => { userInteractedRef.current = true; setActiveImg(idx); }}
                     className={`h-14 w-14 rounded-lg overflow-hidden shrink-0 border-2 transition-colors ${
                       idx === activeImg ? "border-primary" : "border-transparent"
                     }`}
