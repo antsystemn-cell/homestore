@@ -1021,9 +1021,11 @@ const AdminPage = () => {
           <div className="flex overflow-x-auto no-scrollbar gap-1 px-3 py-2">
             {sidebarItems.map((t) => {
               const Icon = t.icon;
-              const active = tab === t.id;
+              const active = t.id === "settings"
+                ? (tab === "settings" || SETTINGS_TABS.includes(tab))
+                : tab === t.id;
               return (
-                <button key={t.id} onClick={() => setTab(t.id)}
+                <button key={t.id} onClick={() => setTab(t.id === "settings" ? "categories" : t.id)}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all shrink-0 ${
                     active 
                       ? "bg-primary text-primary-foreground shadow-sm" 
