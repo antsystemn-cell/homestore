@@ -2165,33 +2165,61 @@ const AdminPage = () => {
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Хэрэглэгч</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Имэйл</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Утас</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Эрх</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Бүртгүүлсэн</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredUsers.map((u: any) => (
-                        <tr key={u.id} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="h-9 w-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold">
-                                {(u.full_name || u.email || "?")[0].toUpperCase()}
+                      {filteredUsers.map((u: any) => {
+                        const userRoles: string[] = u.roles || [];
+                        const roleOptions: { key: "admin" | "moderator" | "driver"; label: string; cls: string }[] = [
+                          { key: "admin", label: "Админ", cls: "bg-purple-500/10 text-purple-600 border-purple-500/30" },
+                          { key: "moderator", label: "Борлуулагч", cls: "bg-blue-500/10 text-blue-600 border-blue-500/30" },
+                          { key: "driver", label: "Жолооч", cls: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" },
+                        ];
+                        return (
+                          <tr key={u.id} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="h-9 w-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold">
+                                  {(u.full_name || u.email || "?")[0].toUpperCase()}
+                                </div>
+                                <span className="text-sm font-medium">{u.full_name || "Нэргүй"}</span>
                               </div>
-                              <span className="text-sm font-medium">{u.full_name || "Нэргүй"}</span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-sm text-muted-foreground">
-                            {u.email ? (
-                              <a href={`mailto:${u.email}`} className="hover:text-foreground hover:underline">{u.email}</a>
-                            ) : "—"}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-muted-foreground">
-                            {u.phone ? (
-                              <a href={`tel:${u.phone}`} className="hover:text-foreground hover:underline">{u.phone}</a>
-                            ) : "—"}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-muted-foreground">{new Date(u.created_at).toLocaleDateString("mn-MN")}</td>
-                        </tr>
-                      ))}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-muted-foreground">
+                              {u.email ? (
+                                <a href={`mailto:${u.email}`} className="hover:text-foreground hover:underline">{u.email}</a>
+                              ) : "—"}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-muted-foreground">
+                              {u.phone ? (
+                                <a href={`tel:${u.phone}`} className="hover:text-foreground hover:underline">{u.phone}</a>
+                              ) : "—"}
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex flex-wrap gap-1.5">
+                                {roleOptions.map((r) => {
+                                  const active = userRoles.includes(r.key);
+                                  return (
+                                    <button
+                                      key={r.key}
+                                      onClick={() => toggleUserRole(u.user_id, r.key, active)}
+                                      className={`text-[10px] px-2 py-1 rounded-full border transition-all ${
+                                        active ? r.cls : "bg-secondary text-muted-foreground border-transparent hover:border-border"
+                                      }`}
+                                      title={active ? `${r.label} эрхийг хасах` : `${r.label} эрх өгөх`}
+                                    >
+                                      {active ? "✓ " : "+ "}{r.label}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-muted-foreground">{new Date(u.created_at).toLocaleDateString("mn-MN")}</td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                   {filteredUsers.length === 0 && !loading && (
@@ -2202,21 +2230,45 @@ const AdminPage = () => {
                 </div>
               </div>
               <div className="md:hidden space-y-2">
-                {filteredUsers.map((u: any) => (
-                  <div key={u.id} className="bg-card rounded-xl p-3 border border-border">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold shrink-0">
-                        {(u.full_name || u.email || "?")[0].toUpperCase()}
+                {filteredUsers.map((u: any) => {
+                  const userRoles: string[] = u.roles || [];
+                  const roleOptions: { key: "admin" | "moderator" | "driver"; label: string; cls: string }[] = [
+                    { key: "admin", label: "Админ", cls: "bg-purple-500/10 text-purple-600 border-purple-500/30" },
+                    { key: "moderator", label: "Борлуулагч", cls: "bg-blue-500/10 text-blue-600 border-blue-500/30" },
+                    { key: "driver", label: "Жолооч", cls: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" },
+                  ];
+                  return (
+                    <div key={u.id} className="bg-card rounded-xl p-3 border border-border space-y-2">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold shrink-0">
+                          {(u.full_name || u.email || "?")[0].toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold truncate">{u.full_name || "Нэргүй"}</p>
+                          <p className="text-[10px] text-muted-foreground truncate">{u.email || "Имэйл байхгүй"}</p>
+                          <p className="text-[10px] text-muted-foreground truncate">{u.phone || "Утас байхгүй"}</p>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground shrink-0">{new Date(u.created_at).toLocaleDateString("mn-MN")}</span>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold truncate">{u.full_name || "Нэргүй"}</p>
-                        <p className="text-[10px] text-muted-foreground truncate">{u.email || "Имэйл байхгүй"}</p>
-                        <p className="text-[10px] text-muted-foreground truncate">{u.phone || "Утас байхгүй"}</p>
+                      <div className="flex flex-wrap gap-1.5 pt-1 border-t border-border">
+                        {roleOptions.map((r) => {
+                          const active = userRoles.includes(r.key);
+                          return (
+                            <button
+                              key={r.key}
+                              onClick={() => toggleUserRole(u.user_id, r.key, active)}
+                              className={`text-[10px] px-2 py-1 rounded-full border transition-all ${
+                                active ? r.cls : "bg-secondary text-muted-foreground border-transparent"
+                              }`}
+                            >
+                              {active ? "✓ " : "+ "}{r.label}
+                            </button>
+                          );
+                        })}
                       </div>
-                      <span className="text-[10px] text-muted-foreground shrink-0">{new Date(u.created_at).toLocaleDateString("mn-MN")}</span>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {filteredUsers.length === 0 && !loading && (
                   <p className="text-center text-sm text-muted-foreground py-8">
                     {q ? "Хайлтад тохирох хэрэглэгч олдсонгүй" : "Хэрэглэгч байхгүй"}
