@@ -458,6 +458,11 @@ export default function DriverPage() {
                 onPickup={handlePickup}
                 onOpenComplete={openCompleteForm}
                 pickupSubmitting={pickupSubmitting === o.id}
+                events={history.filter((h) => h.order_id === o.id)}
+                expanded={expandedOrderId === o.id}
+                onToggleTimeline={() =>
+                  setExpandedOrderId((prev) => (prev === o.id ? null : o.id))
+                }
               />
             ))}
           </div>
