@@ -808,7 +808,7 @@ export default function WarehousePage() {
                     ) : (
                       <CheckCircle2 className="h-4 w-4 mr-2" />
                     )}
-                    Бэлдэж дууссан — Үлдэгдэл хасах
+                    Бэлэн боллоо — Үлдэгдэл хасах
                   </Button>
                 </div>
               );
