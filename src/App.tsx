@@ -41,6 +41,7 @@ const WishlistPage = lazy(() => lazyRetry(() => import("./pages/WishlistPage")))
 const AuthPage = lazy(() => lazyRetry(() => import("./pages/AuthPage")));
 const ResetPasswordPage = lazy(() => lazyRetry(() => import("./pages/ResetPasswordPage")));
 const AdminPage = lazy(() => lazyRetry(() => import("./pages/AdminPage")));
+const WarehousePage = lazy(() => lazyRetry(() => import("./pages/WarehousePage")));
 const NotFound = lazy(() => lazyRetry(() => import("./pages/NotFound")));
 const CollectionPage = lazy(() => lazyRetry(() => import("./pages/CollectionPage")));
 
@@ -90,6 +91,7 @@ const App = () => (
                 {MAINTENANCE_MODE ? (
                   <>
                     <Route path="/admin" element={<AdminPage />} />
+                    <Route path="/warehouse" element={<WarehousePage />} />
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route path="*" element={<MaintenancePage />} />
@@ -109,6 +111,7 @@ const App = () => (
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route path="/admin" element={<AdminPage />} />
+                    <Route path="/warehouse" element={<WarehousePage />} />
                     <Route path="*" element={<NotFound />} />
                   </>
                 )}

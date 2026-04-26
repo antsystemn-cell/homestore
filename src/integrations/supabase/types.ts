@@ -400,6 +400,7 @@ export type Database = {
           sizes: Json | null
           slug: string
           specifications: Json | null
+          stock_quantity: number
           thumbnail_url: string | null
           updated_at: string
         }
@@ -425,6 +426,7 @@ export type Database = {
           sizes?: Json | null
           slug: string
           specifications?: Json | null
+          stock_quantity?: number
           thumbnail_url?: string | null
           updated_at?: string
         }
@@ -450,6 +452,7 @@ export type Database = {
           sizes?: Json | null
           slug?: string
           specifications?: Json | null
+          stock_quantity?: number
           thumbnail_url?: string | null
           updated_at?: string
         }
@@ -566,6 +569,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_movements: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          order_id: string | null
+          performed_by: string | null
+          performed_by_email: string | null
+          product_id: string
+          quantity: number
+          reason: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          order_id?: string | null
+          performed_by?: string | null
+          performed_by_email?: string | null
+          product_id: string
+          quantity: number
+          reason?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          order_id?: string | null
+          performed_by?: string | null
+          performed_by_email?: string | null
+          product_id?: string
+          quantity?: number
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
