@@ -19,9 +19,13 @@ import {
   CheckCircle2,
   ArrowLeft,
   PackageCheck,
+  LayoutDashboard,
+  AlertTriangle,
+  TrendingDown,
 } from "lucide-react";
 
-type Tab = "orders" | "pick" | "history";
+type Tab = "dashboard" | "orders" | "pick" | "history";
+const LOW_STOCK_THRESHOLD = 5;
 
 interface Product {
   id: string;
