@@ -570,12 +570,18 @@ function OrderCard({
   onPickup,
   onOpenComplete,
   pickupSubmitting,
+  events,
+  expanded,
+  onToggleTimeline,
 }: {
   order: Order;
   tab: Tab;
   onPickup: (o: Order) => void;
   onOpenComplete: (o: Order) => void;
   pickupSubmitting: boolean;
+  events: StatusEvent[];
+  expanded: boolean;
+  onToggleTimeline: () => void;
 }) {
   const itemCount = Array.isArray(order.items)
     ? order.items.reduce((s, it: any) => s + (it.quantity || 1), 0)
