@@ -24,6 +24,7 @@ import {
   ChevronDown,
   ChevronUp,
   Circle,
+  X,
 } from "lucide-react";
 
 type Tab = "available" | "active" | "delivered";
