@@ -89,12 +89,16 @@ const ProductPage = () => {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const galleryRef = useRef<HTMLDivElement | null>(null);
+  const userInteractedRef = useRef(false);
+  const isProgrammaticScrollRef = useRef(false);
+  const scrollSyncTimerRef = useRef<number | null>(null);
 
   // Number of color variants with images — controls auto-scroll behavior
   const colorImageCount = (product?.colors || []).filter((c) => !!c.image).length;
-  const shouldAutoScroll = colorImageCount >= 2 && allImages.length >= 2 && !selectedColor;
+  const shouldAutoScroll =
+    colorImageCount >= 2 && allImages.length >= 2 && !selectedColor && !userInteractedRef.current;
 
-  // Auto-advance gallery when product has 2+ color images
+  // Auto-advance gallery when product has 2+ color images (stops once user interacts)
   useEffect(() => {
     if (!shouldAutoScroll) return;
     const id = window.setInterval(() => {
@@ -103,11 +107,18 @@ const ProductPage = () => {
     return () => window.clearInterval(id);
   }, [shouldAutoScroll, allImages.length]);
 
-  // Sync scroll position with activeImg
+  // Sync scroll position with activeImg (programmatic — guard against scroll handler echo)
   useEffect(() => {
     const el = galleryRef.current;
     if (!el) return;
-    el.scrollTo({ left: activeImg * el.clientWidth, behavior: "smooth" });
+    const target = activeImg * el.clientWidth;
+    if (Math.abs(el.scrollLeft - target) < 4) return;
+    isProgrammaticScrollRef.current = true;
+    el.scrollTo({ left: target, behavior: "smooth" });
+    if (scrollSyncTimerRef.current) window.clearTimeout(scrollSyncTimerRef.current);
+    scrollSyncTimerRef.current = window.setTimeout(() => {
+      isProgrammaticScrollRef.current = false;
+    }, 500);
   }, [activeImg]);
 
   // When user selects a color, jump to that color's image
