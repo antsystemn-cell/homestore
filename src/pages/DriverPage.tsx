@@ -153,14 +153,28 @@ export default function DriverPage() {
     if (!silent) setLoading(true);
     else setRefreshing(true);
     try {
-      const { data, error } = await supabase
+      const ordersRes = await supabase
         .from("orders")
         .select("*")
         .in("status", ["ready", "out_for_delivery", "delivered"])
         .order("created_at", { ascending: false })
         .limit(200);
-      if (error) throw error;
-      setOrders((data || []) as Order[]);
+      if (ordersRes.error) throw ordersRes.error;
+      const ordersData = (ordersRes.data || []) as Order[];
+      setOrders(ordersData);
+
+      const ids = ordersData.map((o) => o.id);
+      if (ids.length) {
+        const { data: hData, error: hErr } = await supabase
+          .from("order_status_history")
+          .select("*")
+          .in("order_id", ids)
+          .order("created_at", { ascending: true });
+        if (hErr) console.warn("history fetch", hErr);
+        setHistory((hData || []) as StatusEvent[]);
+      } else {
+        setHistory([]);
+      }
     } catch (e: any) {
       console.error(e);
       toast.error("Захиалга татаж чадсангүй: " + (e.message || ""));
@@ -174,7 +188,7 @@ export default function DriverPage() {
     if (hasAccess) void fetchOrders();
   }, [hasAccess]);
 
-  // Realtime updates
+  // Realtime — orders + status history
   useEffect(() => {
     if (!hasAccess) return;
     const channel = supabase
@@ -183,6 +197,16 @@ export default function DriverPage() {
         "postgres_changes",
         { event: "*", schema: "public", table: "orders" },
         () => void fetchOrders(true)
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "order_status_history" },
+        (payload) => {
+          const ev = payload.new as StatusEvent;
+          setHistory((prev) =>
+            prev.some((e) => e.id === ev.id) ? prev : [...prev, ev]
+          );
+        }
       )
       .subscribe();
     return () => {
