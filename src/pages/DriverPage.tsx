@@ -694,6 +694,111 @@ function OrderCard({
           Хүргэлт дуусгах
         </Button>
       )}
+
+      {/* Timeline toggle */}
+      <button
+        onClick={onToggleTimeline}
+        className="w-full flex items-center justify-between text-xs text-muted-foreground hover:text-foreground border-t border-border pt-3 -mb-1"
+      >
+        <span className="flex items-center gap-1.5">
+          <History className="h-3.5 w-3.5" />
+          Хөдөлгөөний түүх
+          <span className="text-[10px] bg-secondary px-1.5 py-0.5 rounded-full">{events.length}</span>
+        </span>
+        {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+      </button>
+
+      {expanded && <Timeline events={events} currentStatus={order.status} />}
+    </div>
+  );
+}
+
+function Timeline({ events, currentStatus }: { events: StatusEvent[]; currentStatus: string }) {
+  // Sort events ascending by time
+  const sorted = [...events].sort(
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  );
+
+  // Determine which pipeline steps were reached
+  const reachedSteps = new Set(sorted.map((e) => e.to_status));
+  // Also mark current status as reached
+  reachedSteps.add(currentStatus);
+
+  // Map: status -> latest event for it (for actor info & timestamp)
+  const latestByStatus: Record<string, StatusEvent> = {};
+  sorted.forEach((e) => {
+    latestByStatus[e.to_status] = e;
+  });
+
+  if (sorted.length === 0) {
+    return (
+      <p className="text-xs text-muted-foreground italic pt-2">Түүх байхгүй</p>
+    );
+  }
+
+  return (
+    <div className="pt-3 space-y-3">
+      {/* Pipeline progress strip */}
+      <div className="flex items-center gap-1">
+        {PIPELINE.map((step, idx) => {
+          const reached = reachedSteps.has(step);
+          const isCurrent = step === currentStatus;
+          return (
+            <div key={step} className="flex-1 flex items-center gap-1">
+              <div
+                className={`flex-1 h-1.5 rounded-full transition-colors ${
+                  reached ? STATUS_DOT_CLS[step] || "bg-primary" : "bg-secondary"
+                } ${isCurrent ? "ring-2 ring-offset-1 ring-offset-card ring-primary/40" : ""}`}
+                title={STATUS_LABELS[step] || step}
+              />
+              {idx < PIPELINE.length - 1 && (
+                <div className="h-1 w-1 rounded-full bg-border shrink-0" />
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Detailed event list (newest first) */}
+      <ol className="relative space-y-2.5 pl-5">
+        <span className="absolute left-[7px] top-1 bottom-1 w-px bg-border" />
+        {[...sorted].reverse().map((e, idx) => {
+          const dotCls = STATUS_DOT_CLS[e.to_status] || "bg-primary";
+          const isLatest = idx === 0;
+          const actor = e.changed_by_email || (e.changed_by ? "Систем" : "Автомат");
+          return (
+            <li key={e.id} className="relative">
+              <span
+                className={`absolute -left-5 top-1 h-3 w-3 rounded-full ${dotCls} ${
+                  isLatest ? "ring-2 ring-offset-1 ring-offset-card ring-primary/40" : ""
+                }`}
+              />
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium text-foreground">
+                    {e.from_status ? (
+                      <>
+                        <span className="text-muted-foreground">{STATUS_LABELS[e.from_status] || e.from_status}</span>
+                        <span className="text-muted-foreground mx-1">→</span>
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground">Үүссэн → </span>
+                    )}
+                    <span>{STATUS_LABELS[e.to_status] || e.to_status}</span>
+                  </p>
+                  <p className="text-[10px] text-muted-foreground truncate" title={actor}>
+                    {actor}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-[10px] text-muted-foreground">{relativeTime(e.created_at)}</p>
+                  <p className="text-[10px] text-muted-foreground/70">{formatDateTime(e.created_at)}</p>
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }
