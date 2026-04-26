@@ -22,10 +22,22 @@ import {
   LayoutDashboard,
   AlertTriangle,
   TrendingDown,
+  Zap,
+  Power,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 type Tab = "dashboard" | "orders" | "pick" | "history";
 const LOW_STOCK_THRESHOLD = 5;
+const AUTO_PICK_STORAGE_KEY = "warehouse_auto_pick_settings";
+const AUTO_PICK_PROCESSED_KEY = "warehouse_auto_pick_processed";
+
+interface AutoPickSettings {
+  enabled: boolean;
+  delayMinutes: number;
+}
+
+const DEFAULT_AUTO_PICK: AutoPickSettings = { enabled: false, delayMinutes: 30 };
 
 interface Product {
   id: string;
