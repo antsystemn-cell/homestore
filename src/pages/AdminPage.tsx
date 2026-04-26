@@ -1014,7 +1014,7 @@ const AdminPage = () => {
           </button>
           <h1 className="text-base font-bold flex-1">Админ</h1>
           <div className="flex items-center gap-1">
-            <span className="text-[10px] text-muted-foreground bg-secondary px-2 py-1 rounded-full">{sidebarItems.find(s => s.id === tab)?.label}</span>
+            <span className="text-[10px] text-muted-foreground bg-secondary px-2 py-1 rounded-full">{SETTINGS_TABS.includes(tab) ? settingsSubItems.find(s => s.id === tab)?.label : sidebarItems.find(s => s.id === tab)?.label}</span>
           </div>
         </header>
         <div className="sticky top-[52px] z-40 bg-background/95 backdrop-blur-md border-b border-border">
