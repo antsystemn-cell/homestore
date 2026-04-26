@@ -558,6 +558,13 @@ const AdminPage = () => {
 
   const fetchUsers = async () => {
     try {
+      // Try admin RPC first (returns email joined from auth.users)
+      const { data: rpcData, error: rpcError } = await supabase.rpc("admin_list_users");
+      if (!rpcError && rpcData) {
+        setUsers(rpcData as any[]);
+        return;
+      }
+      // Fallback to plain profiles read
       const { data, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
       if (error) throw error;
       setUsers(data || []);
