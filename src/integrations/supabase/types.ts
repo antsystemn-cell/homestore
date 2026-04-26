@@ -690,6 +690,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_list_users: {
+        Args: never
+        Returns: {
+          address: string
+          avatar_url: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string
+          user_id: string
+        }[]
+      }
       generate_slug: { Args: { name: string }; Returns: string }
       has_role: {
         Args: {

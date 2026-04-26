@@ -143,6 +143,7 @@ const AdminPage = () => {
 
   // Search & filter
   const [searchQuery, setSearchQuery] = useState("");
+  const [userSearch, setUserSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [orderSearchPhone, setOrderSearchPhone] = useState("");
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
@@ -558,6 +559,13 @@ const AdminPage = () => {
 
   const fetchUsers = async () => {
     try {
+      // Try admin RPC first (returns email joined from auth.users)
+      const { data: rpcData, error: rpcError } = await supabase.rpc("admin_list_users");
+      if (!rpcError && rpcData) {
+        setUsers(rpcData as any[]);
+        return;
+      }
+      // Fallback to plain profiles read
       const { data, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
       if (error) throw error;
       setUsers(data || []);
@@ -2067,59 +2075,107 @@ const AdminPage = () => {
           )}
 
           {/* Users */}
-          {tab === "users" && (
+          {tab === "users" && (() => {
+            const q = userSearch.trim().toLowerCase();
+            const filteredUsers = !q ? users : users.filter((u: any) => {
+              return (
+                (u.full_name || "").toLowerCase().includes(q) ||
+                (u.email || "").toLowerCase().includes(q) ||
+                (u.phone || "").toLowerCase().includes(q)
+              );
+            });
+            return (
             <div>
+              {/* Search bar */}
+              <div className="mb-4 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  placeholder="Нэр, имэйл, утсаар хайх..."
+                  className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+                {userSearch && (
+                  <button
+                    onClick={() => setUserSearch("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Цэвэрлэх
+                  </button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">{filteredUsers.length} / {users.length} хэрэглэгч</p>
+
               <div className="hidden md:block">
                 <div className="bg-card rounded-2xl border border-border overflow-hidden">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-border text-left">
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Хэрэглэгч</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Имэйл</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Утас</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Бүртгүүлсэн</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {users.map((u) => (
+                      {filteredUsers.map((u: any) => (
                         <tr key={u.id} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div className="h-9 w-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold">
-                                {(u.full_name || "?")[0].toUpperCase()}
+                                {(u.full_name || u.email || "?")[0].toUpperCase()}
                               </div>
                               <span className="text-sm font-medium">{u.full_name || "Нэргүй"}</span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-muted-foreground">{u.phone || "—"}</td>
+                          <td className="px-6 py-4 text-sm text-muted-foreground">
+                            {u.email ? (
+                              <a href={`mailto:${u.email}`} className="hover:text-foreground hover:underline">{u.email}</a>
+                            ) : "—"}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-muted-foreground">
+                            {u.phone ? (
+                              <a href={`tel:${u.phone}`} className="hover:text-foreground hover:underline">{u.phone}</a>
+                            ) : "—"}
+                          </td>
                           <td className="px-6 py-4 text-sm text-muted-foreground">{new Date(u.created_at).toLocaleDateString("mn-MN")}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
-                  {users.length === 0 && !loading && (
-                    <p className="text-center text-sm text-muted-foreground py-12">Хэрэглэгч байхгүй</p>
+                  {filteredUsers.length === 0 && !loading && (
+                    <p className="text-center text-sm text-muted-foreground py-12">
+                      {q ? "Хайлтад тохирох хэрэглэгч олдсонгүй" : "Хэрэглэгч байхгүй"}
+                    </p>
                   )}
                 </div>
               </div>
               <div className="md:hidden space-y-2">
-                {users.map((u) => (
-                  <div key={u.id} className="flex items-center gap-3 bg-card rounded-xl p-3 border border-border">
-                    <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold">
-                      {(u.full_name || "?")[0].toUpperCase()}
+                {filteredUsers.map((u: any) => (
+                  <div key={u.id} className="bg-card rounded-xl p-3 border border-border">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-sm font-bold shrink-0">
+                        {(u.full_name || u.email || "?")[0].toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold truncate">{u.full_name || "Нэргүй"}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{u.email || "Имэйл байхгүй"}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{u.phone || "Утас байхгүй"}</p>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground shrink-0">{new Date(u.created_at).toLocaleDateString("mn-MN")}</span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold truncate">{u.full_name || "Нэргүй"}</p>
-                      <p className="text-[10px] text-muted-foreground">{u.phone || "Утас байхгүй"}</p>
-                    </div>
-                    <span className="text-[10px] text-muted-foreground">{new Date(u.created_at).toLocaleDateString("mn-MN")}</span>
                   </div>
                 ))}
-                {users.length === 0 && !loading && (
-                  <p className="text-center text-sm text-muted-foreground py-8">Хэрэглэгч байхгүй</p>
+                {filteredUsers.length === 0 && !loading && (
+                  <p className="text-center text-sm text-muted-foreground py-8">
+                    {q ? "Хайлтад тохирох хэрэглэгч олдсонгүй" : "Хэрэглэгч байхгүй"}
+                  </p>
                 )}
               </div>
             </div>
-          )}
+            );
+          })()}
 
           {/* Web Analytics */}
           {tab === "analytics" && <WebAnalytics />}
