@@ -70,7 +70,7 @@ export default function WarehousePage() {
   const { user, isAdmin, isModerator, loading: authLoading } = useAuth();
   const hasAccess = isAdmin || isModerator;
 
-  const [tab, setTab] = useState<Tab>("orders");
+  const [tab, setTab] = useState<Tab>("dashboard");
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [movements, setMovements] = useState<Movement[]>([]);
@@ -288,6 +288,7 @@ export default function WarehousePage() {
         {/* Tabs */}
         <div className="max-w-5xl mx-auto px-2 flex gap-1 overflow-x-auto border-t border-border">
           {[
+            { id: "dashboard" as Tab, label: "Хяналтын самбар", icon: LayoutDashboard },
             { id: "orders" as Tab, label: "Захиалга бэлдэх", icon: ClipboardList, count: orders.length },
             { id: "pick" as Tab, label: "Бараа гаргах", icon: PackageCheck },
             { id: "history" as Tab, label: "Түүх", icon: History },
