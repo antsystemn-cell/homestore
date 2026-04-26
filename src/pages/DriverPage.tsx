@@ -697,11 +697,18 @@ function OrderCard({
             </p>
           )}
           {order.delivery_proof_photo && (
-            <img
-              src={order.delivery_proof_photo}
-              alt="Хүргэлтийн нотолгоо"
-              className="w-full h-32 object-cover rounded-lg"
-            />
+            <button
+              type="button"
+              onClick={() => onZoom(order.delivery_proof_photo!)}
+              className="block w-full group"
+              aria-label="Зургийг томруулж үзэх"
+            >
+              <img
+                src={order.delivery_proof_photo}
+                alt="Хүргэлтийн нотолгоо"
+                className="w-full h-32 object-cover rounded-lg transition-opacity group-hover:opacity-90 cursor-zoom-in"
+              />
+            </button>
           )}
           {order.delivery_gps_lat && order.delivery_gps_lng && (
             <a
