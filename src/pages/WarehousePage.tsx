@@ -1,0 +1,542 @@
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import {
+  Loader2,
+  Package,
+  Search,
+  ClipboardList,
+  History,
+  Minus,
+  Plus,
+  CheckCircle2,
+  ArrowLeft,
+  PackageCheck,
+} from "lucide-react";
+
+type Tab = "orders" | "pick" | "history";
+
+interface Product {
+  id: string;
+  name: string;
+  product_code: string | null;
+  price: number;
+  stock_quantity: number;
+  thumbnail_url: string | null;
+  image_url: string | null;
+  category: string;
+  is_active: boolean;
+}
+
+interface Order {
+  id: string;
+  order_ref: string | null;
+  guest_name: string | null;
+  phone: string | null;
+  shipping_address: string | null;
+  status: string;
+  total: number;
+  items: any[];
+  created_at: string;
+}
+
+interface Movement {
+  id: string;
+  product_id: string;
+  quantity: number;
+  reason: string;
+  order_id: string | null;
+  note: string | null;
+  performed_by_email: string | null;
+  created_at: string;
+  product?: { name: string; product_code: string | null } | null;
+}
+
+const formatPrice = (n: number) => `${(n ?? 0).toLocaleString("mn-MN")}₮`;
+
+export default function WarehousePage() {
+  const navigate = useNavigate();
+  const { user, isAdmin, isModerator, loading: authLoading } = useAuth();
+  const hasAccess = isAdmin || isModerator;
+
+  const [tab, setTab] = useState<Tab>("orders");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [movements, setMovements] = useState<Movement[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Manual pick state
+  const [search, setSearch] = useState("");
+  const [picked, setPicked] = useState<Record<string, number>>({});
+  const [pickNote, setPickNote] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  // Per-order processing state
+  const [processingOrderId, setProcessingOrderId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!authLoading && !user) navigate("/auth");
+  }, [authLoading, user, navigate]);
+
+  const loadAll = async () => {
+    setLoading(true);
+    const [pRes, oRes, mRes] = await Promise.all([
+      supabase
+        .from("products")
+        .select("id,name,product_code,price,stock_quantity,thumbnail_url,image_url,category,is_active")
+        .eq("is_active", true)
+        .order("name"),
+      supabase
+        .from("orders")
+        .select("id,order_ref,guest_name,phone,shipping_address,status,total,items,created_at")
+        .in("status", ["pending", "preparing", "phone_confirmed"])
+        .order("created_at", { ascending: false })
+        .limit(100),
+      supabase
+        .from("stock_movements")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(100),
+    ]);
+
+    if (pRes.data) setProducts(pRes.data as Product[]);
+    if (oRes.data) setOrders(oRes.data as any);
+    if (mRes.data) {
+      // Hydrate product names for movements
+      const ids = Array.from(new Set((mRes.data as any[]).map((m) => m.product_id)));
+      let prodMap: Record<string, { name: string; product_code: string | null }> = {};
+      if (ids.length) {
+        const { data: pd } = await supabase
+          .from("products")
+          .select("id,name,product_code")
+          .in("id", ids);
+        prodMap = Object.fromEntries((pd ?? []).map((p: any) => [p.id, p]));
+      }
+      setMovements(
+        (mRes.data as any[]).map((m) => ({ ...m, product: prodMap[m.product_id] ?? null })),
+      );
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (hasAccess) loadAll();
+  }, [hasAccess]);
+
+  const filteredProducts = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return products.slice(0, 50);
+    return products
+      .filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          (p.product_code ?? "").toLowerCase().includes(q),
+      )
+      .slice(0, 50);
+  }, [products, search]);
+
+  const adjustPick = (productId: string, delta: number) => {
+    setPicked((prev) => {
+      const next = { ...prev };
+      const cur = next[productId] ?? 0;
+      const v = Math.max(0, cur + delta);
+      if (v === 0) delete next[productId];
+      else next[productId] = v;
+      return next;
+    });
+  };
+
+  const setPickQty = (productId: string, value: string) => {
+    const n = Math.max(0, parseInt(value || "0", 10) || 0);
+    setPicked((prev) => {
+      const next = { ...prev };
+      if (n === 0) delete next[productId];
+      else next[productId] = n;
+      return next;
+    });
+  };
+
+  const totalPickedItems = Object.values(picked).reduce((a, b) => a + b, 0);
+
+  const submitManualPick = async () => {
+    if (!user) return;
+    const entries = Object.entries(picked);
+    if (entries.length === 0) {
+      toast.error("Бараа сонгоно уу");
+      return;
+    }
+    setSubmitting(true);
+    const rows = entries.map(([product_id, quantity]) => ({
+      product_id,
+      quantity,
+      reason: "manual",
+      note: pickNote || null,
+      performed_by: user.id,
+      performed_by_email: user.email ?? null,
+    }));
+    const { error } = await supabase.from("stock_movements").insert(rows);
+    setSubmitting(false);
+    if (error) {
+      toast.error("Алдаа: " + error.message);
+      return;
+    }
+    toast.success(`${rows.length} бараа агуулахаас гаргалаа ✓`);
+    setPicked({});
+    setPickNote("");
+    loadAll();
+  };
+
+  const completeOrderPick = async (order: Order) => {
+    if (!user) return;
+    const items = Array.isArray(order.items) ? order.items : [];
+    if (items.length === 0) {
+      toast.error("Захиалгад бараа байхгүй байна");
+      return;
+    }
+    setProcessingOrderId(order.id);
+
+    const rows = items
+      .filter((it: any) => it?.product_id && it?.quantity)
+      .map((it: any) => ({
+        product_id: it.product_id as string,
+        quantity: Number(it.quantity) || 1,
+        reason: "order_pick",
+        order_id: order.id,
+        note: order.order_ref ?? null,
+        performed_by: user.id,
+        performed_by_email: user.email ?? null,
+      }));
+
+    if (rows.length === 0) {
+      toast.error("Бараанд product_id байхгүй байна");
+      setProcessingOrderId(null);
+      return;
+    }
+
+    const { error: mvErr } = await supabase.from("stock_movements").insert(rows);
+    if (mvErr) {
+      toast.error("Алдаа: " + mvErr.message);
+      setProcessingOrderId(null);
+      return;
+    }
+
+    // Move order to "preparing" if it isn't already
+    if (order.status !== "preparing") {
+      await supabase.from("orders").update({ status: "preparing" }).eq("id", order.id);
+    }
+
+    toast.success(`${order.order_ref ?? order.id.slice(0, 6)} захиалга бэлдлээ ✓`);
+    setProcessingOrderId(null);
+    loadAll();
+  };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!hasAccess) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3 p-6 bg-background text-center">
+        <Package className="h-10 w-10 text-muted-foreground" />
+        <h1 className="text-xl font-semibold">Хандах эрхгүй</h1>
+        <p className="text-muted-foreground text-sm">
+          Энэ хуудсыг нярав эсвэл админ эрхтэй хэрэглэгч ашиглана.
+        </p>
+        <Button onClick={() => navigate("/")} variant="outline">
+          Нүүр хуудас руу
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background pb-24">
+      {/* Header */}
+      <header className="sticky top-0 z-30 bg-card border-b border-border">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3">
+          <Link to="/" className="p-2 -ml-2 rounded-md hover:bg-muted">
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-base md:text-lg font-semibold truncate flex items-center gap-2">
+              <Package className="h-5 w-5 text-primary" /> Агуулах · Нярав
+            </h1>
+            <p className="text-xs text-muted-foreground truncate">
+              {user?.email}
+            </p>
+          </div>
+          <Button size="sm" variant="outline" onClick={loadAll} disabled={loading}>
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Шинэчлэх"}
+          </Button>
+        </div>
+
+        {/* Tabs */}
+        <div className="max-w-5xl mx-auto px-2 flex gap-1 overflow-x-auto border-t border-border">
+          {[
+            { id: "orders" as Tab, label: "Захиалга бэлдэх", icon: ClipboardList, count: orders.length },
+            { id: "pick" as Tab, label: "Бараа гаргах", icon: PackageCheck },
+            { id: "history" as Tab, label: "Түүх", icon: History },
+          ].map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`flex items-center gap-2 px-3 py-2.5 text-sm whitespace-nowrap border-b-2 transition ${
+                tab === t.id
+                  ? "border-primary text-primary font-medium"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <t.icon className="h-4 w-4" />
+              {t.label}
+              {typeof t.count === "number" && t.count > 0 && (
+                <Badge variant="secondary" className="h-5 px-1.5">
+                  {t.count}
+                </Badge>
+              )}
+            </button>
+          ))}
+        </div>
+      </header>
+
+      <main className="max-w-5xl mx-auto px-4 py-4">
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        )}
+
+        {/* ORDERS TAB */}
+        {tab === "orders" && !loading && (
+          <div className="space-y-3">
+            {orders.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground text-sm">
+                Бэлдэх захиалга алга
+              </div>
+            )}
+            {orders.map((o) => {
+              const items = Array.isArray(o.items) ? o.items : [];
+              return (
+                <div key={o.id} className="rounded-lg border border-border bg-card p-4">
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <div className="min-w-0">
+                      <div className="font-mono text-sm font-semibold">
+                        {o.order_ref ?? o.id.slice(0, 8)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {o.guest_name ?? "—"} · {o.phone ?? "—"}
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {o.shipping_address ?? ""}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant={o.status === "preparing" ? "default" : "secondary"}>
+                        {o.status}
+                      </Badge>
+                      <div className="text-sm font-semibold mt-1">{formatPrice(o.total)}</div>
+                    </div>
+                  </div>
+
+                  <ul className="text-sm space-y-1 mb-3 border-t border-border pt-2">
+                    {items.map((it: any, i: number) => {
+                      const prod = products.find((p) => p.id === it.product_id);
+                      const lowStock = prod && prod.stock_quantity < (it.quantity ?? 1);
+                      return (
+                        <li key={i} className="flex items-center justify-between gap-2">
+                          <span className="truncate">
+                            {it.name ?? prod?.name ?? "—"}
+                            {it.size && <span className="text-muted-foreground"> · {it.size}</span>}
+                            {it.color && <span className="text-muted-foreground"> · {it.color}</span>}
+                          </span>
+                          <span
+                            className={`font-mono shrink-0 ${
+                              lowStock ? "text-destructive font-semibold" : ""
+                            }`}
+                          >
+                            ×{it.quantity ?? 1}
+                            {prod && (
+                              <span className="text-xs text-muted-foreground ml-2">
+                                (үлд: {prod.stock_quantity})
+                              </span>
+                            )}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+
+                  <Button
+                    size="sm"
+                    className="w-full"
+                    onClick={() => completeOrderPick(o)}
+                    disabled={processingOrderId === o.id}
+                  >
+                    {processingOrderId === o.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                    )}
+                    Бэлдэж дууссан — Үлдэгдэл хасах
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* PICK TAB */}
+        {tab === "pick" && !loading && (
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Барааны нэр эсвэл SKU кодоор хайх..."
+                className="pl-9"
+              />
+            </div>
+
+            <div className="space-y-2">
+              {filteredProducts.map((p) => {
+                const qty = picked[p.id] ?? 0;
+                return (
+                  <div
+                    key={p.id}
+                    className="flex items-center gap-3 rounded-lg border border-border bg-card p-2"
+                  >
+                    <div className="w-12 h-12 rounded-md bg-muted overflow-hidden shrink-0">
+                      {(p.thumbnail_url || p.image_url) && (
+                        <img
+                          src={p.thumbnail_url || p.image_url || ""}
+                          alt={p.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium truncate">{p.name}</div>
+                      <div className="text-xs text-muted-foreground flex gap-2">
+                        {p.product_code && <span>{p.product_code}</span>}
+                        <span>· Үлд: {p.stock_quantity}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-8 w-8"
+                        onClick={() => adjustPick(p.id, -1)}
+                        disabled={qty === 0}
+                      >
+                        <Minus className="h-3.5 w-3.5" />
+                      </Button>
+                      <Input
+                        value={qty}
+                        onChange={(e) => setPickQty(p.id, e.target.value)}
+                        className="h-8 w-14 text-center"
+                        inputMode="numeric"
+                      />
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-8 w-8"
+                        onClick={() => adjustPick(p.id, 1)}
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+              {filteredProducts.length === 0 && (
+                <div className="text-center py-8 text-sm text-muted-foreground">
+                  Бараа олдсонгүй
+                </div>
+              )}
+            </div>
+
+            {totalPickedItems > 0 && (
+              <div className="sticky bottom-4 rounded-xl border border-border bg-card shadow-lg p-3 space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium">
+                    Сонгосон: {Object.keys(picked).length} бараа · {totalPickedItems} ширхэг
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setPicked({})}
+                  >
+                    Цуцлах
+                  </Button>
+                </div>
+                <Textarea
+                  value={pickNote}
+                  onChange={(e) => setPickNote(e.target.value)}
+                  placeholder="Тэмдэглэл (заавал биш)"
+                  rows={2}
+                />
+                <Button onClick={submitManualPick} disabled={submitting} className="w-full">
+                  {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                  Агуулахаас гаргах
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* HISTORY TAB */}
+        {tab === "history" && !loading && (
+          <div className="space-y-2">
+            {movements.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground text-sm">
+                Түүх алга
+              </div>
+            )}
+            {movements.map((m) => (
+              <div
+                key={m.id}
+                className="rounded-lg border border-border bg-card p-3 flex items-start justify-between gap-3"
+              >
+                <div className="min-w-0">
+                  <div className="text-sm font-medium truncate">
+                    {m.product?.name ?? "—"}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {new Date(m.created_at).toLocaleString("mn-MN")} ·{" "}
+                    {m.performed_by_email ?? "—"}
+                  </div>
+                  {m.note && (
+                    <div className="text-xs text-muted-foreground mt-1 italic">
+                      {m.note}
+                    </div>
+                  )}
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="font-mono font-semibold text-destructive">
+                    −{m.quantity}
+                  </div>
+                  <Badge variant="outline" className="text-[10px] mt-1">
+                    {m.reason === "order_pick" ? "Захиалга" : "Гараар"}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
