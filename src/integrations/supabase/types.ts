@@ -134,6 +134,39 @@ export type Database = {
         }
         Relationships: []
       }
+      order_status_history: {
+        Row: {
+          changed_by: string | null
+          changed_by_email: string | null
+          created_at: string
+          from_status: string | null
+          id: string
+          note: string | null
+          order_id: string
+          to_status: string
+        }
+        Insert: {
+          changed_by?: string | null
+          changed_by_email?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          note?: string | null
+          order_id: string
+          to_status: string
+        }
+        Update: {
+          changed_by?: string | null
+          changed_by_email?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          note?: string | null
+          order_id?: string
+          to_status?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           assigned_at: string | null
