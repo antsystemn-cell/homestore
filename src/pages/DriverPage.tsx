@@ -893,19 +893,19 @@ function Timeline({ events, currentStatus, order, onZoom }: { events: StatusEven
           </div>
 
           {order.delivery_proof_photo ? (
-            <a
-              href={order.delivery_proof_photo}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block"
+            <button
+              type="button"
+              onClick={() => onZoom(order.delivery_proof_photo!)}
+              className="block w-full group"
+              aria-label="Зургийг томруулж үзэх"
             >
               <img
                 src={order.delivery_proof_photo}
                 alt="Хүргэлтийн нотолгоо"
                 loading="lazy"
-                className="w-full max-h-56 object-cover rounded-lg border border-border"
+                className="w-full max-h-56 object-cover rounded-lg border border-border transition-opacity group-hover:opacity-90 cursor-zoom-in"
               />
-            </a>
+            </button>
           ) : (
             <p className="text-[11px] text-muted-foreground italic">Зураг ороогүй</p>
           )}
