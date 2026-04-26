@@ -100,6 +100,12 @@ const PIPELINE: string[] = [
   "delivered",
 ];
 
+// Index map for quick "is step before/at current?" lookups
+const PIPELINE_INDEX: Record<string, number> = PIPELINE.reduce(
+  (acc, s, i) => ({ ...acc, [s]: i }),
+  {} as Record<string, number>
+);
+
 const formatDateTime = (iso: string) => {
   const d = new Date(iso);
   return d.toLocaleString("mn-MN", {
