@@ -24,6 +24,7 @@ import {
   ChevronDown,
   ChevronUp,
   Circle,
+  X,
 } from "lucide-react";
 
 type Tab = "available" | "active" | "delivered";
@@ -147,7 +148,18 @@ export default function DriverPage() {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [pickupSubmitting, setPickupSubmitting] = useState<string | null>(null);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Close lightbox on Esc
+  useEffect(() => {
+    if (!lightboxUrl) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxUrl(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightboxUrl]);
 
   useEffect(() => {
     if (!authLoading && !hasAccess) {
@@ -469,6 +481,7 @@ export default function DriverPage() {
                 onToggleTimeline={() =>
                   setExpandedOrderId((prev) => (prev === o.id ? null : o.id))
                 }
+                onZoom={setLightboxUrl}
               />
             ))}
           </div>
@@ -566,6 +579,34 @@ export default function DriverPage() {
           </div>
         </div>
       )}
+
+      {/* Image lightbox */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in"
+          onClick={() => setLightboxUrl(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightboxUrl(null);
+            }}
+            aria-label="Хаах"
+            className="absolute top-4 right-4 h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <img
+            src={lightboxUrl}
+            alt="Хүргэлтийн нотолгооны зураг"
+            className="max-h-[90vh] max-w-[95vw] object-contain rounded-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -579,6 +620,7 @@ function OrderCard({
   events,
   expanded,
   onToggleTimeline,
+  onZoom,
 }: {
   order: Order;
   tab: Tab;
@@ -588,6 +630,7 @@ function OrderCard({
   events: StatusEvent[];
   expanded: boolean;
   onToggleTimeline: () => void;
+  onZoom: (url: string) => void;
 }) {
   const itemCount = Array.isArray(order.items)
     ? order.items.reduce((s, it: any) => s + (it.quantity || 1), 0)
@@ -654,11 +697,18 @@ function OrderCard({
             </p>
           )}
           {order.delivery_proof_photo && (
-            <img
-              src={order.delivery_proof_photo}
-              alt="Хүргэлтийн нотолгоо"
-              className="w-full h-32 object-cover rounded-lg"
-            />
+            <button
+              type="button"
+              onClick={() => onZoom(order.delivery_proof_photo!)}
+              className="block w-full group"
+              aria-label="Зургийг томруулж үзэх"
+            >
+              <img
+                src={order.delivery_proof_photo}
+                alt="Хүргэлтийн нотолгоо"
+                className="w-full h-32 object-cover rounded-lg transition-opacity group-hover:opacity-90 cursor-zoom-in"
+              />
+            </button>
           )}
           {order.delivery_gps_lat && order.delivery_gps_lng && (
             <a
@@ -714,12 +764,12 @@ function OrderCard({
         {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
       </button>
 
-      {expanded && <Timeline events={events} currentStatus={order.status} order={order} />}
+      {expanded && <Timeline events={events} currentStatus={order.status} order={order} onZoom={onZoom} />}
     </div>
   );
 }
 
-function Timeline({ events, currentStatus, order }: { events: StatusEvent[]; currentStatus: string; order: Order }) {
+function Timeline({ events, currentStatus, order, onZoom }: { events: StatusEvent[]; currentStatus: string; order: Order; onZoom: (url: string) => void }) {
   // Sort events ascending by time
   const sorted = [...events].sort(
     (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
@@ -843,19 +893,19 @@ function Timeline({ events, currentStatus, order }: { events: StatusEvent[]; cur
           </div>
 
           {order.delivery_proof_photo ? (
-            <a
-              href={order.delivery_proof_photo}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block"
+            <button
+              type="button"
+              onClick={() => onZoom(order.delivery_proof_photo!)}
+              className="block w-full group"
+              aria-label="Зургийг томруулж үзэх"
             >
               <img
                 src={order.delivery_proof_photo}
                 alt="Хүргэлтийн нотолгоо"
                 loading="lazy"
-                className="w-full max-h-56 object-cover rounded-lg border border-border"
+                className="w-full max-h-56 object-cover rounded-lg border border-border transition-opacity group-hover:opacity-90 cursor-zoom-in"
               />
-            </a>
+            </button>
           ) : (
             <p className="text-[11px] text-muted-foreground italic">Зураг ороогүй</p>
           )}
