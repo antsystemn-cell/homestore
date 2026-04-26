@@ -20,6 +20,10 @@ import {
   PackageCheck,
   Clock,
   RefreshCw,
+  History,
+  ChevronDown,
+  ChevronUp,
+  Circle,
 } from "lucide-react";
 
 type Tab = "available" | "active" | "delivered";
@@ -44,18 +48,78 @@ interface Order {
   delivery_gps_lng: number | null;
 }
 
+interface StatusEvent {
+  id: string;
+  order_id: string;
+  from_status: string | null;
+  to_status: string;
+  changed_by: string | null;
+  changed_by_email: string | null;
+  note: string | null;
+  created_at: string;
+}
+
 const formatPrice = (n: number) => `${(n ?? 0).toLocaleString("mn-MN")}₮`;
 
 const STATUS_LABELS: Record<string, string> = {
+  pending: "Шинэ захиалга",
+  preparing: "Бэлдэж байна",
+  phone_confirmed: "Утсаар баталгаажсан",
   ready: "Авах бэлэн",
   out_for_delivery: "Хүргэлтэнд",
   delivered: "Хүргэгдсэн",
+  completed: "Дууссан",
+  cancelled: "Цуцалсан",
 };
 
 const STATUS_VARIANTS: Record<string, "default" | "secondary" | "outline"> = {
   ready: "secondary",
   out_for_delivery: "default",
   delivered: "outline",
+};
+
+// Timeline color coding per status
+const STATUS_DOT_CLS: Record<string, string> = {
+  pending: "bg-slate-400",
+  preparing: "bg-amber-500",
+  phone_confirmed: "bg-sky-500",
+  ready: "bg-blue-500",
+  out_for_delivery: "bg-violet-500",
+  delivered: "bg-emerald-500",
+  completed: "bg-emerald-600",
+  cancelled: "bg-red-500",
+};
+
+// Canonical order of pipeline steps for the visual timeline
+const PIPELINE: string[] = [
+  "pending",
+  "preparing",
+  "phone_confirmed",
+  "ready",
+  "out_for_delivery",
+  "delivered",
+];
+
+const formatDateTime = (iso: string) => {
+  const d = new Date(iso);
+  return d.toLocaleString("mn-MN", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const relativeTime = (iso: string) => {
+  const diff = Date.now() - new Date(iso).getTime();
+  const sec = Math.floor(diff / 1000);
+  if (sec < 60) return `${sec}с өмнө`;
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}м өмнө`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}ц өмнө`;
+  const day = Math.floor(hr / 24);
+  return `${day}ө өмнө`;
 };
 
 export default function DriverPage() {
