@@ -833,6 +833,68 @@ function Timeline({ events, currentStatus, order }: { events: StatusEvent[]; cur
           );
         })}
       </ol>
+
+      {/* Delivery proof block — only for delivered orders */}
+      {currentStatus === "delivered" && (
+        <div className="mt-1 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3 space-y-2.5">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            Хүргэлтийн нотолгоо
+          </div>
+
+          {order.delivery_proof_photo ? (
+            <a
+              href={order.delivery_proof_photo}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <img
+                src={order.delivery_proof_photo}
+                alt="Хүргэлтийн нотолгоо"
+                loading="lazy"
+                className="w-full max-h-56 object-cover rounded-lg border border-border"
+              />
+            </a>
+          ) : (
+            <p className="text-[11px] text-muted-foreground italic">Зураг ороогүй</p>
+          )}
+
+          <div className="grid grid-cols-1 gap-1.5 text-xs">
+            {order.delivery_signature_name && (
+              <div className="flex items-start gap-1.5">
+                <span className="text-muted-foreground shrink-0">Хүлээн авсан:</span>
+                <span className="font-medium text-foreground">{order.delivery_signature_name}</span>
+              </div>
+            )}
+            {order.delivered_at && (
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Clock className="h-3 w-3" />
+                <span>{new Date(order.delivered_at).toLocaleString("mn-MN")}</span>
+              </div>
+            )}
+            {order.delivery_gps_lat != null && order.delivery_gps_lng != null ? (
+              <a
+                href={`https://www.google.com/maps?q=${order.delivery_gps_lat},${order.delivery_gps_lng}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-primary hover:underline"
+              >
+                <Navigation className="h-3 w-3" />
+                <span className="font-mono text-[11px]">
+                  {order.delivery_gps_lat.toFixed(5)}, {order.delivery_gps_lng.toFixed(5)}
+                </span>
+                <span className="text-[10px]">— газрын зураг харах</span>
+              </a>
+            ) : (
+              <p className="text-[11px] text-muted-foreground italic flex items-center gap-1.5">
+                <Navigation className="h-3 w-3" />
+                GPS байршил байхгүй
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
