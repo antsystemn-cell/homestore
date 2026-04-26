@@ -481,6 +481,7 @@ export default function DriverPage() {
                 onToggleTimeline={() =>
                   setExpandedOrderId((prev) => (prev === o.id ? null : o.id))
                 }
+                onZoom={setLightboxUrl}
               />
             ))}
           </div>
