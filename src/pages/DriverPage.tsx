@@ -148,7 +148,18 @@ export default function DriverPage() {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [pickupSubmitting, setPickupSubmitting] = useState<string | null>(null);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Close lightbox on Esc
+  useEffect(() => {
+    if (!lightboxUrl) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxUrl(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightboxUrl]);
 
   useEffect(() => {
     if (!authLoading && !hasAccess) {
