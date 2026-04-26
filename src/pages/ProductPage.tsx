@@ -247,9 +247,16 @@ const ProductPage = () => {
                 className="w-full aspect-square overflow-x-auto flex snap-x snap-mandatory no-scrollbar bg-secondary md:rounded-2xl scroll-smooth"
                 onScroll={(e) => {
                   const el = e.currentTarget;
-                  const i = Math.round(el.scrollLeft / el.clientWidth);
-                  if (i !== activeImg) setActiveImg(i);
+                  const i = Math.round(el.scrollLeft / Math.max(el.clientWidth, 1));
+                  if (!isProgrammaticScrollRef.current) {
+                    userInteractedRef.current = true;
+                  }
+                  if (i !== activeImg && i >= 0 && i < allImages.length) {
+                    setActiveImg(i);
+                  }
                 }}
+                onTouchStart={() => { userInteractedRef.current = true; }}
+                onPointerDown={() => { userInteractedRef.current = true; }}
               >
                 {(allImages.length > 0 ? allImages : [product.image]).map((src, idx) => (
                   <img
@@ -259,19 +266,26 @@ const ProductPage = () => {
                     className="w-full h-full flex-shrink-0 object-cover snap-start"
                     style={{ minWidth: "100%" }}
                     loading={idx === 0 ? "eager" : "lazy"}
+                    draggable={false}
                   />
                 ))}
               </div>
               {allImages.length > 1 && (
                 <>
                   <button
-                    onClick={() => setActiveImg((i) => (i - 1 + allImages.length) % allImages.length)}
+                    onClick={() => {
+                      userInteractedRef.current = true;
+                      setActiveImg((i) => (i - 1 + allImages.length) % allImages.length);
+                    }}
                     className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
                   >
                     <ChevronLeft className="h-4 w-4 text-foreground" />
                   </button>
                   <button
-                    onClick={() => setActiveImg((i) => (i + 1) % allImages.length)}
+                    onClick={() => {
+                      userInteractedRef.current = true;
+                      setActiveImg((i) => (i + 1) % allImages.length);
+                    }}
                     className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
                   >
                     <ChevronRight className="h-4 w-4 text-foreground" />
