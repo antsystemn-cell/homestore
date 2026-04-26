@@ -950,7 +950,11 @@ export default function WarehousePage() {
                     −{m.quantity}
                   </div>
                   <Badge variant="outline" className="text-[10px] mt-1">
-                    {m.reason === "order_pick" ? "Захиалга" : "Гараар"}
+                    {m.reason === "order_pick"
+                      ? "Захиалга"
+                      : m.reason === "auto_pick"
+                      ? "Авто"
+                      : "Гараар"}
                   </Badge>
                 </div>
               </div>
