@@ -725,16 +725,36 @@ function Timeline({ events, currentStatus }: { events: StatusEvent[]; currentSta
     (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
   );
 
-  // Determine which pipeline steps were reached
-  const reachedSteps = new Set(sorted.map((e) => e.to_status));
-  // Also mark current status as reached
+  // Determine which pipeline steps were reached.
+  // 1) Any status that ever appeared in history (from_status or to_status).
+  // 2) Current status itself.
+  // 3) All earlier PIPELINE steps before the highest reached index — so the
+  //    bar stays continuous even when intermediate transitions are missing.
+  const reachedSteps = new Set<string>();
+  sorted.forEach((e) => {
+    if (e.from_status) reachedSteps.add(e.from_status);
+    reachedSteps.add(e.to_status);
+  });
   reachedSteps.add(currentStatus);
+
+  let maxIdx = -1;
+  reachedSteps.forEach((s) => {
+    const i = PIPELINE_INDEX[s];
+    if (i !== undefined && i > maxIdx) maxIdx = i;
+  });
+  if (maxIdx >= 0) {
+    for (let i = 0; i <= maxIdx; i++) reachedSteps.add(PIPELINE[i]);
+  }
 
   // Map: status -> latest event for it (for actor info & timestamp)
   const latestByStatus: Record<string, StatusEvent> = {};
   sorted.forEach((e) => {
     latestByStatus[e.to_status] = e;
   });
+
+  // Off-pipeline terminal states (completed / cancelled) — show a trailing chip
+  const offPipelineCurrent =
+    PIPELINE_INDEX[currentStatus] === undefined ? currentStatus : null;
 
   if (sorted.length === 0) {
     return (
@@ -763,6 +783,14 @@ function Timeline({ events, currentStatus }: { events: StatusEvent[]; currentSta
             </div>
           );
         })}
+        {offPipelineCurrent && (
+          <div
+            className={`ml-1 h-1.5 px-2 rounded-full ring-2 ring-offset-1 ring-offset-card ring-primary/40 ${
+              STATUS_DOT_CLS[offPipelineCurrent] || "bg-primary"
+            }`}
+            title={STATUS_LABELS[offPipelineCurrent] || offPipelineCurrent}
+          />
+        )}
       </div>
 
       {/* Detailed event list (newest first) */}
