@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
-  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle
+  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
@@ -28,7 +28,9 @@ import { mapOrderToLabelData } from "@/lib/niimbot/mapOrder";
 import { generateNiimbotXlsx, buildXlsxFilename } from "@/lib/niimbot/xlsx";
 import { downloadBlob } from "@/lib/niimbot/transfer";
 
-type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics";
+type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "settings";
+
+const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "collections", "analytics", "diagnostics"];
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -808,16 +810,19 @@ const AdminPage = () => {
   const allSidebarItems: { id: Tab; label: string; icon: any }[] = [
     { id: "stats", label: "Статистик", icon: BarChart3 },
     { id: "products", label: "Бараа", icon: Package },
+    { id: "orders", label: "Захиалга", icon: ShoppingBag },
+    { id: "users", label: "Хэрэглэгч", icon: Users },
+    { id: "chatbot", label: "AI Чатбот", icon: MessageCircle },
+    { id: "settings", label: "Ерөнхий тохиргоо", icon: Settings },
+  ];
+
+  const settingsSubItems: { id: Tab; label: string; icon: any }[] = [
     { id: "categories", label: "Ангилал", icon: Layers },
     { id: "brands", label: "Брэнд", icon: Tag },
     { id: "delivery", label: "Хүргэлт", icon: Truck },
     { id: "payments", label: "Төлбөр", icon: CreditCard },
     { id: "banner", label: "Баннер", icon: Megaphone },
-    
-    { id: "orders", label: "Захиалга", icon: ShoppingBag },
     { id: "collections", label: "Багц линк", icon: Link2 },
-    { id: "chatbot", label: "AI Чатбот", icon: MessageCircle },
-    { id: "users", label: "Хэрэглэгч", icon: Users },
     { id: "analytics", label: "Хандалт", icon: Globe },
     { id: "diagnostics", label: "Оношлогоо", icon: AlertTriangle },
   ];
@@ -977,9 +982,11 @@ const AdminPage = () => {
         <nav className="flex-1 p-4 space-y-1">
           {sidebarItems.map((item) => {
             const Icon = item.icon;
-            const active = tab === item.id;
+            const active = item.id === "settings"
+              ? (tab === "settings" || SETTINGS_TABS.includes(tab))
+              : tab === item.id;
             return (
-              <button key={item.id} onClick={() => setTab(item.id)}
+              <button key={item.id} onClick={() => setTab(item.id === "settings" ? "categories" : item.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                   active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                 }`}>
@@ -1007,16 +1014,18 @@ const AdminPage = () => {
           </button>
           <h1 className="text-base font-bold flex-1">Админ</h1>
           <div className="flex items-center gap-1">
-            <span className="text-[10px] text-muted-foreground bg-secondary px-2 py-1 rounded-full">{sidebarItems.find(s => s.id === tab)?.label}</span>
+            <span className="text-[10px] text-muted-foreground bg-secondary px-2 py-1 rounded-full">{SETTINGS_TABS.includes(tab) ? settingsSubItems.find(s => s.id === tab)?.label : sidebarItems.find(s => s.id === tab)?.label}</span>
           </div>
         </header>
         <div className="sticky top-[52px] z-40 bg-background/95 backdrop-blur-md border-b border-border">
           <div className="flex overflow-x-auto no-scrollbar gap-1 px-3 py-2">
             {sidebarItems.map((t) => {
               const Icon = t.icon;
-              const active = tab === t.id;
+              const active = t.id === "settings"
+                ? (tab === "settings" || SETTINGS_TABS.includes(tab))
+                : tab === t.id;
               return (
-                <button key={t.id} onClick={() => setTab(t.id)}
+                <button key={t.id} onClick={() => setTab(t.id === "settings" ? "categories" : t.id)}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all shrink-0 ${
                     active 
                       ? "bg-primary text-primary-foreground shadow-sm" 
@@ -1041,7 +1050,11 @@ const AdminPage = () => {
         {/* Desktop Header */}
         <div className="hidden md:flex items-center justify-between px-8 py-6 border-b border-border bg-card">
           <div>
-            <h2 className="text-xl font-bold">{sidebarItems.find(s => s.id === tab)?.label}</h2>
+            <h2 className="text-xl font-bold">
+              {SETTINGS_TABS.includes(tab)
+                ? `Ерөнхий тохиргоо · ${settingsSubItems.find(s => s.id === tab)?.label}`
+                : sidebarItems.find(s => s.id === tab)?.label}
+            </h2>
             <p className="text-sm text-muted-foreground mt-0.5">
               {tab === "stats" && "Дэлгүүрийн ерөнхий мэдээлэл"}
               {tab === "products" && `Нийт ${products.length} бараа`}
@@ -1065,6 +1078,29 @@ const AdminPage = () => {
             </button>
           )}
         </div>
+
+        {/* Settings sub-tab bar */}
+        {SETTINGS_TABS.includes(tab) && (
+          <div className="sticky top-0 md:top-0 z-30 bg-background/95 backdrop-blur-md border-b border-border">
+            <div className="flex overflow-x-auto no-scrollbar gap-1 px-3 md:px-8 py-2">
+              {settingsSubItems.map((s) => {
+                const Icon = s.icon;
+                const active = tab === s.id;
+                return (
+                  <button key={s.id} onClick={() => setTab(s.id)}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all shrink-0 ${
+                      active
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground bg-secondary/60 hover:bg-secondary"
+                    }`}>
+                    <Icon className="h-3.5 w-3.5" />
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="p-4 md:p-8 max-w-5xl">
           {/* Stats */}
