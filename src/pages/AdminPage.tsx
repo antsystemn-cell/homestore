@@ -143,6 +143,7 @@ const AdminPage = () => {
 
   // Search & filter
   const [searchQuery, setSearchQuery] = useState("");
+  const [userSearch, setUserSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [orderSearchPhone, setOrderSearchPhone] = useState("");
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
