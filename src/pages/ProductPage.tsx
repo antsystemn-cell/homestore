@@ -177,6 +177,7 @@ const ProductPage = () => {
           });
           setAllImages(unique);
           setActiveImg(0);
+          userInteractedRef.current = false;
 
           const rel = await fetchRelatedPublicProducts(data.category, data.id);
           setRelated((rel || []).map(mapDbProduct));
