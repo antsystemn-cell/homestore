@@ -20,6 +20,10 @@ import {
   PackageCheck,
   Clock,
   RefreshCw,
+  History,
+  ChevronDown,
+  ChevronUp,
+  Circle,
 } from "lucide-react";
 
 type Tab = "available" | "active" | "delivered";
@@ -44,18 +48,78 @@ interface Order {
   delivery_gps_lng: number | null;
 }
 
+interface StatusEvent {
+  id: string;
+  order_id: string;
+  from_status: string | null;
+  to_status: string;
+  changed_by: string | null;
+  changed_by_email: string | null;
+  note: string | null;
+  created_at: string;
+}
+
 const formatPrice = (n: number) => `${(n ?? 0).toLocaleString("mn-MN")}₮`;
 
 const STATUS_LABELS: Record<string, string> = {
+  pending: "Шинэ захиалга",
+  preparing: "Бэлдэж байна",
+  phone_confirmed: "Утсаар баталгаажсан",
   ready: "Авах бэлэн",
   out_for_delivery: "Хүргэлтэнд",
   delivered: "Хүргэгдсэн",
+  completed: "Дууссан",
+  cancelled: "Цуцалсан",
 };
 
 const STATUS_VARIANTS: Record<string, "default" | "secondary" | "outline"> = {
   ready: "secondary",
   out_for_delivery: "default",
   delivered: "outline",
+};
+
+// Timeline color coding per status
+const STATUS_DOT_CLS: Record<string, string> = {
+  pending: "bg-slate-400",
+  preparing: "bg-amber-500",
+  phone_confirmed: "bg-sky-500",
+  ready: "bg-blue-500",
+  out_for_delivery: "bg-violet-500",
+  delivered: "bg-emerald-500",
+  completed: "bg-emerald-600",
+  cancelled: "bg-red-500",
+};
+
+// Canonical order of pipeline steps for the visual timeline
+const PIPELINE: string[] = [
+  "pending",
+  "preparing",
+  "phone_confirmed",
+  "ready",
+  "out_for_delivery",
+  "delivered",
+];
+
+const formatDateTime = (iso: string) => {
+  const d = new Date(iso);
+  return d.toLocaleString("mn-MN", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const relativeTime = (iso: string) => {
+  const diff = Date.now() - new Date(iso).getTime();
+  const sec = Math.floor(diff / 1000);
+  if (sec < 60) return `${sec}с өмнө`;
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}м өмнө`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}ц өмнө`;
+  const day = Math.floor(hr / 24);
+  return `${day}ө өмнө`;
 };
 
 export default function DriverPage() {
@@ -65,6 +129,8 @@ export default function DriverPage() {
 
   const [tab, setTab] = useState<Tab>("available");
   const [orders, setOrders] = useState<Order[]>([]);
+  const [history, setHistory] = useState<StatusEvent[]>([]);
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -87,14 +153,28 @@ export default function DriverPage() {
     if (!silent) setLoading(true);
     else setRefreshing(true);
     try {
-      const { data, error } = await supabase
+      const ordersRes = await supabase
         .from("orders")
         .select("*")
         .in("status", ["ready", "out_for_delivery", "delivered"])
         .order("created_at", { ascending: false })
         .limit(200);
-      if (error) throw error;
-      setOrders((data || []) as Order[]);
+      if (ordersRes.error) throw ordersRes.error;
+      const ordersData = (ordersRes.data || []) as Order[];
+      setOrders(ordersData);
+
+      const ids = ordersData.map((o) => o.id);
+      if (ids.length) {
+        const { data: hData, error: hErr } = await supabase
+          .from("order_status_history")
+          .select("*")
+          .in("order_id", ids)
+          .order("created_at", { ascending: true });
+        if (hErr) console.warn("history fetch", hErr);
+        setHistory((hData || []) as StatusEvent[]);
+      } else {
+        setHistory([]);
+      }
     } catch (e: any) {
       console.error(e);
       toast.error("Захиалга татаж чадсангүй: " + (e.message || ""));
@@ -108,7 +188,7 @@ export default function DriverPage() {
     if (hasAccess) void fetchOrders();
   }, [hasAccess]);
 
-  // Realtime updates
+  // Realtime — orders + status history
   useEffect(() => {
     if (!hasAccess) return;
     const channel = supabase
@@ -117,6 +197,16 @@ export default function DriverPage() {
         "postgres_changes",
         { event: "*", schema: "public", table: "orders" },
         () => void fetchOrders(true)
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "order_status_history" },
+        (payload) => {
+          const ev = payload.new as StatusEvent;
+          setHistory((prev) =>
+            prev.some((e) => e.id === ev.id) ? prev : [...prev, ev]
+          );
+        }
       )
       .subscribe();
     return () => {
@@ -368,6 +458,11 @@ export default function DriverPage() {
                 onPickup={handlePickup}
                 onOpenComplete={openCompleteForm}
                 pickupSubmitting={pickupSubmitting === o.id}
+                events={history.filter((h) => h.order_id === o.id)}
+                expanded={expandedOrderId === o.id}
+                onToggleTimeline={() =>
+                  setExpandedOrderId((prev) => (prev === o.id ? null : o.id))
+                }
               />
             ))}
           </div>
@@ -475,12 +570,18 @@ function OrderCard({
   onPickup,
   onOpenComplete,
   pickupSubmitting,
+  events,
+  expanded,
+  onToggleTimeline,
 }: {
   order: Order;
   tab: Tab;
   onPickup: (o: Order) => void;
   onOpenComplete: (o: Order) => void;
   pickupSubmitting: boolean;
+  events: StatusEvent[];
+  expanded: boolean;
+  onToggleTimeline: () => void;
 }) {
   const itemCount = Array.isArray(order.items)
     ? order.items.reduce((s, it: any) => s + (it.quantity || 1), 0)
@@ -593,6 +694,111 @@ function OrderCard({
           Хүргэлт дуусгах
         </Button>
       )}
+
+      {/* Timeline toggle */}
+      <button
+        onClick={onToggleTimeline}
+        className="w-full flex items-center justify-between text-xs text-muted-foreground hover:text-foreground border-t border-border pt-3 -mb-1"
+      >
+        <span className="flex items-center gap-1.5">
+          <History className="h-3.5 w-3.5" />
+          Хөдөлгөөний түүх
+          <span className="text-[10px] bg-secondary px-1.5 py-0.5 rounded-full">{events.length}</span>
+        </span>
+        {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+      </button>
+
+      {expanded && <Timeline events={events} currentStatus={order.status} />}
+    </div>
+  );
+}
+
+function Timeline({ events, currentStatus }: { events: StatusEvent[]; currentStatus: string }) {
+  // Sort events ascending by time
+  const sorted = [...events].sort(
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  );
+
+  // Determine which pipeline steps were reached
+  const reachedSteps = new Set(sorted.map((e) => e.to_status));
+  // Also mark current status as reached
+  reachedSteps.add(currentStatus);
+
+  // Map: status -> latest event for it (for actor info & timestamp)
+  const latestByStatus: Record<string, StatusEvent> = {};
+  sorted.forEach((e) => {
+    latestByStatus[e.to_status] = e;
+  });
+
+  if (sorted.length === 0) {
+    return (
+      <p className="text-xs text-muted-foreground italic pt-2">Түүх байхгүй</p>
+    );
+  }
+
+  return (
+    <div className="pt-3 space-y-3">
+      {/* Pipeline progress strip */}
+      <div className="flex items-center gap-1">
+        {PIPELINE.map((step, idx) => {
+          const reached = reachedSteps.has(step);
+          const isCurrent = step === currentStatus;
+          return (
+            <div key={step} className="flex-1 flex items-center gap-1">
+              <div
+                className={`flex-1 h-1.5 rounded-full transition-colors ${
+                  reached ? STATUS_DOT_CLS[step] || "bg-primary" : "bg-secondary"
+                } ${isCurrent ? "ring-2 ring-offset-1 ring-offset-card ring-primary/40" : ""}`}
+                title={STATUS_LABELS[step] || step}
+              />
+              {idx < PIPELINE.length - 1 && (
+                <div className="h-1 w-1 rounded-full bg-border shrink-0" />
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Detailed event list (newest first) */}
+      <ol className="relative space-y-2.5 pl-5">
+        <span className="absolute left-[7px] top-1 bottom-1 w-px bg-border" />
+        {[...sorted].reverse().map((e, idx) => {
+          const dotCls = STATUS_DOT_CLS[e.to_status] || "bg-primary";
+          const isLatest = idx === 0;
+          const actor = e.changed_by_email || (e.changed_by ? "Систем" : "Автомат");
+          return (
+            <li key={e.id} className="relative">
+              <span
+                className={`absolute -left-5 top-1 h-3 w-3 rounded-full ${dotCls} ${
+                  isLatest ? "ring-2 ring-offset-1 ring-offset-card ring-primary/40" : ""
+                }`}
+              />
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium text-foreground">
+                    {e.from_status ? (
+                      <>
+                        <span className="text-muted-foreground">{STATUS_LABELS[e.from_status] || e.from_status}</span>
+                        <span className="text-muted-foreground mx-1">→</span>
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground">Үүссэн → </span>
+                    )}
+                    <span>{STATUS_LABELS[e.to_status] || e.to_status}</span>
+                  </p>
+                  <p className="text-[10px] text-muted-foreground truncate" title={actor}>
+                    {actor}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-[10px] text-muted-foreground">{relativeTime(e.created_at)}</p>
+                  <p className="text-[10px] text-muted-foreground/70">{formatDateTime(e.created_at)}</p>
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }
