@@ -8,6 +8,7 @@ interface AuthContextType {
   loading: boolean;
   isAdmin: boolean;
   isModerator: boolean;
+  isDriver: boolean;
   authError: boolean;
   signOut: () => Promise<void>;
 }
@@ -40,6 +41,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isModerator, setIsModerator] = useState(false);
+  const [isDriver, setIsDriver] = useState(false);
   const [authError, setAuthError] = useState(false);
 
   const checkRoles = async (userId: string) => {
