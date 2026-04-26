@@ -310,7 +310,7 @@ const ProductPage = () => {
                 {allImages.map((img, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setActiveImg(idx)}
+                    onClick={() => { userInteractedRef.current = true; setActiveImg(idx); }}
                     className={`h-14 w-14 rounded-lg overflow-hidden shrink-0 border-2 transition-colors ${
                       idx === activeImg ? "border-primary" : "border-transparent"
                     }`}
