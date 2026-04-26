@@ -810,16 +810,19 @@ const AdminPage = () => {
   const allSidebarItems: { id: Tab; label: string; icon: any }[] = [
     { id: "stats", label: "Статистик", icon: BarChart3 },
     { id: "products", label: "Бараа", icon: Package },
+    { id: "orders", label: "Захиалга", icon: ShoppingBag },
+    { id: "users", label: "Хэрэглэгч", icon: Users },
+    { id: "chatbot", label: "AI Чатбот", icon: MessageCircle },
+    { id: "settings", label: "Ерөнхий тохиргоо", icon: Settings },
+  ];
+
+  const settingsSubItems: { id: Tab; label: string; icon: any }[] = [
     { id: "categories", label: "Ангилал", icon: Layers },
     { id: "brands", label: "Брэнд", icon: Tag },
     { id: "delivery", label: "Хүргэлт", icon: Truck },
     { id: "payments", label: "Төлбөр", icon: CreditCard },
     { id: "banner", label: "Баннер", icon: Megaphone },
-    
-    { id: "orders", label: "Захиалга", icon: ShoppingBag },
     { id: "collections", label: "Багц линк", icon: Link2 },
-    { id: "chatbot", label: "AI Чатбот", icon: MessageCircle },
-    { id: "users", label: "Хэрэглэгч", icon: Users },
     { id: "analytics", label: "Хандалт", icon: Globe },
     { id: "diagnostics", label: "Оношлогоо", icon: AlertTriangle },
   ];
