@@ -982,9 +982,11 @@ const AdminPage = () => {
         <nav className="flex-1 p-4 space-y-1">
           {sidebarItems.map((item) => {
             const Icon = item.icon;
-            const active = tab === item.id;
+            const active = item.id === "settings"
+              ? (tab === "settings" || SETTINGS_TABS.includes(tab))
+              : tab === item.id;
             return (
-              <button key={item.id} onClick={() => setTab(item.id)}
+              <button key={item.id} onClick={() => setTab(item.id === "settings" ? "categories" : item.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                   active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                 }`}>
