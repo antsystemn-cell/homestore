@@ -764,12 +764,12 @@ function OrderCard({
         {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
       </button>
 
-      {expanded && <Timeline events={events} currentStatus={order.status} order={order} />}
+      {expanded && <Timeline events={events} currentStatus={order.status} order={order} onZoom={onZoom} />}
     </div>
   );
 }
 
-function Timeline({ events, currentStatus, order }: { events: StatusEvent[]; currentStatus: string; order: Order }) {
+function Timeline({ events, currentStatus, order, onZoom }: { events: StatusEvent[]; currentStatus: string; order: Order; onZoom: (url: string) => void }) {
   // Sort events ascending by time
   const sorted = [...events].sort(
     (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
