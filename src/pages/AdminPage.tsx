@@ -560,18 +560,68 @@ const AdminPage = () => {
   const fetchUsers = async () => {
     try {
       // Try admin RPC first (returns email joined from auth.users)
+      let baseUsers: any[] = [];
       const { data: rpcData, error: rpcError } = await supabase.rpc("admin_list_users");
       if (!rpcError && rpcData) {
-        setUsers(rpcData as any[]);
-        return;
+        baseUsers = rpcData as any[];
+      } else {
+        // Fallback to plain profiles read
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        baseUsers = data || [];
       }
-      // Fallback to plain profiles read
-      const { data, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
-      if (error) throw error;
-      setUsers(data || []);
+
+      // Attach roles for each user
+      const { data: rolesData, error: rolesErr } = await supabase
+        .from("user_roles")
+        .select("user_id, role");
+      if (rolesErr) console.warn("Failed to load roles", rolesErr);
+      const rolesMap: Record<string, string[]> = {};
+      (rolesData || []).forEach((r: any) => {
+        if (!rolesMap[r.user_id]) rolesMap[r.user_id] = [];
+        rolesMap[r.user_id].push(r.role);
+      });
+
+      const enriched = baseUsers.map((u: any) => ({
+        ...u,
+        roles: rolesMap[u.user_id] || [],
+      }));
+      setUsers(enriched);
     } catch (error) {
       console.error("Failed to load admin users", error);
       setUsers([]);
+    }
+  };
+
+  // Toggle a role on/off for a given user (admin only)
+  const toggleUserRole = async (
+    userId: string,
+    role: "admin" | "moderator" | "driver",
+    hasRole: boolean
+  ) => {
+    try {
+      if (hasRole) {
+        const { error } = await supabase
+          .from("user_roles")
+          .delete()
+          .eq("user_id", userId)
+          .eq("role", role);
+        if (error) throw error;
+        toast.success(`${role} эрх хасагдлаа`);
+      } else {
+        const { error } = await supabase
+          .from("user_roles")
+          .insert({ user_id: userId, role });
+        if (error) throw error;
+        toast.success(`${role} эрх олгогдлоо`);
+      }
+      await fetchUsers();
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Алдаа гарлаа: " + (e.message || ""));
     }
   };
 
