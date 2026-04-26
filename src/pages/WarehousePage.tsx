@@ -402,12 +402,108 @@ export default function WarehousePage() {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-4">
+      <main className="max-w-5xl mx-auto px-4 py-4 space-y-4">
+        {/* Auto Pick & Pack control */}
+        <div
+          className={`rounded-lg border p-3 md:p-4 transition ${
+            autoPick.enabled
+              ? "border-primary/40 bg-primary/5"
+              : "border-border bg-card"
+          }`}
+        >
+          <div className="flex items-start md:items-center gap-3 flex-col md:flex-row md:justify-between">
+            <div className="flex items-center gap-3 min-w-0">
+              <div
+                className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${
+                  autoPick.enabled
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {autoPick.enabled ? (
+                  <Zap className="h-5 w-5" />
+                ) : (
+                  <Power className="h-5 w-5" />
+                )}
+              </div>
+              <div className="min-w-0">
+                <div className="text-sm font-semibold flex items-center gap-2">
+                  Авто Pick & Pack
+                  {autoRunning && (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                  )}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {autoPick.enabled ? (
+                    <>
+                      Захиалга үүссэнээс хойш{" "}
+                      <span className="font-semibold text-foreground">
+                        {autoPick.delayMinutes} минут
+                      </span>{" "}
+                      өнгөрвөл автоматаар үлдэгдэл хасч "бэлэн" болгоно.
+                      {lastAutoRun && (
+                        <>
+                          {" · Сүүлд: "}
+                          {lastAutoRun.toLocaleTimeString("mn-MN", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
+                          })}
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    "Унтраалттай — захиалгыг гараар бэлдэнэ."
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <div className="flex items-center gap-2">
+                <Label htmlFor="auto-delay" className="text-xs whitespace-nowrap">
+                  Хүлээх (мин)
+                </Label>
+                <Input
+                  id="auto-delay"
+                  type="number"
+                  min={1}
+                  max={1440}
+                  value={autoPick.delayMinutes}
+                  onChange={(e) =>
+                    setAutoPick((s) => ({
+                      ...s,
+                      delayMinutes: Math.max(1, parseInt(e.target.value || "1", 10) || 1),
+                    }))
+                  }
+                  className="h-8 w-20"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={autoPick.enabled}
+                  onCheckedChange={(v) =>
+                    setAutoPick((s) => ({ ...s, enabled: v }))
+                  }
+                />
+                <span className="text-sm font-medium">
+                  {autoPick.enabled ? "Идэвхтэй" : "Унтраалттай"}
+                </span>
+              </div>
+            </div>
+          </div>
+          {autoPick.enabled && (
+            <p className="text-[11px] text-muted-foreground mt-2 md:mt-3 leading-relaxed">
+              ⚠️ Авто горим зөвхөн энэ хуудас нээлттэй үед ажиллана. 30 секунд тутамд шалгана.
+            </p>
+          )}
+        </div>
+
         {loading && (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         )}
+
 
         {/* DASHBOARD TAB */}
         {tab === "dashboard" && !loading && (() => {
