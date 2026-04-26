@@ -97,6 +97,25 @@ export default function WarehousePage() {
   // Per-order processing state
   const [processingOrderId, setProcessingOrderId] = useState<string | null>(null);
 
+  // Auto pick&pack settings
+  const [autoPick, setAutoPick] = useState<AutoPickSettings>(() => {
+    if (typeof window === "undefined") return DEFAULT_AUTO_PICK;
+    try {
+      const raw = localStorage.getItem(AUTO_PICK_STORAGE_KEY);
+      return raw ? { ...DEFAULT_AUTO_PICK, ...JSON.parse(raw) } : DEFAULT_AUTO_PICK;
+    } catch {
+      return DEFAULT_AUTO_PICK;
+    }
+  });
+  const [autoRunning, setAutoRunning] = useState(false);
+  const [lastAutoRun, setLastAutoRun] = useState<Date | null>(null);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(AUTO_PICK_STORAGE_KEY, JSON.stringify(autoPick));
+    } catch {}
+  }, [autoPick]);
+
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
   }, [authLoading, user, navigate]);
