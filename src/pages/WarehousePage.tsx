@@ -19,9 +19,13 @@ import {
   CheckCircle2,
   ArrowLeft,
   PackageCheck,
+  LayoutDashboard,
+  AlertTriangle,
+  TrendingDown,
 } from "lucide-react";
 
-type Tab = "orders" | "pick" | "history";
+type Tab = "dashboard" | "orders" | "pick" | "history";
+const LOW_STOCK_THRESHOLD = 5;
 
 interface Product {
   id: string;
@@ -66,7 +70,7 @@ export default function WarehousePage() {
   const { user, isAdmin, isModerator, loading: authLoading } = useAuth();
   const hasAccess = isAdmin || isModerator;
 
-  const [tab, setTab] = useState<Tab>("orders");
+  const [tab, setTab] = useState<Tab>("dashboard");
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [movements, setMovements] = useState<Movement[]>([]);
@@ -284,6 +288,7 @@ export default function WarehousePage() {
         {/* Tabs */}
         <div className="max-w-5xl mx-auto px-2 flex gap-1 overflow-x-auto border-t border-border">
           {[
+            { id: "dashboard" as Tab, label: "Хяналтын самбар", icon: LayoutDashboard },
             { id: "orders" as Tab, label: "Захиалга бэлдэх", icon: ClipboardList, count: orders.length },
             { id: "pick" as Tab, label: "Бараа гаргах", icon: PackageCheck },
             { id: "history" as Tab, label: "Түүх", icon: History },
@@ -315,6 +320,234 @@ export default function WarehousePage() {
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         )}
+
+        {/* DASHBOARD TAB */}
+        {tab === "dashboard" && !loading && (() => {
+          const todayStr = new Date().toDateString();
+          const todayMv = movements.filter(
+            (m) => new Date(m.created_at).toDateString() === todayStr,
+          );
+          const todayUnits = todayMv.reduce((a, m) => a + (m.quantity || 0), 0);
+          const lowStock = products
+            .filter((p) => p.stock_quantity <= LOW_STOCK_THRESHOLD)
+            .sort((a, b) => a.stock_quantity - b.stock_quantity)
+            .slice(0, 20);
+          const outOfStock = products.filter((p) => p.stock_quantity === 0).length;
+          const pendingItems = orders.reduce((acc, o) => {
+            const its = Array.isArray(o.items) ? o.items : [];
+            return acc + its.reduce((s: number, it: any) => s + (Number(it.quantity) || 1), 0);
+          }, 0);
+
+          return (
+            <div className="space-y-4">
+              {/* KPI cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <button
+                  onClick={() => setTab("orders")}
+                  className="text-left rounded-lg border border-border bg-card p-4 hover:border-primary transition"
+                >
+                  <div className="flex items-center justify-between">
+                    <ClipboardList className="h-5 w-5 text-primary" />
+                    <span className="text-xs text-muted-foreground">Pick & Pack</span>
+                  </div>
+                  <div className="text-2xl font-bold mt-2">{orders.length}</div>
+                  <div className="text-xs text-muted-foreground">
+                    захиалга · {pendingItems} ширхэг
+                  </div>
+                </button>
+
+                <div className="rounded-lg border border-border bg-card p-4">
+                  <div className="flex items-center justify-between">
+                    <TrendingDown className="h-5 w-5 text-primary" />
+                    <span className="text-xs text-muted-foreground">Өнөөдөр гарсан</span>
+                  </div>
+                  <div className="text-2xl font-bold mt-2">{todayUnits}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {todayMv.length} бичилт
+                  </div>
+                </div>
+
+                <button
+                  onClick={() =>
+                    document.getElementById("low-stock-list")?.scrollIntoView({ behavior: "smooth" })
+                  }
+                  className="text-left rounded-lg border border-border bg-card p-4 hover:border-destructive transition"
+                >
+                  <div className="flex items-center justify-between">
+                    <AlertTriangle className="h-5 w-5 text-destructive" />
+                    <span className="text-xs text-muted-foreground">Бага үлдэгдэл</span>
+                  </div>
+                  <div className="text-2xl font-bold mt-2 text-destructive">
+                    {lowStock.length}
+                  </div>
+                  <div className="text-xs text-muted-foreground">≤ {LOW_STOCK_THRESHOLD} ширхэг</div>
+                </button>
+
+                <div className="rounded-lg border border-border bg-card p-4">
+                  <div className="flex items-center justify-between">
+                    <Package className="h-5 w-5 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Дууссан</span>
+                  </div>
+                  <div className="text-2xl font-bold mt-2">{outOfStock}</div>
+                  <div className="text-xs text-muted-foreground">бараа нөөцгүй</div>
+                </div>
+              </div>
+
+              {/* Pick & pack queue preview */}
+              <section className="rounded-lg border border-border bg-card">
+                <header className="flex items-center justify-between px-4 py-3 border-b border-border">
+                  <h2 className="font-semibold text-sm flex items-center gap-2">
+                    <ClipboardList className="h-4 w-4" /> Бэлдэх дараалал
+                  </h2>
+                  <button
+                    onClick={() => setTab("orders")}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Бүгдийг үзэх →
+                  </button>
+                </header>
+                {orders.length === 0 ? (
+                  <div className="text-center py-8 text-sm text-muted-foreground">
+                    Бэлдэх захиалга алга
+                  </div>
+                ) : (
+                  <ul className="divide-y divide-border">
+                    {orders.slice(0, 5).map((o) => {
+                      const its = Array.isArray(o.items) ? o.items : [];
+                      const units = its.reduce(
+                        (s: number, it: any) => s + (Number(it.quantity) || 1),
+                        0,
+                      );
+                      return (
+                        <li
+                          key={o.id}
+                          className="px-4 py-3 flex items-center justify-between gap-3"
+                        >
+                          <div className="min-w-0">
+                            <div className="font-mono text-sm font-semibold">
+                              {o.order_ref ?? o.id.slice(0, 8)}
+                            </div>
+                            <div className="text-xs text-muted-foreground truncate">
+                              {o.guest_name ?? "—"} · {its.length} бараа · {units} ширхэг
+                            </div>
+                          </div>
+                          <Badge
+                            variant={o.status === "preparing" ? "default" : "secondary"}
+                            className="shrink-0"
+                          >
+                            {o.status}
+                          </Badge>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </section>
+
+              {/* Low stock alerts */}
+              <section
+                id="low-stock-list"
+                className="rounded-lg border border-border bg-card"
+              >
+                <header className="flex items-center justify-between px-4 py-3 border-b border-border">
+                  <h2 className="font-semibold text-sm flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-destructive" /> Бага үлдэгдлийн
+                    сэрэмжлүүлэг
+                  </h2>
+                  <span className="text-xs text-muted-foreground">
+                    босго: ≤ {LOW_STOCK_THRESHOLD}
+                  </span>
+                </header>
+                {lowStock.length === 0 ? (
+                  <div className="text-center py-8 text-sm text-muted-foreground">
+                    Бүх бараа хангалттай нөөцтэй ✓
+                  </div>
+                ) : (
+                  <ul className="divide-y divide-border">
+                    {lowStock.map((p) => (
+                      <li
+                        key={p.id}
+                        className="px-4 py-3 flex items-center gap-3"
+                      >
+                        <div className="w-10 h-10 rounded-md bg-muted overflow-hidden shrink-0">
+                          {(p.thumbnail_url || p.image_url) && (
+                            <img
+                              src={p.thumbnail_url || p.image_url || ""}
+                              alt={p.name}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-medium truncate">{p.name}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {p.product_code ?? "—"}
+                          </div>
+                        </div>
+                        <div
+                          className={`font-mono text-sm font-bold shrink-0 ${
+                            p.stock_quantity === 0
+                              ? "text-destructive"
+                              : "text-orange-600 dark:text-orange-400"
+                          }`}
+                        >
+                          {p.stock_quantity}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+
+              {/* Today's stock-out log */}
+              <section className="rounded-lg border border-border bg-card">
+                <header className="flex items-center justify-between px-4 py-3 border-b border-border">
+                  <h2 className="font-semibold text-sm flex items-center gap-2">
+                    <History className="h-4 w-4" /> Өнөөдрийн бараа гаргалт
+                  </h2>
+                  <button
+                    onClick={() => setTab("history")}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Бүх түүх →
+                  </button>
+                </header>
+                {todayMv.length === 0 ? (
+                  <div className="text-center py-8 text-sm text-muted-foreground">
+                    Өнөөдөр бараа гаргаагүй байна
+                  </div>
+                ) : (
+                  <ul className="divide-y divide-border">
+                    {todayMv.slice(0, 10).map((m) => (
+                      <li
+                        key={m.id}
+                        className="px-4 py-3 flex items-center justify-between gap-3"
+                      >
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium truncate">
+                            {m.product?.name ?? "—"}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(m.created_at).toLocaleTimeString("mn-MN", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}{" "}
+                            · {m.performed_by_email ?? "—"} ·{" "}
+                            {m.reason === "order_pick" ? "Захиалга" : "Гараар"}
+                          </div>
+                        </div>
+                        <div className="font-mono font-semibold text-destructive shrink-0">
+                          −{m.quantity}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            </div>
+          );
+        })()}
 
         {/* ORDERS TAB */}
         {tab === "orders" && !loading && (
