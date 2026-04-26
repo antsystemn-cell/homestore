@@ -22,10 +22,22 @@ import {
   LayoutDashboard,
   AlertTriangle,
   TrendingDown,
+  Zap,
+  Power,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 type Tab = "dashboard" | "orders" | "pick" | "history";
 const LOW_STOCK_THRESHOLD = 5;
+const AUTO_PICK_STORAGE_KEY = "warehouse_auto_pick_settings";
+const AUTO_PICK_PROCESSED_KEY = "warehouse_auto_pick_processed";
+
+interface AutoPickSettings {
+  enabled: boolean;
+  delayMinutes: number;
+}
+
+const DEFAULT_AUTO_PICK: AutoPickSettings = { enabled: false, delayMinutes: 30 };
 
 interface Product {
   id: string;
@@ -84,6 +96,25 @@ export default function WarehousePage() {
 
   // Per-order processing state
   const [processingOrderId, setProcessingOrderId] = useState<string | null>(null);
+
+  // Auto pick&pack settings
+  const [autoPick, setAutoPick] = useState<AutoPickSettings>(() => {
+    if (typeof window === "undefined") return DEFAULT_AUTO_PICK;
+    try {
+      const raw = localStorage.getItem(AUTO_PICK_STORAGE_KEY);
+      return raw ? { ...DEFAULT_AUTO_PICK, ...JSON.parse(raw) } : DEFAULT_AUTO_PICK;
+    } catch {
+      return DEFAULT_AUTO_PICK;
+    }
+  });
+  const [autoRunning, setAutoRunning] = useState(false);
+  const [lastAutoRun, setLastAutoRun] = useState<Date | null>(null);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(AUTO_PICK_STORAGE_KEY, JSON.stringify(autoPick));
+    } catch {}
+  }, [autoPick]);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
@@ -197,6 +228,41 @@ export default function WarehousePage() {
     loadAll();
   };
 
+  // Core: deduct stock for one order and mark it ready. Returns true on success.
+  const processOrderStockOut = async (
+    order: Order,
+    opts: { auto?: boolean } = {},
+  ): Promise<boolean> => {
+    if (!user) return false;
+    const items = Array.isArray(order.items) ? order.items : [];
+    const rows = items
+      .filter((it: any) => it?.product_id && it?.quantity)
+      .map((it: any) => ({
+        product_id: it.product_id as string,
+        quantity: Number(it.quantity) || 1,
+        reason: opts.auto ? "auto_pick" : "order_pick",
+        order_id: order.id,
+        note: opts.auto
+          ? `[AUTO] ${order.order_ref ?? ""}`.trim()
+          : order.order_ref ?? null,
+        performed_by: user.id,
+        performed_by_email: user.email ?? null,
+      }));
+
+    if (rows.length === 0) return false;
+
+    const { error: mvErr } = await supabase.from("stock_movements").insert(rows);
+    if (mvErr) {
+      if (!opts.auto) toast.error("Алдаа: " + mvErr.message);
+      console.error("stock_movements insert error", mvErr);
+      return false;
+    }
+
+    // Move order to "ready" (бэлдэж дууссан)
+    await supabase.from("orders").update({ status: "ready" }).eq("id", order.id);
+    return true;
+  };
+
   const completeOrderPick = async (order: Order) => {
     if (!user) return;
     const items = Array.isArray(order.items) ? order.items : [];
@@ -205,41 +271,63 @@ export default function WarehousePage() {
       return;
     }
     setProcessingOrderId(order.id);
-
-    const rows = items
-      .filter((it: any) => it?.product_id && it?.quantity)
-      .map((it: any) => ({
-        product_id: it.product_id as string,
-        quantity: Number(it.quantity) || 1,
-        reason: "order_pick",
-        order_id: order.id,
-        note: order.order_ref ?? null,
-        performed_by: user.id,
-        performed_by_email: user.email ?? null,
-      }));
-
-    if (rows.length === 0) {
-      toast.error("Бараанд product_id байхгүй байна");
-      setProcessingOrderId(null);
-      return;
-    }
-
-    const { error: mvErr } = await supabase.from("stock_movements").insert(rows);
-    if (mvErr) {
-      toast.error("Алдаа: " + mvErr.message);
-      setProcessingOrderId(null);
-      return;
-    }
-
-    // Move order to "preparing" if it isn't already
-    if (order.status !== "preparing") {
-      await supabase.from("orders").update({ status: "preparing" }).eq("id", order.id);
-    }
-
-    toast.success(`${order.order_ref ?? order.id.slice(0, 6)} захиалга бэлдлээ ✓`);
+    const ok = await processOrderStockOut(order);
     setProcessingOrderId(null);
-    loadAll();
+    if (ok) {
+      toast.success(`${order.order_ref ?? order.id.slice(0, 6)} бэлэн боллоо ✓`);
+      loadAll();
+    }
   };
+
+  // ===== Auto Pick & Pack =====
+  // Runs every 30s while the page is open. For each eligible order whose
+  // age (since created_at) >= delayMinutes, auto-deduct stock and mark ready.
+  useEffect(() => {
+    if (!autoPick.enabled || !hasAccess || !user) return;
+
+    let cancelled = false;
+    const tick = async () => {
+      if (cancelled || autoRunning) return;
+
+      const cutoff = Date.now() - autoPick.delayMinutes * 60_000;
+      // Eligible: in queue (pending/preparing/phone_confirmed) AND old enough
+      const eligible = orders.filter((o) => {
+        const t = new Date(o.created_at).getTime();
+        return (
+          ["pending", "preparing", "phone_confirmed"].includes(o.status) &&
+          t <= cutoff &&
+          Array.isArray(o.items) &&
+          o.items.length > 0
+        );
+      });
+
+      if (eligible.length === 0) return;
+
+      setAutoRunning(true);
+      let successCount = 0;
+      for (const o of eligible) {
+        const ok = await processOrderStockOut(o, { auto: true });
+        if (ok) successCount++;
+      }
+      setAutoRunning(false);
+      setLastAutoRun(new Date());
+
+      if (successCount > 0) {
+        toast.success(`Авто горим: ${successCount} захиалга бэлэн боллоо ✓`);
+        loadAll();
+      }
+    };
+
+    // Run once immediately, then every 30s
+    tick();
+    const id = setInterval(tick, 30_000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoPick.enabled, autoPick.delayMinutes, orders, hasAccess, user]);
+
 
   if (authLoading) {
     return (
@@ -314,12 +402,108 @@ export default function WarehousePage() {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-4">
+      <main className="max-w-5xl mx-auto px-4 py-4 space-y-4">
+        {/* Auto Pick & Pack control */}
+        <div
+          className={`rounded-lg border p-3 md:p-4 transition ${
+            autoPick.enabled
+              ? "border-primary/40 bg-primary/5"
+              : "border-border bg-card"
+          }`}
+        >
+          <div className="flex items-start md:items-center gap-3 flex-col md:flex-row md:justify-between">
+            <div className="flex items-center gap-3 min-w-0">
+              <div
+                className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${
+                  autoPick.enabled
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {autoPick.enabled ? (
+                  <Zap className="h-5 w-5" />
+                ) : (
+                  <Power className="h-5 w-5" />
+                )}
+              </div>
+              <div className="min-w-0">
+                <div className="text-sm font-semibold flex items-center gap-2">
+                  Авто Pick & Pack
+                  {autoRunning && (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                  )}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {autoPick.enabled ? (
+                    <>
+                      Захиалга үүссэнээс хойш{" "}
+                      <span className="font-semibold text-foreground">
+                        {autoPick.delayMinutes} минут
+                      </span>{" "}
+                      өнгөрвөл автоматаар үлдэгдэл хасч "бэлэн" болгоно.
+                      {lastAutoRun && (
+                        <>
+                          {" · Сүүлд: "}
+                          {lastAutoRun.toLocaleTimeString("mn-MN", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
+                          })}
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    "Унтраалттай — захиалгыг гараар бэлдэнэ."
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <div className="flex items-center gap-2">
+                <Label htmlFor="auto-delay" className="text-xs whitespace-nowrap">
+                  Хүлээх (мин)
+                </Label>
+                <Input
+                  id="auto-delay"
+                  type="number"
+                  min={1}
+                  max={1440}
+                  value={autoPick.delayMinutes}
+                  onChange={(e) =>
+                    setAutoPick((s) => ({
+                      ...s,
+                      delayMinutes: Math.max(1, parseInt(e.target.value || "1", 10) || 1),
+                    }))
+                  }
+                  className="h-8 w-20"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={autoPick.enabled}
+                  onCheckedChange={(v) =>
+                    setAutoPick((s) => ({ ...s, enabled: v }))
+                  }
+                />
+                <span className="text-sm font-medium">
+                  {autoPick.enabled ? "Идэвхтэй" : "Унтраалттай"}
+                </span>
+              </div>
+            </div>
+          </div>
+          {autoPick.enabled && (
+            <p className="text-[11px] text-muted-foreground mt-2 md:mt-3 leading-relaxed">
+              ⚠️ Авто горим зөвхөн энэ хуудас нээлттэй үед ажиллана. 30 секунд тутамд шалгана.
+            </p>
+          )}
+        </div>
+
         {loading && (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         )}
+
 
         {/* DASHBOARD TAB */}
         {tab === "dashboard" && !loading && (() => {
@@ -534,7 +718,11 @@ export default function WarehousePage() {
                               minute: "2-digit",
                             })}{" "}
                             · {m.performed_by_email ?? "—"} ·{" "}
-                            {m.reason === "order_pick" ? "Захиалга" : "Гараар"}
+                            {m.reason === "order_pick"
+                              ? "Захиалга"
+                              : m.reason === "auto_pick"
+                              ? "Авто"
+                              : "Гараар"}
                           </div>
                         </div>
                         <div className="font-mono font-semibold text-destructive shrink-0">
@@ -620,7 +808,7 @@ export default function WarehousePage() {
                     ) : (
                       <CheckCircle2 className="h-4 w-4 mr-2" />
                     )}
-                    Бэлдэж дууссан — Үлдэгдэл хасах
+                    Бэлэн боллоо — Үлдэгдэл хасах
                   </Button>
                 </div>
               );
@@ -762,7 +950,11 @@ export default function WarehousePage() {
                     −{m.quantity}
                   </div>
                   <Badge variant="outline" className="text-[10px] mt-1">
-                    {m.reason === "order_pick" ? "Захиалга" : "Гараар"}
+                    {m.reason === "order_pick"
+                      ? "Захиалга"
+                      : m.reason === "auto_pick"
+                      ? "Авто"
+                      : "Гараар"}
                   </Badge>
                 </div>
               </div>
