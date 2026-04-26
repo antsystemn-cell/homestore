@@ -718,7 +718,7 @@ export type Database = {
       increment_story_view: { Args: { _story_id: string }; Returns: undefined }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "driver"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -846,7 +846,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "driver"],
     },
   },
 } as const
