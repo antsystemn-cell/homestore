@@ -1050,7 +1050,11 @@ const AdminPage = () => {
         {/* Desktop Header */}
         <div className="hidden md:flex items-center justify-between px-8 py-6 border-b border-border bg-card">
           <div>
-            <h2 className="text-xl font-bold">{sidebarItems.find(s => s.id === tab)?.label}</h2>
+            <h2 className="text-xl font-bold">
+              {SETTINGS_TABS.includes(tab)
+                ? `Ерөнхий тохиргоо · ${settingsSubItems.find(s => s.id === tab)?.label}`
+                : sidebarItems.find(s => s.id === tab)?.label}
+            </h2>
             <p className="text-sm text-muted-foreground mt-0.5">
               {tab === "stats" && "Дэлгүүрийн ерөнхий мэдээлэл"}
               {tab === "products" && `Нийт ${products.length} бараа`}
@@ -1074,6 +1078,29 @@ const AdminPage = () => {
             </button>
           )}
         </div>
+
+        {/* Settings sub-tab bar */}
+        {SETTINGS_TABS.includes(tab) && (
+          <div className="sticky top-0 md:top-0 z-30 bg-background/95 backdrop-blur-md border-b border-border">
+            <div className="flex overflow-x-auto no-scrollbar gap-1 px-3 md:px-8 py-2">
+              {settingsSubItems.map((s) => {
+                const Icon = s.icon;
+                const active = tab === s.id;
+                return (
+                  <button key={s.id} onClick={() => setTab(s.id)}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all shrink-0 ${
+                      active
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground bg-secondary/60 hover:bg-secondary"
+                    }`}>
+                    <Icon className="h-3.5 w-3.5" />
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="p-4 md:p-8 max-w-5xl">
           {/* Stats */}
