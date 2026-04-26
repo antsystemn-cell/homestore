@@ -228,6 +228,41 @@ export default function WarehousePage() {
     loadAll();
   };
 
+  // Core: deduct stock for one order and mark it ready. Returns true on success.
+  const processOrderStockOut = async (
+    order: Order,
+    opts: { auto?: boolean } = {},
+  ): Promise<boolean> => {
+    if (!user) return false;
+    const items = Array.isArray(order.items) ? order.items : [];
+    const rows = items
+      .filter((it: any) => it?.product_id && it?.quantity)
+      .map((it: any) => ({
+        product_id: it.product_id as string,
+        quantity: Number(it.quantity) || 1,
+        reason: opts.auto ? "auto_pick" : "order_pick",
+        order_id: order.id,
+        note: opts.auto
+          ? `[AUTO] ${order.order_ref ?? ""}`.trim()
+          : order.order_ref ?? null,
+        performed_by: user.id,
+        performed_by_email: user.email ?? null,
+      }));
+
+    if (rows.length === 0) return false;
+
+    const { error: mvErr } = await supabase.from("stock_movements").insert(rows);
+    if (mvErr) {
+      if (!opts.auto) toast.error("Алдаа: " + mvErr.message);
+      console.error("stock_movements insert error", mvErr);
+      return false;
+    }
+
+    // Move order to "ready" (бэлдэж дууссан)
+    await supabase.from("orders").update({ status: "ready" }).eq("id", order.id);
+    return true;
+  };
+
   const completeOrderPick = async (order: Order) => {
     if (!user) return;
     const items = Array.isArray(order.items) ? order.items : [];
@@ -236,41 +271,63 @@ export default function WarehousePage() {
       return;
     }
     setProcessingOrderId(order.id);
-
-    const rows = items
-      .filter((it: any) => it?.product_id && it?.quantity)
-      .map((it: any) => ({
-        product_id: it.product_id as string,
-        quantity: Number(it.quantity) || 1,
-        reason: "order_pick",
-        order_id: order.id,
-        note: order.order_ref ?? null,
-        performed_by: user.id,
-        performed_by_email: user.email ?? null,
-      }));
-
-    if (rows.length === 0) {
-      toast.error("Бараанд product_id байхгүй байна");
-      setProcessingOrderId(null);
-      return;
-    }
-
-    const { error: mvErr } = await supabase.from("stock_movements").insert(rows);
-    if (mvErr) {
-      toast.error("Алдаа: " + mvErr.message);
-      setProcessingOrderId(null);
-      return;
-    }
-
-    // Move order to "preparing" if it isn't already
-    if (order.status !== "preparing") {
-      await supabase.from("orders").update({ status: "preparing" }).eq("id", order.id);
-    }
-
-    toast.success(`${order.order_ref ?? order.id.slice(0, 6)} захиалга бэлдлээ ✓`);
+    const ok = await processOrderStockOut(order);
     setProcessingOrderId(null);
-    loadAll();
+    if (ok) {
+      toast.success(`${order.order_ref ?? order.id.slice(0, 6)} бэлэн боллоо ✓`);
+      loadAll();
+    }
   };
+
+  // ===== Auto Pick & Pack =====
+  // Runs every 30s while the page is open. For each eligible order whose
+  // age (since created_at) >= delayMinutes, auto-deduct stock and mark ready.
+  useEffect(() => {
+    if (!autoPick.enabled || !hasAccess || !user) return;
+
+    let cancelled = false;
+    const tick = async () => {
+      if (cancelled || autoRunning) return;
+
+      const cutoff = Date.now() - autoPick.delayMinutes * 60_000;
+      // Eligible: in queue (pending/preparing/phone_confirmed) AND old enough
+      const eligible = orders.filter((o) => {
+        const t = new Date(o.created_at).getTime();
+        return (
+          ["pending", "preparing", "phone_confirmed"].includes(o.status) &&
+          t <= cutoff &&
+          Array.isArray(o.items) &&
+          o.items.length > 0
+        );
+      });
+
+      if (eligible.length === 0) return;
+
+      setAutoRunning(true);
+      let successCount = 0;
+      for (const o of eligible) {
+        const ok = await processOrderStockOut(o, { auto: true });
+        if (ok) successCount++;
+      }
+      setAutoRunning(false);
+      setLastAutoRun(new Date());
+
+      if (successCount > 0) {
+        toast.success(`Авто горим: ${successCount} захиалга бэлэн боллоо ✓`);
+        loadAll();
+      }
+    };
+
+    // Run once immediately, then every 30s
+    tick();
+    const id = setInterval(tick, 30_000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoPick.enabled, autoPick.delayMinutes, orders, hasAccess, user]);
+
 
   if (authLoading) {
     return (
