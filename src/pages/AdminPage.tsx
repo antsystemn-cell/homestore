@@ -805,7 +805,15 @@ const AdminPage = () => {
 
   const categories = [...new Set(products.map((p) => p.category))];
 
-  const moderatorTabs: Tab[] = ["stats", "delivery", "orders"];
+  const moderatorTabs: Tab[] = ["orders"];
+
+  // Moderator only sees orders — auto-switch if they land on a non-allowed tab
+  useEffect(() => {
+    if (!isAdmin && isModerator && !moderatorTabs.includes(tab)) {
+      setTab("orders");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin, isModerator]);
 
   const allSidebarItems: { id: Tab; label: string; icon: any }[] = [
     { id: "stats", label: "Статистик", icon: BarChart3 },
