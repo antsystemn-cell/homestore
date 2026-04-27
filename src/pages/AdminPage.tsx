@@ -2099,13 +2099,17 @@ const AdminPage = () => {
                             onChange={(e) => updateOrderStatus(o.id, e.target.value)}
                             className={`text-xs font-bold px-3 py-2 rounded-xl border border-border cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 ${statusColors[o.status] || "bg-secondary text-muted-foreground"}`}
                           >
-                            {Object.entries(statusLabels).map(([value, label]) => (
+                            {(isModerator && !isAdmin
+                              ? (["pending", "phone_confirmed", "confirmed"] as const).map((value) => [value, statusLabels[value]] as const)
+                              : Object.entries(statusLabels)
+                            ).map(([value, label]) => (
                               <option key={value} value={value}>{label}</option>
                             ))}
                           </select>
                         </div>
 
-                        {/* Delivery Photos */}
+                        {/* Delivery Photos — admin only */}
+                        {isAdmin && (
                         <div>
                           <h4 className="text-xs font-bold text-muted-foreground mb-2">Хүргэлтийн зургууд</h4>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -2154,6 +2158,7 @@ const AdminPage = () => {
                             </div>
                           </div>
                         </div>
+                        )}
                       </div>
                     )}
                   </div>
