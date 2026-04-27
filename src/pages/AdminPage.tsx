@@ -36,7 +36,7 @@ const AdminPage = () => {
   const navigate = useNavigate();
   const { isAdmin, isModerator, loading: authLoading, authError } = useAuth();
   const hasAdminAccess = isAdmin || isModerator;
-  const [tab, setTab] = useState<Tab>(isModerator && !isAdmin ? "orders" : "stats");
+  const [tab, setTab] = useState<Tab>("stats");
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
