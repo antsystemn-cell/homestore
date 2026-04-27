@@ -1059,6 +1059,283 @@ const AdminPage = () => {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Manual External Order Modal */}
+      {showManualOrder && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto" onClick={() => !manualSubmitting && setShowManualOrder(false)}>
+          <div className="bg-card rounded-2xl border border-border w-full max-w-2xl my-8 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 bg-card border-b border-border px-5 py-4 flex items-center justify-between">
+              <h2 className="text-lg font-bold">Гадны борлуулалт бүртгэх</h2>
+              <button onClick={() => !manualSubmitting && setShowManualOrder(false)} className="p-1 rounded-lg hover:bg-secondary">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-5 space-y-5">
+              {/* Source */}
+              <div>
+                <label className="text-xs font-bold text-muted-foreground mb-2 block">Эх сурвалж *</label>
+                <div className="grid grid-cols-5 gap-2">
+                  {([
+                    { v: "facebook", l: "📘 Facebook" },
+                    { v: "phone", l: "📞 Утас" },
+                    { v: "instagram", l: "📷 Instagram" },
+                    { v: "store", l: "🏬 Дэлгүүр" },
+                    { v: "other", l: "Бусад" },
+                  ] as const).map((opt) => (
+                    <button
+                      key={opt.v}
+                      type="button"
+                      onClick={() => setManualForm((f) => ({ ...f, source: opt.v }))}
+                      className={`text-xs font-bold px-2 py-2 rounded-xl border transition-colors ${
+                        manualForm.source === opt.v
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-secondary border-border hover:border-primary/40"
+                      }`}
+                    >
+                      {opt.l}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  value={manualForm.source_note}
+                  onChange={(e) => setManualForm((f) => ({ ...f, source_note: e.target.value }))}
+                  placeholder="Тэмдэглэл (жишээ: Messenger хэлэлцээр, FB пост гэх мэт)"
+                  className="mt-2 w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              {/* Customer */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Хэрэглэгчийн нэр *</label>
+                  <input
+                    type="text"
+                    value={manualForm.customer_name}
+                    onChange={(e) => setManualForm((f) => ({ ...f, customer_name: e.target.value }))}
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Утас *</label>
+                  <input
+                    type="tel"
+                    value={manualForm.phone}
+                    onChange={(e) => setManualForm((f) => ({ ...f, phone: e.target.value }))}
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+              </div>
+
+              {/* Address */}
+              <div>
+                <label className="text-xs font-bold text-muted-foreground mb-1 block">Хүргэлтийн хаяг</label>
+                <textarea
+                  value={manualForm.shipping_address}
+                  onChange={(e) => setManualForm((f) => ({ ...f, shipping_address: e.target.value }))}
+                  rows={2}
+                  placeholder="Дүүрэг, хороо, байр, орц, тоот..."
+                  className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              {/* Delivery */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Хүргэлтийн сонголт</label>
+                  <select
+                    value={manualForm.delivery_option_id}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      const opt = deliveryOptions.find((d: any) => d.id === id);
+                      setManualForm((f) => ({ ...f, delivery_option_id: id, delivery_fee: opt ? Number(opt.price) || 0 : f.delivery_fee }));
+                    }}
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="">— Сонгох —</option>
+                    {deliveryOptions.map((d: any) => (
+                      <option key={d.id} value={d.id}>{d.name} ({formatPrice(Number(d.price) || 0)})</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Хүргэлтийн төлбөр (₮)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={manualForm.delivery_fee}
+                    onChange={(e) => setManualForm((f) => ({ ...f, delivery_fee: Number(e.target.value) || 0 }))}
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+              </div>
+
+              {/* Products */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-bold text-muted-foreground">Бараанууд *</label>
+                  <span className="text-xs text-muted-foreground">{manualItems.length} төрөл</span>
+                </div>
+
+                {/* Product picker */}
+                <div className="relative mb-2">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={manualProductSearch}
+                    onChange={(e) => setManualProductSearch(e.target.value)}
+                    placeholder="Бараа хайх (нэр / SKU)..."
+                    className="w-full rounded-xl bg-secondary pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                {manualProductSearch.trim() && (
+                  <div className="border border-border rounded-xl max-h-48 overflow-y-auto mb-2">
+                    {products
+                      .filter((p) => {
+                        const q = manualProductSearch.toLowerCase();
+                        return p.name.toLowerCase().includes(q) || (p.product_code || "").toLowerCase().includes(q);
+                      })
+                      .slice(0, 20)
+                      .map((p) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => {
+                            setManualItems((prev) => {
+                              const existing = prev.find((it) => it.product_id === p.id);
+                              if (existing) {
+                                return prev.map((it) => it.product_id === p.id ? { ...it, quantity: it.quantity + 1 } : it);
+                              }
+                              return [...prev, {
+                                product_id: p.id,
+                                name: p.name,
+                                price: p.price,
+                                quantity: 1,
+                                product_code: p.product_code,
+                                image: p.thumbnail_url || p.image_url,
+                              }];
+                            });
+                            setManualProductSearch("");
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-secondary text-left border-b border-border last:border-b-0"
+                        >
+                          {(p.thumbnail_url || p.image_url) && (
+                            <img src={p.thumbnail_url || p.image_url} alt="" className="w-8 h-8 rounded object-cover bg-secondary" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium truncate">{p.name}</p>
+                            <p className="text-[10px] text-muted-foreground">{p.product_code || "—"} · {formatPrice(p.price)}</p>
+                          </div>
+                        </button>
+                      ))}
+                  </div>
+                )}
+
+                {/* Selected items */}
+                <div className="space-y-2">
+                  {manualItems.map((it, idx) => (
+                    <div key={idx} className="flex items-center gap-2 bg-secondary/40 rounded-xl p-2">
+                      {it.image && <img src={it.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-secondary" />}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium truncate">{it.name}</p>
+                        <p className="text-[10px] text-muted-foreground">{formatPrice(it.price)} × {it.quantity}</p>
+                      </div>
+                      <input
+                        type="number"
+                        min={1}
+                        value={it.quantity}
+                        onChange={(e) => {
+                          const q = Math.max(1, Number(e.target.value) || 1);
+                          setManualItems((prev) => prev.map((p, i) => i === idx ? { ...p, quantity: q } : p));
+                        }}
+                        className="w-16 rounded-lg bg-card border border-border px-2 py-1 text-xs text-center"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setManualItems((prev) => prev.filter((_, i) => i !== idx))}
+                        className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                  {manualItems.length === 0 && (
+                    <p className="text-center text-xs text-muted-foreground py-3 border border-dashed border-border rounded-xl">
+                      Дээрх хайлтаас бараа сонгоно уу
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Payment & status */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Төлбөрийн суваг</label>
+                  <select
+                    value={manualForm.payment_method}
+                    onChange={(e) => setManualForm((f) => ({ ...f, payment_method: e.target.value }))}
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="cash">Бэлнээр</option>
+                    <option value="qpay">QPay</option>
+                    <option value="storepay">Storepay</option>
+                    <option value="transfer">Шилжүүлэг</option>
+                    <option value="pocket">Pocket</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Төлбөрийн төлөв</label>
+                  <select
+                    value={manualForm.payment_status}
+                    onChange={(e) => setManualForm((f) => ({ ...f, payment_status: e.target.value as any }))}
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="unpaid">Төлөгдөөгүй</option>
+                    <option value="confirmed">Төлбөр орсон</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Захиалгын төлөв</label>
+                  <select
+                    value={manualForm.status}
+                    onChange={(e) => setManualForm((f) => ({ ...f, status: e.target.value as any }))}
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="pending">Хүлээгдэж буй</option>
+                    <option value="phone_confirmed">Утсаар баталгаажуулсан</option>
+                    <option value="confirmed">Төлбөр орсон</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Total */}
+              <div className="bg-secondary/50 rounded-xl p-3 space-y-1 text-sm">
+                <div className="flex justify-between"><span className="text-muted-foreground">Бараа:</span><span className="font-medium">{formatPrice(manualSubtotal)}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Хүргэлт:</span><span className="font-medium">{formatPrice(Number(manualForm.delivery_fee) || 0)}</span></div>
+                <div className="flex justify-between border-t border-border pt-1 mt-1"><span className="font-bold">Нийт:</span><span className="font-bold text-primary">{formatPrice(manualTotal)}</span></div>
+              </div>
+            </div>
+
+            <div className="sticky bottom-0 bg-card border-t border-border px-5 py-3 flex items-center justify-end gap-2">
+              <button
+                onClick={() => setShowManualOrder(false)}
+                disabled={manualSubmitting}
+                className="px-4 py-2 rounded-xl bg-secondary text-sm font-medium hover:bg-secondary/80 disabled:opacity-50"
+              >
+                Болих
+              </button>
+              <button
+                onClick={handleCreateManualOrder}
+                disabled={manualSubmitting}
+                className="px-5 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow hover:opacity-90 disabled:opacity-50 inline-flex items-center gap-2"
+              >
+                {manualSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                Бүртгэх
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       <aside className="hidden md:flex md:flex-col md:w-64 bg-card border-r border-border min-h-screen sticky top-0">
         <div className="p-6 border-b border-border">
