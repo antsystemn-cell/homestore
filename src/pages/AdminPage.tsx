@@ -429,6 +429,72 @@ const AdminPage = () => {
     setDeletingOrder(false);
   };
 
+  const resetManualForm = () => {
+    setManualForm({
+      source: "facebook",
+      source_note: "",
+      customer_name: "",
+      phone: "",
+      shipping_address: "",
+      delivery_option_id: "",
+      delivery_fee: 0,
+      payment_method: "cash",
+      payment_status: "unpaid",
+      status: "pending",
+      note: "",
+    });
+    setManualItems([]);
+    setManualProductSearch("");
+  };
+
+  const manualSubtotal = manualItems.reduce((s, it) => s + (it.price * it.quantity), 0);
+  const manualTotal = manualSubtotal + (Number(manualForm.delivery_fee) || 0);
+
+  const handleCreateManualOrder = async () => {
+    if (!manualForm.customer_name.trim()) { toast.error("Хэрэглэгчийн нэр оруулна уу"); return; }
+    if (!manualForm.phone.trim()) { toast.error("Утасны дугаар оруулна уу"); return; }
+    if (manualItems.length === 0) { toast.error("Дор хаяж 1 бараа нэмнэ үү"); return; }
+
+    setManualSubmitting(true);
+    try {
+      const items = manualItems.map((it) => ({
+        product_id: it.product_id,
+        name: it.name,
+        price: it.price,
+        quantity: it.quantity,
+        product_code: it.product_code || null,
+        image: it.image || null,
+      }));
+      const payload: any = {
+        items,
+        total: manualTotal,
+        status: manualForm.status,
+        phone: manualForm.phone.trim(),
+        shipping_address: manualForm.shipping_address.trim() || null,
+        delivery_option_id: manualForm.delivery_option_id || null,
+        delivery_fee: Number(manualForm.delivery_fee) || 0,
+        payment_method: manualForm.payment_method,
+        payment_status: manualForm.payment_status,
+        is_guest: true,
+        guest_name: manualForm.customer_name.trim(),
+        source: manualForm.source,
+        source_note: manualForm.source_note.trim() || null,
+        user_id: null,
+      };
+      const { data, error } = await supabase.from("orders").insert(payload).select().single();
+      if (error) throw error;
+      toast.success("Гадны захиалга амжилттай бүртгэгдлээ");
+      setOrders((prev) => [data, ...prev]);
+      setShowManualOrder(false);
+      resetManualForm();
+    } catch (e: any) {
+      console.error("Manual order create error", e);
+      toast.error("Захиалга үүсгэхэд алдаа: " + (e?.message || "тодорхойгүй"));
+    } finally {
+      setManualSubmitting(false);
+    }
+  };
+
   const paymentMethodLabels: Record<string, { label: string; color: string }> = {
     storepay: { label: "Storepay", color: "bg-purple-500/10 text-purple-600" },
     qpay: { label: "QPay", color: "bg-blue-500/10 text-blue-600" },
