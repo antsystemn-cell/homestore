@@ -20,8 +20,36 @@ const AuthPage = () => {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showReset, setShowReset] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
   const navigate = useNavigate();
   const { authError } = useAuth();
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail.trim()) {
+      toast.error("Имэйл хаягаа оруулна уу");
+      return;
+    }
+    setResetLoading(true);
+    try {
+      const result = await withTimeout(
+        supabase.auth.resetPasswordForEmail(resetEmail, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        })
+      );
+      if (!result) throw new Error("Request timeout");
+      if (result.error) throw result.error;
+      toast.success("Сэргээх линкийг имэйл рүү тань илгээлээ");
+      setShowReset(false);
+      setResetEmail("");
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setResetLoading(false);
+    }
+  };
 
   const getErrorMessage = (error: unknown) => {
     if (error instanceof Error && error.message) {
