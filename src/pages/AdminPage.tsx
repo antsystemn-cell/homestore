@@ -151,6 +151,25 @@ const AdminPage = () => {
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
   const [showXlsxHelp, setShowXlsxHelp] = useState(false);
 
+  // Manual (external) order modal
+  const [showManualOrder, setShowManualOrder] = useState(false);
+  const [manualSubmitting, setManualSubmitting] = useState(false);
+  const [manualForm, setManualForm] = useState({
+    source: "facebook" as "facebook" | "phone" | "instagram" | "store" | "other",
+    source_note: "",
+    customer_name: "",
+    phone: "",
+    shipping_address: "",
+    delivery_option_id: "",
+    delivery_fee: 0,
+    payment_method: "cash",
+    payment_status: "unpaid" as "unpaid" | "confirmed",
+    status: "pending" as "pending" | "phone_confirmed" | "confirmed",
+    note: "",
+  });
+  const [manualItems, setManualItems] = useState<{ product_id: string; name: string; price: number; quantity: number; product_code?: string; image?: string; }[]>([]);
+  const [manualProductSearch, setManualProductSearch] = useState("");
+
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
