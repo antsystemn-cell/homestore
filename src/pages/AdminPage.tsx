@@ -1883,6 +1883,20 @@ const AdminPage = () => {
           {/* Orders */}
           {tab === "orders" && (
             <div className="space-y-3">
+              {/* Manual external order */}
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <p className="text-xs text-muted-foreground">
+                  Facebook, утас гэх мэт сувгаар орж ирсэн борлуулалтыг "Гадны захиалга" товчоор бүртгэнэ үү.
+                </p>
+                <button
+                  onClick={() => { resetManualForm(); setShowManualOrder(true); }}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow hover:opacity-90 transition-opacity"
+                >
+                  <Plus className="h-4 w-4" />
+                  Гадны захиалга
+                </button>
+              </div>
+
               {/* Phone search */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
