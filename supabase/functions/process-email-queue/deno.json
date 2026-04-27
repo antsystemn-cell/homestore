@@ -1,1 +1,6 @@
-{}
+{
+  "imports": {
+    "@lovable.dev/email-js": "npm:@lovable.dev/email-js@^0.1.0"
+  },
+  "nodeModulesDir": "auto"
+}
