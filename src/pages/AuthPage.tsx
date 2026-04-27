@@ -255,6 +255,54 @@ const AuthPage = () => {
           {formContent}
         </div>
       </div>
+
+      {showReset && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+          onClick={() => !resetLoading && setShowReset(false)}
+        >
+          <div
+            className="w-full max-w-sm bg-background rounded-2xl p-6 shadow-xl border border-border"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold mb-2">Нууц үг сэргээх</h3>
+            <p className="text-sm text-muted-foreground mb-5">
+              Бүртгэлтэй имэйл хаягаа оруулна уу. Сэргээх линкийг илгээх болно.
+            </p>
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="email"
+                  placeholder="Имэйл хаяг"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  className="w-full rounded-xl bg-secondary pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  required
+                  autoFocus
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowReset(false)}
+                  disabled={resetLoading}
+                  className="flex-1 rounded-xl bg-secondary py-3 text-sm font-semibold hover:bg-secondary/80 transition-colors disabled:opacity-50"
+                >
+                  Цуцлах
+                </button>
+                <button
+                  type="submit"
+                  disabled={resetLoading}
+                  className="flex-1 rounded-xl bg-primary text-primary-foreground py-3 text-sm font-bold hover:bg-primary/90 transition-colors disabled:opacity-50"
+                >
+                  {resetLoading ? "Илгээж байна..." : "Илгээх"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
