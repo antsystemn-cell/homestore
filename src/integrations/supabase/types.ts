@@ -194,6 +194,8 @@ export type Database = {
           phone: string | null
           picked_up_at: string | null
           shipping_address: string | null
+          source: string
+          source_note: string | null
           status: string
           total: number
           updated_at: string
@@ -225,6 +227,8 @@ export type Database = {
           phone?: string | null
           picked_up_at?: string | null
           shipping_address?: string | null
+          source?: string
+          source_note?: string | null
           status?: string
           total?: number
           updated_at?: string
@@ -256,6 +260,8 @@ export type Database = {
           phone?: string | null
           picked_up_at?: string | null
           shipping_address?: string | null
+          source?: string
+          source_note?: string | null
           status?: string
           total?: number
           updated_at?: string
