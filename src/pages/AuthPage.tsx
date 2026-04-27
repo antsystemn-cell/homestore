@@ -160,6 +160,15 @@ const AuthPage = () => {
           className="w-full bg-primary text-primary-foreground rounded-xl py-3 text-sm font-bold disabled:opacity-50 hover:bg-primary/90 transition-colors">
           {loading ? "Уншиж байна..." : isLogin ? "Нэвтрэх" : "Бүртгүүлэх"}
         </button>
+        {isLogin && (
+          <button
+            type="button"
+            onClick={() => { setResetEmail(email); setShowReset(true); }}
+            className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors text-center"
+          >
+            Нууц үгээ мартсан уу?
+          </button>
+        )}
       </form>
 
       <div className="my-6 flex items-center gap-3">
