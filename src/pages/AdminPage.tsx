@@ -2038,6 +2038,14 @@ const AdminPage = () => {
                           <span>{o.phone || "—"}</span>
                           <span>{new Date(o.created_at).toLocaleDateString("mn-MN")} {new Date(o.created_at).toLocaleTimeString("mn-MN", { hour: "2-digit", minute: "2-digit" })}</span>
                           {o.is_guest && <span className="text-[10px] bg-secondary px-1.5 py-0.5 rounded">Зочин{o.guest_name ? `: ${o.guest_name}` : ""}</span>}
+                          {o.source && o.source !== "web" && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-600">
+                              {o.source === "facebook" ? "📘 Facebook" :
+                               o.source === "phone" ? "📞 Утас" :
+                               o.source === "instagram" ? "📷 Instagram" :
+                               o.source === "store" ? "🏬 Дэлгүүр" : "Бусад"}
+                            </span>
+                          )}
                         </div>
                         {delOpt && (
                           <div className="flex items-center gap-1.5 mt-1">
