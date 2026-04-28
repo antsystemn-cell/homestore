@@ -1,5 +1,5 @@
 // Захиалгын мэдээллийг хэвлэх туслах функц
-// Цэвэр, минимал нэг хуудсан delivery slip загвар
+// A4 цаасан дээр нэг хүргэлт эсвэл 8 хүргэлтийг (4x2 grid) багтаасан загвар
 
 interface PrintItem {
   name?: string;
@@ -29,78 +29,91 @@ const esc = (s: string) =>
 
 const mnt = (n: number) => `${(n ?? 0).toLocaleString("mn-MN")}₮`;
 
-export function printOrder(order: PrintOrder) {
+// Нэг slip-ийн HTML үүсгэх (A4 4x2 grid дотор багтах хэмжээтэй)
+function buildSlip(order: PrintOrder): string {
   const items: PrintItem[] = Array.isArray(order.items) ? order.items : [];
   const ref = order.order_ref || order.id?.slice(0, 8) || "—";
   const date = order.created_at
-    ? new Date(order.created_at).toLocaleString("mn-MN", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
+    ? new Date(order.created_at).toLocaleDateString("mn-MN", { year: "2-digit", month: "2-digit", day: "2-digit" })
     : "";
 
+  // Багтаах ёстой тул барааны нэрийг товчилно
   const rows = items
-    .map((it, i) => {
+    .slice(0, 6)
+    .map((it) => {
       const qty = Number(it.quantity) || 1;
-      const price = Number(it.price) || 0;
       const code = it.product_code || it.sku || "";
-      const parts = [it.color, it.size].filter(Boolean).join(" / ");
-      return `<tr>
-        <td>${i + 1}</td>
-        <td>${esc(it.name || "—")}${code ? `<br><span class="sm">${esc(code)}</span>` : ""}${parts ? `<br><span class="sm">${esc(parts)}</span>` : ""}</td>
-        <td class="r">${qty}</td>
-        <td class="r">${mnt(price)}</td>
-        <td class="r">${mnt(price * qty)}</td>
-      </tr>`;
+      const parts = [it.color, it.size].filter(Boolean).join("/");
+      const meta = [code, parts].filter(Boolean).join(" · ");
+      const name = (it.name || "—").length > 32 ? (it.name || "").slice(0, 32) + "…" : it.name || "—";
+      return `<tr><td>${esc(name)}${meta ? `<span class="m"> ${esc(meta)}</span>` : ""}</td><td class="r">${qty}</td></tr>`;
     })
     .join("");
 
+  const more = items.length > 6 ? `<tr><td colspan="2" class="m" style="text-align:center">+${items.length - 6} бараа…</td></tr>` : "";
+
   const subtotal = items.reduce((s, it) => s + (Number(it.price) || 0) * (Number(it.quantity) || 1), 0);
   const fee = Number(order.delivery_fee) || 0;
+  const total = order.total ?? subtotal + fee;
 
-  const html = `<!doctype html><html lang="mn"><head><meta charset="utf-8"/>
-<title>${esc(ref)}</title>
-<style>
+  return `<div class="slip">
+    <div class="sh">
+      <div class="brand">EasyShop</div>
+      <div class="ref"><b>${esc(ref)}</b>${date ? `<span class="m"> · ${esc(date)}</span>` : ""}</div>
+    </div>
+    <div class="who">
+      <div><b>${esc(order.guest_name || "—")}</b> · ${esc(order.phone || "—")}</div>
+      <div class="addr">${esc(order.shipping_address || "—")}</div>
+    </div>
+    <table>
+      <thead><tr><th>Бараа</th><th class="r" style="width:24px">Тоо</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="2" class="m" style="text-align:center">—</td></tr>'}${more}</tbody>
+    </table>
+    <div class="tot">
+      <span>Нийт ${items.reduce((s, it) => s + (Number(it.quantity) || 1), 0)} ширхэг</span>
+      <b>${mnt(total)}</b>
+    </div>
+    ${order.source_note ? `<div class="note">${esc(order.source_note.slice(0, 80))}</div>` : ""}
+  </div>`;
+}
+
+// Нийтлэг CSS — A4 (210x297mm), 4 мөр × 2 багана = 8 slip
+const STYLES = `
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:system-ui,-apple-system,Arial,sans-serif;color:#000;font-size:11px;padding:10mm}
-.hdr{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:6px;border-bottom:1.5px solid #000;margin-bottom:8px}
-.brand{font-size:15px;font-weight:800;letter-spacing:-.3px}
-.ref{text-align:right;font-size:10px}
-.ref b{display:block;font-size:13px;font-family:monospace}
-.info{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;font-size:10px}
-.info div{border:1px solid #ccc;border-radius:4px;padding:6px 8px}
-.info .lbl{font-size:8px;text-transform:uppercase;letter-spacing:.5px;color:#666;margin-bottom:2px}
-table{width:100%;border-collapse:collapse;margin-bottom:6px}
-th{background:#f0f0f0;font-size:8px;text-transform:uppercase;letter-spacing:.3px;padding:4px;text-align:left;border-bottom:1px solid #000}
-td{padding:4px;border-bottom:1px solid #eee;vertical-align:top;font-size:10px}
+body{font-family:system-ui,-apple-system,Arial,sans-serif;color:#000;font-size:9px;background:#fff}
+@page{size:A4;margin:0}
+.sheet{width:210mm;min-height:297mm;padding:6mm;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,1fr);gap:3mm;page-break-after:always}
+.sheet:last-child{page-break-after:auto}
+.slip{border:1px dashed #999;border-radius:3px;padding:4mm;display:flex;flex-direction:column;overflow:hidden;height:69mm}
+.sh{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #000;padding-bottom:2px;margin-bottom:3px}
+.brand{font-size:11px;font-weight:800;letter-spacing:-.3px}
+.ref{font-size:8px;text-align:right}
+.ref b{font-family:monospace;font-size:10px}
+.who{font-size:9px;margin-bottom:3px;line-height:1.3}
+.who .addr{color:#333;font-size:8px;margin-top:1px}
+table{width:100%;border-collapse:collapse;margin-bottom:auto;flex:1}
+th{font-size:7px;text-transform:uppercase;letter-spacing:.3px;padding:2px 0;text-align:left;border-bottom:1px solid #ccc;color:#666;font-weight:600}
+td{padding:1.5px 0;border-bottom:1px dotted #eee;vertical-align:top;font-size:8.5px;line-height:1.25}
 .r{text-align:right}
-.sm{font-size:8px;color:#666}
-.totals{width:200px;margin-left:auto;font-size:10px}
-.totals .row{display:flex;justify-content:space-between;padding:2px 0}
-.totals .total{border-top:1.5px solid #000;margin-top:3px;padding-top:4px;font-size:12px;font-weight:800}
-.note{margin-top:6px;padding:5px 8px;border-left:2px solid #f59e0b;background:#fffbeb;font-size:9px;border-radius:2px}
-.ft{margin-top:10px;text-align:center;font-size:8px;color:#999;border-top:1px dashed #ccc;padding-top:6px}
-@media print{body{padding:8mm}button{display:none!important}}
-.actions{position:fixed;top:8px;right:8px;display:flex;gap:6px}
+.m{font-size:7px;color:#777}
+.tot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #000;padding-top:3px;margin-top:3px;font-size:10px}
+.tot b{font-size:11px}
+.note{margin-top:3px;padding:2px 4px;border-left:2px solid #f59e0b;background:#fffbeb;font-size:7.5px;border-radius:1px;line-height:1.2}
+.actions{position:fixed;top:8px;right:8px;display:flex;gap:6px;z-index:1000}
 .actions button{padding:6px 14px;border-radius:4px;border:1px solid #000;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
 .actions .pr{background:#000;color:#fff}
 .actions .cl{background:#fff;color:#000}
-</style></head><body>
+@media print{.actions{display:none!important}}
+`;
+
+function openPrintWindow(bodyHtml: string, title: string) {
+  const html = `<!doctype html><html lang="mn"><head><meta charset="utf-8"/><title>${esc(title)}</title><style>${STYLES}</style></head><body>
 <div class="actions"><button class="pr" onclick="window.print()">Хэвлэх</button><button class="cl" onclick="window.close()">Хаах</button></div>
-<div class="hdr"><div class="brand">EasyShop</div><div class="ref"><b>${esc(ref)}</b>${date}</div></div>
-<div class="info">
-<div><div class="lbl">Хүлээн авагч</div><b>${esc(order.guest_name || "—")}</b><br>${esc(order.phone || "—")}</div>
-<div><div class="lbl">Хүргэх хаяг</div>${esc(order.shipping_address || "—")}</div>
-</div>
-<table><thead><tr><th style="width:20px">#</th><th>Бараа</th><th class="r" style="width:36px">Тоо</th><th class="r" style="width:70px">Үнэ</th><th class="r" style="width:80px">Дүн</th></tr></thead><tbody>${rows || '<tr><td colspan="5" style="text-align:center;color:#999">—</td></tr>'}</tbody></table>
-<div class="totals">
-<div class="row"><span>Бараа:</span><span>${mnt(subtotal)}</span></div>
-<div class="row"><span>Хүргэлт:</span><span>${fee > 0 ? mnt(fee) : "Үнэгүй"}</span></div>
-<div class="row total"><span>Нийт:</span><span>${mnt(order.total ?? subtotal + fee)}</span></div>
-</div>
-${order.source_note ? `<div class="note">${esc(order.source_note)}</div>` : ""}
-<div class="ft">easyshop.mn</div>
+${bodyHtml}
 <script>window.addEventListener('load',()=>setTimeout(()=>window.print(),300))</script>
 </body></html>`;
 
-  const w = window.open("", "_blank", "width=700,height=800");
+  const w = window.open("", "_blank", "width=900,height=1000");
   if (!w) {
     alert("Pop-up зөвшөөрнө үү.");
     return;
@@ -108,4 +121,23 @@ ${order.source_note ? `<div class="note">${esc(order.source_note)}</div>` : ""}
   w.document.open();
   w.document.write(html);
   w.document.close();
+}
+
+// Нэг захиалга хэвлэх — A4 нэг хуудас, 1 slip эхний нүдэнд
+export function printOrder(order: PrintOrder) {
+  const ref = order.order_ref || order.id?.slice(0, 8) || "захиалга";
+  const sheet = `<div class="sheet">${buildSlip(order)}</div>`;
+  openPrintWindow(sheet, ref);
+}
+
+// Олон захиалга — A4 хуудас бүрт 8 slip (4x2)
+export function printOrders(orders: PrintOrder[]) {
+  if (!orders?.length) return;
+  const PER_PAGE = 8;
+  const sheets: string[] = [];
+  for (let i = 0; i < orders.length; i += PER_PAGE) {
+    const chunk = orders.slice(i, i + PER_PAGE);
+    sheets.push(`<div class="sheet">${chunk.map(buildSlip).join("")}</div>`);
+  }
+  openPrintWindow(sheets.join(""), `${orders.length} захиалга`);
 }
