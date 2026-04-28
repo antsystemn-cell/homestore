@@ -325,7 +325,45 @@ export default function WarehousePage() {
     setProcessingOrderId(null);
   };
 
-  // ===== Auto Pick & Pack =====
+  // Bulk: олон захиалгыг нэгэн зэрэг үлдэгдэл хасч A4 хэвлэх
+  const completeOrdersBulk = async () => {
+    if (!user || bulkSelected.size === 0) return;
+    const chosen = orders.filter((o) => bulkSelected.has(o.id));
+    if (chosen.length === 0) {
+      toast.error("Захиалга сонгоно уу");
+      return;
+    }
+    setBulkProcessing(true);
+    let success = 0;
+    let failed = 0;
+    const printed: typeof chosen = [];
+    for (const o of chosen) {
+      const items = Array.isArray(o.items) ? o.items : [];
+      if (items.length === 0) {
+        failed++;
+        continue;
+      }
+      const ok = await processOrderStockOut(o);
+      if (ok) {
+        success++;
+        printed.push(o);
+      } else {
+        failed++;
+      }
+    }
+    setBulkProcessing(false);
+    setBulkSelected(new Set());
+    if (success > 0) {
+      toast.success(`${success} захиалга бэлэн боллоо ✓`);
+      try {
+        printOrders(printed);
+      } catch {
+        toast.error("Хэвлэхэд алдаа гарлаа");
+      }
+    }
+    if (failed > 0) toast.error(`${failed} захиалга боловсруулагдсангүй`);
+    loadAll();
+  };
   // Runs every 30s while the page is open. For each eligible order whose
   // age (since created_at) >= delayMinutes, auto-deduct stock and mark ready.
   useEffect(() => {
