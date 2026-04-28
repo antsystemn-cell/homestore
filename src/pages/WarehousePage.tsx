@@ -771,11 +771,16 @@ export default function WarehousePage() {
                        disabled={processingOrderId === o.id}
                      >
                        {processingOrderId === o.id ? (
-                         <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                         <>
+                           <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                           Боловсруулж байна...
+                         </>
                        ) : (
-                         <Printer className="h-4 w-4 mr-2" />
+                         <>
+                           <Printer className="h-4 w-4 mr-2" />
+                           Хүргэлтэнд гарлаа — Хэвлэх
+                         </>
                        )}
-                       Хүргэлтэнд гарлаа — Хэвлэх
                      </Button>
                    </div>
                 </div>
