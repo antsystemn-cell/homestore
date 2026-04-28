@@ -64,6 +64,10 @@ interface Order {
   total: number;
   items: any[];
   created_at: string;
+  payment_method?: string | null;
+  payment_status?: string | null;
+  delivery_fee?: number | null;
+  source_note?: string | null;
 }
 
 interface Movement {
