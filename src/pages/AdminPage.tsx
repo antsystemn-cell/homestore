@@ -166,6 +166,9 @@ const AdminPage = () => {
     payment_status: "unpaid" as "unpaid" | "confirmed",
     status: "pending" as "pending" | "phone_confirmed" | "confirmed",
     note: "",
+    sale_date: new Date().toISOString().slice(0, 10),
+    external_ref: "",
+    branch: "",
   });
   const [manualItems, setManualItems] = useState<{ product_id: string; name: string; price: number; quantity: number; product_code?: string; image?: string; }[]>([]);
   const [manualProductSearch, setManualProductSearch] = useState("");
@@ -442,6 +445,9 @@ const AdminPage = () => {
       payment_status: "unpaid",
       status: "pending",
       note: "",
+      sale_date: new Date().toISOString().slice(0, 10),
+      external_ref: "",
+      branch: "",
     });
     setManualItems([]);
     setManualProductSearch("");
@@ -479,8 +485,18 @@ const AdminPage = () => {
         guest_name: manualForm.customer_name.trim(),
         source: manualForm.source,
         source_note: manualForm.source_note.trim() || null,
+        external_ref: manualForm.external_ref.trim() || null,
+        branch: manualForm.branch.trim() || null,
         user_id: null,
       };
+      // Хэрэглэгч огноо сонгосон бол created_at-г түүгээр давхар оноох
+      if (manualForm.sale_date) {
+        const d = new Date(manualForm.sale_date);
+        if (!isNaN(d.getTime())) {
+          payload.sale_date = d.toISOString();
+          payload.created_at = d.toISOString();
+        }
+      }
       const { data, error } = await supabase.from("orders").insert(payload).select().single();
       if (error) throw error;
       toast.success("Гадны захиалга амжилттай бүртгэгдлээ");
@@ -1102,6 +1118,40 @@ const AdminPage = () => {
                   placeholder="Тэмдэглэл (жишээ: Messenger хэлэлцээр, FB пост гэх мэт)"
                   className="mt-2 w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
+              </div>
+
+              {/* Sale meta: date / external ref / branch */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Борлуулсан огноо *</label>
+                  <input
+                    type="date"
+                    value={manualForm.sale_date}
+                    max={new Date().toISOString().slice(0, 10)}
+                    onChange={(e) => setManualForm((f) => ({ ...f, sale_date: e.target.value }))}
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Дэс дугаар (гадаад №)</label>
+                  <input
+                    type="text"
+                    value={manualForm.external_ref}
+                    onChange={(e) => setManualForm((f) => ({ ...f, external_ref: e.target.value.slice(0, 50) }))}
+                    placeholder="Жнь: FB-1023"
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Салбар</label>
+                  <input
+                    type="text"
+                    value={manualForm.branch}
+                    onChange={(e) => setManualForm((f) => ({ ...f, branch: e.target.value.slice(0, 100) }))}
+                    placeholder="Жнь: Төв салбар"
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
               </div>
 
               {/* Customer */}
