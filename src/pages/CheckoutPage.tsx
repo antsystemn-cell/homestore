@@ -113,6 +113,7 @@ const CheckoutPage = () => {
       delivery_fee: totalDeliveryFee,
       payment_method: pm,
       payment_status: paymentStatus,
+      source_note: note.trim() || null,
     };
 
     if (isGuestCheckout) {
