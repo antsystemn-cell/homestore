@@ -106,7 +106,7 @@ td{padding:0.4mm 0;border-bottom:1px dotted #eee;vertical-align:top;font-size:2.
 @media print{.actions{display:none!important}}
 `;
 
-function openPrintWindow(bodyHtml: string, title: string, pageCount: number, autoprint: boolean) {
+function openPrintWindow(bodyHtml: string, title: string, pageCount: number, autoprint: boolean): boolean {
   const previewBar = pageCount > 0 ? `
 <div class="preview-bar">
   <div class="preview-info">
