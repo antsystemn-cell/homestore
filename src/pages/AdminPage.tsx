@@ -162,6 +162,7 @@ const AdminPage = () => {
     shipping_address: "",
     addr_district: "",
     addr_khoroo: "",
+    addr_khotkhon: "",
     addr_building: "",
     addr_entrance: "",
     addr_apt: "",
@@ -448,6 +449,7 @@ const AdminPage = () => {
       shipping_address: "",
       addr_district: "",
       addr_khoroo: "",
+      addr_khotkhon: "",
       addr_building: "",
       addr_entrance: "",
       addr_apt: "",
@@ -482,6 +484,7 @@ const AdminPage = () => {
     const addrParts = [
       `${manualForm.addr_district.trim()} дүүрэг`,
       `${manualForm.addr_khoroo.trim()}-р хороо`,
+      ...(manualForm.addr_khotkhon.trim() ? [`${manualForm.addr_khotkhon.trim()} хотхон`] : []),
       `${manualForm.addr_building.trim()} байр`,
       `${manualForm.addr_entrance.trim()} орц`,
       `${manualForm.addr_apt.trim()} тоот`,
@@ -1220,6 +1223,16 @@ const AdminPage = () => {
                       className="w-full rounded-xl bg-secondary px-3 py-2 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                     {manualForm.addr_khoroo && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">-р хороо</span>}
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={manualForm.addr_khotkhon}
+                      onChange={(e) => setManualForm((f) => ({ ...f, addr_khotkhon: e.target.value.slice(0, 50) }))}
+                      placeholder="Хотхон (заавал биш)"
+                      className="w-full rounded-xl bg-secondary px-3 py-2 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                    {manualForm.addr_khotkhon && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">хотхон</span>}
                   </div>
                   <div className="relative">
                     <input
