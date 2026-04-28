@@ -168,7 +168,7 @@ const AdminPage = () => {
     note: "",
     sale_date: new Date().toISOString().slice(0, 10),
     external_ref: "",
-    branch: "",
+    branch: "Лавай",
   });
   const [manualItems, setManualItems] = useState<{ product_id: string; name: string; price: number; quantity: number; product_code?: string; image?: string; }[]>([]);
   const [manualProductSearch, setManualProductSearch] = useState("");
