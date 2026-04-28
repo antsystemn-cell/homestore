@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { printOrder, printOrders } from "@/lib/printOrder";
+import { printOrder, printOrders, getBankInfo, setBankInfo, type BankInfo } from "@/lib/printOrder";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Loader2,
