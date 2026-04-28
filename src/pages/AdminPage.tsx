@@ -2472,7 +2472,8 @@ const AdminPage = () => {
                                 toast.error("Захиалга сонгоно уу");
                                 return;
                               }
-                              printOrders(chosen);
+                              setPendingPrintOrders(chosen);
+                              setShowPrintChecklist(true);
                             }}
                             disabled={bulkSelected.size === 0}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-background hover:bg-accent text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
