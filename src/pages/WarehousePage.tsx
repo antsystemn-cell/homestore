@@ -99,6 +99,8 @@ export default function WarehousePage() {
 
   // Per-order processing state
   const [processingOrderId, setProcessingOrderId] = useState<string | null>(null);
+  const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
+  const [bulkProcessing, setBulkProcessing] = useState(false);
 
   // Auto pick&pack settings — persisted in localStorage
   const sanitizeAutoPick = (val: unknown): AutoPickSettings => {
