@@ -296,7 +296,7 @@ export default function WarehousePage() {
     return true;
   };
 
-  const completeOrderPick = async (order: Order) => {
+  const completeOrderPick = async (order: Order, shouldPrint = false) => {
     if (!user) return;
     const items = Array.isArray(order.items) ? order.items : [];
     if (items.length === 0) {
@@ -305,11 +305,21 @@ export default function WarehousePage() {
     }
     setProcessingOrderId(order.id);
     const ok = await processOrderStockOut(order);
-    setProcessingOrderId(null);
     if (ok) {
       toast.success(`${order.order_ref ?? order.id.slice(0, 6)} бэлэн боллоо ✓`);
+      if (shouldPrint) {
+        try {
+          printOrder(order);
+          toast.success("Хэвлэх цонх нээгдлээ");
+        } catch {
+          toast.error("Хэвлэхэд алдаа гарлаа");
+        }
+      }
       loadAll();
+    } else {
+      toast.error("Үлдэгдэл хасахад алдаа гарлаа");
     }
+    setProcessingOrderId(null);
   };
 
   // ===== Auto Pick & Pack =====
