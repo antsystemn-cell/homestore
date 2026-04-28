@@ -162,7 +162,7 @@ export default function WarehousePage() {
       supabase
         .from("orders")
         .select("id,order_ref,guest_name,phone,shipping_address,status,total,items,created_at")
-        .in("status", ["pending", "preparing", "phone_confirmed"])
+        .eq("status", "preparing")
         .order("created_at", { ascending: false })
         .limit(100),
       supabase
@@ -321,11 +321,11 @@ export default function WarehousePage() {
       if (cancelled || autoRunning) return;
 
       const cutoff = Date.now() - autoPick.delayMinutes * 60_000;
-      // Eligible: in queue (pending/preparing/phone_confirmed) AND old enough
+      // Eligible: only "preparing" AND old enough
       const eligible = orders.filter((o) => {
         const t = new Date(o.created_at).getTime();
         return (
-          ["pending", "preparing", "phone_confirmed"].includes(o.status) &&
+          o.status === "preparing" &&
           t <= cutoff &&
           Array.isArray(o.items) &&
           o.items.length > 0
