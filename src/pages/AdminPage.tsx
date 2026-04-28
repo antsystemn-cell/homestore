@@ -26,6 +26,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { NiimbotBulkXlsxButton } from "@/components/niimbot/NiimbotBulkXlsxButton";
 import { NiimbotInstructionsModal } from "@/components/niimbot/NiimbotInstructionsModal";
+import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
 import { mapOrderToLabelData } from "@/lib/niimbot/mapOrder";
 import { generateNiimbotXlsx, buildXlsxFilename } from "@/lib/niimbot/xlsx";
 import { downloadBlob } from "@/lib/niimbot/transfer";
@@ -152,6 +153,8 @@ const AdminPage = () => {
   const [orderSearchPhone, setOrderSearchPhone] = useState("");
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
   const [showXlsxHelp, setShowXlsxHelp] = useState(false);
+  const [showPrintChecklist, setShowPrintChecklist] = useState(false);
+  const [pendingPrintOrders, setPendingPrintOrders] = useState<any[]>([]);
 
   // Manual (external) order modal
   const [showManualOrder, setShowManualOrder] = useState(false);
@@ -2469,7 +2472,8 @@ const AdminPage = () => {
                                 toast.error("Захиалга сонгоно уу");
                                 return;
                               }
-                              printOrders(chosen);
+                              setPendingPrintOrders(chosen);
+                              setShowPrintChecklist(true);
                             }}
                             disabled={bulkSelected.size === 0}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-background hover:bg-accent text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -3762,6 +3766,15 @@ const AdminPage = () => {
         </div>
       </main>
       <NiimbotInstructionsModal open={showXlsxHelp} onOpenChange={setShowXlsxHelp} mode="xlsx" />
+      <PrintChecklistModal
+        open={showPrintChecklist}
+        onOpenChange={setShowPrintChecklist}
+        count={pendingPrintOrders.length}
+        onConfirm={() => {
+          setShowPrintChecklist(false);
+          printOrders(pendingPrintOrders);
+        }}
+      />
     </div>
   );
 };
