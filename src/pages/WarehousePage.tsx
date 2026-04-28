@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { printOrder, printOrders } from "@/lib/printOrder";
+import { printOrder, printOrders, getBankInfo, setBankInfo, type BankInfo } from "@/lib/printOrder";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Loader2,
@@ -64,6 +64,10 @@ interface Order {
   total: number;
   items: any[];
   created_at: string;
+  payment_method?: string | null;
+  payment_status?: string | null;
+  delivery_fee?: number | null;
+  source_note?: string | null;
 }
 
 interface Movement {
@@ -101,6 +105,15 @@ export default function WarehousePage() {
   const [processingOrderId, setProcessingOrderId] = useState<string | null>(null);
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
   const [bulkProcessing, setBulkProcessing] = useState(false);
+
+  // Print дээр харагдах дансны мэдээлэл (COD захиалгад)
+  const [bankDraft, setBankDraft] = useState<BankInfo>(() => getBankInfo());
+  const [bankOpen, setBankOpen] = useState(false);
+  const saveBank = () => {
+    setBankInfo(bankDraft);
+    toast.success("Дансны мэдээлэл хадгалагдлаа");
+    setBankOpen(false);
+  };
 
   // Auto pick&pack settings — persisted in localStorage
   const sanitizeAutoPick = (val: unknown): AutoPickSettings => {
@@ -166,7 +179,7 @@ export default function WarehousePage() {
         .order("name"),
       supabase
         .from("orders")
-        .select("id,order_ref,guest_name,phone,shipping_address,status,total,items,created_at")
+        .select("id,order_ref,guest_name,phone,shipping_address,status,total,items,created_at,payment_method,payment_status,delivery_fee,source_note")
         .eq("status", "preparing")
         .order("created_at", { ascending: false })
         .limit(100),
@@ -842,6 +855,67 @@ export default function WarehousePage() {
                 </Button>
               </div>
             )}
+
+            {/* Print дээр харагдах дансны мэдээлэл (COD захиалгад) */}
+            <div className="rounded-lg border border-border bg-card">
+              <button
+                type="button"
+                onClick={() => setBankOpen((v) => !v)}
+                className="w-full px-3 py-2 flex items-center justify-between text-sm hover:bg-muted/40"
+              >
+                <span className="flex items-center gap-2">
+                  <Printer className="h-4 w-4 text-primary" />
+                  Хэвлэх дээр харагдах данс
+                  {bankDraft.account ? (
+                    <span className="text-xs text-muted-foreground font-mono">
+                      · {bankDraft.bank} {bankDraft.account}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-amber-600">· тохируулаагүй</span>
+                  )}
+                </span>
+                <span className="text-xs text-muted-foreground">{bankOpen ? "Хаах" : "Засах"}</span>
+              </button>
+              {bankOpen && (
+                <div className="px-3 pb-3 grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <div>
+                    <Label className="text-xs">Банк</Label>
+                    <Input
+                      placeholder="Хаан банк"
+                      value={bankDraft.bank ?? ""}
+                      onChange={(e) => setBankDraft((p) => ({ ...p, bank: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Дансны дугаар</Label>
+                    <Input
+                      placeholder="5XXXXXXXXX"
+                      value={bankDraft.account ?? ""}
+                      onChange={(e) => setBankDraft((p) => ({ ...p, account: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Эзэмшигч</Label>
+                    <Input
+                      placeholder="Овог Нэр"
+                      value={bankDraft.holder ?? ""}
+                      onChange={(e) => setBankDraft((p) => ({ ...p, holder: e.target.value }))}
+                    />
+                  </div>
+                  <div className="md:col-span-3 flex justify-end gap-2">
+                    <Button size="sm" variant="outline" onClick={() => setBankDraft(getBankInfo())}>
+                      Цуцлах
+                    </Button>
+                    <Button size="sm" onClick={saveBank}>
+                      Хадгалах
+                    </Button>
+                  </div>
+                  <p className="md:col-span-3 text-xs text-muted-foreground">
+                    Бэлэн / COD төлбөртэй, төлөгдөөгүй захиалгын хэвлэх slip дээр энэ мэдээлэл харагдана.
+                  </p>
+                </div>
+              )}
+            </div>
 
             {orders.map((o) => {
               const items = Array.isArray(o.items) ? o.items : [];

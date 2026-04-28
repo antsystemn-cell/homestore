@@ -11,6 +11,12 @@ interface PrintItem {
   price?: number;
 }
 
+export interface BankInfo {
+  bank?: string;          // ж: "Хаан банк"
+  account?: string;       // дансны дугаар
+  holder?: string;        // эзэмшигч
+}
+
 interface PrintOrder {
   order_ref?: string | null;
   id?: string;
@@ -22,6 +28,8 @@ interface PrintOrder {
   source_note?: string | null;
   created_at?: string | null;
   items?: PrintItem[] | any;
+  payment_method?: string | null;   // 'cash' | 'qpay' | 'storepay' | 'pocket' | ...
+  payment_status?: string | null;   // 'paid' | 'unpaid' | ...
 }
 
 const esc = (s: string) =>
@@ -29,8 +37,36 @@ const esc = (s: string) =>
 
 const mnt = (n: number) => `${(n ?? 0).toLocaleString("mn-MN")}₮`;
 
+// Дансны мэдээллийг localStorage-д хадгалах туслах
+const BANK_INFO_KEY = "print_bank_info";
+export function getBankInfo(): BankInfo {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem(BANK_INFO_KEY);
+    return raw ? (JSON.parse(raw) as BankInfo) : {};
+  } catch {
+    return {};
+  }
+}
+export function setBankInfo(info: BankInfo) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(BANK_INFO_KEY, JSON.stringify(info));
+  } catch {}
+}
+
+// Төлбөр авах шаардлагатай эсэх — COD/cash + төлөгдөөгүй
+function needsCollection(order: PrintOrder): boolean {
+  const method = (order.payment_method || "").toLowerCase();
+  const status = (order.payment_status || "").toLowerCase();
+  // Бэлэн / cash / cod болон тодорхойгүй төлбөртэй захиалгуудыг unpaid үед төлбөр авна
+  const isCash = !method || method === "cash" || method === "cod";
+  const isUnpaid = !status || status === "unpaid" || status === "pending";
+  return isCash && isUnpaid;
+}
+
 // Нэг slip-ийн HTML үүсгэх (A4 4x2 grid дотор багтах хэмжээтэй)
-function buildSlip(order: PrintOrder): string {
+function buildSlip(order: PrintOrder, bank?: BankInfo): string {
   const items: PrintItem[] = Array.isArray(order.items) ? order.items : [];
   const ref = order.order_ref || order.id?.slice(0, 8) || "—";
   const date = order.created_at
@@ -45,16 +81,28 @@ function buildSlip(order: PrintOrder): string {
       const code = it.product_code || it.sku || "";
       const parts = [it.color, it.size].filter(Boolean).join("/");
       const meta = [code, parts].filter(Boolean).join(" · ");
-      const name = (it.name || "—").length > 32 ? (it.name || "").slice(0, 32) + "…" : it.name || "—";
-      return `<tr><td>${esc(name)}${meta ? `<span class="m"> ${esc(meta)}</span>` : ""}</td><td class="r">${qty}</td></tr>`;
+      const price = Number(it.price) || 0;
+      const name = (it.name || "—").length > 36 ? (it.name || "").slice(0, 36) + "…" : it.name || "—";
+      return `<tr><td>${esc(name)}${meta ? `<span class="m"> ${esc(meta)}</span>` : ""}</td><td class="r">${qty}</td><td class="r">${mnt(price * qty)}</td></tr>`;
     })
     .join("");
 
-  const more = items.length > 6 ? `<tr><td colspan="2" class="m" style="text-align:center">+${items.length - 6} бараа…</td></tr>` : "";
+  const more = items.length > 6 ? `<tr><td colspan="3" class="m" style="text-align:center">+${items.length - 6} бараа…</td></tr>` : "";
 
   const subtotal = items.reduce((s, it) => s + (Number(it.price) || 0) * (Number(it.quantity) || 1), 0);
   const fee = Number(order.delivery_fee) || 0;
   const total = order.total ?? subtotal + fee;
+
+  const collect = needsCollection(order);
+  const bankInfo = bank ?? getBankInfo();
+  const hasBank = !!(bankInfo && (bankInfo.bank || bankInfo.account));
+
+  const payBlock = collect
+    ? `<div class="pay">
+        <div class="pay-h">⚠ ТӨЛБӨР АВАХ · <b>${mnt(total)}</b></div>
+        ${hasBank ? `<div class="pay-b">${esc(bankInfo.bank || "")}${bankInfo.account ? ` · <b>${esc(bankInfo.account)}</b>` : ""}${bankInfo.holder ? ` · ${esc(bankInfo.holder)}` : ""}</div>` : ""}
+      </div>`
+    : `<div class="paid">✓ Төлөгдсөн (${esc((order.payment_method || "").toUpperCase() || "—")})</div>`;
 
   return `<div class="slip">
     <div class="sh">
@@ -62,20 +110,22 @@ function buildSlip(order: PrintOrder): string {
       <div class="ref"><b>${esc(ref)}</b>${date ? `<span class="m"> · ${esc(date)}</span>` : ""}</div>
     </div>
     <div class="who">
-      <div><b>${esc(order.guest_name || "—")}</b> · ${esc(order.phone || "—")}</div>
+      <div><b>${esc(order.guest_name || "—")}</b> · <span class="phone">${esc(order.phone || "—")}</span></div>
       <div class="addr">${esc(order.shipping_address || "—")}</div>
     </div>
     <table>
-      <thead><tr><th>Бараа</th><th class="r" style="width:24px">Тоо</th></tr></thead>
-      <tbody>${rows || '<tr><td colspan="2" class="m" style="text-align:center">—</td></tr>'}${more}</tbody>
+      <thead><tr><th>Бараа</th><th class="r" style="width:18px">Тоо</th><th class="r" style="width:34px">Дүн</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="3" class="m" style="text-align:center">—</td></tr>'}${more}</tbody>
     </table>
     <div class="tot">
-      <span>Нийт ${items.reduce((s, it) => s + (Number(it.quantity) || 1), 0)} ширхэг</span>
+      <span>${items.reduce((s, it) => s + (Number(it.quantity) || 1), 0)} ширхэг${fee ? ` · хүргэлт ${mnt(fee)}` : ""}</span>
       <b>${mnt(total)}</b>
     </div>
+    ${payBlock}
     ${order.source_note ? `<div class="note">${esc(order.source_note.slice(0, 80))}</div>` : ""}
   </div>`;
 }
+
 
 // Нийтлэг CSS — A4 (210x297mm), 4 мөр × 2 багана = 8 slip
 const STYLES = `
@@ -99,6 +149,13 @@ td{padding:0.4mm 0;border-bottom:1px dotted #eee;vertical-align:top;font-size:2.
 .tot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #000;padding-top:0.8mm;margin-top:0.8mm;font-size:2.6mm;line-height:1.2}
 .tot b{font-size:2.8mm}
 .note{margin-top:0.8mm;padding:0.5mm 1mm;border-left:2px solid #f59e0b;background:#fffbeb;font-size:2mm;border-radius:1px;line-height:1.2}
+.who .phone{font-family:'Courier New',Courier,monospace;font-weight:700;font-size:2.6mm}
+.pay{margin-top:0.8mm;padding:1mm 1.2mm;border:1.2px solid #000;background:#fef3c7;border-radius:1px;line-height:1.2}
+.pay-h{font-size:2.3mm;font-weight:800;letter-spacing:.2px}
+.pay-h b{font-family:'Courier New',Courier,monospace;font-size:2.5mm}
+.pay-b{font-size:2mm;margin-top:0.4mm}
+.pay-b b{font-family:'Courier New',Courier,monospace;font-size:2.3mm;letter-spacing:.3px}
+.paid{margin-top:0.8mm;padding:0.5mm 1mm;font-size:2mm;color:#15803d;font-weight:700;border-left:2px solid #15803d;background:#f0fdf4;border-radius:1px;line-height:1.2}
 .actions{position:fixed;top:8px;right:8px;display:flex;gap:6px;z-index:1000}
 .actions button{padding:6px 14px;border-radius:4px;border:1px solid #000;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
 .actions .pr{background:#000;color:#fff}
@@ -175,7 +232,7 @@ export function printOrders(orders: PrintOrder[]): boolean {
   const sheets: string[] = [];
   for (let i = 0; i < orders.length; i += PER_PAGE) {
     const chunk = orders.slice(i, i + PER_PAGE);
-    sheets.push(`<div class="sheet">${chunk.map(buildSlip).join("")}</div>`);
+    sheets.push(`<div class="sheet">${chunk.map((o) => buildSlip(o)).join("")}</div>`);
   }
   return openPrintWindow(sheets.join(""), `${orders.length} захиалга`, sheets.length, false);
 }
