@@ -162,7 +162,7 @@ export default function WarehousePage() {
       supabase
         .from("orders")
         .select("id,order_ref,guest_name,phone,shipping_address,status,total,items,created_at")
-        .in("status", ["pending", "preparing", "phone_confirmed"])
+        .eq("status", "preparing")
         .order("created_at", { ascending: false })
         .limit(100),
       supabase
@@ -321,11 +321,11 @@ export default function WarehousePage() {
       if (cancelled || autoRunning) return;
 
       const cutoff = Date.now() - autoPick.delayMinutes * 60_000;
-      // Eligible: in queue (pending/preparing/phone_confirmed) AND old enough
+      // Eligible: only "preparing" AND old enough
       const eligible = orders.filter((o) => {
         const t = new Date(o.created_at).getTime();
         return (
-          ["pending", "preparing", "phone_confirmed"].includes(o.status) &&
+          o.status === "preparing" &&
           t <= cutoff &&
           Array.isArray(o.items) &&
           o.items.length > 0
@@ -556,7 +556,7 @@ export default function WarehousePage() {
           return (
             <div className="space-y-4">
               {/* KPI cards */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 <button
                   onClick={() => setTab("orders")}
                   className="text-left rounded-lg border border-border bg-card p-4 hover:border-primary transition"
@@ -583,29 +583,16 @@ export default function WarehousePage() {
                 </div>
 
                 <button
-                  onClick={() =>
-                    document.getElementById("low-stock-list")?.scrollIntoView({ behavior: "smooth" })
-                  }
-                  className="text-left rounded-lg border border-border bg-card p-4 hover:border-destructive transition"
+                  onClick={() => setTab("history")}
+                  className="text-left rounded-lg border border-border bg-card p-4 hover:border-primary transition"
                 >
                   <div className="flex items-center justify-between">
-                    <AlertTriangle className="h-5 w-5 text-destructive" />
-                    <span className="text-xs text-muted-foreground">Бага үлдэгдэл</span>
+                    <History className="h-5 w-5 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Түүх</span>
                   </div>
-                  <div className="text-2xl font-bold mt-2 text-destructive">
-                    {lowStock.length}
-                  </div>
-                  <div className="text-xs text-muted-foreground">≤ {LOW_STOCK_THRESHOLD} ширхэг</div>
+                  <div className="text-2xl font-bold mt-2">{movements.length}</div>
+                  <div className="text-xs text-muted-foreground">сүүлийн бичилт</div>
                 </button>
-
-                <div className="rounded-lg border border-border bg-card p-4">
-                  <div className="flex items-center justify-between">
-                    <Package className="h-5 w-5 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">Дууссан</span>
-                  </div>
-                  <div className="text-2xl font-bold mt-2">{outOfStock}</div>
-                  <div className="text-xs text-muted-foreground">бараа нөөцгүй</div>
-                </div>
               </div>
 
               {/* Pick & pack queue preview */}
@@ -659,61 +646,7 @@ export default function WarehousePage() {
                 )}
               </section>
 
-              {/* Low stock alerts */}
-              <section
-                id="low-stock-list"
-                className="rounded-lg border border-border bg-card"
-              >
-                <header className="flex items-center justify-between px-4 py-3 border-b border-border">
-                  <h2 className="font-semibold text-sm flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4 text-destructive" /> Бага үлдэгдлийн
-                    сэрэмжлүүлэг
-                  </h2>
-                  <span className="text-xs text-muted-foreground">
-                    босго: ≤ {LOW_STOCK_THRESHOLD}
-                  </span>
-                </header>
-                {lowStock.length === 0 ? (
-                  <div className="text-center py-8 text-sm text-muted-foreground">
-                    Бүх бараа хангалттай нөөцтэй ✓
-                  </div>
-                ) : (
-                  <ul className="divide-y divide-border">
-                    {lowStock.map((p) => (
-                      <li
-                        key={p.id}
-                        className="px-4 py-3 flex items-center gap-3"
-                      >
-                        <div className="w-10 h-10 rounded-md bg-muted overflow-hidden shrink-0">
-                          {(p.thumbnail_url || p.image_url) && (
-                            <img
-                              src={p.thumbnail_url || p.image_url || ""}
-                              alt={p.name}
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                            />
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="text-sm font-medium truncate">{p.name}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {p.product_code ?? "—"}
-                          </div>
-                        </div>
-                        <div
-                          className={`font-mono text-sm font-bold shrink-0 ${
-                            p.stock_quantity === 0
-                              ? "text-destructive"
-                              : "text-orange-600 dark:text-orange-400"
-                          }`}
-                        >
-                          {p.stock_quantity}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </section>
+              {/* Low stock alerts hidden per request */}
 
               {/* Today's stock-out log */}
               <section className="rounded-lg border border-border bg-card">
@@ -803,7 +736,6 @@ export default function WarehousePage() {
                   <ul className="text-sm space-y-1 mb-3 border-t border-border pt-2">
                     {items.map((it: any, i: number) => {
                       const prod = products.find((p) => p.id === it.product_id);
-                      const lowStock = prod && prod.stock_quantity < (it.quantity ?? 1);
                       return (
                         <li key={i} className="flex items-center justify-between gap-2">
                           <span className="truncate">
@@ -811,17 +743,8 @@ export default function WarehousePage() {
                             {it.size && <span className="text-muted-foreground"> · {it.size}</span>}
                             {it.color && <span className="text-muted-foreground"> · {it.color}</span>}
                           </span>
-                          <span
-                            className={`font-mono shrink-0 ${
-                              lowStock ? "text-destructive font-semibold" : ""
-                            }`}
-                          >
+                          <span className="font-mono shrink-0">
                             ×{it.quantity ?? 1}
-                            {prod && (
-                              <span className="text-xs text-muted-foreground ml-2">
-                                (үлд: {prod.stock_quantity})
-                              </span>
-                            )}
                           </span>
                         </li>
                       );
@@ -882,7 +805,6 @@ export default function WarehousePage() {
                       <div className="text-sm font-medium truncate">{p.name}</div>
                       <div className="text-xs text-muted-foreground flex gap-2">
                         {p.product_code && <span>{p.product_code}</span>}
-                        <span>· Үлд: {p.stock_quantity}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
