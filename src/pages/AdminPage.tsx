@@ -1140,13 +1140,19 @@ const AdminPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Дэс дугаар (гадаад №)</label>
+                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Дэс дугаар (авто)</label>
                   <input
                     type="text"
-                    value={manualForm.external_ref}
-                    onChange={(e) => setManualForm((f) => ({ ...f, external_ref: e.target.value.slice(0, 50) }))}
-                    placeholder="Жнь: FB-1023"
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    value={(() => {
+                      const d = manualForm.sale_date ? new Date(manualForm.sale_date) : new Date();
+                      const yy = String(d.getFullYear()).slice(-2);
+                      const mm = String(d.getMonth() + 1).padStart(2, "0");
+                      const dd = String(d.getDate()).padStart(2, "0");
+                      return `ES-${yy}${mm}${dd}-XXX`;
+                    })()}
+                    disabled
+                    placeholder="Автоматаар үүснэ"
+                    className="w-full rounded-xl bg-secondary/50 px-3 py-2 text-sm text-muted-foreground cursor-not-allowed"
                   />
                 </div>
                 <div>
