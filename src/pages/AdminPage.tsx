@@ -468,7 +468,14 @@ const AdminPage = () => {
 
   const handleCreateManualOrder = async () => {
     if (!manualForm.phone.trim()) { toast.error("Утасны дугаар оруулна уу"); return; }
+    if (!manualForm.addr_district.trim()) { toast.error("Дүүрэг оруулна уу"); return; }
+    if (!manualForm.addr_khoroo.trim()) { toast.error("Хороо оруулна уу"); return; }
+    if (!manualForm.addr_building.trim()) { toast.error("Байр оруулна уу"); return; }
+    if (!manualForm.addr_entrance.trim()) { toast.error("Орц оруулна уу"); return; }
+    if (!manualForm.addr_apt.trim()) { toast.error("Тоот оруулна уу"); return; }
     if (manualItems.length === 0) { toast.error("Дор хаяж 1 бараа нэмнэ үү"); return; }
+
+    const fullAddress = `${manualForm.addr_district.trim()} дүүрэг, ${manualForm.addr_khoroo.trim()}-р хороо, ${manualForm.addr_building.trim()} байр, ${manualForm.addr_entrance.trim()} орц, ${manualForm.addr_apt.trim()} тоот`;
 
     setManualSubmitting(true);
     try {
@@ -485,7 +492,11 @@ const AdminPage = () => {
         total: manualTotal,
         status: manualForm.status,
         phone: manualForm.phone.trim(),
-        shipping_address: manualForm.shipping_address.trim() || null,
+        shipping_address: fullAddress,
+        delivery_option_id: manualForm.delivery_option_id || null,
+        delivery_fee: Number(manualForm.delivery_fee) || 0,
+        payment_method: manualForm.payment_method,
+        payment_status: manualForm.payment_status,
         delivery_option_id: manualForm.delivery_option_id || null,
         delivery_fee: Number(manualForm.delivery_fee) || 0,
         payment_method: manualForm.payment_method,
