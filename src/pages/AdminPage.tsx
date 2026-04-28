@@ -160,11 +160,16 @@ const AdminPage = () => {
     customer_name: "",
     phone: "",
     shipping_address: "",
+    addr_district: "",
+    addr_khoroo: "",
+    addr_building: "",
+    addr_entrance: "",
+    addr_apt: "",
     delivery_option_id: "",
     delivery_fee: 0,
     payment_method: "cash",
     payment_status: "confirmed" as "unpaid" | "confirmed",
-    status: "pending" as "pending" | "phone_confirmed" | "confirmed",
+    status: "confirmed" as "pending" | "phone_confirmed" | "confirmed",
     note: "",
     sale_date: new Date().toISOString().slice(0, 10),
     external_ref: "",
@@ -439,11 +444,16 @@ const AdminPage = () => {
       customer_name: "",
       phone: "",
       shipping_address: "",
+      addr_district: "",
+      addr_khoroo: "",
+      addr_building: "",
+      addr_entrance: "",
+      addr_apt: "",
       delivery_option_id: "",
       delivery_fee: 0,
       payment_method: "cash",
       payment_status: "confirmed",
-      status: "pending",
+      status: "confirmed",
       note: "",
       sale_date: new Date().toISOString().slice(0, 10),
       external_ref: "",
@@ -458,7 +468,14 @@ const AdminPage = () => {
 
   const handleCreateManualOrder = async () => {
     if (!manualForm.phone.trim()) { toast.error("Утасны дугаар оруулна уу"); return; }
+    if (!manualForm.addr_district.trim()) { toast.error("Дүүрэг оруулна уу"); return; }
+    if (!manualForm.addr_khoroo.trim()) { toast.error("Хороо оруулна уу"); return; }
+    if (!manualForm.addr_building.trim()) { toast.error("Байр оруулна уу"); return; }
+    if (!manualForm.addr_entrance.trim()) { toast.error("Орц оруулна уу"); return; }
+    if (!manualForm.addr_apt.trim()) { toast.error("Тоот оруулна уу"); return; }
     if (manualItems.length === 0) { toast.error("Дор хаяж 1 бараа нэмнэ үү"); return; }
+
+    const fullAddress = `${manualForm.addr_district.trim()} дүүрэг, ${manualForm.addr_khoroo.trim()}-р хороо, ${manualForm.addr_building.trim()} байр, ${manualForm.addr_entrance.trim()} орц, ${manualForm.addr_apt.trim()} тоот`;
 
     setManualSubmitting(true);
     try {
@@ -475,7 +492,7 @@ const AdminPage = () => {
         total: manualTotal,
         status: manualForm.status,
         phone: manualForm.phone.trim(),
-        shipping_address: manualForm.shipping_address.trim() || null,
+        shipping_address: fullAddress,
         delivery_option_id: manualForm.delivery_option_id || null,
         delivery_fee: Number(manualForm.delivery_fee) || 0,
         payment_method: manualForm.payment_method,
@@ -1132,16 +1149,46 @@ const AdminPage = () => {
                 />
               </div>
 
-              {/* Address */}
+              {/* Address — detailed */}
               <div>
-                <label className="text-xs font-bold text-muted-foreground mb-1 block">Хүргэлтийн хаяг</label>
-                <textarea
-                  value={manualForm.shipping_address}
-                  onChange={(e) => setManualForm((f) => ({ ...f, shipping_address: e.target.value }))}
-                  rows={2}
-                  placeholder="Дүүрэг, хороо, байр, орц, тоот..."
-                  className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
+                <label className="text-xs font-bold text-muted-foreground mb-1 block">Хүргэлтийн хаяг *</label>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                  <input
+                    type="text"
+                    value={manualForm.addr_district}
+                    onChange={(e) => setManualForm((f) => ({ ...f, addr_district: e.target.value.slice(0, 50) }))}
+                    placeholder="Дүүрэг"
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  <input
+                    type="text"
+                    value={manualForm.addr_khoroo}
+                    onChange={(e) => setManualForm((f) => ({ ...f, addr_khoroo: e.target.value.slice(0, 20) }))}
+                    placeholder="Хороо"
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  <input
+                    type="text"
+                    value={manualForm.addr_building}
+                    onChange={(e) => setManualForm((f) => ({ ...f, addr_building: e.target.value.slice(0, 50) }))}
+                    placeholder="Байр"
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  <input
+                    type="text"
+                    value={manualForm.addr_entrance}
+                    onChange={(e) => setManualForm((f) => ({ ...f, addr_entrance: e.target.value.slice(0, 20) }))}
+                    placeholder="Орц"
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  <input
+                    type="text"
+                    value={manualForm.addr_apt}
+                    onChange={(e) => setManualForm((f) => ({ ...f, addr_apt: e.target.value.slice(0, 20) }))}
+                    placeholder="Тоот"
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
               </div>
 
               {/* Delivery fee toggle */}
@@ -1254,8 +1301,8 @@ const AdminPage = () => {
                 </div>
               </div>
 
-              {/* Payment & status */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {/* Payment */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-muted-foreground mb-1 block">Төлбөрийн суваг</label>
                   <select
@@ -1276,23 +1323,11 @@ const AdminPage = () => {
                     <input
                       type="checkbox"
                       checked={manualForm.payment_status === "unpaid"}
-                      onChange={(e) => setManualForm((f) => ({ ...f, payment_status: e.target.checked ? "unpaid" : "confirmed" }))}
+                      onChange={(e) => setManualForm((f) => ({ ...f, payment_status: e.target.checked ? "unpaid" : "confirmed", status: e.target.checked ? "pending" : "confirmed" }))}
                       className="h-4 w-4 rounded"
                     />
                     <span>Төлбөр авах</span>
                   </label>
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Захиалгын төлөв</label>
-                  <select
-                    value={manualForm.status}
-                    onChange={(e) => setManualForm((f) => ({ ...f, status: e.target.value as any }))}
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  >
-                    <option value="pending">Хүлээгдэж буй</option>
-                    <option value="phone_confirmed">Утсаар баталгаажуулсан</option>
-                    <option value="confirmed">Төлбөр орсон</option>
-                  </select>
                 </div>
               </div>
 
