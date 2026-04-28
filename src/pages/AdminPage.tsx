@@ -1086,40 +1086,6 @@ const AdminPage = () => {
               </button>
             </div>
             <div className="p-5 space-y-5">
-              {/* Source */}
-              <div>
-                <label className="text-xs font-bold text-muted-foreground mb-2 block">Эх сурвалж *</label>
-                <div className="grid grid-cols-5 gap-2">
-                  {([
-                    { v: "facebook", l: "📘 Facebook" },
-                    { v: "phone", l: "📞 Утас" },
-                    { v: "instagram", l: "📷 Instagram" },
-                    { v: "store", l: "🏬 Дэлгүүр" },
-                    { v: "other", l: "Бусад" },
-                  ] as const).map((opt) => (
-                    <button
-                      key={opt.v}
-                      type="button"
-                      onClick={() => setManualForm((f) => ({ ...f, source: opt.v }))}
-                      className={`text-xs font-bold px-2 py-2 rounded-xl border transition-colors ${
-                        manualForm.source === opt.v
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-secondary border-border hover:border-primary/40"
-                      }`}
-                    >
-                      {opt.l}
-                    </button>
-                  ))}
-                </div>
-                <input
-                  type="text"
-                  value={manualForm.source_note}
-                  onChange={(e) => setManualForm((f) => ({ ...f, source_note: e.target.value }))}
-                  placeholder="Тэмдэглэл (жишээ: Messenger хэлэлцээр, FB пост гэх мэт)"
-                  className="mt-2 w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-
               {/* Sale meta: date / external ref / branch */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
