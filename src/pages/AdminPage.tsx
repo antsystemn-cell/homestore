@@ -526,7 +526,7 @@ const AdminPage = () => {
         guest_name: manualForm.customer_name.trim(),
         source: manualForm.source,
         source_note: manualForm.source_note.trim() || null,
-        external_ref: manualForm.external_ref.trim() || null,
+        external_ref: autoExternalRef,
         branch: manualForm.branch.trim() || null,
         user_id: null,
       };
