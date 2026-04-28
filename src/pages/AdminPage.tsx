@@ -17,7 +17,7 @@ import { optimizeImage, generateThumbnail, estimateBase64Size } from "@/lib/imag
 import { resolveColor } from "@/lib/colorMap";
 import { cyrillicToLatinSlug } from "@/lib/cyrillicToLatin";
 import { parseAddressBlob } from "@/lib/addressParser";
-import { printOrder } from "@/lib/printOrder";
+import { printOrder, printOrders } from "@/lib/printOrder";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -2460,7 +2460,25 @@ const AdminPage = () => {
                             {bulkSelected.size} сонгосон
                           </span>
                         </div>
-                        <NiimbotBulkXlsxButton onExport={handleBulkXlsx} count={bulkSelected.size} />
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const chosen = orders.filter((o: any) => bulkSelected.has(o.id));
+                              if (chosen.length === 0) {
+                                toast.error("Захиалга сонгоно уу");
+                                return;
+                              }
+                              printOrders(chosen);
+                            }}
+                            disabled={bulkSelected.size === 0}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-background hover:bg-accent text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            title="A4 цаасан дээр 8 захиалга/хуудас"
+                          >
+                            🖨️ A4 хэвлэх ({bulkSelected.size})
+                          </button>
+                          <NiimbotBulkXlsxButton onExport={handleBulkXlsx} count={bulkSelected.size} />
+                        </div>
                       </div>
                       <p className="text-[11px] text-muted-foreground leading-relaxed">
                         Niimbot аппын <span className="font-semibold text-foreground">Import Data Source</span> функцэд ашиглана. Олон захиалгыг нэг загвар руу импортолж бөөнөөр хэвлэнэ.
