@@ -163,7 +163,7 @@ const AdminPage = () => {
     delivery_option_id: "",
     delivery_fee: 0,
     payment_method: "cash",
-    payment_status: "unpaid" as "unpaid" | "confirmed",
+    payment_status: "confirmed" as "unpaid" | "confirmed",
     status: "pending" as "pending" | "phone_confirmed" | "confirmed",
     note: "",
     sale_date: new Date().toISOString().slice(0, 10),
@@ -442,7 +442,7 @@ const AdminPage = () => {
       delivery_option_id: "",
       delivery_fee: 0,
       payment_method: "cash",
-      payment_status: "unpaid",
+      payment_status: "confirmed",
       status: "pending",
       note: "",
       sale_date: new Date().toISOString().slice(0, 10),
@@ -1246,15 +1246,16 @@ const AdminPage = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Төлбөрийн төлөв</label>
-                  <select
-                    value={manualForm.payment_status}
-                    onChange={(e) => setManualForm((f) => ({ ...f, payment_status: e.target.value as any }))}
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  >
-                    <option value="unpaid">Төлөгдөөгүй</option>
-                    <option value="confirmed">Төлбөр орсон</option>
-                  </select>
+                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Төлбөр</label>
+                  <label className="flex items-center gap-2 w-full rounded-xl bg-secondary px-3 py-2 text-sm cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={manualForm.payment_status === "unpaid"}
+                      onChange={(e) => setManualForm((f) => ({ ...f, payment_status: e.target.checked ? "unpaid" : "confirmed" }))}
+                      className="h-4 w-4 rounded"
+                    />
+                    <span>Төлбөр авах (өрөнд)</span>
+                  </label>
                 </div>
                 <div>
                   <label className="text-xs font-bold text-muted-foreground mb-1 block">Захиалгын төлөв</label>
