@@ -485,8 +485,18 @@ const AdminPage = () => {
         guest_name: manualForm.customer_name.trim(),
         source: manualForm.source,
         source_note: manualForm.source_note.trim() || null,
+        external_ref: manualForm.external_ref.trim() || null,
+        branch: manualForm.branch.trim() || null,
         user_id: null,
       };
+      // Хэрэглэгч огноо сонгосон бол created_at-г түүгээр давхар оноох
+      if (manualForm.sale_date) {
+        const d = new Date(manualForm.sale_date);
+        if (!isNaN(d.getTime())) {
+          payload.sale_date = d.toISOString();
+          payload.created_at = d.toISOString();
+        }
+      }
       const { data, error } = await supabase.from("orders").insert(payload).select().single();
       if (error) throw error;
       toast.success("Гадны захиалга амжилттай бүртгэгдлээ");
