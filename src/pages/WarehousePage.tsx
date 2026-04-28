@@ -278,62 +278,32 @@ export default function WarehousePage() {
   };
 
   // Core: deduct stock for one order and mark it ready. Returns true on success.
+  // Зөвхөн статусыг "ready" болгоно — үлдэгдлийг ОГТ хасахгүй (stock_movement бичихгүй)
   const processOrderStockOut = async (
     order: Order,
-    opts: { auto?: boolean } = {},
+    _opts: { auto?: boolean } = {},
   ): Promise<boolean> => {
     if (!user) return false;
     const items = Array.isArray(order.items) ? order.items : [];
-    const rows = items
-      .filter((it: any) => it?.product_id && it?.quantity)
-      .map((it: any) => ({
-        product_id: it.product_id as string,
-        quantity: Number(it.quantity) || 1,
-        reason: opts.auto ? "auto_pick" : "order_pick",
-        order_id: order.id,
-        note: opts.auto
-          ? `[AUTO] ${order.order_ref ?? ""}`.trim()
-          : order.order_ref ?? null,
-        performed_by: user.id,
-        performed_by_email: user.email ?? null,
-      }));
+    if (items.length === 0) return false;
 
-    if (rows.length === 0) return false;
-
-    const { error: mvErr } = await supabase.from("stock_movements").insert(rows);
-    if (mvErr) {
-      if (!opts.auto) toast.error("Алдаа: " + mvErr.message);
-      console.error("stock_movements insert error", mvErr);
+    const { error } = await supabase
+      .from("orders")
+      .update({ status: "ready" })
+      .eq("id", order.id);
+    if (error) {
+      console.error("orders status update error", error);
       return false;
     }
-
-    // Move order to "ready" (бэлдэж дууссан)
-    await supabase.from("orders").update({ status: "ready" }).eq("id", order.id);
     return true;
   };
 
-  // Rollback: статусыг буцааж, үлдэгдлийг сэргээх (reverse stock movement)
+  // Rollback: статусыг өмнөх төлөв рүү буцаана (stock_movement байхгүй тул сэргээх юм байхгүй)
   const rollbackOrderStockOut = async (order: Order, previousStatus = "preparing") => {
     if (!user) return;
-    const items = Array.isArray(order.items) ? order.items : [];
-    const rows = items
-      .filter((it: any) => it?.product_id && it?.quantity)
-      .map((it: any) => ({
-        product_id: it.product_id as string,
-        // Сөрөг тоогоор reverse — apply_stock_movement trigger үлдэгдлийг буцаан нэмнэ
-        quantity: -(Number(it.quantity) || 1),
-        reason: "rollback_print_failed",
-        order_id: order.id,
-        note: `[ROLLBACK] ${order.order_ref ?? ""}`.trim(),
-        performed_by: user.id,
-        performed_by_email: user.email ?? null,
-      }));
-    if (rows.length > 0) {
-      const { error } = await supabase.from("stock_movements").insert(rows);
-      if (error) console.error("rollback stock_movements error", error);
-    }
     await supabase.from("orders").update({ status: previousStatus }).eq("id", order.id);
   };
+
 
   const completeOrderPick = async (order: Order, shouldPrint = false) => {
     if (!user) return;
