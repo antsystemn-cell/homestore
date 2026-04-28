@@ -445,6 +445,9 @@ const AdminPage = () => {
       payment_status: "unpaid",
       status: "pending",
       note: "",
+      sale_date: new Date().toISOString().slice(0, 10),
+      external_ref: "",
+      branch: "",
     });
     setManualItems([]);
     setManualProductSearch("");
