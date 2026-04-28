@@ -257,6 +257,7 @@ export type Database = {
       orders: {
         Row: {
           assigned_at: string | null
+          branch: string | null
           created_at: string
           delivered_at: string | null
           delivery_completed_photo: string | null
@@ -270,6 +271,7 @@ export type Database = {
           delivery_signature_name: string | null
           delivery_status: string | null
           driver_id: string | null
+          external_ref: string | null
           guest_name: string | null
           id: string
           is_guest: boolean | null
@@ -280,6 +282,7 @@ export type Database = {
           payment_status: string | null
           phone: string | null
           picked_up_at: string | null
+          sale_date: string | null
           shipping_address: string | null
           source: string
           source_note: string | null
@@ -290,6 +293,7 @@ export type Database = {
         }
         Insert: {
           assigned_at?: string | null
+          branch?: string | null
           created_at?: string
           delivered_at?: string | null
           delivery_completed_photo?: string | null
@@ -303,6 +307,7 @@ export type Database = {
           delivery_signature_name?: string | null
           delivery_status?: string | null
           driver_id?: string | null
+          external_ref?: string | null
           guest_name?: string | null
           id?: string
           is_guest?: boolean | null
@@ -313,6 +318,7 @@ export type Database = {
           payment_status?: string | null
           phone?: string | null
           picked_up_at?: string | null
+          sale_date?: string | null
           shipping_address?: string | null
           source?: string
           source_note?: string | null
@@ -323,6 +329,7 @@ export type Database = {
         }
         Update: {
           assigned_at?: string | null
+          branch?: string | null
           created_at?: string
           delivered_at?: string | null
           delivery_completed_photo?: string | null
@@ -336,6 +343,7 @@ export type Database = {
           delivery_signature_name?: string | null
           delivery_status?: string | null
           driver_id?: string | null
+          external_ref?: string | null
           guest_name?: string | null
           id?: string
           is_guest?: boolean | null
@@ -346,6 +354,7 @@ export type Database = {
           payment_status?: string | null
           phone?: string | null
           picked_up_at?: string | null
+          sale_date?: string | null
           shipping_address?: string | null
           source?: string
           source_note?: string | null
