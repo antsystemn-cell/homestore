@@ -3766,6 +3766,15 @@ const AdminPage = () => {
         </div>
       </main>
       <NiimbotInstructionsModal open={showXlsxHelp} onOpenChange={setShowXlsxHelp} mode="xlsx" />
+      <PrintChecklistModal
+        open={showPrintChecklist}
+        onOpenChange={setShowPrintChecklist}
+        count={pendingPrintOrders.length}
+        onConfirm={() => {
+          setShowPrintChecklist(false);
+          printOrders(pendingPrintOrders);
+        }}
+      />
     </div>
   );
 };
