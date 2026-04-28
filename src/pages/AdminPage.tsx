@@ -1254,8 +1254,8 @@ const AdminPage = () => {
                 </div>
               </div>
 
-              {/* Payment & status */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {/* Payment */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-muted-foreground mb-1 block">Төлбөрийн суваг</label>
                   <select
@@ -1276,23 +1276,11 @@ const AdminPage = () => {
                     <input
                       type="checkbox"
                       checked={manualForm.payment_status === "unpaid"}
-                      onChange={(e) => setManualForm((f) => ({ ...f, payment_status: e.target.checked ? "unpaid" : "confirmed" }))}
+                      onChange={(e) => setManualForm((f) => ({ ...f, payment_status: e.target.checked ? "unpaid" : "confirmed", status: e.target.checked ? "pending" : "confirmed" }))}
                       className="h-4 w-4 rounded"
                     />
                     <span>Төлбөр авах</span>
                   </label>
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Захиалгын төлөв</label>
-                  <select
-                    value={manualForm.status}
-                    onChange={(e) => setManualForm((f) => ({ ...f, status: e.target.value as any }))}
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  >
-                    <option value="pending">Хүлээгдэж буй</option>
-                    <option value="phone_confirmed">Утсаар баталгаажуулсан</option>
-                    <option value="confirmed">Төлбөр орсон</option>
-                  </select>
                 </div>
               </div>
 
