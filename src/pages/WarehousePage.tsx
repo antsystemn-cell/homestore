@@ -166,7 +166,7 @@ export default function WarehousePage() {
         .order("name"),
       supabase
         .from("orders")
-        .select("id,order_ref,guest_name,phone,shipping_address,status,total,items,created_at")
+        .select("id,order_ref,guest_name,phone,shipping_address,status,total,items,created_at,payment_method,payment_status,delivery_fee,source_note")
         .eq("status", "preparing")
         .order("created_at", { ascending: false })
         .limit(100),
