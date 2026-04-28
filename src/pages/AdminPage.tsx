@@ -477,6 +477,31 @@ const AdminPage = () => {
 
     const fullAddress = `${manualForm.addr_district.trim()} дүүрэг, ${manualForm.addr_khoroo.trim()}-р хороо, ${manualForm.addr_building.trim()} байр, ${manualForm.addr_entrance.trim()} орц, ${manualForm.addr_apt.trim()} тоот`;
 
+    // Auto-generate external_ref: ES-YYMMDD-NNN (тухайн өдрийн дараалал)
+    const saleDate = manualForm.sale_date ? new Date(manualForm.sale_date) : new Date();
+    const yy = String(saleDate.getFullYear()).slice(-2);
+    const mm = String(saleDate.getMonth() + 1).padStart(2, "0");
+    const dd = String(saleDate.getDate()).padStart(2, "0");
+    const datePrefix = `ES-${yy}${mm}${dd}`;
+    let nextSeq = 1;
+    try {
+      const { data: existing } = await supabase
+        .from("orders")
+        .select("external_ref")
+        .like("external_ref", `${datePrefix}-%`);
+      if (existing && existing.length > 0) {
+        const maxSeq = existing.reduce((m: number, r: any) => {
+          const match = String(r.external_ref || "").match(/-(\d+)$/);
+          const n = match ? parseInt(match[1], 10) : 0;
+          return n > m ? n : m;
+        }, 0);
+        nextSeq = maxSeq + 1;
+      }
+    } catch (e) {
+      console.warn("external_ref sequence fetch failed", e);
+    }
+    const autoExternalRef = `${datePrefix}-${String(nextSeq).padStart(3, "0")}`;
+
     setManualSubmitting(true);
     try {
       const items = manualItems.map((it) => ({
@@ -501,7 +526,7 @@ const AdminPage = () => {
         guest_name: manualForm.customer_name.trim(),
         source: manualForm.source,
         source_note: manualForm.source_note.trim() || null,
-        external_ref: manualForm.external_ref.trim() || null,
+        external_ref: autoExternalRef,
         branch: manualForm.branch.trim() || null,
         user_id: null,
       };
@@ -1115,13 +1140,19 @@ const AdminPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Дэс дугаар (гадаад №)</label>
+                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Дэс дугаар (авто)</label>
                   <input
                     type="text"
-                    value={manualForm.external_ref}
-                    onChange={(e) => setManualForm((f) => ({ ...f, external_ref: e.target.value.slice(0, 50) }))}
-                    placeholder="Жнь: FB-1023"
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    value={(() => {
+                      const d = manualForm.sale_date ? new Date(manualForm.sale_date) : new Date();
+                      const yy = String(d.getFullYear()).slice(-2);
+                      const mm = String(d.getMonth() + 1).padStart(2, "0");
+                      const dd = String(d.getDate()).padStart(2, "0");
+                      return `ES-${yy}${mm}${dd}-XXX`;
+                    })()}
+                    disabled
+                    placeholder="Автоматаар үүснэ"
+                    className="w-full rounded-xl bg-secondary/50 px-3 py-2 text-sm text-muted-foreground cursor-not-allowed"
                   />
                 </div>
                 <div>
