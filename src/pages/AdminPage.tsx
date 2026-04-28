@@ -2388,7 +2388,7 @@ const AdminPage = () => {
                             {sendingDelivery === o.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Truck className="h-4 w-4" />}
                           </button>
                         )}
-                        {o.status === "cancelled" && (
+                        {o.status === "cancelled" && isAdmin && (
                           <button
                             onClick={(e) => { e.stopPropagation(); setDeleteOrderTarget({ id: o.id }); }}
                             className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"
