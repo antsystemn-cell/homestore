@@ -1412,16 +1412,25 @@ const AdminPage = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Төлбөр</label>
-                  <label className="flex items-center gap-2 w-full rounded-xl bg-secondary px-3 py-2 text-sm cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={manualForm.payment_status === "unpaid"}
-                      onChange={(e) => setManualForm((f) => ({ ...f, payment_status: e.target.checked ? "unpaid" : "confirmed", status: e.target.checked ? "pending" : "confirmed" }))}
-                      className="h-4 w-4 rounded"
-                    />
-                    <span>Төлбөр авах</span>
-                  </label>
+                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Төлөв</label>
+                  <select
+                    value={manualForm.status === "preparing" ? "preparing" : manualForm.payment_status === "unpaid" ? "unpaid" : "confirmed"}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "preparing") {
+                        setManualForm((f) => ({ ...f, status: "preparing", payment_status: "unpaid" }));
+                      } else if (v === "unpaid") {
+                        setManualForm((f) => ({ ...f, status: "pending", payment_status: "unpaid" }));
+                      } else {
+                        setManualForm((f) => ({ ...f, status: "confirmed", payment_status: "confirmed" }));
+                      }
+                    }}
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="confirmed">Төлбөр авсан</option>
+                    <option value="unpaid">Төлбөр аваагүй</option>
+                    <option value="preparing">Бэлдэж байна (нярав)</option>
+                  </select>
                 </div>
               </div>
 
