@@ -1197,39 +1197,76 @@ const AdminPage = () => {
               <div>
                 <label className="text-xs font-bold text-muted-foreground mb-1 block">Хүргэлтийн хаяг *</label>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                  <input
-                    type="text"
+                  <select
                     value={manualForm.addr_district}
-                    onChange={(e) => setManualForm((f) => ({ ...f, addr_district: e.target.value.slice(0, 50) }))}
-                    placeholder="Дүүрэг"
+                    onChange={(e) => setManualForm((f) => ({ ...f, addr_district: e.target.value }))}
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="">Дүүрэг</option>
+                    <option value="ХУД">ХУД</option>
+                    <option value="БЗД">БЗД</option>
+                    <option value="БГД">БГД</option>
+                    <option value="СХД">СХД</option>
+                    <option value="СБД">СБД</option>
+                    <option value="ЧД">ЧД</option>
+                  </select>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      value={manualForm.addr_khoroo}
+                      onChange={(e) => setManualForm((f) => ({ ...f, addr_khoroo: e.target.value.slice(0, 3) }))}
+                      placeholder="Хороо"
+                      className="w-full rounded-xl bg-secondary px-3 py-2 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                    {manualForm.addr_khoroo && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">-р хороо</span>}
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={manualForm.addr_building}
+                      onChange={(e) => setManualForm((f) => ({ ...f, addr_building: e.target.value.slice(0, 30) }))}
+                      placeholder="Байр"
+                      className="w-full rounded-xl bg-secondary px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                    {manualForm.addr_building && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">байр</span>}
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      value={manualForm.addr_entrance}
+                      onChange={(e) => setManualForm((f) => ({ ...f, addr_entrance: e.target.value.slice(0, 3) }))}
+                      placeholder="Орц"
+                      className="w-full rounded-xl bg-secondary px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                    {manualForm.addr_entrance && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">орц</span>}
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      value={manualForm.addr_apt}
+                      onChange={(e) => setManualForm((f) => ({ ...f, addr_apt: e.target.value.slice(0, 5) }))}
+                      placeholder="Тоот"
+                      className="w-full rounded-xl bg-secondary px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                    {manualForm.addr_apt && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">тоот</span>}
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                  <input
+                    type="text"
+                    value={manualForm.addr_door_code}
+                    onChange={(e) => setManualForm((f) => ({ ...f, addr_door_code: e.target.value.slice(0, 20) }))}
+                    placeholder="Орцны код (заавал биш)"
                     className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                   <input
                     type="text"
-                    value={manualForm.addr_khoroo}
-                    onChange={(e) => setManualForm((f) => ({ ...f, addr_khoroo: e.target.value.slice(0, 20) }))}
-                    placeholder="Хороо"
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                  <input
-                    type="text"
-                    value={manualForm.addr_building}
-                    onChange={(e) => setManualForm((f) => ({ ...f, addr_building: e.target.value.slice(0, 50) }))}
-                    placeholder="Байр"
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                  <input
-                    type="text"
-                    value={manualForm.addr_entrance}
-                    onChange={(e) => setManualForm((f) => ({ ...f, addr_entrance: e.target.value.slice(0, 20) }))}
-                    placeholder="Орц"
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                  <input
-                    type="text"
-                    value={manualForm.addr_apt}
-                    onChange={(e) => setManualForm((f) => ({ ...f, addr_apt: e.target.value.slice(0, 20) }))}
-                    placeholder="Тоот"
+                    value={manualForm.addr_landmark}
+                    onChange={(e) => setManualForm((f) => ({ ...f, addr_landmark: e.target.value.slice(0, 200) }))}
+                    placeholder="Дэлгэрэнгүй хаяг / Чиглэл (заавал биш)"
                     className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
