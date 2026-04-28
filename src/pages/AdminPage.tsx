@@ -479,7 +479,16 @@ const AdminPage = () => {
     if (!manualForm.addr_apt.trim()) { toast.error("Тоот оруулна уу"); return; }
     if (manualItems.length === 0) { toast.error("Дор хаяж 1 бараа нэмнэ үү"); return; }
 
-    const fullAddress = `${manualForm.addr_district.trim()} дүүрэг, ${manualForm.addr_khoroo.trim()}-р хороо, ${manualForm.addr_building.trim()} байр, ${manualForm.addr_entrance.trim()} орц, ${manualForm.addr_apt.trim()} тоот`;
+    const addrParts = [
+      `${manualForm.addr_district.trim()} дүүрэг`,
+      `${manualForm.addr_khoroo.trim()}-р хороо`,
+      `${manualForm.addr_building.trim()} байр`,
+      `${manualForm.addr_entrance.trim()} орц`,
+      `${manualForm.addr_apt.trim()} тоот`,
+    ];
+    if (manualForm.addr_door_code.trim()) addrParts.push(`орцны код: ${manualForm.addr_door_code.trim()}`);
+    if (manualForm.addr_landmark.trim()) addrParts.push(`(${manualForm.addr_landmark.trim()})`);
+    const fullAddress = addrParts.join(", ");
 
     // Auto-generate external_ref: ES-YYMMDD-NNN (тухайн өдрийн дараалал)
     const saleDate = manualForm.sale_date ? new Date(manualForm.sale_date) : new Date();
