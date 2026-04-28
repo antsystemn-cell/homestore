@@ -106,7 +106,7 @@ td{padding:0.4mm 0;border-bottom:1px dotted #eee;vertical-align:top;font-size:2.
 @media print{.actions{display:none!important}}
 `;
 
-function openPrintWindow(bodyHtml: string, title: string, pageCount: number, autoprint: boolean) {
+function openPrintWindow(bodyHtml: string, title: string, pageCount: number, autoprint: boolean): boolean {
   const previewBar = pageCount > 0 ? `
 <div class="preview-bar">
   <div class="preview-info">
@@ -147,28 +147,35 @@ ${autoprint ? "<script>window.addEventListener('load',()=>setTimeout(()=>window.
   const w = window.open("", "_blank", "width=900,height=1000");
   if (!w) {
     alert("Pop-up зөвшөөрнө үү.");
-    return;
+    return false;
   }
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
+  try {
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+    return true;
+  } catch (e) {
+    console.error("print window write error", e);
+    try { w.close(); } catch {}
+    return false;
+  }
 }
 
 // Нэг захиалга хэвлэх — A4 нэг хуудас, 1 slip эхний нүдэнд
-export function printOrder(order: PrintOrder) {
+export function printOrder(order: PrintOrder): boolean {
   const ref = order.order_ref || order.id?.slice(0, 8) || "захиалга";
   const sheet = `<div class="sheet">${buildSlip(order)}</div>`;
-  openPrintWindow(sheet, ref, 0, true);
+  return openPrintWindow(sheet, ref, 0, true);
 }
 
 // Олон захиалга — Preview горимтой, A4 хуудас бүрт 8 slip (4x2)
-export function printOrders(orders: PrintOrder[]) {
-  if (!orders?.length) return;
+export function printOrders(orders: PrintOrder[]): boolean {
+  if (!orders?.length) return false;
   const PER_PAGE = 8;
   const sheets: string[] = [];
   for (let i = 0; i < orders.length; i += PER_PAGE) {
     const chunk = orders.slice(i, i + PER_PAGE);
     sheets.push(`<div class="sheet">${chunk.map(buildSlip).join("")}</div>`);
   }
-  openPrintWindow(sheets.join(""), `${orders.length} захиалга`, sheets.length, false);
+  return openPrintWindow(sheets.join(""), `${orders.length} захиалга`, sheets.length, false);
 }

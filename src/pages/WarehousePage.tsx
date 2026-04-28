@@ -299,6 +299,29 @@ export default function WarehousePage() {
     return true;
   };
 
+  // Rollback: статусыг буцааж, үлдэгдлийг сэргээх (reverse stock movement)
+  const rollbackOrderStockOut = async (order: Order, previousStatus = "preparing") => {
+    if (!user) return;
+    const items = Array.isArray(order.items) ? order.items : [];
+    const rows = items
+      .filter((it: any) => it?.product_id && it?.quantity)
+      .map((it: any) => ({
+        product_id: it.product_id as string,
+        // Сөрөг тоогоор reverse — apply_stock_movement trigger үлдэгдлийг буцаан нэмнэ
+        quantity: -(Number(it.quantity) || 1),
+        reason: "rollback_print_failed",
+        order_id: order.id,
+        note: `[ROLLBACK] ${order.order_ref ?? ""}`.trim(),
+        performed_by: user.id,
+        performed_by_email: user.email ?? null,
+      }));
+    if (rows.length > 0) {
+      const { error } = await supabase.from("stock_movements").insert(rows);
+      if (error) console.error("rollback stock_movements error", error);
+    }
+    await supabase.from("orders").update({ status: previousStatus }).eq("id", order.id);
+  };
+
   const completeOrderPick = async (order: Order, shouldPrint = false) => {
     if (!user) return;
     const items = Array.isArray(order.items) ? order.items : [];
@@ -306,17 +329,27 @@ export default function WarehousePage() {
       toast.error("Захиалгад бараа байхгүй байна");
       return;
     }
+    const previousStatus = order.status;
     setProcessingOrderId(order.id);
     const ok = await processOrderStockOut(order);
     if (ok) {
-      toast.success(`${order.order_ref ?? order.id.slice(0, 6)} бэлэн боллоо ✓`);
       if (shouldPrint) {
+        let printed = false;
         try {
-          printOrder(order);
-          toast.success("Хэвлэх цонх нээгдлээ");
-        } catch {
-          toast.error("Хэвлэхэд алдаа гарлаа");
+          printed = printOrder(order);
+        } catch (e) {
+          console.error("print error", e);
+          printed = false;
         }
+        if (printed) {
+          toast.success(`${order.order_ref ?? order.id.slice(0, 6)} бэлэн боллоо ✓ Хэвлэх цонх нээгдлээ`);
+        } else {
+          // Rollback — хэвлэх амжилтгүй болсон тул статус болон үлдэгдлийг буцаана
+          await rollbackOrderStockOut(order, previousStatus);
+          toast.error("Хэвлэхэд алдаа гарлаа — статус болон үлдэгдэл буцаагдлаа");
+        }
+      } else {
+        toast.success(`${order.order_ref ?? order.id.slice(0, 6)} бэлэн боллоо ✓`);
       }
       loadAll();
     } else {
@@ -336,34 +369,48 @@ export default function WarehousePage() {
     setBulkProcessing(true);
     let success = 0;
     let failed = 0;
-    const printed: typeof chosen = [];
+    const printed: { order: Order; previousStatus: string }[] = [];
     for (const o of chosen) {
       const items = Array.isArray(o.items) ? o.items : [];
       if (items.length === 0) {
         failed++;
         continue;
       }
+      const previousStatus = o.status;
       const ok = await processOrderStockOut(o);
       if (ok) {
         success++;
-        printed.push(o);
+        printed.push({ order: o, previousStatus });
       } else {
         failed++;
       }
     }
-    setBulkProcessing(false);
-    setBulkSelected(new Set());
-    if (success > 0) {
-      toast.success(`${success} захиалга бэлэн боллоо ✓`);
+
+    let printOk = false;
+    if (printed.length > 0) {
       try {
-        printOrders(printed);
-      } catch {
-        toast.error("Хэвлэхэд алдаа гарлаа");
+        printOk = printOrders(printed.map((p) => p.order));
+      } catch (e) {
+        console.error("printOrders error", e);
+        printOk = false;
+      }
+      if (!printOk) {
+        // Бүх амжилттай захиалгыг rollback
+        for (const p of printed) {
+          await rollbackOrderStockOut(p.order, p.previousStatus);
+        }
+        toast.error(`Хэвлэхэд алдаа гарлаа — ${printed.length} захиалгын статус болон үлдэгдэл буцаагдлаа`);
+        success = 0;
       }
     }
+
+    setBulkProcessing(false);
+    setBulkSelected(new Set());
+    if (success > 0) toast.success(`${success} захиалга бэлэн боллоо ✓`);
     if (failed > 0) toast.error(`${failed} захиалга боловсруулагдсангүй`);
     loadAll();
   };
+
   // Runs every 30s while the page is open. For each eligible order whose
   // age (since created_at) >= delayMinutes, auto-deduct stock and mark ready.
   useEffect(() => {
