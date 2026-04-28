@@ -25,6 +25,7 @@ import {
   TrendingDown,
   Zap,
   Power,
+  Printer,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
