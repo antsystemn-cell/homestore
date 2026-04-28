@@ -27,6 +27,7 @@ const CheckoutPage = () => {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [name, setName] = useState("");
+  const [note, setNote] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("qpay");
   const [orderId, setOrderId] = useState<string | null>(null);
   const [orderRef, setOrderRef] = useState<string | null>(null);
