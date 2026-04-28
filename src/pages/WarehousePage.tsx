@@ -753,29 +753,21 @@ export default function WarehousePage() {
                     })}
                   </ul>
 
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => completeOrderPick(o)}
-                      disabled={processingOrderId === o.id}
-                    >
-                      {processingOrderId === o.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      ) : (
-                        <CheckCircle2 className="h-4 w-4 mr-2" />
-                      )}
-                      Бэлэн боллоо — Үлдэгдэл хасах
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => printOrder(o)}
-                      title="Хэвлэх"
-                    >
-                      <Printer className="h-4 w-4" />
-                    </Button>
-                  </div>
+                   <div className="flex gap-2">
+                     <Button
+                       size="sm"
+                       className="flex-1"
+                       onClick={() => { completeOrderPick(o); printOrder(o); }}
+                       disabled={processingOrderId === o.id}
+                     >
+                       {processingOrderId === o.id ? (
+                         <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                       ) : (
+                         <Printer className="h-4 w-4 mr-2" />
+                       )}
+                       Хүргэлтэнд гарлаа — Хэвлэх
+                     </Button>
+                   </div>
                 </div>
               );
             })}
