@@ -1499,6 +1499,21 @@ const AdminPage = () => {
                 </div>
               </div>
 
+              {/* Notes / extra description */}
+              <div>
+                <label className="text-xs font-bold text-muted-foreground mb-1 block">
+                  Нэмэлт тайлбар <span className="font-normal text-muted-foreground/60">(хүргэлт, бараа, бусад)</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={manualForm.source_note}
+                  onChange={(e) => setManualForm((f) => ({ ...f, source_note: e.target.value.slice(0, 500) }))}
+                  placeholder="Жишээ: 14:00-аас өмнө хүргэх, утсаар яриад очих, бэлэг боох гэх мэт..."
+                  className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                />
+                <div className="text-[10px] text-muted-foreground/60 text-right mt-1">{manualForm.source_note.length}/500</div>
+              </div>
+
               {/* Total */}
               <div className="bg-secondary/50 rounded-xl p-3 space-y-1 text-sm">
                 <div className="flex justify-between"><span className="text-muted-foreground">Бараа:</span><span className="font-medium">{formatPrice(manualSubtotal)}</span></div>
