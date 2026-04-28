@@ -1149,16 +1149,46 @@ const AdminPage = () => {
                 />
               </div>
 
-              {/* Address */}
+              {/* Address — detailed */}
               <div>
-                <label className="text-xs font-bold text-muted-foreground mb-1 block">Хүргэлтийн хаяг</label>
-                <textarea
-                  value={manualForm.shipping_address}
-                  onChange={(e) => setManualForm((f) => ({ ...f, shipping_address: e.target.value }))}
-                  rows={2}
-                  placeholder="Дүүрэг, хороо, байр, орц, тоот..."
-                  className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
+                <label className="text-xs font-bold text-muted-foreground mb-1 block">Хүргэлтийн хаяг *</label>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                  <input
+                    type="text"
+                    value={manualForm.addr_district}
+                    onChange={(e) => setManualForm((f) => ({ ...f, addr_district: e.target.value.slice(0, 50) }))}
+                    placeholder="Дүүрэг"
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  <input
+                    type="text"
+                    value={manualForm.addr_khoroo}
+                    onChange={(e) => setManualForm((f) => ({ ...f, addr_khoroo: e.target.value.slice(0, 20) }))}
+                    placeholder="Хороо"
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  <input
+                    type="text"
+                    value={manualForm.addr_building}
+                    onChange={(e) => setManualForm((f) => ({ ...f, addr_building: e.target.value.slice(0, 50) }))}
+                    placeholder="Байр"
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  <input
+                    type="text"
+                    value={manualForm.addr_entrance}
+                    onChange={(e) => setManualForm((f) => ({ ...f, addr_entrance: e.target.value.slice(0, 20) }))}
+                    placeholder="Орц"
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  <input
+                    type="text"
+                    value={manualForm.addr_apt}
+                    onChange={(e) => setManualForm((f) => ({ ...f, addr_apt: e.target.value.slice(0, 20) }))}
+                    placeholder="Тоот"
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
               </div>
 
               {/* Delivery fee toggle */}
