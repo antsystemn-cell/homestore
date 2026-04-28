@@ -2608,13 +2608,6 @@ const AdminPage = () => {
                         >
                           📋
                         </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); printOrder(o); }}
-                          className="p-2 rounded-lg hover:bg-primary/10 text-primary transition-colors"
-                          title="Хэвлэх"
-                        >
-                          🖨️
-                        </button>
                         {!o.delivery_order_id && o.status !== "cancelled" && (
                           <button
                             onClick={(e) => { e.stopPropagation(); sendToDelivery(o.id); }}
