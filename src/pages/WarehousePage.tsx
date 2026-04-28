@@ -736,7 +736,6 @@ export default function WarehousePage() {
                   <ul className="text-sm space-y-1 mb-3 border-t border-border pt-2">
                     {items.map((it: any, i: number) => {
                       const prod = products.find((p) => p.id === it.product_id);
-                      const lowStock = prod && prod.stock_quantity < (it.quantity ?? 1);
                       return (
                         <li key={i} className="flex items-center justify-between gap-2">
                           <span className="truncate">
@@ -744,17 +743,8 @@ export default function WarehousePage() {
                             {it.size && <span className="text-muted-foreground"> · {it.size}</span>}
                             {it.color && <span className="text-muted-foreground"> · {it.color}</span>}
                           </span>
-                          <span
-                            className={`font-mono shrink-0 ${
-                              lowStock ? "text-destructive font-semibold" : ""
-                            }`}
-                          >
+                          <span className="font-mono shrink-0">
                             ×{it.quantity ?? 1}
-                            {prod && (
-                              <span className="text-xs text-muted-foreground ml-2">
-                                (үлд: {prod.stock_quantity})
-                              </span>
-                            )}
                           </span>
                         </li>
                       );
@@ -815,7 +805,6 @@ export default function WarehousePage() {
                       <div className="text-sm font-medium truncate">{p.name}</div>
                       <div className="text-xs text-muted-foreground flex gap-2">
                         {p.product_code && <span>{p.product_code}</span>}
-                        <span>· Үлд: {p.stock_quantity}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
