@@ -443,7 +443,7 @@ const AdminPage = () => {
       delivery_fee: 0,
       payment_method: "cash",
       payment_status: "confirmed",
-      status: "pending",
+      status: "confirmed",
       note: "",
       sale_date: new Date().toISOString().slice(0, 10),
       external_ref: "",
