@@ -106,11 +106,42 @@ td{padding:0.4mm 0;border-bottom:1px dotted #eee;vertical-align:top;font-size:2.
 @media print{.actions{display:none!important}}
 `;
 
-function openPrintWindow(bodyHtml: string, title: string) {
-  const html = `<!doctype html><html lang="mn"><head><meta charset="utf-8"/><title>${esc(title)}</title><style>${STYLES}</style></head><body>
-<div class="actions"><button class="pr" onclick="window.print()">Хэвлэх</button><button class="cl" onclick="window.close()">Хаах</button></div>
+function openPrintWindow(bodyHtml: string, title: string, pageCount: number, autoprint: boolean) {
+  const previewBar = pageCount > 0 ? `
+<div class="preview-bar">
+  <div class="preview-info">
+    <span class="preview-title">${esc(title)}</span>
+    <span class="preview-pages">${pageCount} хуудас · хуудас бүрт 8 slip</span>
+  </div>
+  <div class="preview-nav">
+    ${Array.from({ length: pageCount }, (_, i) => `<button class="pg-btn" onclick="document.querySelectorAll('.sheet')[${i}].scrollIntoView({behavior:'smooth',block:'start'})">Хуудас ${i + 1}</button>`).join("")}
+  </div>
+  <div class="preview-actions">
+    <button class="pr" onclick="window.print()">🖨️ Хэвлэх</button>
+    <button class="cl" onclick="window.close()">Хаах</button>
+  </div>
+</div>` : "";
+
+  const previewStyles = pageCount > 0 ? `
+.preview-bar{position:sticky;top:0;z-index:1000;background:#1a1a2e;color:#fff;padding:10px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-family:system-ui,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.preview-info{display:flex;flex-direction:column;gap:2px;min-width:140px}
+.preview-title{font-size:13px;font-weight:700}
+.preview-pages{font-size:11px;opacity:.7}
+.preview-nav{display:flex;gap:4px;flex-wrap:wrap;flex:1}
+.pg-btn{padding:4px 10px;border-radius:4px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:11px;cursor:pointer;transition:all .15s}
+.pg-btn:hover{background:rgba(255,255,255,.15);border-color:#fff}
+.preview-actions{display:flex;gap:6px;margin-left:auto}
+.sheet{margin:12px auto;box-shadow:0 2px 12px rgba(0,0,0,.15);border:1px solid #ddd}
+body{background:#e8e8e8!important}
+@media print{.preview-bar{display:none!important}body{background:#fff!important}.sheet{margin:0;box-shadow:none;border:none}}
+` : "";
+
+  const html = `<!doctype html><html lang="mn"><head><meta charset="utf-8"/><title>${esc(title)}</title>
+<style>${STYLES}${previewStyles}</style></head><body>
+${pageCount > 0 ? "" : '<div class="actions"><button class="pr" onclick="window.print()">Хэвлэх</button><button class="cl" onclick="window.close()">Хаах</button></div>'}
+${previewBar}
 ${bodyHtml}
-<script>window.addEventListener('load',()=>setTimeout(()=>window.print(),300))</script>
+${autoprint ? "<script>window.addEventListener('load',()=>setTimeout(()=>window.print(),300))</script>" : ""}
 </body></html>`;
 
   const w = window.open("", "_blank", "width=900,height=1000");
@@ -127,10 +158,10 @@ ${bodyHtml}
 export function printOrder(order: PrintOrder) {
   const ref = order.order_ref || order.id?.slice(0, 8) || "захиалга";
   const sheet = `<div class="sheet">${buildSlip(order)}</div>`;
-  openPrintWindow(sheet, ref);
+  openPrintWindow(sheet, ref, 0, true);
 }
 
-// Олон захиалга — A4 хуудас бүрт 8 slip (4x2)
+// Олон захиалга — Preview горимтой, A4 хуудас бүрт 8 slip (4x2)
 export function printOrders(orders: PrintOrder[]) {
   if (!orders?.length) return;
   const PER_PAGE = 8;
@@ -139,5 +170,5 @@ export function printOrders(orders: PrintOrder[]) {
     const chunk = orders.slice(i, i + PER_PAGE);
     sheets.push(`<div class="sheet">${chunk.map(buildSlip).join("")}</div>`);
   }
-  openPrintWindow(sheets.join(""), `${orders.length} захиалга`);
+  openPrintWindow(sheets.join(""), `${orders.length} захиалга`, sheets.length, false);
 }
