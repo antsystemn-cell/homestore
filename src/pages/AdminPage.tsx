@@ -17,6 +17,7 @@ import { optimizeImage, generateThumbnail, estimateBase64Size } from "@/lib/imag
 import { resolveColor } from "@/lib/colorMap";
 import { cyrillicToLatinSlug } from "@/lib/cyrillicToLatin";
 import { parseAddressBlob } from "@/lib/addressParser";
+import { printOrder } from "@/lib/printOrder";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -2584,6 +2585,13 @@ const AdminPage = () => {
                           title="Excel-д хуулах"
                         >
                           📋
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); printOrder(o); }}
+                          className="p-2 rounded-lg hover:bg-primary/10 text-primary transition-colors"
+                          title="Хэвлэх"
+                        >
+                          🖨️
                         </button>
                         {!o.delivery_order_id && o.status !== "cancelled" && (
                           <button
