@@ -540,7 +540,7 @@ const AdminPage = () => {
       }
       const { data, error } = await supabase.from("orders").insert(payload).select().single();
       if (error) throw error;
-      toast.success("Гадны захиалга амжилттай бүртгэгдлээ");
+      toast.success("Захиалга амжилттай бүртгэгдлээ");
       setOrders((prev) => [data, ...prev]);
       setShowManualOrder(false);
       resetManualForm();
@@ -1121,7 +1121,7 @@ const AdminPage = () => {
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto" onClick={() => !manualSubmitting && setShowManualOrder(false)}>
           <div className="bg-card rounded-2xl border border-border w-full max-w-2xl my-8 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="sticky top-0 bg-card border-b border-border px-5 py-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold">Гадны борлуулалт бүртгэх</h2>
+              <h2 className="text-lg font-bold">Захиалга оруулах</h2>
               <button onClick={() => !manualSubmitting && setShowManualOrder(false)} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="h-5 w-5" />
               </button>
@@ -2218,14 +2218,14 @@ const AdminPage = () => {
               {/* Manual external order */}
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <p className="text-xs text-muted-foreground">
-                  Facebook, утас гэх мэт сувгаар орж ирсэн борлуулалтыг "Гадны захиалга" товчоор бүртгэнэ үү.
+                  Facebook, утас гэх мэт сувгаар орж ирсэн борлуулалтыг "Захиалга оруулах" товчоор бүртгэнэ үү.
                 </p>
                 <button
                   onClick={() => { resetManualForm(); setShowManualOrder(true); }}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow hover:opacity-90 transition-opacity"
                 >
                   <Plus className="h-4 w-4" />
-                  Гадны захиалга
+                  Захиалга оруулах
                 </button>
               </div>
 
