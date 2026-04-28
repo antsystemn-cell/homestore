@@ -164,7 +164,7 @@ const AdminPage = () => {
     delivery_fee: 0,
     payment_method: "cash",
     payment_status: "confirmed" as "unpaid" | "confirmed",
-    status: "pending" as "pending" | "phone_confirmed" | "confirmed",
+    status: "confirmed" as "pending" | "phone_confirmed" | "confirmed",
     note: "",
     sale_date: new Date().toISOString().slice(0, 10),
     external_ref: "",
