@@ -1120,6 +1120,40 @@ const AdminPage = () => {
                 />
               </div>
 
+              {/* Sale meta: date / external ref / branch */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Борлуулсан огноо *</label>
+                  <input
+                    type="date"
+                    value={manualForm.sale_date}
+                    max={new Date().toISOString().slice(0, 10)}
+                    onChange={(e) => setManualForm((f) => ({ ...f, sale_date: e.target.value }))}
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Дэс дугаар (гадаад №)</label>
+                  <input
+                    type="text"
+                    value={manualForm.external_ref}
+                    onChange={(e) => setManualForm((f) => ({ ...f, external_ref: e.target.value.slice(0, 50) }))}
+                    placeholder="Жнь: FB-1023"
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Салбар</label>
+                  <input
+                    type="text"
+                    value={manualForm.branch}
+                    onChange={(e) => setManualForm((f) => ({ ...f, branch: e.target.value.slice(0, 100) }))}
+                    placeholder="Жнь: Төв салбар"
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+              </div>
+
               {/* Customer */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
