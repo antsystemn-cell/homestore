@@ -1186,6 +1186,70 @@ const AdminPage = () => {
                 </div>
               </div>
 
+              {/* Quick fill — paste anything (phone + address mixed, latin/cyrillic) */}
+              <div>
+                <label className="text-xs font-bold text-muted-foreground mb-1 block flex items-center gap-2">
+                  ⚡ Шуурхай бөглөх
+                  <span className="font-normal text-[10px] text-muted-foreground/70">(хаяг + утас хуулж тавь, автоматаар таниулна)</span>
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Жишээ: ХУД 11-р хороо нархан хотхон 1 байр 34 орц 8 тоот код 1234, 99119911"
+                  className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  onPaste={(e) => {
+                    const text = e.clipboardData.getData("text");
+                    if (!text) return;
+                    e.preventDefault();
+                    const p = parseAddressBlob(text);
+                    setManualForm((f) => ({
+                      ...f,
+                      phone: p.phone || f.phone,
+                      addr_district: p.district || f.addr_district,
+                      addr_khoroo: p.khoroo || f.addr_khoroo,
+                      addr_khotkhon: p.khotkhon || f.addr_khotkhon,
+                      addr_building: p.building || f.addr_building,
+                      addr_entrance: p.entrance || f.addr_entrance,
+                      addr_apt: p.apt || f.addr_apt,
+                      addr_door_code: p.doorCode || f.addr_door_code,
+                      addr_landmark: p.landmark || f.addr_landmark,
+                    }));
+                    const filled = [
+                      p.phone && "утас",
+                      p.district && "дүүрэг",
+                      p.khoroo && "хороо",
+                      p.khotkhon && "хотхон",
+                      p.building && "байр",
+                      p.entrance && "орц",
+                      p.apt && "тоот",
+                      p.doorCode && "код",
+                    ].filter(Boolean);
+                    if (filled.length) toast.success(`Таниулсан: ${filled.join(", ")}`);
+                    else toast.error("Хаягийг таних боломжгүй байна");
+                    (e.target as HTMLTextAreaElement).value = "";
+                  }}
+                  onChange={(e) => {
+                    // allow manual typing + parse on Enter
+                    if (e.target.value.endsWith("\n")) {
+                      const text = e.target.value.trim();
+                      const p = parseAddressBlob(text);
+                      setManualForm((f) => ({
+                        ...f,
+                        phone: p.phone || f.phone,
+                        addr_district: p.district || f.addr_district,
+                        addr_khoroo: p.khoroo || f.addr_khoroo,
+                        addr_khotkhon: p.khotkhon || f.addr_khotkhon,
+                        addr_building: p.building || f.addr_building,
+                        addr_entrance: p.entrance || f.addr_entrance,
+                        addr_apt: p.apt || f.addr_apt,
+                        addr_door_code: p.doorCode || f.addr_door_code,
+                        addr_landmark: p.landmark || f.addr_landmark,
+                      }));
+                      e.target.value = "";
+                    }
+                  }}
+                />
+              </div>
+
               {/* Phone */}
               <div>
                 <label className="text-xs font-bold text-muted-foreground mb-1 block">Утас *</label>
