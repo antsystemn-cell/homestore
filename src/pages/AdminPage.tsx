@@ -447,7 +447,7 @@ const AdminPage = () => {
       note: "",
       sale_date: new Date().toISOString().slice(0, 10),
       external_ref: "",
-      branch: "",
+      branch: "Лавай",
     });
     setManualItems([]);
     setManualProductSearch("");
