@@ -149,6 +149,13 @@ td{padding:0.4mm 0;border-bottom:1px dotted #eee;vertical-align:top;font-size:2.
 .tot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #000;padding-top:0.8mm;margin-top:0.8mm;font-size:2.6mm;line-height:1.2}
 .tot b{font-size:2.8mm}
 .note{margin-top:0.8mm;padding:0.5mm 1mm;border-left:2px solid #f59e0b;background:#fffbeb;font-size:2mm;border-radius:1px;line-height:1.2}
+.who .phone{font-family:'Courier New',Courier,monospace;font-weight:700;font-size:2.6mm}
+.pay{margin-top:0.8mm;padding:1mm 1.2mm;border:1.2px solid #000;background:#fef3c7;border-radius:1px;line-height:1.2}
+.pay-h{font-size:2.3mm;font-weight:800;letter-spacing:.2px}
+.pay-h b{font-family:'Courier New',Courier,monospace;font-size:2.5mm}
+.pay-b{font-size:2mm;margin-top:0.4mm}
+.pay-b b{font-family:'Courier New',Courier,monospace;font-size:2.3mm;letter-spacing:.3px}
+.paid{margin-top:0.8mm;padding:0.5mm 1mm;font-size:2mm;color:#15803d;font-weight:700;border-left:2px solid #15803d;background:#f0fdf4;border-radius:1px;line-height:1.2}
 .actions{position:fixed;top:8px;right:8px;display:flex;gap:6px;z-index:1000}
 .actions button{padding:6px 14px;border-radius:4px;border:1px solid #000;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
 .actions .pr{background:#000;color:#fff}
