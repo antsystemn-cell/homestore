@@ -166,6 +166,9 @@ const AdminPage = () => {
     payment_status: "unpaid" as "unpaid" | "confirmed",
     status: "pending" as "pending" | "phone_confirmed" | "confirmed",
     note: "",
+    sale_date: new Date().toISOString().slice(0, 10),
+    external_ref: "",
+    branch: "",
   });
   const [manualItems, setManualItems] = useState<{ product_id: string; name: string; price: number; quantity: number; product_code?: string; image?: string; }[]>([]);
   const [manualProductSearch, setManualProductSearch] = useState("");
