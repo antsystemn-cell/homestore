@@ -79,12 +79,12 @@ function buildSlip(order: PrintOrder): string {
 
 // Нийтлэг CSS — A4 (210x297mm), 4 мөр × 2 багана = 8 slip
 const STYLES = `
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:system-ui,-apple-system,Arial,sans-serif;color:#000;font-size:9px;background:#fff}
-@page{size:A4;margin:0}
-.sheet{width:210mm;min-height:297mm;padding:6mm;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,1fr);gap:3mm;page-break-after:always}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+html,body{width:210mm;margin:0;padding:0;font-family:system-ui,-apple-system,Arial,sans-serif;color:#000;font-size:9px;background:#fff;line-height:1.3}
+@page{size:A4 portrait;margin:0}
+.sheet{width:210mm;height:297mm;padding:5mm;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,1fr);gap:2mm;page-break-after:always;overflow:hidden}
 .sheet:last-child{page-break-after:auto}
-.slip{border:1px dashed #999;border-radius:3px;padding:4mm;display:flex;flex-direction:column;overflow:hidden;height:69mm}
+.slip{border:1px dashed #999;border-radius:2px;padding:3mm;display:flex;flex-direction:column;overflow:hidden;height:calc((297mm - 10mm - 6mm) / 4)}
 .sh{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #000;padding-bottom:2px;margin-bottom:3px}
 .brand{font-size:11px;font-weight:800;letter-spacing:-.3px}
 .ref{font-size:8px;text-align:right}
