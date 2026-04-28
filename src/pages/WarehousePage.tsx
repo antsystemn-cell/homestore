@@ -106,6 +106,15 @@ export default function WarehousePage() {
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
   const [bulkProcessing, setBulkProcessing] = useState(false);
 
+  // Print дээр харагдах дансны мэдээлэл (COD захиалгад)
+  const [bankDraft, setBankDraft] = useState<BankInfo>(() => getBankInfo());
+  const [bankOpen, setBankOpen] = useState(false);
+  const saveBank = () => {
+    setBankInfo(bankDraft);
+    toast.success("Дансны мэдээлэл хадгалагдлаа");
+    setBankOpen(false);
+  };
+
   // Auto pick&pack settings — persisted in localStorage
   const sanitizeAutoPick = (val: unknown): AutoPickSettings => {
     const obj = (val ?? {}) as Partial<AutoPickSettings>;
