@@ -767,7 +767,7 @@ export default function WarehousePage() {
                      <Button
                        size="sm"
                        className="flex-1"
-                       onClick={() => { completeOrderPick(o); printOrder(o); }}
+                       onClick={() => completeOrderPick(o, true)}
                        disabled={processingOrderId === o.id}
                      >
                        {processingOrderId === o.id ? (
