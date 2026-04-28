@@ -80,25 +80,25 @@ function buildSlip(order: PrintOrder): string {
 // Нийтлэг CSS — A4 (210x297mm), 4 мөр × 2 багана = 8 slip
 const STYLES = `
 *{margin:0;padding:0;box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-html,body{width:210mm;margin:0;padding:0;font-family:system-ui,-apple-system,Arial,sans-serif;color:#000;font-size:9px;background:#fff;line-height:1.3}
+html,body{width:210mm;margin:0;padding:0;font-family:'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif,'Apple Color Emoji';color:#000;font-size:2.4mm;background:#fff;line-height:1.25;-webkit-text-size-adjust:100%;text-rendering:geometricPrecision}
 @page{size:A4 portrait;margin:0}
 .sheet{width:210mm;height:297mm;padding:5mm;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,1fr);gap:2mm;page-break-after:always;overflow:hidden}
 .sheet:last-child{page-break-after:auto}
 .slip{border:1px dashed #999;border-radius:2px;padding:3mm;display:flex;flex-direction:column;overflow:hidden;height:calc((297mm - 10mm - 6mm) / 4)}
-.sh{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #000;padding-bottom:2px;margin-bottom:3px}
-.brand{font-size:11px;font-weight:800;letter-spacing:-.3px}
-.ref{font-size:8px;text-align:right}
-.ref b{font-family:monospace;font-size:10px}
-.who{font-size:9px;margin-bottom:3px;line-height:1.3}
-.who .addr{color:#333;font-size:8px;margin-top:1px}
+.sh{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #000;padding-bottom:0.5mm;margin-bottom:1mm;line-height:1.2}
+.brand{font-size:3mm;font-weight:800;letter-spacing:-.3px}
+.ref{font-size:2.2mm;text-align:right;line-height:1.2}
+.ref b{font-family:'Courier New',Courier,monospace;font-size:2.6mm}
+.who{font-size:2.4mm;margin-bottom:1mm;line-height:1.25}
+.who .addr{color:#333;font-size:2.1mm;margin-top:0.3mm;line-height:1.2}
 table{width:100%;border-collapse:collapse;margin-bottom:auto;flex:1}
-th{font-size:7px;text-transform:uppercase;letter-spacing:.3px;padding:2px 0;text-align:left;border-bottom:1px solid #ccc;color:#666;font-weight:600}
-td{padding:1.5px 0;border-bottom:1px dotted #eee;vertical-align:top;font-size:8.5px;line-height:1.25}
+th{font-size:1.8mm;text-transform:uppercase;letter-spacing:.3px;padding:0.5mm 0;text-align:left;border-bottom:1px solid #ccc;color:#666;font-weight:600;line-height:1.2}
+td{padding:0.4mm 0;border-bottom:1px dotted #eee;vertical-align:top;font-size:2.2mm;line-height:1.2}
 .r{text-align:right}
-.m{font-size:7px;color:#777}
-.tot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #000;padding-top:3px;margin-top:3px;font-size:10px}
-.tot b{font-size:11px}
-.note{margin-top:3px;padding:2px 4px;border-left:2px solid #f59e0b;background:#fffbeb;font-size:7.5px;border-radius:1px;line-height:1.2}
+.m{font-size:1.8mm;color:#777;line-height:1.2}
+.tot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #000;padding-top:0.8mm;margin-top:0.8mm;font-size:2.6mm;line-height:1.2}
+.tot b{font-size:2.8mm}
+.note{margin-top:0.8mm;padding:0.5mm 1mm;border-left:2px solid #f59e0b;background:#fffbeb;font-size:2mm;border-radius:1px;line-height:1.2}
 .actions{position:fixed;top:8px;right:8px;display:flex;gap:6px;z-index:1000}
 .actions button{padding:6px 14px;border-radius:4px;border:1px solid #000;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
 .actions .pr{background:#000;color:#fff}
