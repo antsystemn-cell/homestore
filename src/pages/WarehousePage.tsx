@@ -762,11 +762,58 @@ export default function WarehousePage() {
                 Бэлдэх захиалга алга
               </div>
             )}
+
+            {orders.length > 0 && (
+              <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border border-border rounded-lg p-3 flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    id="bulk-all"
+                    checked={bulkSelected.size === orders.length && orders.length > 0 ? true : bulkSelected.size > 0 ? "indeterminate" : false}
+                    onCheckedChange={() => {
+                      setBulkSelected((prev) =>
+                        prev.size === orders.length ? new Set() : new Set(orders.map((o) => o.id))
+                      );
+                    }}
+                  />
+                  <label htmlFor="bulk-all" className="text-sm font-medium cursor-pointer">
+                    Бүгдийг сонгох
+                  </label>
+                  <span className="text-xs text-muted-foreground">
+                    {bulkSelected.size} / {orders.length}
+                  </span>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={completeOrdersBulk}
+                  disabled={bulkSelected.size === 0 || bulkProcessing}
+                >
+                  {bulkProcessing ? (
+                    <><Loader2 className="h-4 w-4 animate-spin mr-2" />Боловсруулж байна...</>
+                  ) : (
+                    <><Printer className="h-4 w-4 mr-2" />Хүргэлтэнд гарлаа — A4 хэвлэх ({bulkSelected.size})</>
+                  )}
+                </Button>
+              </div>
+            )}
+
             {orders.map((o) => {
               const items = Array.isArray(o.items) ? o.items : [];
+              const isChecked = bulkSelected.has(o.id);
               return (
-                <div key={o.id} className="rounded-lg border border-border bg-card p-4">
-                  <div className="flex items-start justify-between gap-2 mb-3">
+                <div key={o.id} className={`rounded-lg border bg-card p-4 transition-colors ${isChecked ? "border-primary ring-1 ring-primary/30" : "border-border"}`}>
+                  <div className="flex items-start gap-3 mb-3">
+                    <Checkbox
+                      checked={isChecked}
+                      onCheckedChange={() => {
+                        setBulkSelected((prev) => {
+                          const next = new Set(prev);
+                          next.has(o.id) ? next.delete(o.id) : next.add(o.id);
+                          return next;
+                        });
+                      }}
+                      className="mt-1"
+                    />
+                    <div className="flex-1 flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <div className="font-mono text-sm font-semibold">
                         {o.order_ref ?? o.id.slice(0, 8)}
