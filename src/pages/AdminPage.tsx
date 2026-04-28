@@ -1279,7 +1279,7 @@ const AdminPage = () => {
                       onChange={(e) => setManualForm((f) => ({ ...f, payment_status: e.target.checked ? "unpaid" : "confirmed" }))}
                       className="h-4 w-4 rounded"
                     />
-                    <span>Төлбөр авах (өрөнд)</span>
+                    <span>Төлбөр авах</span>
                   </label>
                 </div>
                 <div>
