@@ -1086,8 +1086,8 @@ const AdminPage = () => {
               </button>
             </div>
             <div className="p-5 space-y-5">
-              {/* Sale meta: date / external ref / branch */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {/* Sale meta: date / external ref */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-muted-foreground mb-1 block">Борлуулсан огноо *</label>
                   <input
@@ -1108,38 +1108,17 @@ const AdminPage = () => {
                     className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Салбар</label>
-                  <input
-                    type="text"
-                    value={manualForm.branch}
-                    onChange={(e) => setManualForm((f) => ({ ...f, branch: e.target.value.slice(0, 100) }))}
-                    placeholder="Жнь: Төв салбар"
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
               </div>
 
-              {/* Customer */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Хэрэглэгчийн нэр *</label>
-                  <input
-                    type="text"
-                    value={manualForm.customer_name}
-                    onChange={(e) => setManualForm((f) => ({ ...f, customer_name: e.target.value }))}
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Утас *</label>
-                  <input
-                    type="tel"
-                    value={manualForm.phone}
-                    onChange={(e) => setManualForm((f) => ({ ...f, phone: e.target.value }))}
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
+              {/* Phone */}
+              <div>
+                <label className="text-xs font-bold text-muted-foreground mb-1 block">Утас *</label>
+                <input
+                  type="tel"
+                  value={manualForm.phone}
+                  onChange={(e) => setManualForm((f) => ({ ...f, phone: e.target.value }))}
+                  className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
               </div>
 
               {/* Address */}
@@ -1152,37 +1131,6 @@ const AdminPage = () => {
                   placeholder="Дүүрэг, хороо, байр, орц, тоот..."
                   className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
-              </div>
-
-              {/* Delivery */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Хүргэлтийн сонголт</label>
-                  <select
-                    value={manualForm.delivery_option_id}
-                    onChange={(e) => {
-                      const id = e.target.value;
-                      const opt = deliveryOptions.find((d: any) => d.id === id);
-                      setManualForm((f) => ({ ...f, delivery_option_id: id, delivery_fee: opt ? Number(opt.price) || 0 : f.delivery_fee }));
-                    }}
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  >
-                    <option value="">— Сонгох —</option>
-                    {deliveryOptions.map((d: any) => (
-                      <option key={d.id} value={d.id}>{d.name} ({formatPrice(Number(d.price) || 0)})</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Хүргэлтийн төлбөр (₮)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={manualForm.delivery_fee}
-                    onChange={(e) => setManualForm((f) => ({ ...f, delivery_fee: Number(e.target.value) || 0 }))}
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
               </div>
 
               {/* Products */}
