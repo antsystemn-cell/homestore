@@ -26,6 +26,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { NiimbotBulkXlsxButton } from "@/components/niimbot/NiimbotBulkXlsxButton";
 import { NiimbotInstructionsModal } from "@/components/niimbot/NiimbotInstructionsModal";
+import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
 import { mapOrderToLabelData } from "@/lib/niimbot/mapOrder";
 import { generateNiimbotXlsx, buildXlsxFilename } from "@/lib/niimbot/xlsx";
 import { downloadBlob } from "@/lib/niimbot/transfer";
