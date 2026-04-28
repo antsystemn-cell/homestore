@@ -477,6 +477,31 @@ const AdminPage = () => {
 
     const fullAddress = `${manualForm.addr_district.trim()} дүүрэг, ${manualForm.addr_khoroo.trim()}-р хороо, ${manualForm.addr_building.trim()} байр, ${manualForm.addr_entrance.trim()} орц, ${manualForm.addr_apt.trim()} тоот`;
 
+    // Auto-generate external_ref: ES-YYMMDD-NNN (тухайн өдрийн дараалал)
+    const saleDate = manualForm.sale_date ? new Date(manualForm.sale_date) : new Date();
+    const yy = String(saleDate.getFullYear()).slice(-2);
+    const mm = String(saleDate.getMonth() + 1).padStart(2, "0");
+    const dd = String(saleDate.getDate()).padStart(2, "0");
+    const datePrefix = `ES-${yy}${mm}${dd}`;
+    let nextSeq = 1;
+    try {
+      const { data: existing } = await supabase
+        .from("orders")
+        .select("external_ref")
+        .like("external_ref", `${datePrefix}-%`);
+      if (existing && existing.length > 0) {
+        const maxSeq = existing.reduce((m: number, r: any) => {
+          const match = String(r.external_ref || "").match(/-(\d+)$/);
+          const n = match ? parseInt(match[1], 10) : 0;
+          return n > m ? n : m;
+        }, 0);
+        nextSeq = maxSeq + 1;
+      }
+    } catch (e) {
+      console.warn("external_ref sequence fetch failed", e);
+    }
+    const autoExternalRef = `${datePrefix}-${String(nextSeq).padStart(3, "0")}`;
+
     setManualSubmitting(true);
     try {
       const items = manualItems.map((it) => ({
