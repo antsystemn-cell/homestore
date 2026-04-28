@@ -27,6 +27,7 @@ const CheckoutPage = () => {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [name, setName] = useState("");
+  const [note, setNote] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("qpay");
   const [orderId, setOrderId] = useState<string | null>(null);
   const [orderRef, setOrderRef] = useState<string | null>(null);
@@ -112,6 +113,7 @@ const CheckoutPage = () => {
       delivery_fee: totalDeliveryFee,
       payment_method: pm,
       payment_status: paymentStatus,
+      source_note: note.trim() || null,
     };
 
     if (isGuestCheckout) {
@@ -322,10 +324,15 @@ const CheckoutPage = () => {
                 className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               />
               <textarea
-                placeholder="Нэмэлт тэмдэглэл (заавал биш)"
+                placeholder="Нэмэлт тэмдэглэл — хүргэлт, бараа болон бусад хүсэлт (заавал биш)"
                 rows={3}
+                value={note}
+                onChange={(e) => setNote(e.target.value.slice(0, 500))}
                 className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
               />
+              {note.length > 0 && (
+                <div className="text-[10px] text-muted-foreground/60 text-right -mt-2">{note.length}/500</div>
+              )}
             </div>
 
             {/* Delivery Options */}
