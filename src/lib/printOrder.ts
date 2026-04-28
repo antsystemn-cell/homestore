@@ -225,7 +225,7 @@ export function printOrders(orders: PrintOrder[]): boolean {
   const sheets: string[] = [];
   for (let i = 0; i < orders.length; i += PER_PAGE) {
     const chunk = orders.slice(i, i + PER_PAGE);
-    sheets.push(`<div class="sheet">${chunk.map(buildSlip).join("")}</div>`);
+    sheets.push(`<div class="sheet">${chunk.map((o) => buildSlip(o)).join("")}</div>`);
   }
   return openPrintWindow(sheets.join(""), `${orders.length} захиалга`, sheets.length, false);
 }
