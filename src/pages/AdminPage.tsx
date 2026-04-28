@@ -442,7 +442,7 @@ const AdminPage = () => {
       delivery_option_id: "",
       delivery_fee: 0,
       payment_method: "cash",
-      payment_status: "unpaid",
+      payment_status: "confirmed",
       status: "pending",
       note: "",
       sale_date: new Date().toISOString().slice(0, 10),
