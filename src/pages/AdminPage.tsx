@@ -165,6 +165,8 @@ const AdminPage = () => {
     addr_building: "",
     addr_entrance: "",
     addr_apt: "",
+    addr_door_code: "",
+    addr_landmark: "",
     delivery_option_id: "",
     delivery_fee: 0,
     payment_method: "cash",
