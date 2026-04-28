@@ -168,7 +168,7 @@ const AdminPage = () => {
     note: "",
     sale_date: new Date().toISOString().slice(0, 10),
     external_ref: "",
-    branch: "",
+    branch: "Лавай",
   });
   const [manualItems, setManualItems] = useState<{ product_id: string; name: string; price: number; quantity: number; product_code?: string; image?: string; }[]>([]);
   const [manualProductSearch, setManualProductSearch] = useState("");
@@ -447,7 +447,7 @@ const AdminPage = () => {
       note: "",
       sale_date: new Date().toISOString().slice(0, 10),
       external_ref: "",
-      branch: "",
+      branch: "Лавай",
     });
     setManualItems([]);
     setManualProductSearch("");
@@ -1085,8 +1085,8 @@ const AdminPage = () => {
               </button>
             </div>
             <div className="p-5 space-y-5">
-              {/* Sale meta: date / external ref */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {/* Sale meta: date / external ref / location */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
                   <label className="text-xs font-bold text-muted-foreground mb-1 block">Борлуулсан огноо *</label>
                   <input
@@ -1106,6 +1106,18 @@ const AdminPage = () => {
                     placeholder="Жнь: FB-1023"
                     className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Бараа гарах байршил *</label>
+                  <select
+                    value={manualForm.branch}
+                    onChange={(e) => setManualForm((f) => ({ ...f, branch: e.target.value }))}
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="Лавай">Лавай</option>
+                    <option value="Их наяд">Их наяд</option>
+                    <option value="Хонгор агуулах">Хонгор агуулах</option>
+                  </select>
                 </div>
               </div>
 
@@ -1130,6 +1142,19 @@ const AdminPage = () => {
                   placeholder="Дүүрэг, хороо, байр, орц, тоот..."
                   className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
+              </div>
+
+              {/* Delivery fee toggle */}
+              <div>
+                <label className="flex items-center gap-2 w-full rounded-xl bg-secondary px-3 py-2 text-sm cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={Number(manualForm.delivery_fee) > 0}
+                    onChange={(e) => setManualForm((f) => ({ ...f, delivery_fee: e.target.checked ? 8000 : 0 }))}
+                    className="h-4 w-4 rounded"
+                  />
+                  <span>Хүргэлтийн төлбөр авах (8,000₮)</span>
+                </label>
               </div>
 
               {/* Products */}
