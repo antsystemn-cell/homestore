@@ -831,6 +831,7 @@ export default function WarehousePage() {
                       </Badge>
                       <div className="text-sm font-semibold mt-1">{formatPrice(o.total)}</div>
                     </div>
+                    </div>
                   </div>
 
                   <ul className="text-sm space-y-1 mb-3 border-t border-border pt-2">
