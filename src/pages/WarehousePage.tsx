@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { printOrder } from "@/lib/printOrder";
+import { printOrder, printOrders } from "@/lib/printOrder";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Loader2,
   Package,
@@ -98,6 +99,8 @@ export default function WarehousePage() {
 
   // Per-order processing state
   const [processingOrderId, setProcessingOrderId] = useState<string | null>(null);
+  const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
+  const [bulkProcessing, setBulkProcessing] = useState(false);
 
   // Auto pick&pack settings — persisted in localStorage
   const sanitizeAutoPick = (val: unknown): AutoPickSettings => {
@@ -322,7 +325,45 @@ export default function WarehousePage() {
     setProcessingOrderId(null);
   };
 
-  // ===== Auto Pick & Pack =====
+  // Bulk: олон захиалгыг нэгэн зэрэг үлдэгдэл хасч A4 хэвлэх
+  const completeOrdersBulk = async () => {
+    if (!user || bulkSelected.size === 0) return;
+    const chosen = orders.filter((o) => bulkSelected.has(o.id));
+    if (chosen.length === 0) {
+      toast.error("Захиалга сонгоно уу");
+      return;
+    }
+    setBulkProcessing(true);
+    let success = 0;
+    let failed = 0;
+    const printed: typeof chosen = [];
+    for (const o of chosen) {
+      const items = Array.isArray(o.items) ? o.items : [];
+      if (items.length === 0) {
+        failed++;
+        continue;
+      }
+      const ok = await processOrderStockOut(o);
+      if (ok) {
+        success++;
+        printed.push(o);
+      } else {
+        failed++;
+      }
+    }
+    setBulkProcessing(false);
+    setBulkSelected(new Set());
+    if (success > 0) {
+      toast.success(`${success} захиалга бэлэн боллоо ✓`);
+      try {
+        printOrders(printed);
+      } catch {
+        toast.error("Хэвлэхэд алдаа гарлаа");
+      }
+    }
+    if (failed > 0) toast.error(`${failed} захиалга боловсруулагдсангүй`);
+    loadAll();
+  };
   // Runs every 30s while the page is open. For each eligible order whose
   // age (since created_at) >= delayMinutes, auto-deduct stock and mark ready.
   useEffect(() => {
@@ -721,11 +762,58 @@ export default function WarehousePage() {
                 Бэлдэх захиалга алга
               </div>
             )}
+
+            {orders.length > 0 && (
+              <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border border-border rounded-lg p-3 flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    id="bulk-all"
+                    checked={bulkSelected.size === orders.length && orders.length > 0 ? true : bulkSelected.size > 0 ? "indeterminate" : false}
+                    onCheckedChange={() => {
+                      setBulkSelected((prev) =>
+                        prev.size === orders.length ? new Set() : new Set(orders.map((o) => o.id))
+                      );
+                    }}
+                  />
+                  <label htmlFor="bulk-all" className="text-sm font-medium cursor-pointer">
+                    Бүгдийг сонгох
+                  </label>
+                  <span className="text-xs text-muted-foreground">
+                    {bulkSelected.size} / {orders.length}
+                  </span>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={completeOrdersBulk}
+                  disabled={bulkSelected.size === 0 || bulkProcessing}
+                >
+                  {bulkProcessing ? (
+                    <><Loader2 className="h-4 w-4 animate-spin mr-2" />Боловсруулж байна...</>
+                  ) : (
+                    <><Printer className="h-4 w-4 mr-2" />Хүргэлтэнд гарлаа — A4 хэвлэх ({bulkSelected.size})</>
+                  )}
+                </Button>
+              </div>
+            )}
+
             {orders.map((o) => {
               const items = Array.isArray(o.items) ? o.items : [];
+              const isChecked = bulkSelected.has(o.id);
               return (
-                <div key={o.id} className="rounded-lg border border-border bg-card p-4">
-                  <div className="flex items-start justify-between gap-2 mb-3">
+                <div key={o.id} className={`rounded-lg border bg-card p-4 transition-colors ${isChecked ? "border-primary ring-1 ring-primary/30" : "border-border"}`}>
+                  <div className="flex items-start gap-3 mb-3">
+                    <Checkbox
+                      checked={isChecked}
+                      onCheckedChange={() => {
+                        setBulkSelected((prev) => {
+                          const next = new Set(prev);
+                          next.has(o.id) ? next.delete(o.id) : next.add(o.id);
+                          return next;
+                        });
+                      }}
+                      className="mt-1"
+                    />
+                    <div className="flex-1 flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <div className="font-mono text-sm font-semibold">
                         {o.order_ref ?? o.id.slice(0, 8)}
@@ -742,6 +830,7 @@ export default function WarehousePage() {
                         {o.status}
                       </Badge>
                       <div className="text-sm font-semibold mt-1">{formatPrice(o.total)}</div>
+                    </div>
                     </div>
                   </div>
 
