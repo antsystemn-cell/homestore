@@ -457,7 +457,6 @@ const AdminPage = () => {
   const manualTotal = manualSubtotal + (Number(manualForm.delivery_fee) || 0);
 
   const handleCreateManualOrder = async () => {
-    if (!manualForm.customer_name.trim()) { toast.error("Хэрэглэгчийн нэр оруулна уу"); return; }
     if (!manualForm.phone.trim()) { toast.error("Утасны дугаар оруулна уу"); return; }
     if (manualItems.length === 0) { toast.error("Дор хаяж 1 бараа нэмнэ үү"); return; }
 
