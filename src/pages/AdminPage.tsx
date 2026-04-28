@@ -153,6 +153,8 @@ const AdminPage = () => {
   const [orderSearchPhone, setOrderSearchPhone] = useState("");
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
   const [showXlsxHelp, setShowXlsxHelp] = useState(false);
+  const [showPrintChecklist, setShowPrintChecklist] = useState(false);
+  const [pendingPrintOrders, setPendingPrintOrders] = useState<any[]>([]);
 
   // Manual (external) order modal
   const [showManualOrder, setShowManualOrder] = useState(false);
