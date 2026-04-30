@@ -151,6 +151,7 @@ const AdminPage = () => {
   const [userSearch, setUserSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [orderSearchPhone, setOrderSearchPhone] = useState("");
+  const [showCancelledRecent, setShowCancelledRecent] = useState(false);
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
   const [showXlsxHelp, setShowXlsxHelp] = useState(false);
   const [showPrintChecklist, setShowPrintChecklist] = useState(false);
