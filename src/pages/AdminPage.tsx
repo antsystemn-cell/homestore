@@ -2408,7 +2408,66 @@ const AdminPage = () => {
                 </p>
               )}
 
+              {/* Recently cancelled orders */}
               {(() => {
+                const recentCancelled = orders
+                  .filter((o: any) => o.status === "cancelled")
+                  .slice(0, 5);
+                if (recentCancelled.length === 0) return null;
+                return (
+                  <div className="bg-card rounded-xl border border-border overflow-hidden">
+                    <button
+                      onClick={() => setShowCancelledRecent((v) => !v)}
+                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-secondary/40 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">🗑️</span>
+                        <span className="text-sm font-bold">Сүүлд цуцлагдсан захиалгууд</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-600">
+                          {recentCancelled.length}
+                        </span>
+                      </div>
+                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${showCancelledRecent ? "rotate-180" : ""}`} />
+                    </button>
+                    {showCancelledRecent && (
+                      <div className="border-t border-border divide-y divide-border">
+                        {recentCancelled.map((o: any) => (
+                          <div key={o.id} className="px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs font-mono font-bold">{o.order_ref || o.id.slice(0, 8)}</span>
+                                <span className="text-[10px] text-muted-foreground">{new Date(o.updated_at || o.created_at).toLocaleString("mn-MN")}</span>
+                              </div>
+                              <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                {o.guest_name || "—"} · {o.phone || "—"} · {(o.total || 0).toLocaleString()}₮
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => updateOrderStatus(o.id, "pending")}
+                                className="text-xs font-bold px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+                                title="Хүлээгдэж буй төлөвт буцаах"
+                              >
+                                Сэргээх
+                              </button>
+                              {isAdmin && (
+                                <button
+                                  onClick={() => setDeleteOrderTarget({ id: o.id })}
+                                  className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"
+                                  title="Бүрмөсөн устгах"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
                 const filteredOrders = orderSearchPhone
                   ? orders.filter(o => o.phone?.includes(orderSearchPhone) || o.order_ref?.toLowerCase().includes(orderSearchPhone.toLowerCase()))
                   : orders;
