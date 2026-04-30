@@ -2468,6 +2468,7 @@ const AdminPage = () => {
                 );
               })()}
 
+              {(() => {
                 const filteredOrders = orderSearchPhone
                   ? orders.filter(o => o.phone?.includes(orderSearchPhone) || o.order_ref?.toLowerCase().includes(orderSearchPhone.toLowerCase()))
                   : orders;
