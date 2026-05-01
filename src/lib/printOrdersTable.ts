@@ -135,7 +135,8 @@ function buildRows(
 ): string {
   const items: OrderItem[] = Array.isArray(o.items) ? (o.items as OrderItem[]) : [];
   const list = items.length ? items : ([{ name: "—", quantity: 1, price: 0 }] as OrderItem[]);
-  const enabled = fields.filter((f) => f.enabled && !(ctx.hidePayment && f.key === "payment"));
+  const hiddenWhenPaid: PrintField[] = ["payment", "price"];
+  const enabled = fields.filter((f) => f.enabled && !(ctx.hidePayment && hiddenWhenPaid.includes(f.key)));
   const rowCount = list.length;
 
   return list
@@ -143,7 +144,9 @@ function buildRows(
       const qty = Number(it.quantity) || 1;
       const price = Number(it.price) || 0;
       const variant = [it.color, it.size].filter(Boolean).join("/");
-      const productName = `${it.name || "—"}${variant ? ` (${variant})` : ""} × ${qty}`;
+      const sku = it.product_code || it.sku || "";
+      const skuPart = sku ? ` [${sku}]` : "";
+      const productName = `${it.name || "—"}${variant ? ` (${variant})` : ""}${skuPart} × ${qty}`;
       const isFirst = rowIdx === 0;
 
       return `<tr>${enabled
@@ -190,7 +193,8 @@ function buildOrderBlock(
   idx: number,
   ctx: OrderRenderContext
 ): string {
-  const enabled = fields.filter((f) => f.enabled && !(ctx.hidePayment && f.key === "payment"));
+  const hiddenWhenPaid: PrintField[] = ["payment", "price"];
+  const enabled = fields.filter((f) => f.enabled && !(ctx.hidePayment && hiddenWhenPaid.includes(f.key)));
   const ref = o.order_ref || (o.id ? `#${o.id.slice(0, 8).toUpperCase()}` : "—");
   const date = o.created_at ? new Date(o.created_at).toLocaleString("mn-MN", {
     year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit",
