@@ -193,7 +193,8 @@ function buildOrderBlock(
   idx: number,
   ctx: OrderRenderContext
 ): string {
-  const enabled = fields.filter((f) => f.enabled && !(ctx.hidePayment && f.key === "payment"));
+  const hiddenWhenPaid: PrintField[] = ["payment", "price"];
+  const enabled = fields.filter((f) => f.enabled && !(ctx.hidePayment && hiddenWhenPaid.includes(f.key)));
   const ref = o.order_ref || (o.id ? `#${o.id.slice(0, 8).toUpperCase()}` : "—");
   const date = o.created_at ? new Date(o.created_at).toLocaleString("mn-MN", {
     year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit",
