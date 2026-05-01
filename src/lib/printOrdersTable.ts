@@ -143,7 +143,7 @@ function buildRows(
       const qty = Number(it.quantity) || 1;
       const variant = [it.color, it.size].filter(Boolean).join("/");
       const sku = it.product_code || it.sku || "";
-      const skuPart = sku ? ` [${sku}]` : "";
+      const skuPart = sku ? ` - ${sku}` : "";
       return `${it.name || "—"}${variant ? ` (${variant})` : ""}${skuPart} × ${qty}`;
     })
     .join(" | ");
