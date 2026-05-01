@@ -2536,7 +2536,7 @@ const AdminPage = () => {
                   }
                 };
 
-                const handlePrintSelected = () => {
+                const handlePrintSelected = async () => {
                   const chosen = orders.filter((o: any) => bulkSelected.has(o.id));
                   if (chosen.length === 0) {
                     toast.error("Захиалга сонгоно уу");
@@ -2547,7 +2547,14 @@ const AdminPage = () => {
                     toast.error("Хэвлэх багана сонгогдоогүй байна. Тохиргоо хэсгээс идэвхжүүлнэ үү.");
                     return;
                   }
-                  printOrdersTable(chosen, fields);
+                  const t = toast.loading("Хэвлэх хуудас бэлдэж байна…");
+                  try {
+                    await printOrdersTable(chosen, fields);
+                    toast.success("Бэлэн боллоо", { id: t });
+                  } catch (e) {
+                    console.error(e);
+                    toast.error("Хэвлэхэд алдаа гарлаа", { id: t });
+                  }
                 };
 
                 return (
