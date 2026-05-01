@@ -382,8 +382,10 @@ Deno.serve(async (req: Request) => {
         return await handleCreateInvoice(body, req);
       case "check-payment":
         return await handleCheckPayment(body, req);
+      case "print-invoice":
+        return await handlePrintInvoice(body, req);
       default:
-        return err("Unknown action. Use: create-invoice, check-payment");
+        return err("Unknown action. Use: create-invoice, check-payment, print-invoice");
     }
   } catch (e: any) {
     console.error("QPay edge function error:", e);
