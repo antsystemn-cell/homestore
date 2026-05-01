@@ -137,54 +137,55 @@ function buildRows(
   const list = items.length ? items : ([{ name: "—", quantity: 1, price: 0 }] as OrderItem[]);
   const hiddenWhenPaid: PrintField[] = ["payment", "price"];
   const enabled = fields.filter((f) => f.enabled && !(ctx.hidePayment && hiddenWhenPaid.includes(f.key)));
-  const rowCount = list.length;
 
-  return list
-    .map((it, rowIdx) => {
+  // Нэг захиалгын бүх барааг нэг нүдэнд нэгтгэнэ
+  const productCell = list
+    .map((it) => {
       const qty = Number(it.quantity) || 1;
-      const price = Number(it.price) || 0;
       const variant = [it.color, it.size].filter(Boolean).join("/");
       const sku = it.product_code || it.sku || "";
       const skuPart = sku ? ` [${sku}]` : "";
-      const productName = `${it.name || "—"}${variant ? ` (${variant})` : ""}${skuPart} × ${qty}`;
-      const isFirst = rowIdx === 0;
-
-      return `<tr>${enabled
-        .map((f) => {
-          // Нэг захиалгад нэг л удаа гардаг талбарууд (зөвхөн эхний мөрөнд)
-          const sharedFields: PrintField[] = ["phone", "address", "payment"];
-          if (sharedFields.includes(f.key)) {
-            if (!isFirst) return ""; // skip — already rowspanned
-            const rs = rowCount > 1 ? ` rowspan="${rowCount}"` : "";
-            switch (f.key) {
-              case "phone":
-                return `<td${rs} class="shared">${esc(o.phone || "—")}</td>`;
-              case "address":
-                return `<td${rs} class="shared">${esc(o.shipping_address || "—")}</td>`;
-              case "payment": {
-                if (ctx.qrDataUrl) {
-                  return `<td${rs} class="shared pay-cell">
-                    <div class="pay-text">${esc(paymentLabel(o))}</div>
-                    <div class="pay-amount">${mnt(Number(o.total) || 0)}</div>
-                    <img class="qr" src="${ctx.qrDataUrl}" alt="QPay QR"/>
-                    <div class="qr-hint">QPay-аар скан хийнэ үү</div>
-                  </td>`;
-                }
-                return `<td${rs} class="shared">${esc(paymentLabel(o))}</td>`;
-              }
-            }
-          }
-          // Мөр бүрт давтагдах талбарууд
-          switch (f.key) {
-            case "product": return `<td>${esc(productName)}</td>`;
-            case "sku": return `<td>${esc(it.product_code || it.sku || "—")}</td>`;
-            case "price": return `<td class="r">${mnt(price * qty)}</td>`;
-          }
-          return "";
-        })
-        .join("")}</tr>`;
+      return `${it.name || "—"}${variant ? ` (${variant})` : ""}${skuPart} × ${qty}`;
     })
-    .join("");
+    .join(" | ");
+
+  const skuCell = list
+    .map((it) => it.product_code || it.sku || "—")
+    .join(" | ");
+
+  const totalPrice = list.reduce(
+    (sum, it) => sum + (Number(it.price) || 0) * (Number(it.quantity) || 1),
+    0
+  );
+
+  return `<tr>${enabled
+    .map((f) => {
+      switch (f.key) {
+        case "phone":
+          return `<td class="shared">${esc(o.phone || "—")}</td>`;
+        case "address":
+          return `<td class="shared">${esc(o.shipping_address || "—")}</td>`;
+        case "payment": {
+          if (ctx.qrDataUrl) {
+            return `<td class="shared pay-cell">
+              <div class="pay-text">${esc(paymentLabel(o))}</div>
+              <div class="pay-amount">${mnt(Number(o.total) || 0)}</div>
+              <img class="qr" src="${ctx.qrDataUrl}" alt="QPay QR"/>
+              <div class="qr-hint">QPay-аар скан хийнэ үү</div>
+            </td>`;
+          }
+          return `<td class="shared">${esc(paymentLabel(o))}</td>`;
+        }
+        case "product":
+          return `<td>${esc(productCell)}</td>`;
+        case "sku":
+          return `<td>${esc(skuCell)}</td>`;
+        case "price":
+          return `<td class="r">${mnt(totalPrice)}</td>`;
+      }
+      return "";
+    })
+    .join("")}</tr>`;
 }
 
 function buildOrderBlock(
