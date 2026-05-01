@@ -17,7 +17,6 @@ export interface PrintFieldConfig {
 export const DEFAULT_PRINT_FIELDS: PrintFieldConfig[] = [
   { key: "phone", label: "Утас", enabled: true },
   { key: "product", label: "Бараа", enabled: true },
-  { key: "sku", label: "SKU", enabled: true },
   { key: "price", label: "Үнэ", enabled: true },
   { key: "payment", label: "Төлбөр", enabled: true },
   { key: "address", label: "Хаяг", enabled: true },
@@ -144,7 +143,7 @@ function buildRows(
       const qty = Number(it.quantity) || 1;
       const variant = [it.color, it.size].filter(Boolean).join("/");
       const sku = it.product_code || it.sku || "";
-      const skuPart = sku ? ` [${sku}]` : "";
+      const skuPart = sku ? ` - ${sku}` : "";
       return `${it.name || "—"}${variant ? ` (${variant})` : ""}${skuPart} × ${qty}`;
     })
     .join(" | ");
