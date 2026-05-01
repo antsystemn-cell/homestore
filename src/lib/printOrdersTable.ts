@@ -1,5 +1,10 @@
 // Тус бүр захиалгыг A4 дээр хүснэгт хэлбэрээр хэвлэх
-// Захиалга бүрд header (Phone | Product | SKU | Price | Paid | Address) давтагдана.
+// - Захиалга бүрд header (Phone | Product | SKU | Price | Paid | Address) давтагдана
+// - Нэг захиалгын Утас, Хаяг, Төлбөр баганыг ЗӨВХӨН ЭХНИЙ МӨРӨНД (rowspan) гаргана
+// - Төлөгдсөн бол Төлбөр баганыг тухайн захиалгад нуух
+// - Төлөгдөөгүй (Cash/COD) бол QPay invoice үүсгэж QR-г Төлбөр нүдэнд оруулна
+
+import { supabase } from "@/integrations/supabase/client";
 
 export type PrintField = "phone" | "product" | "sku" | "price" | "payment" | "address";
 
@@ -26,7 +31,6 @@ export function loadPrintFields(): PrintFieldConfig[] {
     const raw = localStorage.getItem(PRINT_FIELDS_KEY);
     if (!raw) return DEFAULT_PRINT_FIELDS;
     const parsed = JSON.parse(raw) as PrintFieldConfig[];
-    // Validate: ensure all default keys exist (in stored order)
     const known = new Map(DEFAULT_PRINT_FIELDS.map((f) => [f.key, f]));
     const result: PrintFieldConfig[] = [];
     const seen = new Set<string>();
@@ -81,56 +85,123 @@ const esc = (s: string) =>
 
 const mnt = (n: number) => `${(n ?? 0).toLocaleString("mn-MN")}₮`;
 
-function paymentLabel(o: TablePrintOrder): string {
+function isPaid(o: TablePrintOrder): boolean {
   const status = (o.payment_status || "").toLowerCase();
+  return status === "confirmed" || status === "paid";
+}
+
+function isCashLike(o: TablePrintOrder): boolean {
+  const m = (o.payment_method || "cash").toLowerCase();
+  return m === "cash" || m === "cod" || m === "" || m === "qpay";
+}
+
+function paymentLabel(o: TablePrintOrder): string {
   const method = (o.payment_method || "cash").toLowerCase();
-  const isPaid = status === "confirmed" || status === "paid";
   const methodMap: Record<string, string> = {
     cash: "Бэлэн", cod: "Бэлэн", qpay: "QPay", storepay: "Storepay", pocket: "Pocket",
   };
   const m = methodMap[method] || method.toUpperCase();
-  return isPaid ? `Төлсөн (${m})` : `Төлөөгүй (${m})`;
+  return isPaid(o) ? `Төлсөн (${m})` : `Төлөөгүй (${m})`;
 }
 
-function buildRows(o: TablePrintOrder, fields: PrintFieldConfig[]): string {
-  const items: OrderItem[] = Array.isArray(o.items) ? (o.items as OrderItem[]) : [];
-  if (items.length === 0) {
-    return `<tr>${fields.map(() => `<td>—</td>`).join("")}</tr>`;
+// QPay invoice татах — алдаа гарвал null
+async function fetchQpayQr(orderId: string): Promise<string | null> {
+  try {
+    const { data, error } = await supabase.functions.invoke("qpay", {
+      body: { action: "print-invoice", orderId },
+    });
+    if (error || !data?.qrImage) {
+      console.warn("QPay print-invoice failed for order", orderId, error || data);
+      return null;
+    }
+    // qr_image нь base64 (no data: prefix). data: URL болгоно
+    const qr: string = data.qrImage;
+    return qr.startsWith("data:") ? qr : `data:image/png;base64,${qr}`;
+  } catch (e) {
+    console.warn("QPay invoke error", e);
+    return null;
   }
-  return items
-    .map((it) => {
+}
+
+interface OrderRenderContext {
+  qrDataUrl: string | null;
+  hidePayment: boolean; // Төлсөн бол true
+}
+
+function buildRows(
+  o: TablePrintOrder,
+  fields: PrintFieldConfig[],
+  ctx: OrderRenderContext
+): string {
+  const items: OrderItem[] = Array.isArray(o.items) ? (o.items as OrderItem[]) : [];
+  const list = items.length ? items : ([{ name: "—", quantity: 1, price: 0 }] as OrderItem[]);
+  const enabled = fields.filter((f) => f.enabled && !(ctx.hidePayment && f.key === "payment"));
+  const rowCount = list.length;
+
+  return list
+    .map((it, rowIdx) => {
       const qty = Number(it.quantity) || 1;
       const price = Number(it.price) || 0;
       const variant = [it.color, it.size].filter(Boolean).join("/");
       const productName = `${it.name || "—"}${variant ? ` (${variant})` : ""} × ${qty}`;
-      return `<tr>${fields
-        .filter((f) => f.enabled)
+      const isFirst = rowIdx === 0;
+
+      return `<tr>${enabled
         .map((f) => {
+          // Нэг захиалгад нэг л удаа гардаг талбарууд (зөвхөн эхний мөрөнд)
+          const sharedFields: PrintField[] = ["phone", "address", "payment"];
+          if (sharedFields.includes(f.key)) {
+            if (!isFirst) return ""; // skip — already rowspanned
+            const rs = rowCount > 1 ? ` rowspan="${rowCount}"` : "";
+            switch (f.key) {
+              case "phone":
+                return `<td${rs} class="shared">${esc(o.phone || "—")}</td>`;
+              case "address":
+                return `<td${rs} class="shared">${esc(o.shipping_address || "—")}</td>`;
+              case "payment": {
+                if (ctx.qrDataUrl) {
+                  return `<td${rs} class="shared pay-cell">
+                    <div class="pay-text">${esc(paymentLabel(o))}</div>
+                    <div class="pay-amount">${mnt(Number(o.total) || 0)}</div>
+                    <img class="qr" src="${ctx.qrDataUrl}" alt="QPay QR"/>
+                    <div class="qr-hint">QPay-аар скан хийнэ үү</div>
+                  </td>`;
+                }
+                return `<td${rs} class="shared">${esc(paymentLabel(o))}</td>`;
+              }
+            }
+          }
+          // Мөр бүрт давтагдах талбарууд
           switch (f.key) {
-            case "phone": return `<td>${esc(o.phone || "—")}</td>`;
             case "product": return `<td>${esc(productName)}</td>`;
             case "sku": return `<td>${esc(it.product_code || it.sku || "—")}</td>`;
             case "price": return `<td class="r">${mnt(price * qty)}</td>`;
-            case "payment": return `<td>${esc(paymentLabel(o))}</td>`;
-            case "address": return `<td>${esc(o.shipping_address || "—")}</td>`;
           }
+          return "";
         })
         .join("")}</tr>`;
     })
     .join("");
 }
 
-function buildOrderBlock(o: TablePrintOrder, fields: PrintFieldConfig[], idx: number): string {
-  const enabled = fields.filter((f) => f.enabled);
+function buildOrderBlock(
+  o: TablePrintOrder,
+  fields: PrintFieldConfig[],
+  idx: number,
+  ctx: OrderRenderContext
+): string {
+  const enabled = fields.filter((f) => f.enabled && !(ctx.hidePayment && f.key === "payment"));
   const ref = o.order_ref || (o.id ? `#${o.id.slice(0, 8).toUpperCase()}` : "—");
   const date = o.created_at ? new Date(o.created_at).toLocaleString("mn-MN", {
     year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit",
   }) : "";
+  const paidBadge = ctx.hidePayment ? `<span class="paid-badge">ТӨЛСӨН</span>` : "";
   return `<section class="order-block">
     <div class="order-head">
       <span class="order-num">№ ${idx + 1}</span>
       <span class="order-ref">${esc(ref)}</span>
       ${o.guest_name ? `<span class="order-name">${esc(o.guest_name)}</span>` : ""}
+      ${paidBadge}
       <span class="order-total">${mnt(Number(o.total) || 0)}</span>
       ${date ? `<span class="order-date">${esc(date)}</span>` : ""}
     </div>
@@ -138,7 +209,7 @@ function buildOrderBlock(o: TablePrintOrder, fields: PrintFieldConfig[], idx: nu
       <thead>
         <tr>${enabled.map((f) => `<th>${esc(f.label)}</th>`).join("")}</tr>
       </thead>
-      <tbody>${buildRows(o, fields)}</tbody>
+      <tbody>${buildRows(o, fields, ctx)}</tbody>
     </table>
   </section>`;
 }
@@ -154,12 +225,19 @@ body{margin:0;padding:0;font-family:'Segoe UI',Roboto,Arial,'Noto Sans',sans-ser
 .order-num{background:#fff;color:#000;padding:1px 8px;border-radius:3px;font-weight:700}
 .order-ref{font-family:'Courier New',monospace;font-weight:700}
 .order-name{opacity:.95}
+.paid-badge{background:#16a34a;color:#fff;padding:1px 7px;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:.5px}
 .order-total{margin-left:auto;font-weight:800;font-size:13px}
 .order-date{opacity:.8;font-size:11px}
-.order-table{width:100%;border-collapse:collapse;font-size:12px}
+.order-table{width:100%;border-collapse:collapse;font-size:12px;table-layout:auto}
 .order-table th{background:#f3f3f3;border:1px solid #999;padding:5px 7px;text-align:left;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.3px}
-.order-table td{border:1px solid #bbb;padding:5px 7px;vertical-align:top;line-height:1.35}
+.order-table td{border:1px solid #bbb;padding:5px 7px;vertical-align:middle;line-height:1.35}
+.order-table td.shared{background:#fafafa;vertical-align:middle;text-align:center}
 .order-table .r{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.pay-cell{text-align:center}
+.pay-text{font-weight:600;font-size:11px;margin-bottom:2px}
+.pay-amount{font-weight:800;font-size:13px;margin-bottom:3px}
+.qr{display:block;width:80px;height:80px;margin:2px auto 0;image-rendering:pixelated}
+.qr-hint{font-size:9px;color:#555;margin-top:2px;font-weight:500}
 .bar{position:sticky;top:0;z-index:1000;background:#1a1a2e;color:#fff;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.3);font-family:system-ui,sans-serif}
 .bar .info{display:flex;flex-direction:column;line-height:1.25}
 .bar .t{font-size:13px;font-weight:700}
@@ -176,13 +254,45 @@ body{margin:0;padding:0;font-family:'Segoe UI',Roboto,Arial,'Noto Sans',sans-ser
 }
 `;
 
-export function printOrdersTable(orders: TablePrintOrder[], fields?: PrintFieldConfig[]): boolean {
+export async function printOrdersTable(
+  orders: TablePrintOrder[],
+  fields?: PrintFieldConfig[]
+): Promise<boolean> {
   if (!orders?.length) return false;
   const fieldList = (fields || loadPrintFields()).filter((f) => f.enabled).length
     ? (fields || loadPrintFields())
     : DEFAULT_PRINT_FIELDS;
 
-  const blocks = orders.map((o, i) => buildOrderBlock(o, fieldList, i)).join("");
+  // Pop-up-г шууд нээж "Бэлдэж байна" харуулна (browser-ууд async pop-up-г блок хийдэг)
+  const w = window.open("", "_blank", "width=1000,height=1100");
+  if (!w) {
+    alert("Pop-up зөвшөөрнө үү.");
+    return false;
+  }
+  try {
+    w.document.open();
+    w.document.write(`<!doctype html><html><head><meta charset="utf-8"/><title>Бэлдэж байна…</title>
+      <style>body{font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#1a1a2e;color:#fff;font-size:16px}</style>
+      </head><body>QPay нэхэмжлэлүүдийг бэлдэж байна… (${orders.length} захиалга)</body></html>`);
+    w.document.close();
+  } catch {}
+
+  // Төлөгдөөгүй захиалгуудад QR татна (параллел)
+  const needsQr = orders.filter((o) => !isPaid(o) && isCashLike(o) && o.id);
+  const qrEntries = await Promise.all(
+    needsQr.map(async (o) => [o.id!, await fetchQpayQr(o.id!)] as const)
+  );
+  const qrMap = new Map<string, string | null>(qrEntries);
+
+  const blocks = orders
+    .map((o, i) => {
+      const ctx: OrderRenderContext = {
+        hidePayment: isPaid(o),
+        qrDataUrl: o.id ? qrMap.get(o.id) || null : null,
+      };
+      return buildOrderBlock(o, fieldList, i, ctx);
+    })
+    .join("");
 
   const html = `<!doctype html><html lang="mn"><head><meta charset="utf-8"/>
 <title>${orders.length} захиалга — Хэвлэх</title>
@@ -190,7 +300,7 @@ export function printOrdersTable(orders: TablePrintOrder[], fields?: PrintFieldC
 <div class="bar">
   <div class="info">
     <span class="t">${orders.length} захиалга</span>
-    <span class="s">A4 — захиалга бүрд толгой давтагдана</span>
+    <span class="s">A4 — захиалга бүрд толгой давтагдана. Төлөгдөөгүйд QPay QR орсон.</span>
   </div>
   <div class="actions">
     <button class="pr" onclick="window.print()">🖨️ Хэвлэх</button>
@@ -200,11 +310,6 @@ export function printOrdersTable(orders: TablePrintOrder[], fields?: PrintFieldC
 <div class="page"><div class="page-inner">${blocks}</div></div>
 </body></html>`;
 
-  const w = window.open("", "_blank", "width=1000,height=1100");
-  if (!w) {
-    alert("Pop-up зөвшөөрнө үү.");
-    return false;
-  }
   try {
     w.document.open();
     w.document.write(html);
