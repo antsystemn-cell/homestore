@@ -275,6 +275,110 @@ async function handleCreateInvoice(body: any, req: Request) {
   });
 }
 
+// Захиалгын статусыг өөрчлөхгүй, зөвхөн QPay QR-г үүсгэж буцаана (хэвлэхэд зориулсан)
+async function handlePrintInvoice(body: any, req: Request) {
+  const userId = await getUserId(req);
+  const { orderId } = body;
+  if (!orderId) return err("orderId шаардлагатай");
+
+  const supabaseAdmin = getSupabaseAdmin();
+  const { data: order, error: orderErr } = await supabaseAdmin
+    .from("orders")
+    .select("id, order_ref, total, payment_status, user_id, phone")
+    .eq("id", orderId)
+    .single();
+
+  if (orderErr || !order) return err("Захиалга олдсонгүй", 404);
+
+  if (order.payment_status === "paid" || order.payment_status === "confirmed") {
+    return err("Энэ захиалга аль хэдийн төлөгдсөн");
+  }
+
+  // Хэрэв ижил захиалгад QPay invoice байгаа бол ашиглана
+  const { data: existingIntents } = await supabaseAdmin
+    .from("payment_intents")
+    .select("id, status, storepay_response")
+    .eq("order_id", orderId)
+    .eq("provider", "QPAY")
+    .in("status", ["INITIATED", "WAITING"])
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  if (existingIntents && existingIntents.length > 0) {
+    const invoiceData = existingIntents[0].storepay_response as any;
+    if (invoiceData?.qr_image) {
+      return json({
+        invoiceId: invoiceData.invoice_id,
+        qrImage: invoiceData.qr_image,
+        qrText: invoiceData.qr_text,
+        amount: order.total,
+      });
+    }
+  }
+
+  const invoiceCode = Deno.env.get("QPAY_INVOICE_CODE");
+  if (!invoiceCode) return err("QPay invoice code тохируулаагүй", 500);
+
+  const senderInvoiceNo = order.order_ref || orderId;
+  const callbackUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/qpay-webhook?order_id=${orderId}`;
+
+  const invoicePayload = {
+    invoice_code: invoiceCode,
+    sender_invoice_no: senderInvoiceNo,
+    invoice_receiver_code: "terminal",
+    invoice_description: `EasyShop захиалга ${senderInvoiceNo}`,
+    amount: order.total,
+    callback_url: callbackUrl,
+  };
+
+  const res = await qpayFetch(`${QPAY_BASE}/invoice`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(invoicePayload),
+  });
+
+  const responseText = await res.text();
+  let responseData: any;
+  try {
+    responseData = JSON.parse(responseText);
+  } catch {
+    return err("QPay хариу буруу формат", 502);
+  }
+  if (!res.ok) {
+    console.error("QPay print-invoice error:", responseData);
+    return err(responseData?.message || "QPay нэхэмжлэл үүсгэхэд алдаа", 502);
+  }
+
+  // Хэвлэх invoice-уудыг бүртгэлд хадгалъя — webhook callback ажиллахын тулд
+  const requestId = crypto.randomUUID();
+  const intentData: any = {
+    order_id: orderId,
+    type: "ORDER",
+    phone: order.phone || "",
+    amount: order.total,
+    request_id: requestId,
+    provider: "QPAY",
+    status: "WAITING",
+    storepay_response: {
+      invoice_id: responseData.invoice_id,
+      qr_image: responseData.qr_image,
+      qr_text: responseData.qr_text,
+      urls: responseData.urls,
+      print_only: true,
+    },
+  };
+  if (userId) intentData.user_id = userId;
+  await supabaseAdmin.from("payment_intents").insert(intentData);
+  // Захиалгын статусыг ӨӨРЧИЛДӨГГҮЙ — энэ нь зөвхөн хэвлэхэд зориулсан
+
+  return json({
+    invoiceId: responseData.invoice_id,
+    qrImage: responseData.qr_image,
+    qrText: responseData.qr_text,
+    amount: order.total,
+  });
+}
+
 async function handleCheckPayment(body: any, req: Request) {
   const userId = await getUserId(req);
   const { intentId } = body;
@@ -382,8 +486,10 @@ Deno.serve(async (req: Request) => {
         return await handleCreateInvoice(body, req);
       case "check-payment":
         return await handleCheckPayment(body, req);
+      case "print-invoice":
+        return await handlePrintInvoice(body, req);
       default:
-        return err("Unknown action. Use: create-invoice, check-payment");
+        return err("Unknown action. Use: create-invoice, check-payment, print-invoice");
     }
   } catch (e: any) {
     console.error("QPay edge function error:", e);
