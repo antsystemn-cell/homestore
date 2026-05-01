@@ -159,6 +159,7 @@ const AdminPage = () => {
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
   const [showXlsxHelp, setShowXlsxHelp] = useState(false);
   const [showPrintChecklist, setShowPrintChecklist] = useState(false);
+  const [showPrintSettings, setShowPrintSettings] = useState(false);
   const [pendingPrintOrders, setPendingPrintOrders] = useState<any[]>([]);
 
   // Manual (external) order modal
