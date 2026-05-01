@@ -17,7 +17,6 @@ export interface PrintFieldConfig {
 export const DEFAULT_PRINT_FIELDS: PrintFieldConfig[] = [
   { key: "phone", label: "Утас", enabled: true },
   { key: "product", label: "Бараа", enabled: true },
-  { key: "sku", label: "SKU", enabled: true },
   { key: "price", label: "Үнэ", enabled: true },
   { key: "payment", label: "Төлбөр", enabled: true },
   { key: "address", label: "Хаяг", enabled: true },
