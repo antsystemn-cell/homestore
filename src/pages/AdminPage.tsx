@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
-  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings
+  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, Printer, FileSpreadsheet
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
@@ -24,12 +24,16 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 import { NiimbotBulkXlsxButton } from "@/components/niimbot/NiimbotBulkXlsxButton";
 import { NiimbotInstructionsModal } from "@/components/niimbot/NiimbotInstructionsModal";
 import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
 import { mapOrderToLabelData } from "@/lib/niimbot/mapOrder";
 import { generateNiimbotXlsx, buildXlsxFilename } from "@/lib/niimbot/xlsx";
 import { downloadBlob } from "@/lib/niimbot/transfer";
+import { printOrdersTable, loadPrintFields, buildSelectedOrdersXlsxRows, type PrintFieldConfig } from "@/lib/printOrdersTable";
+import { PrintFieldsSettings } from "@/components/admin/PrintFieldsSettings";
+import * as XLSX from "xlsx";
 
 type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "settings";
 
@@ -2506,9 +2510,51 @@ const AdminPage = () => {
                   }
                 };
 
+                const handleSelectedXlsx = () => {
+                  const chosen = orders.filter((o: any) => bulkSelected.has(o.id));
+                  if (chosen.length === 0) {
+                    toast.error("Захиалга сонгоно уу");
+                    return;
+                  }
+                  try {
+                    const fields = loadPrintFields();
+                    const rows = buildSelectedOrdersXlsxRows(chosen, fields);
+                    const ws = XLSX.utils.json_to_sheet(rows);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "Orders");
+                    const buf = XLSX.write(wb, { type: "array", bookType: "xlsx" }) as ArrayBuffer;
+                    const blob = new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+                    const d = new Date();
+                    const pad = (n: number) => String(n).padStart(2, "0");
+                    const stamp = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}${pad(d.getHours())}${pad(d.getMinutes())}`;
+                    downloadBlob(blob, `orders-selected-${chosen.length}-${stamp}.xlsx`);
+                    toast.success(`${chosen.length} захиалгыг Excel-д татлаа`);
+                  } catch (e) {
+                    console.error(e);
+                    toast.error("Excel үүсгэхэд алдаа гарлаа");
+                  }
+                };
+
+                const handlePrintSelected = () => {
+                  const chosen = orders.filter((o: any) => bulkSelected.has(o.id));
+                  if (chosen.length === 0) {
+                    toast.error("Захиалга сонгоно уу");
+                    return;
+                  }
+                  const fields = loadPrintFields();
+                  if (!fields.some((f) => f.enabled)) {
+                    toast.error("Хэвлэх багана сонгогдоогүй байна. Тохиргоо хэсгээс идэвхжүүлнэ үү.");
+                    return;
+                  }
+                  printOrdersTable(chosen, fields);
+                };
+
                 return (
                   <>
-                    {/* Niimbot bulk action bar */}
+                    {/* Print field settings */}
+                    <PrintFieldsSettings />
+
+                    {/* Bulk action bar */}
                     <div className="bg-card rounded-xl border border-border p-3 md:p-4 space-y-2">
                       <div className="flex items-center justify-between gap-3 flex-wrap">
                         <div className="flex items-center gap-3">
@@ -2520,16 +2566,37 @@ const AdminPage = () => {
                           <label htmlFor="bulk-select-all" className="text-sm font-medium cursor-pointer select-none">
                             Бүгдийг сонгох
                           </label>
-                          <span className="text-xs text-muted-foreground">
-                            {bulkSelected.size} сонгосон
+                          <span className="text-xs font-semibold text-primary">
+                            {bulkSelected.size} захиалга сонгосон
                           </span>
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={handleSelectedXlsx}
+                            disabled={bulkSelected.size === 0}
+                            className="gap-1.5"
+                          >
+                            <FileSpreadsheet className="h-4 w-4" />
+                            Excel татах ({bulkSelected.size})
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={handlePrintSelected}
+                            disabled={bulkSelected.size === 0}
+                            className="gap-1.5"
+                          >
+                            <Printer className="h-4 w-4" />
+                            Сонгосноо хэвлэх ({bulkSelected.size})
+                          </Button>
                           <NiimbotBulkXlsxButton onExport={handleBulkXlsx} count={bulkSelected.size} />
                         </div>
                       </div>
                       <p className="text-[11px] text-muted-foreground leading-relaxed">
-                        Niimbot аппын <span className="font-semibold text-foreground">Import Data Source</span> функцэд ашиглана. Олон захиалгыг нэг загвар руу импортолж бөөнөөр хэвлэнэ.
+                        <span className="font-semibold text-foreground">Сонгосноо хэвлэх</span> — A4 дээр захиалга бүрд толгой давтагдсан хүснэгтээр хэвлэнэ. Niimbot Excel — шошго хэвлэх загварт ашиглана.
                       </p>
                     </div>
 
