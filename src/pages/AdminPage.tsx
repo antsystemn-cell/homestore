@@ -2551,9 +2551,6 @@ const AdminPage = () => {
 
                 return (
                   <>
-                    {/* Print field settings */}
-                    <PrintFieldsSettings />
-
                     {/* Bulk action bar */}
                     <div className="bg-card rounded-xl border border-border p-3 md:p-4 space-y-2">
                       <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -2593,11 +2590,24 @@ const AdminPage = () => {
                             Сонгосноо хэвлэх ({bulkSelected.size})
                           </Button>
                           <NiimbotBulkXlsxButton onExport={handleBulkXlsx} count={bulkSelected.size} />
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setShowPrintSettings((v) => !v)}
+                            className="gap-1.5"
+                            title="Хэвлэх тохиргоо"
+                          >
+                            <Settings className="h-4 w-4" />
+                            Тохиргоо
+                          </Button>
                         </div>
                       </div>
-                      <p className="text-[11px] text-muted-foreground leading-relaxed">
-                        <span className="font-semibold text-foreground">Сонгосноо хэвлэх</span> — A4 дээр захиалга бүрд толгой давтагдсан хүснэгтээр хэвлэнэ. Niimbot Excel — шошго хэвлэх загварт ашиглана.
-                      </p>
+                      {showPrintSettings && (
+                        <div className="pt-2 border-t border-border">
+                          <PrintFieldsSettings />
+                        </div>
+                      )}
                     </div>
 
                     {filteredOrders.map((o: any) => {
