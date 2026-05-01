@@ -311,9 +311,13 @@ export async function printOrdersTable(
 </body></html>`;
 
   try {
-    w.document.open();
-    w.document.write(html);
-    w.document.close();
+    // Blob URL-аар бүх HTML-г бүрэн навигаци хийж ачааллана — document.write дахин хийхгүй
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const blobUrl = URL.createObjectURL(blob);
+    w.location.replace(blobUrl);
+    // Цэвэрлэгээ — хуудас ачаалсны дараа URL-г чөлөөлнө
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+    try { w.focus(); } catch {}
     return true;
   } catch (e) {
     console.error(e);
