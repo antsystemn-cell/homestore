@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
-  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings
+  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, Printer, FileSpreadsheet
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
@@ -30,6 +30,9 @@ import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
 import { mapOrderToLabelData } from "@/lib/niimbot/mapOrder";
 import { generateNiimbotXlsx, buildXlsxFilename } from "@/lib/niimbot/xlsx";
 import { downloadBlob } from "@/lib/niimbot/transfer";
+import { printOrdersTable, loadPrintFields, buildSelectedOrdersXlsxRows, type PrintFieldConfig } from "@/lib/printOrdersTable";
+import { PrintFieldsSettings } from "@/components/admin/PrintFieldsSettings";
+import * as XLSX from "xlsx";
 
 type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "settings";
 
