@@ -2016,20 +2016,67 @@ const AdminPage = () => {
                     const b = dbBrands.find((x: any) => x.id === form.brand_id);
                     const norm = (b?.name || "").toLowerCase().replace(/\s+/g, "");
                     if (!(norm.includes("elle") && norm.includes("sport"))) return null;
+
+                    const validColors = form.colors.filter(c => c.name.trim());
+                    const validSizes = form.sizes.filter(s => s.trim());
+                    const colorList = validColors.length > 0 ? validColors.map(c => c.name) : [""];
+                    const sizeList = validSizes.length > 0 ? validSizes : [""];
+
+                    const total = colorList.reduce((sum, c) => sum + sizeList.reduce((s2, s) => s2 + (Number(form.variant_stock?.[`${c}|${s}`]) || 0), 0), 0);
+
                     return (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-[11px] text-muted-foreground mb-1 block">Үлдэгдэл (ширхэг)</label>
-                          <input
-                            type="number"
-                            min={0}
-                            placeholder="0"
-                            value={form.stock_quantity || ""}
-                            onChange={(e) => setForm({ ...form, stock_quantity: Math.max(0, +e.target.value || 0) })}
-                            className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                          />
-                          <p className="text-[10px] text-muted-foreground mt-0.5">Зөвхөн Elle Sport брэнд дээр харагдана</p>
+                      <div className="rounded-xl border border-border bg-secondary/30 p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[11px] font-semibold text-foreground">
+                            Үлдэгдэл (өнгө × хэмжээ)
+                          </label>
+                          <span className="text-[11px] text-muted-foreground">Нийт: <span className="font-bold text-foreground">{total}</span></span>
                         </div>
+                        {(validColors.length === 0 && validSizes.length === 0) ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number" min={0} placeholder="0"
+                              value={form.variant_stock?.["|"] || ""}
+                              onChange={(e) => setForm({ ...form, variant_stock: { ...form.variant_stock, ["|"]: Math.max(0, +e.target.value || 0) } })}
+                              className="w-32 rounded-lg bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            />
+                            <span className="text-xs text-muted-foreground">ширхэг</span>
+                          </div>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr>
+                                  <th className="text-left py-1 pr-2 font-medium text-muted-foreground">Өнгө \ Хэмжээ</th>
+                                  {sizeList.map((s) => (
+                                    <th key={s} className="text-center py-1 px-1 font-medium text-muted-foreground min-w-[60px]">{s || "—"}</th>
+                                  ))}
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {colorList.map((c) => (
+                                  <tr key={c}>
+                                    <td className="py-1 pr-2 text-foreground font-medium">{c || "—"}</td>
+                                    {sizeList.map((s) => {
+                                      const key = `${c}|${s}`;
+                                      return (
+                                        <td key={s} className="py-1 px-1">
+                                          <input
+                                            type="number" min={0} placeholder="0"
+                                            value={form.variant_stock?.[key] || ""}
+                                            onChange={(e) => setForm({ ...form, variant_stock: { ...form.variant_stock, [key]: Math.max(0, +e.target.value || 0) } })}
+                                            className="w-full rounded-md bg-background px-2 py-1.5 text-xs text-center focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                          />
+                                        </td>
+                                      );
+                                    })}
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                        <p className="text-[10px] text-muted-foreground">Зөвхөн Elle Sport брэнд дээр харагдана. Өнгө/хэмжээ нэмсний дараа автоматаар бүх хослолд нүд гарч ирнэ.</p>
                       </div>
                     );
                   })()}
