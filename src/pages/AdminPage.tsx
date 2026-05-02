@@ -1451,22 +1451,47 @@ const AdminPage = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Төлөв</label>
-                  <select
-                    value={manualForm.payment_status === "unpaid" ? "unpaid" : "confirmed"}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (v === "unpaid") {
-                        setManualForm((f) => ({ ...f, status: "pending", payment_status: "unpaid" }));
-                      } else {
-                        setManualForm((f) => ({ ...f, status: "confirmed", payment_status: "confirmed" }));
-                      }
-                    }}
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  >
-                    <option value="confirmed">Төлбөр авсан</option>
-                    <option value="unpaid">Төлбөр аваагүй</option>
-                  </select>
+                  <label className="text-xs font-bold text-muted-foreground mb-1 block">
+                    Төлөв <span className="font-normal text-muted-foreground/60">(Захиалгын төлбөрийн нөхцөл)</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      {
+                        value: "confirmed",
+                        title: "Төлбөр авсан",
+                        desc: "Бэлэн / шилжүүлэг хүлээн авсан",
+                        active: manualForm.payment_status !== "unpaid",
+                        accent: "text-emerald-600 border-emerald-500/40 bg-emerald-500/5",
+                      },
+                      {
+                        value: "unpaid",
+                        title: "Төлбөр аваагүй",
+                        desc: "Хүргэлт дээр төлнө",
+                        active: manualForm.payment_status === "unpaid",
+                        accent: "text-amber-600 border-amber-500/40 bg-amber-500/5",
+                      },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => {
+                          if (opt.value === "unpaid") {
+                            setManualForm((f) => ({ ...f, status: "pending", payment_status: "unpaid" }));
+                          } else {
+                            setManualForm((f) => ({ ...f, status: "confirmed", payment_status: "confirmed" }));
+                          }
+                        }}
+                        className={`text-left rounded-xl border-2 px-3 py-2 transition-all ${
+                          opt.active
+                            ? `${opt.accent} font-semibold shadow-sm`
+                            : "border-transparent bg-secondary text-foreground/70 hover:bg-secondary/70"
+                        }`}
+                      >
+                        <div className="text-sm font-bold leading-tight">{opt.title}</div>
+                        <div className="text-[11px] opacity-80 mt-0.5 leading-tight">{opt.desc}</div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
