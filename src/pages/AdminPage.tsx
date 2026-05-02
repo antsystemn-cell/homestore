@@ -848,6 +848,11 @@ const AdminPage = () => {
       brand_id: form.brand_id || null,
       colors: form.colors.filter(c => c.name.trim()),
       sizes: form.sizes.filter(s => s.trim()),
+      stock_quantity: (() => {
+        const b = dbBrands.find((x: any) => x.id === form.brand_id);
+        const norm = (b?.name || "").toLowerCase().replace(/\s+/g, "");
+        return norm.includes("elle") && norm.includes("sport") ? Math.max(0, Number(form.stock_quantity) || 0) : 0;
+      })(),
     };
     let productId = editId;
     if (editId) {
