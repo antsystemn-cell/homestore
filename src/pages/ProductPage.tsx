@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/store/ProductCard";
 import ProductReviews from "@/components/store/ProductReviews";
 import LoadError from "@/components/store/LoadError";
-import { fetchPublicProductBySlug, fetchPublicProductById, fetchPublicProductImages, fetchRelatedPublicProducts } from "@/lib/publicStoreApi";
+import { fetchPublicProductBySlug, fetchPublicProductById, fetchPublicProductImages, fetchRelatedPublicProducts, fetchPublicBrands } from "@/lib/publicStoreApi";
 import Header from "@/components/store/Header";
 
 const VideoWithThumbnail = ({ media }: { media: DetailMedia }) => {
@@ -88,6 +88,8 @@ const ProductPage = () => {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [brandName, setBrandName] = useState<string | null>(null);
+  const [stockQty, setStockQty] = useState<number | null>(null);
   const galleryRef = useRef<HTMLDivElement | null>(null);
   const userInteractedRef = useRef(false);
   const isProgrammaticScrollRef = useRef(false);
@@ -164,6 +166,19 @@ const ProductPage = () => {
         if (data) {
           const p = mapDbProduct(data);
           setProduct(p);
+          setStockQty(typeof data.stock_quantity === "number" ? data.stock_quantity : null);
+
+          if (data.brand_id) {
+            try {
+              const brands = await fetchPublicBrands();
+              const b = (brands || []).find((x: any) => x.id === data.brand_id);
+              setBrandName(b?.name || null);
+            } catch {
+              setBrandName(null);
+            }
+          } else {
+            setBrandName(null);
+          }
 
           const imgs = await fetchPublicProductImages(data.id);
           const extras = (imgs || []).map((r: any) => r.image_url);
@@ -343,6 +358,26 @@ const ProductPage = () => {
                 <span className="bg-primary text-primary-foreground text-xs font-bold px-2.5 py-1 rounded-lg">1+1 Үнэгүй</span>
               ) : null}
             </div>
+
+            {/* Stock — shown only for Elle Sport brand */}
+            {(() => {
+              const normalized = (brandName || "").toLowerCase().replace(/\s+/g, "");
+              const isElleSport = normalized.includes("elle") && normalized.includes("sport");
+              if (!isElleSport || stockQty === null) return null;
+              return (
+                <div className="text-sm">
+                  {stockQty > 0 ? (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-secondary text-foreground font-medium">
+                      Үлдэгдэл: <span className="font-bold">{stockQty}</span> ширхэг
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-destructive/10 text-destructive font-medium">
+                      Дууссан
+                    </span>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* Color selector */}
             {product.colors && product.colors.length > 0 && (
