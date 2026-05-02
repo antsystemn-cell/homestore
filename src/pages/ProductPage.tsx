@@ -88,6 +88,8 @@ const ProductPage = () => {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [brandName, setBrandName] = useState<string | null>(null);
+  const [stockQty, setStockQty] = useState<number | null>(null);
   const galleryRef = useRef<HTMLDivElement | null>(null);
   const userInteractedRef = useRef(false);
   const isProgrammaticScrollRef = useRef(false);
