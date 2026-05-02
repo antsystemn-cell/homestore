@@ -1453,12 +1453,10 @@ const AdminPage = () => {
                 <div>
                   <label className="text-xs font-bold text-muted-foreground mb-1 block">Төлөв</label>
                   <select
-                    value={manualForm.status === "preparing" ? "preparing" : manualForm.payment_status === "unpaid" ? "unpaid" : "confirmed"}
+                    value={manualForm.payment_status === "unpaid" ? "unpaid" : "confirmed"}
                     onChange={(e) => {
                       const v = e.target.value;
-                      if (v === "preparing") {
-                        setManualForm((f) => ({ ...f, status: "preparing", payment_status: "unpaid" }));
-                      } else if (v === "unpaid") {
+                      if (v === "unpaid") {
                         setManualForm((f) => ({ ...f, status: "pending", payment_status: "unpaid" }));
                       } else {
                         setManualForm((f) => ({ ...f, status: "confirmed", payment_status: "confirmed" }));
@@ -1468,7 +1466,6 @@ const AdminPage = () => {
                   >
                     <option value="confirmed">Төлбөр авсан</option>
                     <option value="unpaid">Төлбөр аваагүй</option>
-                    <option value="preparing">Бэлдэж байна (нярав)</option>
                   </select>
                 </div>
               </div>
