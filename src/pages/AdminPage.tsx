@@ -899,6 +899,12 @@ const AdminPage = () => {
       .select("description, colors, sizes, specifications, detail_media, variant_stock")
       .eq("id", p.id)
       .single();
+
+    const full: any = fullProduct || {};
+    const specs = Array.isArray(full.specifications) ? full.specifications : [];
+    const media = Array.isArray(full.detail_media) ? full.detail_media : [];
+    setForm({
+      name: p.name, description: full.description || "", price: p.price,
       original_price: p.original_price || 0, image_url: p.image_url || "",
       category: p.category, discount: p.discount || 0,
       is_new: p.is_new, is_on_sale: p.is_on_sale, is_bogo: p.is_bogo || false, is_active: p.is_active !== false,
@@ -910,6 +916,7 @@ const AdminPage = () => {
       colors: Array.isArray(full.colors) ? full.colors.map((c: any) => typeof c === 'string' ? { name: c, image: '', sku: '' } : { name: c.name || '', image: c.image || '', sku: c.sku || '' }) : [],
       sizes: Array.isArray(full.sizes) ? full.sizes : [],
       stock_quantity: typeof p.stock_quantity === "number" ? p.stock_quantity : 0,
+      variant_stock: (full.variant_stock && typeof full.variant_stock === "object") ? full.variant_stock : {},
     });
     setEditId(p.id);
     setShowForm(true);
