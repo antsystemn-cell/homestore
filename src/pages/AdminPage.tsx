@@ -477,7 +477,7 @@ const AdminPage = () => {
       payment_status: "confirmed",
       status: "confirmed",
       note: "",
-      sale_date: new Date().toISOString().slice(0, 10),
+      sale_date: (() => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); })(),
       external_ref: "",
       branch: "Лавай",
     });
