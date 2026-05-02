@@ -1376,16 +1376,97 @@ const AdminPage = () => {
                   <span className="text-xs text-muted-foreground">{manualItems.length} төрөл сонгосон</span>
                 </header>
                 <div className="p-4 space-y-2">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <input
-                      type="text"
-                      value={manualProductSearch}
-                      onChange={(e) => setManualProductSearch(e.target.value)}
-                      placeholder="Бараа хайх (нэр / SKU)..."
-                      className="w-full rounded-xl bg-secondary pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    />
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <input
+                        type="text"
+                        value={manualProductSearch}
+                        onChange={(e) => setManualProductSearch(e.target.value)}
+                        placeholder="Бараа хайх (нэр / SKU)..."
+                        className="w-full rounded-xl bg-secondary pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowCustomItemForm((s) => !s)}
+                      className={`shrink-0 inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition ${showCustomItemForm ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-secondary/70"}`}
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Гараар
+                    </button>
                   </div>
+
+                  {showCustomItemForm && (
+                    <div className="border border-dashed border-primary/40 rounded-xl p-3 space-y-2 bg-primary/5">
+                      <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Бүртгэлд байхгүй бараа гараар оруулах</p>
+                      <input
+                        type="text"
+                        value={customItem.name}
+                        onChange={(e) => setCustomItem((c) => ({ ...c, name: e.target.value }))}
+                        placeholder="Барааны нэр *"
+                        className="w-full rounded-lg bg-card border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      />
+                      <div className="grid grid-cols-3 gap-2">
+                        <input
+                          type="number"
+                          min={0}
+                          value={customItem.price}
+                          onChange={(e) => setCustomItem((c) => ({ ...c, price: e.target.value }))}
+                          placeholder="Үнэ ₮ *"
+                          className="rounded-lg bg-card border border-border px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                        <input
+                          type="number"
+                          min={1}
+                          value={customItem.quantity}
+                          onChange={(e) => setCustomItem((c) => ({ ...c, quantity: e.target.value }))}
+                          placeholder="Тоо"
+                          className="rounded-lg bg-card border border-border px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                        <input
+                          type="text"
+                          value={customItem.product_code}
+                          onChange={(e) => setCustomItem((c) => ({ ...c, product_code: e.target.value }))}
+                          placeholder="SKU"
+                          className="rounded-lg bg-card border border-border px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                      </div>
+                      <div className="flex items-center justify-end gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => { setShowCustomItemForm(false); setCustomItem({ name: "", price: "", quantity: "1", product_code: "" }); }}
+                          className="px-3 py-1.5 text-xs rounded-lg hover:bg-secondary"
+                        >
+                          Болих
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const name = customItem.name.trim();
+                            const price = Number(customItem.price);
+                            const qty = Math.max(1, Number(customItem.quantity) || 1);
+                            if (!name) { toast.error("Барааны нэр шаардлагатай"); return; }
+                            if (!price || price < 0) { toast.error("Үнэ зөв оруулна уу"); return; }
+                            setManualItems((prev) => [...prev, {
+                              product_id: null,
+                              name,
+                              price,
+                              quantity: qty,
+                              product_code: customItem.product_code.trim() || undefined,
+                              is_custom: true,
+                            }]);
+                            setCustomItem({ name: "", price: "", quantity: "1", product_code: "" });
+                            setShowCustomItemForm(false);
+                            toast.success("Бараа нэмэгдлээ");
+                          }}
+                          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
+                        >
+                          Нэмэх
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   {manualProductSearch.trim() && (
                     <div className="border border-border rounded-xl max-h-48 overflow-y-auto">
                       {products
