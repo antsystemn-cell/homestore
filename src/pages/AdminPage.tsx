@@ -1515,8 +1515,11 @@ const AdminPage = () => {
                       <div key={idx} className="flex items-center gap-2 bg-secondary/40 rounded-xl p-2">
                         {it.image && <img src={it.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-secondary" />}
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium truncate">{it.name}</p>
-                          <p className="text-[10px] text-muted-foreground">{formatPrice(it.price)} × {it.quantity}</p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-xs font-medium truncate">{it.name}</p>
+                            {it.is_custom && <span className="shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded bg-primary/15 text-primary uppercase">Гараар</span>}
+                          </div>
+                          <p className="text-[10px] text-muted-foreground">{formatPrice(it.price)} × {it.quantity}{it.product_code ? ` · ${it.product_code}` : ""}</p>
                         </div>
                         <input
                           type="number"
