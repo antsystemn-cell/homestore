@@ -1316,21 +1316,21 @@ const AdminPage = () => {
                     />
                     {manualForm.addr_apt && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">тоот</span>}
                   </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
                   <input
                     type="text"
                     value={manualForm.addr_door_code}
                     onChange={(e) => setManualForm((f) => ({ ...f, addr_door_code: e.target.value.slice(0, 20) }))}
-                    placeholder="Орцны код (заавал биш)"
+                    placeholder="Орцны код"
                     className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
-                  <input
-                    type="text"
+                </div>
+                <div className="mt-2">
+                  <textarea
+                    rows={3}
                     value={manualForm.addr_landmark}
                     onChange={(e) => setManualForm((f) => ({ ...f, addr_landmark: e.target.value.slice(0, 200) }))}
                     placeholder="Дэлгэрэнгүй хаяг / Чиглэл (заавал биш)"
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full rounded-xl bg-secondary px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>
