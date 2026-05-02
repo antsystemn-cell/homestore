@@ -562,6 +562,7 @@ export type Database = {
           stock_quantity: number
           thumbnail_url: string | null
           updated_at: string
+          variant_stock: Json
         }
         Insert: {
           brand_id?: string | null
@@ -588,6 +589,7 @@ export type Database = {
           stock_quantity?: number
           thumbnail_url?: string | null
           updated_at?: string
+          variant_stock?: Json
         }
         Update: {
           brand_id?: string | null
@@ -614,6 +616,7 @@ export type Database = {
           stock_quantity?: number
           thumbnail_url?: string | null
           updated_at?: string
+          variant_stock?: Json
         }
         Relationships: [
           {
