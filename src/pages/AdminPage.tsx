@@ -545,6 +545,7 @@ const AdminPage = () => {
         quantity: it.quantity,
         product_code: it.product_code || null,
         image: it.image || null,
+        is_custom: it.is_custom || false,
       }));
       const payload: any = {
         items,
