@@ -94,6 +94,7 @@ const AdminPage = () => {
     brand_id: "",
     colors: [] as { name: string; image: string; sku: string }[],
     sizes: [] as string[],
+    stock_quantity: 0,
   });
   const [newColor, setNewColor] = useState("");
   const [newSize, setNewSize] = useState("");
@@ -361,7 +362,7 @@ const AdminPage = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from("products").select("id, name, price, original_price, image_url, thumbnail_url, category, sales, is_new, is_on_sale, is_bogo, is_active, discount, product_code, slug, brand_id, created_at").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("products").select("id, name, price, original_price, image_url, thumbnail_url, category, sales, is_new, is_on_sale, is_bogo, is_active, discount, product_code, slug, brand_id, stock_quantity, created_at").order("created_at", { ascending: false });
       if (error) throw error;
       setProducts(data || []);
     } catch (error) {
@@ -797,7 +798,7 @@ const AdminPage = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, is_bogo: false, is_active: true, product_code: "", slug: "", specifications: [], detail_media: [], brand_id: "", colors: [], sizes: [] });
+    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, is_bogo: false, is_active: true, product_code: "", slug: "", specifications: [], detail_media: [], brand_id: "", colors: [], sizes: [], stock_quantity: 0 });
     setNewColor(""); setNewSize("");
     setEditId(null);
     setShowForm(false);
@@ -847,6 +848,11 @@ const AdminPage = () => {
       brand_id: form.brand_id || null,
       colors: form.colors.filter(c => c.name.trim()),
       sizes: form.sizes.filter(s => s.trim()),
+      stock_quantity: (() => {
+        const b = dbBrands.find((x: any) => x.id === form.brand_id);
+        const norm = (b?.name || "").toLowerCase().replace(/\s+/g, "");
+        return norm.includes("elle") && norm.includes("sport") ? Math.max(0, Number(form.stock_quantity) || 0) : 0;
+      })(),
     };
     let productId = editId;
     if (editId) {
@@ -908,6 +914,7 @@ const AdminPage = () => {
       brand_id: p.brand_id || "",
       colors: Array.isArray(full.colors) ? full.colors.map((c: any) => typeof c === 'string' ? { name: c, image: '', sku: '' } : { name: c.name || '', image: c.image || '', sku: c.sku || '' }) : [],
       sizes: Array.isArray(full.sizes) ? full.sizes : [],
+      stock_quantity: typeof p.stock_quantity === "number" ? p.stock_quantity : 0,
     });
     setEditId(p.id);
     setShowForm(true);
@@ -950,6 +957,7 @@ const AdminPage = () => {
       brand_id: p.brand_id || "",
       colors: Array.isArray(full.colors) ? full.colors.map((c: any) => typeof c === 'string' ? { name: c, image: '', sku: '' } : { name: c.name || '', image: c.image || '', sku: c.sku || '' }) : [],
       sizes: Array.isArray(full.sizes) ? full.sizes : [],
+      stock_quantity: 0,
     });
     setEditId(null); // important: create new, don't update
     setShowForm(true);
@@ -1982,6 +1990,28 @@ const AdminPage = () => {
                       </select>
                     </div>
                   </div>
+
+                  {(() => {
+                    const b = dbBrands.find((x: any) => x.id === form.brand_id);
+                    const norm = (b?.name || "").toLowerCase().replace(/\s+/g, "");
+                    if (!(norm.includes("elle") && norm.includes("sport"))) return null;
+                    return (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[11px] text-muted-foreground mb-1 block">Үлдэгдэл (ширхэг)</label>
+                          <input
+                            type="number"
+                            min={0}
+                            placeholder="0"
+                            value={form.stock_quantity || ""}
+                            onChange={(e) => setForm({ ...form, stock_quantity: Math.max(0, +e.target.value || 0) })}
+                            className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                          />
+                          <p className="text-[10px] text-muted-foreground mt-0.5">Зөвхөн Elle Sport брэнд дээр харагдана</p>
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
