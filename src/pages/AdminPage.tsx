@@ -2941,7 +2941,7 @@ const AdminPage = () => {
                             className={`text-xs font-bold px-3 py-2 rounded-xl border border-border cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 ${statusColors[o.status] || "bg-secondary text-muted-foreground"}`}
                           >
                             {(isModerator && !isAdmin
-                              ? (["pending", "phone_confirmed", "confirmed"] as const).map((value) => [value, statusLabels[value]] as const)
+                              ? (["pending", "phone_confirmed", "confirmed", "preparing"] as const).map((value) => [value, statusLabels[value]] as const)
                               : Object.entries(statusLabels)
                             ).map(([value, label]) => (
                               <option key={value} value={value}>{label}</option>
