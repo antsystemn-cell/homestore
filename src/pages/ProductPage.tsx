@@ -359,6 +359,26 @@ const ProductPage = () => {
               ) : null}
             </div>
 
+            {/* Stock — shown only for Elle Sport brand */}
+            {(() => {
+              const normalized = (brandName || "").toLowerCase().replace(/\s+/g, "");
+              const isElleSport = normalized.includes("elle") && normalized.includes("sport");
+              if (!isElleSport || stockQty === null) return null;
+              return (
+                <div className="text-sm">
+                  {stockQty > 0 ? (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-secondary text-foreground font-medium">
+                      Үлдэгдэл: <span className="font-bold">{stockQty}</span> ширхэг
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-destructive/10 text-destructive font-medium">
+                      Дууссан
+                    </span>
+                  )}
+                </div>
+              );
+            })()}
+
             {/* Color selector */}
             {product.colors && product.colors.length > 0 && (
               <div>
