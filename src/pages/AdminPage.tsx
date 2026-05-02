@@ -1991,6 +1991,28 @@ const AdminPage = () => {
                     </div>
                   </div>
 
+                  {(() => {
+                    const b = dbBrands.find((x: any) => x.id === form.brand_id);
+                    const norm = (b?.name || "").toLowerCase().replace(/\s+/g, "");
+                    if (!(norm.includes("elle") && norm.includes("sport"))) return null;
+                    return (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[11px] text-muted-foreground mb-1 block">Үлдэгдэл (ширхэг)</label>
+                          <input
+                            type="number"
+                            min={0}
+                            placeholder="0"
+                            value={form.stock_quantity || ""}
+                            onChange={(e) => setForm({ ...form, stock_quantity: Math.max(0, +e.target.value || 0) })}
+                            className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                          />
+                          <p className="text-[10px] text-muted-foreground mt-0.5">Зөвхөн Elle Sport брэнд дээр харагдана</p>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                       <label className="text-[11px] text-muted-foreground mb-1 block">Бүтээгдэхүүний код</label>
