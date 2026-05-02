@@ -909,6 +909,7 @@ const AdminPage = () => {
       brand_id: p.brand_id || "",
       colors: Array.isArray(full.colors) ? full.colors.map((c: any) => typeof c === 'string' ? { name: c, image: '', sku: '' } : { name: c.name || '', image: c.image || '', sku: c.sku || '' }) : [],
       sizes: Array.isArray(full.sizes) ? full.sizes : [],
+      stock_quantity: typeof p.stock_quantity === "number" ? p.stock_quantity : 0,
     });
     setEditId(p.id);
     setShowForm(true);
