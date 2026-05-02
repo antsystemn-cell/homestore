@@ -168,6 +168,7 @@ const ProductPage = () => {
           const p = mapDbProduct(data);
           setProduct(p);
           setStockQty(typeof data.stock_quantity === "number" ? data.stock_quantity : null);
+          setVariantStock((data.variant_stock && typeof data.variant_stock === "object") ? data.variant_stock : {});
 
           if (data.brand_id) {
             try {
