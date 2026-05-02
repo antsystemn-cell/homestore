@@ -1224,17 +1224,6 @@ const AdminPage = () => {
                   </select>
                 </div>
               </div>
-
-              {/* Plain note textarea */}
-              <div>
-                <label className="text-xs font-bold text-muted-foreground mb-1 block">Тэмдэглэл</label>
-                <textarea
-                  rows={2}
-                  placeholder="Нэмэлт тэмдэглэл..."
-                  className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-
               {/* Phone */}
               <div>
                 <label className="text-xs font-bold text-muted-foreground mb-1 block">Утас *</label>
