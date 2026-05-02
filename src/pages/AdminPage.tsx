@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
-  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, Printer, FileSpreadsheet
+  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, Printer, FileSpreadsheet,
+  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
@@ -1175,347 +1176,389 @@ const AdminPage = () => {
       {/* Manual External Order Modal */}
       {showManualOrder && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto" onClick={() => !manualSubmitting && setShowManualOrder(false)}>
-          <div className="bg-card rounded-2xl border border-border w-full max-w-2xl my-8 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="sticky top-0 bg-card border-b border-border px-5 py-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold">Захиалга оруулах</h2>
+          <div className="bg-card rounded-2xl border border-border w-full max-w-3xl my-8 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 z-10 bg-card border-b border-border px-5 py-4 flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold">Захиалга оруулах</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">Гадны сувгаар (Facebook, утас, дэлгүүр) ирсэн захиалгыг гараар бүртгэнэ</p>
+              </div>
               <button onClick={() => !manualSubmitting && setShowManualOrder(false)} className="p-1 rounded-lg hover:bg-secondary">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="p-5 space-y-5">
-              {/* Sale meta: date / external ref / location */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Борлуулсан огноо *</label>
-                  <input
-                    type="date"
-                    value={manualForm.sale_date}
-                    max={new Date().toISOString().slice(0, 10)}
-                    onChange={(e) => setManualForm((f) => ({ ...f, sale_date: e.target.value }))}
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Дэс дугаар (авто)</label>
-                  <input
-                    type="text"
-                    value={(() => {
-                      const d = manualForm.sale_date ? new Date(manualForm.sale_date) : new Date();
-                      const yy = String(d.getFullYear()).slice(-2);
-                      const mm = String(d.getMonth() + 1).padStart(2, "0");
-                      const dd = String(d.getDate()).padStart(2, "0");
-                      return `ES-${yy}${mm}${dd}-XXX`;
-                    })()}
-                    disabled
-                    placeholder="Автоматаар үүснэ"
-                    className="w-full rounded-xl bg-secondary/50 px-3 py-2 text-sm text-muted-foreground cursor-not-allowed"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Бараа гарах байршил *</label>
-                  <select
-                    value={manualForm.branch}
-                    onChange={(e) => setManualForm((f) => ({ ...f, branch: e.target.value }))}
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  >
-                    <option value="Лавай">Лавай</option>
-                    <option value="Их наяд">Их наяд</option>
-                    <option value="Хонгор агуулах">Хонгор агуулах</option>
-                  </select>
-                </div>
-              </div>
-              {/* Phone */}
-              <div>
-                <label className="text-xs font-bold text-muted-foreground mb-1 block">Утас *</label>
-                <input
-                  type="tel"
-                  value={manualForm.phone}
-                  onChange={(e) => setManualForm((f) => ({ ...f, phone: e.target.value }))}
-                  className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
+            <div className="p-5 space-y-4 bg-muted/30">
 
-              {/* Address — detailed */}
-              <div>
-                <label className="text-xs font-bold text-muted-foreground mb-1 block">Хүргэлтийн хаяг *</label>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                  <select
-                    value={manualForm.addr_district}
-                    onChange={(e) => setManualForm((f) => ({ ...f, addr_district: e.target.value }))}
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  >
-                    <option value="">Дүүрэг</option>
-                    <option value="ХУД">ХУД</option>
-                    <option value="БЗД">БЗД</option>
-                    <option value="БГД">БГД</option>
-                    <option value="СХД">СХД</option>
-                    <option value="СБД">СБД</option>
-                    <option value="ЧД">ЧД</option>
-                  </select>
-                  <div className="relative">
+              {/* SECTION 1 — Sale meta */}
+              <section className="bg-card rounded-2xl border border-border overflow-hidden">
+                <header className="flex items-center gap-2 px-4 py-2.5 bg-secondary/40 border-b border-border">
+                  <Calendar className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-bold">Үндсэн мэдээлэл</h3>
+                </header>
+                <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-muted-foreground mb-1 block">Борлуулсан огноо *</label>
                     <input
-                      type="number"
-                      inputMode="numeric"
-                      value={manualForm.addr_khoroo}
-                      onChange={(e) => setManualForm((f) => ({ ...f, addr_khoroo: e.target.value.slice(0, 3) }))}
-                      placeholder="Хороо"
-                      className="w-full rounded-xl bg-secondary px-3 py-2 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      type="date"
+                      value={manualForm.sale_date}
+                      max={new Date().toISOString().slice(0, 10)}
+                      onChange={(e) => setManualForm((f) => ({ ...f, sale_date: e.target.value }))}
+                      className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
-                    {manualForm.addr_khoroo && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">-р хороо</span>}
                   </div>
-                  <div className="relative">
+                  <div>
+                    <label className="text-xs font-bold text-muted-foreground mb-1 block">Дэс дугаар</label>
                     <input
                       type="text"
-                      value={manualForm.addr_khotkhon}
-                      onChange={(e) => setManualForm((f) => ({ ...f, addr_khotkhon: e.target.value.slice(0, 50) }))}
-                      placeholder="Хотхон (заавал биш)"
-                      className="w-full rounded-xl bg-secondary px-3 py-2 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      value={(() => {
+                        const d = manualForm.sale_date ? new Date(manualForm.sale_date) : new Date();
+                        const yy = String(d.getFullYear()).slice(-2);
+                        const mm = String(d.getMonth() + 1).padStart(2, "0");
+                        const dd = String(d.getDate()).padStart(2, "0");
+                        return `ES-${yy}${mm}${dd}-XXX`;
+                      })()}
+                      disabled
+                      placeholder="Хадгалахад автоматаар үүснэ"
+                      className="w-full rounded-xl bg-secondary/50 px-3 py-2 text-sm text-muted-foreground cursor-not-allowed"
                     />
-                    {manualForm.addr_khotkhon && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">хотхон</span>}
                   </div>
-                  <div className="relative">
+                  <div>
+                    <label className="text-xs font-bold text-muted-foreground mb-1 block flex items-center gap-1">
+                      <Store className="h-3.5 w-3.5" /> Бараа гарах байршил *
+                    </label>
+                    <select
+                      value={manualForm.branch}
+                      onChange={(e) => setManualForm((f) => ({ ...f, branch: e.target.value }))}
+                      className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    >
+                      <option value="Лавай">Лавай</option>
+                      <option value="Их наяд">Их наяд</option>
+                      <option value="Хонгор агуулах">Хонгор агуулах</option>
+                    </select>
+                  </div>
+                </div>
+              </section>
+
+              {/* SECTION 2 — Customer */}
+              <section className="bg-card rounded-2xl border border-border overflow-hidden">
+                <header className="flex items-center gap-2 px-4 py-2.5 bg-secondary/40 border-b border-border">
+                  <User className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-bold">Үйлчлүүлэгч</h3>
+                </header>
+                <div className="p-4 space-y-3">
+                  <div>
+                    <label className="text-xs font-bold text-muted-foreground mb-1 block flex items-center gap-1">
+                      <Phone className="h-3.5 w-3.5" /> Утас *
+                    </label>
                     <input
-                      type="text"
-                      value={manualForm.addr_building}
-                      onChange={(e) => setManualForm((f) => ({ ...f, addr_building: e.target.value.slice(0, 30) }))}
-                      placeholder="Байр"
-                      className="w-full rounded-xl bg-secondary px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      type="tel"
+                      value={manualForm.phone}
+                      onChange={(e) => setManualForm((f) => ({ ...f, phone: e.target.value }))}
+                      placeholder="9911XXXX"
+                      className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
-                    {manualForm.addr_building && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">байр</span>}
                   </div>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      inputMode="numeric"
-                      value={manualForm.addr_entrance}
-                      onChange={(e) => setManualForm((f) => ({ ...f, addr_entrance: e.target.value.slice(0, 3) }))}
-                      placeholder="Орц"
-                      className="w-full rounded-xl bg-secondary px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    />
-                    {manualForm.addr_entrance && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">орц</span>}
-                  </div>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      inputMode="numeric"
-                      value={manualForm.addr_apt}
-                      onChange={(e) => setManualForm((f) => ({ ...f, addr_apt: e.target.value.slice(0, 5) }))}
-                      placeholder="Тоот"
-                      className="w-full rounded-xl bg-secondary px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    />
-                    {manualForm.addr_apt && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">тоот</span>}
-                  </div>
-                  <input
-                    type="text"
-                    value={manualForm.addr_door_code}
-                    onChange={(e) => setManualForm((f) => ({ ...f, addr_door_code: e.target.value.slice(0, 20) }))}
-                    placeholder="Орцны код"
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-                <div className="mt-2">
-                  <textarea
-                    rows={3}
-                    value={manualForm.addr_landmark}
-                    onChange={(e) => setManualForm((f) => ({ ...f, addr_landmark: e.target.value.slice(0, 200) }))}
-                    placeholder="Дэлгэрэнгүй хаяг / Чиглэл (заавал биш)"
-                    className="w-full rounded-xl bg-secondary px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-              </div>
 
-              {/* Delivery fee toggle */}
-              <div>
-                <label className="flex items-center gap-2 w-full rounded-xl bg-secondary px-3 py-2 text-sm cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={Number(manualForm.delivery_fee) > 0}
-                    onChange={(e) => setManualForm((f) => ({ ...f, delivery_fee: e.target.checked ? 8000 : 0 }))}
-                    className="h-4 w-4 rounded"
-                  />
-                  <span>Хүргэлтийн төлбөр авах (8,000₮)</span>
-                </label>
-              </div>
-
-              {/* Products */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-bold text-muted-foreground">Бараанууд *</label>
-                  <span className="text-xs text-muted-foreground">{manualItems.length} төрөл</span>
-                </div>
-
-                {/* Product picker */}
-                <div className="relative mb-2">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <input
-                    type="text"
-                    value={manualProductSearch}
-                    onChange={(e) => setManualProductSearch(e.target.value)}
-                    placeholder="Бараа хайх (нэр / SKU)..."
-                    className="w-full rounded-xl bg-secondary pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-                {manualProductSearch.trim() && (
-                  <div className="border border-border rounded-xl max-h-48 overflow-y-auto mb-2">
-                    {products
-                      .filter((p) => {
-                        const q = manualProductSearch.toLowerCase();
-                        return p.name.toLowerCase().includes(q) || (p.product_code || "").toLowerCase().includes(q);
-                      })
-                      .slice(0, 20)
-                      .map((p) => (
-                        <button
-                          key={p.id}
-                          type="button"
-                          onClick={() => {
-                            setManualItems((prev) => {
-                              const existing = prev.find((it) => it.product_id === p.id);
-                              if (existing) {
-                                return prev.map((it) => it.product_id === p.id ? { ...it, quantity: it.quantity + 1 } : it);
-                              }
-                              return [...prev, {
-                                product_id: p.id,
-                                name: p.name,
-                                price: p.price,
-                                quantity: 1,
-                                product_code: p.product_code,
-                                image: p.thumbnail_url || p.image_url,
-                              }];
-                            });
-                            setManualProductSearch("");
-                          }}
-                          className="w-full flex items-center gap-3 px-3 py-2 hover:bg-secondary text-left border-b border-border last:border-b-0"
-                        >
-                          {(p.thumbnail_url || p.image_url) && (
-                            <img src={p.thumbnail_url || p.image_url} alt="" className="w-8 h-8 rounded object-cover bg-secondary" />
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium truncate">{p.name}</p>
-                            <p className="text-[10px] text-muted-foreground">{p.product_code || "—"} · {formatPrice(p.price)}</p>
-                          </div>
-                        </button>
-                      ))}
-                  </div>
-                )}
-
-                {/* Selected items */}
-                <div className="space-y-2">
-                  {manualItems.map((it, idx) => (
-                    <div key={idx} className="flex items-center gap-2 bg-secondary/40 rounded-xl p-2">
-                      {it.image && <img src={it.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-secondary" />}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium truncate">{it.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{formatPrice(it.price)} × {it.quantity}</p>
+                  <div>
+                    <label className="text-xs font-bold text-muted-foreground mb-1 block flex items-center gap-1">
+                      <MapPin className="h-3.5 w-3.5" /> Хүргэлтийн хаяг *
+                    </label>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                      <select
+                        value={manualForm.addr_district}
+                        onChange={(e) => setManualForm((f) => ({ ...f, addr_district: e.target.value }))}
+                        className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      >
+                        <option value="">Дүүрэг</option>
+                        <option value="ХУД">ХУД</option>
+                        <option value="БЗД">БЗД</option>
+                        <option value="БГД">БГД</option>
+                        <option value="СХД">СХД</option>
+                        <option value="СБД">СБД</option>
+                        <option value="ЧД">ЧД</option>
+                      </select>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          value={manualForm.addr_khoroo}
+                          onChange={(e) => setManualForm((f) => ({ ...f, addr_khoroo: e.target.value.slice(0, 3) }))}
+                          placeholder="Хороо"
+                          className="w-full rounded-xl bg-secondary px-3 py-2 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                        {manualForm.addr_khoroo && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">-р хороо</span>}
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={manualForm.addr_khotkhon}
+                          onChange={(e) => setManualForm((f) => ({ ...f, addr_khotkhon: e.target.value.slice(0, 50) }))}
+                          placeholder="Хотхон (заавал биш)"
+                          className="w-full rounded-xl bg-secondary px-3 py-2 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                        {manualForm.addr_khotkhon && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">хотхон</span>}
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={manualForm.addr_building}
+                          onChange={(e) => setManualForm((f) => ({ ...f, addr_building: e.target.value.slice(0, 30) }))}
+                          placeholder="Байр"
+                          className="w-full rounded-xl bg-secondary px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                        {manualForm.addr_building && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">байр</span>}
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          value={manualForm.addr_entrance}
+                          onChange={(e) => setManualForm((f) => ({ ...f, addr_entrance: e.target.value.slice(0, 3) }))}
+                          placeholder="Орц"
+                          className="w-full rounded-xl bg-secondary px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                        {manualForm.addr_entrance && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">орц</span>}
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          value={manualForm.addr_apt}
+                          onChange={(e) => setManualForm((f) => ({ ...f, addr_apt: e.target.value.slice(0, 5) }))}
+                          placeholder="Тоот"
+                          className="w-full rounded-xl bg-secondary px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                        {manualForm.addr_apt && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">тоот</span>}
                       </div>
                       <input
-                        type="number"
-                        min={1}
-                        value={it.quantity}
-                        onChange={(e) => {
-                          const q = Math.max(1, Number(e.target.value) || 1);
-                          setManualItems((prev) => prev.map((p, i) => i === idx ? { ...p, quantity: q } : p));
-                        }}
-                        className="w-16 rounded-lg bg-card border border-border px-2 py-1 text-xs text-center"
+                        type="text"
+                        value={manualForm.addr_door_code}
+                        onChange={(e) => setManualForm((f) => ({ ...f, addr_door_code: e.target.value.slice(0, 20) }))}
+                        placeholder="Орцны код"
+                        className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                       />
-                      <button
-                        type="button"
-                        onClick={() => setManualItems((prev) => prev.filter((_, i) => i !== idx))}
-                        className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
                     </div>
-                  ))}
-                  {manualItems.length === 0 && (
-                    <p className="text-center text-xs text-muted-foreground py-3 border border-dashed border-border rounded-xl">
-                      Дээрх хайлтаас бараа сонгоно уу
-                    </p>
-                  )}
-                </div>
-              </div>
+                    <div className="mt-2">
+                      <textarea
+                        rows={3}
+                        value={manualForm.addr_landmark}
+                        onChange={(e) => setManualForm((f) => ({ ...f, addr_landmark: e.target.value.slice(0, 200) }))}
+                        placeholder="Дэлгэрэнгүй хаяг / Чиглэл (заавал биш)"
+                        className="w-full rounded-xl bg-secondary px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+                  </div>
 
-              {/* Payment */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground mb-1 block">Төлбөрийн суваг</label>
-                  <select
-                    value={manualForm.payment_method}
-                    onChange={(e) => setManualForm((f) => ({ ...f, payment_method: e.target.value }))}
-                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  >
-                    <option value="cash">Бэлнээр</option>
-                    <option value="qpay">QPay</option>
-                    <option value="storepay">Storepay</option>
-                    <option value="transfer">Шилжүүлэг</option>
-                    <option value="pocket">Pocket</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-muted-foreground mb-1 block">
-                    Төлөв <span className="font-normal text-muted-foreground/60">(Захиалгын төлбөрийн нөхцөл)</span>
+                  <label className="flex items-center gap-2 w-full rounded-xl bg-secondary/60 px-3 py-2.5 text-sm cursor-pointer hover:bg-secondary transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={Number(manualForm.delivery_fee) > 0}
+                      onChange={(e) => setManualForm((f) => ({ ...f, delivery_fee: e.target.checked ? 8000 : 0 }))}
+                      className="h-4 w-4 rounded"
+                    />
+                    <Truck className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">Хүргэлтийн төлбөр авах</span>
+                    <span className="ml-auto text-primary font-bold">8,000₮</span>
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      {
-                        value: "confirmed",
-                        title: "Төлбөр авсан",
-                        desc: "Бэлэн / шилжүүлэг хүлээн авсан",
-                        active: manualForm.payment_status !== "unpaid",
-                        accent: "text-emerald-600 border-emerald-500/40 bg-emerald-500/5",
-                      },
-                      {
-                        value: "unpaid",
-                        title: "Төлбөр аваагүй",
-                        desc: "Хүргэлт дээр төлнө",
-                        active: manualForm.payment_status === "unpaid",
-                        accent: "text-amber-600 border-amber-500/40 bg-amber-500/5",
-                      },
-                    ].map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => {
-                          if (opt.value === "unpaid") {
-                            setManualForm((f) => ({ ...f, status: "pending", payment_status: "unpaid" }));
-                          } else {
-                            setManualForm((f) => ({ ...f, status: "confirmed", payment_status: "confirmed" }));
-                          }
-                        }}
-                        className={`text-left rounded-xl border-2 px-3 py-2 transition-all ${
-                          opt.active
-                            ? `${opt.accent} font-semibold shadow-sm`
-                            : "border-transparent bg-secondary text-foreground/70 hover:bg-secondary/70"
-                        }`}
-                      >
-                        <div className="text-sm font-bold leading-tight">{opt.title}</div>
-                        <div className="text-[11px] opacity-80 mt-0.5 leading-tight">{opt.desc}</div>
-                      </button>
+                </div>
+              </section>
+
+              {/* SECTION 3 — Products */}
+              <section className="bg-card rounded-2xl border border-border overflow-hidden">
+                <header className="flex items-center justify-between px-4 py-2.5 bg-secondary/40 border-b border-border">
+                  <div className="flex items-center gap-2">
+                    <ShoppingBag className="h-4 w-4 text-primary" />
+                    <h3 className="text-sm font-bold">Бараанууд *</h3>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{manualItems.length} төрөл сонгосон</span>
+                </header>
+                <div className="p-4 space-y-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      value={manualProductSearch}
+                      onChange={(e) => setManualProductSearch(e.target.value)}
+                      placeholder="Бараа хайх (нэр / SKU)..."
+                      className="w-full rounded-xl bg-secondary pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
+                  {manualProductSearch.trim() && (
+                    <div className="border border-border rounded-xl max-h-48 overflow-y-auto">
+                      {products
+                        .filter((p) => {
+                          const q = manualProductSearch.toLowerCase();
+                          return p.name.toLowerCase().includes(q) || (p.product_code || "").toLowerCase().includes(q);
+                        })
+                        .slice(0, 20)
+                        .map((p) => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => {
+                              setManualItems((prev) => {
+                                const existing = prev.find((it) => it.product_id === p.id);
+                                if (existing) {
+                                  return prev.map((it) => it.product_id === p.id ? { ...it, quantity: it.quantity + 1 } : it);
+                                }
+                                return [...prev, {
+                                  product_id: p.id,
+                                  name: p.name,
+                                  price: p.price,
+                                  quantity: 1,
+                                  product_code: p.product_code,
+                                  image: p.thumbnail_url || p.image_url,
+                                }];
+                              });
+                              setManualProductSearch("");
+                            }}
+                            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-secondary text-left border-b border-border last:border-b-0"
+                          >
+                            {(p.thumbnail_url || p.image_url) && (
+                              <img src={p.thumbnail_url || p.image_url} alt="" className="w-8 h-8 rounded object-cover bg-secondary" />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium truncate">{p.name}</p>
+                              <p className="text-[10px] text-muted-foreground">{p.product_code || "—"} · {formatPrice(p.price)}</p>
+                            </div>
+                          </button>
+                        ))}
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    {manualItems.map((it, idx) => (
+                      <div key={idx} className="flex items-center gap-2 bg-secondary/40 rounded-xl p-2">
+                        {it.image && <img src={it.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-secondary" />}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium truncate">{it.name}</p>
+                          <p className="text-[10px] text-muted-foreground">{formatPrice(it.price)} × {it.quantity}</p>
+                        </div>
+                        <input
+                          type="number"
+                          min={1}
+                          value={it.quantity}
+                          onChange={(e) => {
+                            const q = Math.max(1, Number(e.target.value) || 1);
+                            setManualItems((prev) => prev.map((p, i) => i === idx ? { ...p, quantity: q } : p));
+                          }}
+                          className="w-16 rounded-lg bg-card border border-border px-2 py-1 text-xs text-center"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setManualItems((prev) => prev.filter((_, i) => i !== idx))}
+                          className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     ))}
+                    {manualItems.length === 0 && (
+                      <p className="text-center text-xs text-muted-foreground py-4 border border-dashed border-border rounded-xl">
+                        Дээрх хайлтаас бараа сонгоно уу
+                      </p>
+                    )}
                   </div>
                 </div>
-              </div>
+              </section>
 
-              {/* Notes / extra description */}
-              <div>
-                <label className="text-xs font-bold text-muted-foreground mb-1 block">
-                  Нэмэлт тайлбар <span className="font-normal text-muted-foreground/60">(хүргэлт, бараа, бусад)</span>
-                </label>
-                <textarea
-                  rows={3}
-                  value={manualForm.source_note}
-                  onChange={(e) => setManualForm((f) => ({ ...f, source_note: e.target.value.slice(0, 500) }))}
-                  placeholder="Жишээ: 14:00-аас өмнө хүргэх, утсаар яриад очих, бэлэг боох гэх мэт..."
-                  className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
-                />
-                <div className="text-[10px] text-muted-foreground/60 text-right mt-1">{manualForm.source_note.length}/500</div>
-              </div>
+              {/* SECTION 4 — Payment */}
+              <section className="bg-card rounded-2xl border border-border overflow-hidden">
+                <header className="flex items-center gap-2 px-4 py-2.5 bg-secondary/40 border-b border-border">
+                  <Wallet className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-bold">Төлбөр</h3>
+                </header>
+                <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-muted-foreground mb-1 block">Төлбөрийн суваг</label>
+                    <select
+                      value={manualForm.payment_method}
+                      onChange={(e) => setManualForm((f) => ({ ...f, payment_method: e.target.value }))}
+                      className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    >
+                      <option value="cash">Бэлнээр</option>
+                      <option value="qpay">QPay</option>
+                      <option value="storepay">Storepay</option>
+                      <option value="transfer">Шилжүүлэг</option>
+                      <option value="pocket">Pocket</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-muted-foreground mb-1 block">
+                      Төлөв <span className="font-normal text-muted-foreground/60">(төлбөр төлөгдсөн эсэх)</span>
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        {
+                          value: "confirmed",
+                          title: "Төлбөр авсан",
+                          desc: "Бэлэн / шилжүүлэг хүлээн авсан",
+                          active: manualForm.payment_status !== "unpaid",
+                          accent: "text-emerald-600 border-emerald-500/40 bg-emerald-500/5",
+                        },
+                        {
+                          value: "unpaid",
+                          title: "Төлбөр аваагүй",
+                          desc: "Хүргэлт дээр төлнө",
+                          active: manualForm.payment_status === "unpaid",
+                          accent: "text-amber-600 border-amber-500/40 bg-amber-500/5",
+                        },
+                      ].map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => {
+                            if (opt.value === "unpaid") {
+                              setManualForm((f) => ({ ...f, status: "pending", payment_status: "unpaid" }));
+                            } else {
+                              setManualForm((f) => ({ ...f, status: "confirmed", payment_status: "confirmed" }));
+                            }
+                          }}
+                          className={`text-left rounded-xl border-2 px-3 py-2 transition-all ${
+                            opt.active
+                              ? `${opt.accent} font-semibold shadow-sm`
+                              : "border-transparent bg-secondary text-foreground/70 hover:bg-secondary/70"
+                          }`}
+                        >
+                          <div className="text-sm font-bold leading-tight">{opt.title}</div>
+                          <div className="text-[11px] opacity-80 mt-0.5 leading-tight">{opt.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </section>
 
-              {/* Total */}
-              <div className="bg-secondary/50 rounded-xl p-3 space-y-1 text-sm">
-                <div className="flex justify-between"><span className="text-muted-foreground">Бараа:</span><span className="font-medium">{formatPrice(manualSubtotal)}</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Хүргэлт:</span><span className="font-medium">{formatPrice(Number(manualForm.delivery_fee) || 0)}</span></div>
-                <div className="flex justify-between border-t border-border pt-1 mt-1"><span className="font-bold">Нийт:</span><span className="font-bold text-primary">{formatPrice(manualTotal)}</span></div>
-              </div>
+              {/* SECTION 5 — Notes */}
+              <section className="bg-card rounded-2xl border border-border overflow-hidden">
+                <header className="flex items-center gap-2 px-4 py-2.5 bg-secondary/40 border-b border-border">
+                  <FileText className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-bold">Нэмэлт тайлбар</h3>
+                  <span className="text-[10px] text-muted-foreground">(заавал биш)</span>
+                </header>
+                <div className="p-4">
+                  <textarea
+                    rows={3}
+                    value={manualForm.source_note}
+                    onChange={(e) => setManualForm((f) => ({ ...f, source_note: e.target.value.slice(0, 500) }))}
+                    placeholder="Жишээ: 14:00-аас өмнө хүргэх, утсаар яриад очих, бэлэг боох гэх мэт..."
+                    className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                  />
+                  <div className="text-[10px] text-muted-foreground/60 text-right mt-1">{manualForm.source_note.length}/500</div>
+                </div>
+              </section>
+
+              {/* SECTION 6 — Total */}
+              <section className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl border-2 border-primary/20 overflow-hidden">
+                <header className="flex items-center gap-2 px-4 py-2.5 border-b border-primary/10">
+                  <Receipt className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-bold">Нийт дүн</h3>
+                </header>
+                <div className="p-4 space-y-1.5 text-sm">
+                  <div className="flex justify-between"><span className="text-muted-foreground">Бараа:</span><span className="font-medium">{formatPrice(manualSubtotal)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Хүргэлт:</span><span className="font-medium">{formatPrice(Number(manualForm.delivery_fee) || 0)}</span></div>
+                  <div className="flex justify-between border-t border-primary/20 pt-2 mt-2"><span className="font-bold text-base">Нийт:</span><span className="font-bold text-lg text-primary">{formatPrice(manualTotal)}</span></div>
+                </div>
+              </section>
             </div>
 
             <div className="sticky bottom-0 bg-card border-t border-border px-5 py-3 flex items-center justify-end gap-2">
