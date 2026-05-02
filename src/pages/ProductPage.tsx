@@ -361,16 +361,35 @@ const ProductPage = () => {
               ) : null}
             </div>
 
-            {/* Stock — shown only for Elle Sport brand */}
+            {/* Stock — shown only for Elle Sport brand. Per-variant when color/size selected. */}
             {(() => {
               const normalized = (brandName || "").toLowerCase().replace(/\s+/g, "");
               const isElleSport = normalized.includes("elle") && normalized.includes("sport");
-              if (!isElleSport || stockQty === null) return null;
+              if (!isElleSport) return null;
+
+              const hasColors = (product.colors?.length || 0) > 0;
+              const hasSizes = (product.sizes?.length || 0) > 0;
+              const needsColor = hasColors && !selectedColor;
+              const needsSize = hasSizes && !selectedSize;
+
+              if (needsColor || needsSize) {
+                const parts = [needsColor && "өнгө", needsSize && "хэмжээ"].filter(Boolean).join(" ба ");
+                return (
+                  <div className="text-sm">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-secondary text-muted-foreground">
+                      Үлдэгдэл харахын тулд {parts} сонгоно уу
+                    </span>
+                  </div>
+                );
+              }
+
+              const key = `${selectedColor || ""}|${selectedSize || ""}`;
+              const qty = Number(variantStock?.[key]) || 0;
               return (
                 <div className="text-sm">
-                  {stockQty > 0 ? (
+                  {qty > 0 ? (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-secondary text-foreground font-medium">
-                      Үлдэгдэл: <span className="font-bold">{stockQty}</span> ширхэг
+                      Үлдэгдэл: <span className="font-bold">{qty}</span> ширхэг
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-destructive/10 text-destructive font-medium">
