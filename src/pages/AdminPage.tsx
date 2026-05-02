@@ -94,6 +94,7 @@ const AdminPage = () => {
     brand_id: "",
     colors: [] as { name: string; image: string; sku: string }[],
     sizes: [] as string[],
+    stock_quantity: 0,
   });
   const [newColor, setNewColor] = useState("");
   const [newSize, setNewSize] = useState("");
