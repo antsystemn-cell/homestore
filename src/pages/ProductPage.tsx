@@ -90,6 +90,7 @@ const ProductPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [brandName, setBrandName] = useState<string | null>(null);
   const [stockQty, setStockQty] = useState<number | null>(null);
+  const [variantStock, setVariantStock] = useState<Record<string, number>>({});
   const galleryRef = useRef<HTMLDivElement | null>(null);
   const userInteractedRef = useRef(false);
   const isProgrammaticScrollRef = useRef(false);
