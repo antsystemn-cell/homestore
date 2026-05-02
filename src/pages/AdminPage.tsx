@@ -483,6 +483,8 @@ const AdminPage = () => {
     });
     setManualItems([]);
     setManualProductSearch("");
+    setShowCustomItemForm(false);
+    setCustomItem({ name: "", price: "", quantity: "1", product_code: "" });
   };
 
   const manualSubtotal = manualItems.reduce((s, it) => s + (it.price * it.quantity), 0);
