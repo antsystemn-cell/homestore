@@ -192,8 +192,10 @@ const AdminPage = () => {
     external_ref: "",
     branch: "Лавай",
   });
-  const [manualItems, setManualItems] = useState<{ product_id: string; name: string; price: number; quantity: number; product_code?: string; image?: string; }[]>([]);
+  const [manualItems, setManualItems] = useState<{ product_id: string | null; name: string; price: number; quantity: number; product_code?: string; image?: string; is_custom?: boolean; }[]>([]);
   const [manualProductSearch, setManualProductSearch] = useState("");
+  const [showCustomItemForm, setShowCustomItemForm] = useState(false);
+  const [customItem, setCustomItem] = useState({ name: "", price: "", quantity: "1", product_code: "" });
 
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
