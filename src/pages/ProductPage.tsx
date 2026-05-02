@@ -166,6 +166,19 @@ const ProductPage = () => {
         if (data) {
           const p = mapDbProduct(data);
           setProduct(p);
+          setStockQty(typeof data.stock_quantity === "number" ? data.stock_quantity : null);
+
+          if (data.brand_id) {
+            try {
+              const brands = await fetchPublicBrands();
+              const b = (brands || []).find((x: any) => x.id === data.brand_id);
+              setBrandName(b?.name || null);
+            } catch {
+              setBrandName(null);
+            }
+          } else {
+            setBrandName(null);
+          }
 
           const imgs = await fetchPublicProductImages(data.id);
           const extras = (imgs || []).map((r: any) => r.image_url);
