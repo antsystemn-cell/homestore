@@ -849,10 +849,28 @@ const AdminPage = () => {
       brand_id: form.brand_id || null,
       colors: form.colors.filter(c => c.name.trim()),
       sizes: form.sizes.filter(s => s.trim()),
-      stock_quantity: (() => {
+      ...(() => {
         const b = dbBrands.find((x: any) => x.id === form.brand_id);
         const norm = (b?.name || "").toLowerCase().replace(/\s+/g, "");
-        return norm.includes("elle") && norm.includes("sport") ? Math.max(0, Number(form.stock_quantity) || 0) : 0;
+        const isElleSport = norm.includes("elle") && norm.includes("sport");
+        if (!isElleSport) {
+          return { stock_quantity: 0, variant_stock: {} };
+        }
+        // Filter variant_stock to only valid keys based on current colors/sizes
+        const validColors = form.colors.filter(c => c.name.trim()).map(c => c.name);
+        const validSizes = form.sizes.filter(s => s.trim());
+        const cleaned: Record<string, number> = {};
+        const colorList = validColors.length > 0 ? validColors : [""];
+        const sizeList = validSizes.length > 0 ? validSizes : [""];
+        for (const c of colorList) {
+          for (const s of sizeList) {
+            const key = `${c}|${s}`;
+            const v = Math.max(0, Number(form.variant_stock?.[key]) || 0);
+            cleaned[key] = v;
+          }
+        }
+        const total = Object.values(cleaned).reduce((a, b) => a + b, 0);
+        return { stock_quantity: total, variant_stock: cleaned };
       })(),
     };
     let productId = editId;
