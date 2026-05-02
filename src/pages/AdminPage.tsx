@@ -1201,14 +1201,15 @@ const AdminPage = () => {
                 </header>
                 <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
-                    <label className="text-xs font-bold text-muted-foreground mb-1 block">Борлуулсан огноо *</label>
+                    <label className="text-xs font-bold text-muted-foreground mb-1 block">Борлуулсан огноо, цаг *</label>
                     <input
-                      type="date"
+                      type="datetime-local"
                       value={manualForm.sale_date}
-                      max={new Date().toISOString().slice(0, 10)}
+                      max={(() => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); })()}
                       onChange={(e) => setManualForm((f) => ({ ...f, sale_date: e.target.value }))}
                       className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
+                    <p className="text-[10px] text-muted-foreground mt-1">Захиалга үүссэн он/сар/өдөр, цаг минутыг бүртгэнэ</p>
                   </div>
                   <div>
                     <label className="text-xs font-bold text-muted-foreground mb-1 block">Дэс дугаар</label>
