@@ -19,6 +19,7 @@ import { resolveColor } from "@/lib/colorMap";
 import { cyrillicToLatinSlug } from "@/lib/cyrillicToLatin";
 import { parseAddressBlob } from "@/lib/addressParser";
 import { printOrder, printOrders } from "@/lib/printOrder";
+import { downloadManualItemsPdf } from "@/lib/manualItemsPdf";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -1279,12 +1280,32 @@ const AdminPage = () => {
 
               {/* SECTION 3 — Products */}
               <section className="bg-card rounded-2xl border border-border overflow-hidden">
-                <header className="flex items-center justify-between px-4 py-2.5 bg-secondary/40 border-b border-border">
-                  <div className="flex items-center gap-2">
-                    <ShoppingBag className="h-4 w-4 text-primary" />
-                    <h3 className="text-sm font-bold">Бараанууд *</h3>
+                <header className="flex items-center justify-between gap-2 px-4 py-2.5 bg-secondary/40 border-b border-border">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <ShoppingBag className="h-4 w-4 text-primary shrink-0" />
+                    <h3 className="text-sm font-bold truncate">Бараанууд *</h3>
                   </div>
-                  <span className="text-xs text-muted-foreground">{manualItems.length} төрөл сонгосон</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-xs text-muted-foreground">{manualItems.length} төрөл</span>
+                    <button
+                      type="button"
+                      disabled={manualItems.length === 0}
+                      onClick={async () => {
+                        try {
+                          await downloadManualItemsPdf(manualItems);
+                          toast.success("PDF татагдлаа");
+                        } catch (e) {
+                          console.error(e);
+                          toast.error("PDF үүсгэхэд алдаа гарлаа");
+                        }
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed"
+                      title="Сонгосон бараануудыг 70x80mm босоо PDF болгож татах"
+                    >
+                      <FileSpreadsheet className="h-3.5 w-3.5" />
+                      PDF
+                    </button>
+                  </div>
                 </header>
                 <div className="p-4 space-y-2">
                   <div className="flex items-center gap-2">
