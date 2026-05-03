@@ -20,6 +20,7 @@ import { cyrillicToLatinSlug } from "@/lib/cyrillicToLatin";
 import { parseAddressBlob } from "@/lib/addressParser";
 import { printOrder, printOrders } from "@/lib/printOrder";
 import { downloadManualItemsPdf } from "@/lib/manualItemsPdf";
+import { downloadOrderLabelsPdf } from "@/lib/orderLabelsPdf";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
