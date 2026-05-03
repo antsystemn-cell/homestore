@@ -77,8 +77,9 @@ export async function downloadOrderLabelsPdf(
         overflow: hidden;
       `;
       card.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #000;padding-bottom:3px;">
-          <div style="font-size:11px;font-weight:800;">${escapeHtml(orderNo)}</div>
+        <div style="text-align:center;border:2px solid #000;border-radius:4px;padding:4px 6px;margin-bottom:2px;background:#000;color:#fff;">
+          <div style="font-size:8px;font-weight:600;letter-spacing:1px;opacity:0.8;text-transform:uppercase;">Order</div>
+          <div style="font-size:16px;font-weight:900;line-height:1.1;letter-spacing:0.5px;">${escapeHtml(orderNo)}</div>
         </div>
         ${name ? `<div style="font-size:10px;font-weight:700;">${escapeHtml(name)}</div>` : ""}
         ${(phone || addr) ? `<div style="font-size:10px;font-weight:600;line-height:1.3;word-break:break-word;">${[phone ? escapeHtml(phone) : "", addr ? escapeHtml(addr) : ""].filter(Boolean).join(" • ")}</div>` : ""}
