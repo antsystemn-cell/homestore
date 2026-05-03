@@ -2724,7 +2724,7 @@ const AdminPage = () => {
                             }}
                             disabled={bulkSelected.size === 0}
                             className="gap-1.5"
-                            title="Сонгосон захиалгуудын бараануудыг 70x80mm босоо PDF болгож татах"
+                            title="Сонгосон захиалгуудыг 70x80mm босоо PDF (хаяг + утас + бараа) болгож татах"
                           >
                             <FileSpreadsheet className="h-4 w-4" />
                             PDF татах ({bulkSelected.size})
