@@ -2713,21 +2713,9 @@ const AdminPage = () => {
                             onClick={async () => {
                               const chosen = orders.filter((o: any) => bulkSelected.has(o.id));
                               if (chosen.length === 0) { toast.error("Захиалга сонгоно уу"); return; }
-                              const allItems = chosen.flatMap((o: any) =>
-                                Array.isArray(o.items)
-                                  ? o.items.map((it: any) => ({
-                                      name: it.name || "",
-                                      price: Number(it.price || 0),
-                                      quantity: Number(it.quantity || 1),
-                                      product_code: it.product_code || undefined,
-                                      image: it.image || undefined,
-                                    }))
-                                  : []
-                              );
-                              if (allItems.length === 0) { toast.error("Бараа олдсонгүй"); return; }
                               const t = toast.loading("PDF бэлдэж байна…");
                               try {
-                                await downloadManualItemsPdf(allItems, `orders-items-${new Date().toISOString().slice(0,10)}.pdf`);
+                                await downloadOrderLabelsPdf(chosen as any, `orders-${new Date().toISOString().slice(0,10)}.pdf`);
                                 toast.success("PDF татагдлаа", { id: t });
                               } catch (e) {
                                 console.error(e);
