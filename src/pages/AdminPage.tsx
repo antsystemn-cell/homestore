@@ -20,6 +20,7 @@ import { cyrillicToLatinSlug } from "@/lib/cyrillicToLatin";
 import { parseAddressBlob } from "@/lib/addressParser";
 import { printOrder, printOrders } from "@/lib/printOrder";
 import { downloadManualItemsPdf } from "@/lib/manualItemsPdf";
+import { downloadOrderLabelsPdf } from "@/lib/orderLabelsPdf";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -2712,21 +2713,9 @@ const AdminPage = () => {
                             onClick={async () => {
                               const chosen = orders.filter((o: any) => bulkSelected.has(o.id));
                               if (chosen.length === 0) { toast.error("Захиалга сонгоно уу"); return; }
-                              const allItems = chosen.flatMap((o: any) =>
-                                Array.isArray(o.items)
-                                  ? o.items.map((it: any) => ({
-                                      name: it.name || "",
-                                      price: Number(it.price || 0),
-                                      quantity: Number(it.quantity || 1),
-                                      product_code: it.product_code || undefined,
-                                      image: it.image || undefined,
-                                    }))
-                                  : []
-                              );
-                              if (allItems.length === 0) { toast.error("Бараа олдсонгүй"); return; }
                               const t = toast.loading("PDF бэлдэж байна…");
                               try {
-                                await downloadManualItemsPdf(allItems, `orders-items-${new Date().toISOString().slice(0,10)}.pdf`);
+                                await downloadOrderLabelsPdf(chosen as any, `orders-${new Date().toISOString().slice(0,10)}.pdf`);
                                 toast.success("PDF татагдлаа", { id: t });
                               } catch (e) {
                                 console.error(e);
@@ -2735,7 +2724,7 @@ const AdminPage = () => {
                             }}
                             disabled={bulkSelected.size === 0}
                             className="gap-1.5"
-                            title="Сонгосон захиалгуудын бараануудыг 70x80mm босоо PDF болгож татах"
+                            title="Сонгосон захиалгуудыг 70x80mm босоо PDF (хаяг + утас + бараа) болгож татах"
                           >
                             <FileSpreadsheet className="h-4 w-4" />
                             PDF татах ({bulkSelected.size})
