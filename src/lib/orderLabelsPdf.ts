@@ -81,8 +81,7 @@ export async function downloadOrderLabelsPdf(
           <div style="font-size:11px;font-weight:800;">${escapeHtml(orderNo)}</div>
         </div>
         ${name ? `<div style="font-size:10px;font-weight:700;">${escapeHtml(name)}</div>` : ""}
-        ${phone ? `<div style="font-size:11px;font-weight:800;">📞 ${escapeHtml(phone)}</div>` : ""}
-        ${addr ? `<div style="font-size:9px;line-height:1.3;word-break:break-word;">📍 ${escapeHtml(addr)}</div>` : ""}
+        ${(phone || addr) ? `<div style="font-size:10px;font-weight:600;line-height:1.3;word-break:break-word;">${[phone ? escapeHtml(phone) : "", addr ? escapeHtml(addr) : ""].filter(Boolean).join(" • ")}</div>` : ""}
         <div style="border-top:1px dashed #999;margin-top:2px;padding-top:3px;flex:1 1 auto;min-height:0;overflow:hidden;">
           <div style="font-size:9px;font-weight:700;margin-bottom:2px;">Бараа:</div>
           ${itemsHtml || '<div style="font-size:9px;color:#666;">—</div>'}
