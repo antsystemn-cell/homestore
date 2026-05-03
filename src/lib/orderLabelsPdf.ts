@@ -50,6 +50,10 @@ export async function downloadOrderLabelsPdf(
       const name = (o.guest_name || "").trim();
       const phone = (o.phone || "").trim();
       const addr = (o.shipping_address || "").trim();
+      const dateStr = o.created_at
+        ? new Date(o.created_at).toLocaleString("mn-MN", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
+        : "";
+      const totalStr = o.total != null ? `₮${Number(o.total).toLocaleString("mn-MN")}` : "";
 
       const itemsArr: OrderItemLite[] = Array.isArray(o.items) ? (o.items as OrderItemLite[]) : [];
       const itemsHtml = itemsArr
