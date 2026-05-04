@@ -2505,7 +2505,16 @@ const AdminPage = () => {
                         {p.discount > 0 && <span className="text-[10px] text-destructive font-bold">-{p.discount}%</span>}
                       </div>
                     </div>
-                    <button onClick={() => handleEditProduct(p)} className="p-2 rounded-lg bg-secondary" title="Засах"><Pencil className="h-3.5 w-3.5" /></button>
+                    <a
+                      href={`/admin?tab=products&edit=${p.id}`}
+                      onClick={(e) => {
+                        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+                        e.preventDefault();
+                        setSearchParams({ tab: "products", edit: p.id });
+                        handleEditProduct(p);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className="p-2 rounded-lg bg-secondary inline-flex" title="Засах"><Pencil className="h-3.5 w-3.5" /></a>
                     <button onClick={() => handleDuplicateProduct(p)} className="p-2 rounded-lg bg-secondary" title="Хуулбарлах"><Copy className="h-3.5 w-3.5" /></button>
                     <button onClick={() => setDeleteTarget({ id: p.id, name: p.name })} className="p-2 rounded-lg bg-destructive/10 text-destructive" title="Устгах"><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
