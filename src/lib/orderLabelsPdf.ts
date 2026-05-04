@@ -176,8 +176,8 @@ export async function downloadOrderLabelsPdf(
         <div class="lbl-footer" style="display:flex;justify-content:space-between;align-items:flex-end;font-size:9px;font-weight:700;color:${paid ? "#15803d" : "#b45309"};border-top:1px solid #000;padding-top:2px;${qrUrl ? `padding-right:54px;` : ""}">
           <span>${escapeHtml(payLbl)}</span>
         </div>
-        ${qrUrl ? `<div style="position:absolute;right:4px;top:30px;background:#fff;padding:1px;border:1px solid #000;border-radius:2px;text-align:center;line-height:1;">
-          <img src="${qrUrl}" alt="QR" style="display:block;width:50px;height:50px;image-rendering:pixelated;"/>
+        ${qrUrl ? `<div style="position:absolute;right:4px;bottom:4px;background:#fff;padding:1px;border:1px solid #000;border-radius:2px;text-align:center;line-height:1;">
+          <img src="${qrUrl}" alt="QR" style="display:block;width:60px;height:60px;image-rendering:pixelated;"/>
           <div style="font-size:6px;font-weight:700;margin-top:1px;">QPay</div>
         </div>` : ""}
       `;
@@ -188,8 +188,8 @@ export async function downloadOrderLabelsPdf(
         const qrEl = card.querySelector<HTMLDivElement>('div[style*="position:absolute"]');
         const itemsBox = card.children[card.children.length - 3] as HTMLDivElement | undefined;
         const footerBox = card.children[card.children.length - 2] as HTMLDivElement | undefined;
-        let qrSize = 50;
-        const minQr = 32;
+        let qrSize = 60;
+        const minQr = 36;
         const fits = (): boolean => {
           if (!qrEl || !itemsBox) return true;
           const cardRect = card.getBoundingClientRect();
