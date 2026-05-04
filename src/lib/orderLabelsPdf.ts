@@ -131,7 +131,7 @@ export async function downloadOrderLabelsPdf(
 
       // Table row helpers
       const labelRow = (label: string) => `
-        <div style="padding:2px 6px;font-size:${BASE_FS - 2}px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#000;border-bottom:1px solid #000;background:#f0f0f0;line-height:1.2;">${escapeHtml(label)}</div>`;
+        <div style="display:flex;align-items:center;justify-content:flex-start;height:16px;padding:0 6px;font-size:${BASE_FS - 2}px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#000;border-top:1px solid #000;border-bottom:1px solid #000;background:#f0f0f0;line-height:1;">${escapeHtml(label)}</div>`;
       const valueRow = (html: string, extra = "") => `
         <div style="padding:4px 6px;border-bottom:1px solid #000;line-height:1.3;${extra}">${html}</div>`;
 
