@@ -1,6 +1,24 @@
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
+function formatUlaanbaatarDate(iso: string): string {
+  try {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Ulaanbaatar",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).formatToParts(new Date(iso));
+    const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+    return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")} (УБ)`;
+  } catch {
+    return "";
+  }
+}
+
 export interface OrderItemLite {
   name?: string;
   quantity?: number;
@@ -50,9 +68,7 @@ export async function downloadOrderLabelsPdf(
       const name = (o.guest_name || "").trim();
       const phone = (o.phone || "").trim();
       const addr = (o.shipping_address || "").trim();
-      const dateStr = o.created_at
-        ? new Date(o.created_at).toLocaleString("mn-MN", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
-        : "";
+      const dateStr = o.created_at ? formatUlaanbaatarDate(o.created_at) : "";
       const totalStr = o.total != null ? `₮${Number(o.total).toLocaleString("mn-MN")}` : "";
 
       const itemsArr: OrderItemLite[] = Array.isArray(o.items) ? (o.items as OrderItemLite[]) : [];
