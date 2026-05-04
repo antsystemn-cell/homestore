@@ -106,7 +106,13 @@ export async function downloadOrderLabelsPdf(
           <span style="font-weight:800;color:#000;">${escapeHtml(totalStr)}</span>
         </div>` : ""}
         ${name ? `<div style="font-size:10px;font-weight:700;">${escapeHtml(name)}</div>` : ""}
-        ${(phone || addr) ? `<div style="font-size:10px;font-weight:600;line-height:1.3;word-break:break-word;">${[phone ? escapeHtml(phone) : "", addr ? escapeHtml(addr) : ""].filter(Boolean).join(" • ")}</div>` : ""}
+        ${(phone || addr) ? (() => {
+          const combined = [phone, addr].filter(Boolean).join(" • ");
+          const len = combined.length;
+          const fs = len > 110 ? 7 : len > 80 ? 8 : len > 50 ? 9 : 10;
+          const lh = fs <= 8 ? 1.25 : 1.35;
+          return `<div style="font-size:${fs}px;font-weight:600;line-height:${lh};word-break:break-word;overflow-wrap:anywhere;white-space:normal;">${escapeHtml(combined)}</div>`;
+        })() : ""}
         <div style="border-top:1px dashed #999;margin-top:2px;padding-top:3px;flex:1 1 auto;min-height:0;overflow:hidden;">
           <div style="font-size:9px;font-weight:700;margin-bottom:2px;">Бараа:</div>
           ${itemsHtml || '<div style="font-size:9px;color:#666;">—</div>'}
