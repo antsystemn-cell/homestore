@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -44,9 +44,14 @@ const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "b
 
 const AdminPage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isAdmin, isModerator, loading: authLoading, authError } = useAuth();
   const hasAdminAccess = isAdmin || isModerator;
-  const [tab, setTab] = useState<Tab>("stats");
+  const [tab, setTab] = useState<Tab>(() => {
+    const t = searchParams.get("tab") as Tab | null;
+    const valid: Tab[] = ["stats","products","orders","users","categories","brands","delivery","payments","banner","collections","chatbot","analytics","diagnostics","settings"];
+    return t && valid.includes(t) ? t : "stats";
+  });
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
@@ -274,6 +279,19 @@ const AdminPage = () => {
     if (authLoading || !hasAdminAccess) return;
     loadAdminData();
   }, [authLoading, isAdmin]);
+
+  // Open product editor when URL has ?edit=<id> (supports new tab / right-click open)
+  useEffect(() => {
+    const editParam = searchParams.get("edit");
+    if (!editParam || products.length === 0) return;
+    const p = products.find((x) => x.id === editParam);
+    if (p && editId !== p.id) {
+      handleEditProduct(p);
+      if (tab !== "products") setTab("products");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products, searchParams]);
 
   const fetchPromoBanners = async () => {
     try {
@@ -2433,10 +2451,18 @@ const AdminPage = () => {
                                 className="p-2 rounded-lg hover:bg-secondary transition-colors" title="Харах">
                                 <Eye className="h-3.5 w-3.5 text-muted-foreground" />
                               </button>
-                              <button onClick={() => handleEditProduct(p)}
-                                className="p-2 rounded-lg hover:bg-secondary transition-colors" title="Засах">
+                              <a
+                                href={`/admin?tab=products&edit=${p.id}`}
+                                onClick={(e) => {
+                                  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+                                  e.preventDefault();
+                                  setSearchParams({ tab: "products", edit: p.id });
+                                  handleEditProduct(p);
+                                  window.scrollTo({ top: 0, behavior: "smooth" });
+                                }}
+                                className="p-2 rounded-lg hover:bg-secondary transition-colors inline-flex" title="Засах">
                                 <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-                              </button>
+                              </a>
                               <button onClick={() => handleDuplicateProduct(p)}
                                 className="p-2 rounded-lg hover:bg-secondary transition-colors" title="Хуулбарлах">
                                 <Copy className="h-3.5 w-3.5 text-muted-foreground" />
@@ -2479,7 +2505,16 @@ const AdminPage = () => {
                         {p.discount > 0 && <span className="text-[10px] text-destructive font-bold">-{p.discount}%</span>}
                       </div>
                     </div>
-                    <button onClick={() => handleEditProduct(p)} className="p-2 rounded-lg bg-secondary" title="Засах"><Pencil className="h-3.5 w-3.5" /></button>
+                    <a
+                      href={`/admin?tab=products&edit=${p.id}`}
+                      onClick={(e) => {
+                        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+                        e.preventDefault();
+                        setSearchParams({ tab: "products", edit: p.id });
+                        handleEditProduct(p);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className="p-2 rounded-lg bg-secondary inline-flex" title="Засах"><Pencil className="h-3.5 w-3.5" /></a>
                     <button onClick={() => handleDuplicateProduct(p)} className="p-2 rounded-lg bg-secondary" title="Хуулбарлах"><Copy className="h-3.5 w-3.5" /></button>
                     <button onClick={() => setDeleteTarget({ id: p.id, name: p.name })} className="p-2 rounded-lg bg-destructive/10 text-destructive" title="Устгах"><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
