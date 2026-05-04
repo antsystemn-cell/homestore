@@ -176,10 +176,9 @@ export async function downloadOrderLabelsPdf(
       // Auto-fit: shrink QR (and items font as fallback) until no overlap/overflow
       if (qrUrl) {
         const qrEl = card.querySelector<HTMLDivElement>('div[style*="position:absolute"]');
-        const itemsBox = card.children[card.children.length - 3] as HTMLDivElement | undefined;
-        const footerBox = card.children[card.children.length - 2] as HTMLDivElement | undefined;
-        let qrSize = 60;
-        const minQr = 36;
+        const itemsBox = card.querySelector<HTMLDivElement>(".lbl-items");
+        let qrSize = 72;
+        const minQr = 44;
         const fits = (): boolean => {
           if (!qrEl || !itemsBox) return true;
           const cardRect = card.getBoundingClientRect();
@@ -196,19 +195,17 @@ export async function downloadOrderLabelsPdf(
           return !overlap;
         };
         let guard = 0;
-        while (!fits() && guard < 12) {
+        while (!fits() && guard < 14) {
           guard++;
           if (qrSize > minQr) {
             qrSize -= 2;
             const img = qrEl?.querySelector("img") as HTMLImageElement | null;
             if (img) { img.style.width = `${qrSize}px`; img.style.height = `${qrSize}px`; }
-            const pad = `${qrSize + 6}px`;
-            if (itemsBox) itemsBox.style.paddingRight = pad;
-            if (footerBox) footerBox.style.paddingRight = pad;
+            if (itemsBox) itemsBox.style.paddingRight = `${qrSize + 8}px`;
           } else {
             itemsBox?.querySelectorAll<HTMLElement>("div").forEach((el) => {
-              const cur = parseFloat(getComputedStyle(el).fontSize) || 8.5;
-              if (cur > 6.5) el.style.fontSize = `${cur - 0.5}px`;
+              const cur = parseFloat(getComputedStyle(el).fontSize) || 10;
+              if (cur > 7) el.style.fontSize = `${cur - 0.5}px`;
             });
           }
         }
