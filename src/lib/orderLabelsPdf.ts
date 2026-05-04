@@ -70,7 +70,13 @@ export async function downloadOrderLabelsPdf(
   const CONTENT_W = PAGE_W - MARGIN * 2;
 
   const pdf = new jsPDF({ unit: "mm", format: [PAGE_W, PAGE_H], orientation: "portrait", putOnlyUsedFonts: true });
-  await registerDejaVuFont(pdf);
+  let fontFamily = "helvetica";
+  try {
+    await registerDejaVuFont(pdf);
+    fontFamily = "DejaVuSans";
+  } catch (e) {
+    console.error("[orderLabelsPdf] DejaVu font load failed, falling back to helvetica", e);
+  }
   pdf.setTextColor(0, 0, 0);
   pdf.setDrawColor(0, 0, 0);
 
