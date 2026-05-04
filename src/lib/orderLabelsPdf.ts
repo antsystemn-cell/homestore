@@ -131,15 +131,15 @@ export async function downloadOrderLabelsPdf(
           const sku = it.product_code || it.sku || "";
           const meta = [variant, sku].filter(Boolean).join(" · ");
           const m = meta ? ` <span style="color:#666;">(${escapeHtml(meta)})</span>` : "";
-          return `<div style="font-size:8.5px;line-height:1.25;">• ${escapeHtml(String(it.name))}${m} × ${it.quantity ?? 1}</div>`;
+          return `<div class="lbl-item" style="font-size:10px;line-height:1.3;margin-bottom:1px;">• ${escapeHtml(String(it.name))}${m} × ${it.quantity ?? 1}</div>`;
         })
         .join("");
 
       // Combine phone+address with dynamic font sizing
       const combined = [phone, addr].filter(Boolean).join(" • ");
       const len = combined.length;
-      const fs = len > 110 ? 7 : len > 80 ? 8 : len > 50 ? 9 : 10;
-      const lh = fs <= 8 ? 1.25 : 1.35;
+      const fs = len > 110 ? 8 : len > 80 ? 9 : len > 50 ? 10 : 11;
+      const lh = fs <= 9 ? 1.25 : 1.35;
 
       host.innerHTML = "";
       const card = document.createElement("div");
@@ -151,33 +151,33 @@ export async function downloadOrderLabelsPdf(
         font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
         display: flex;
         flex-direction: column;
-        padding: 6px;
+        padding: 5px;
         box-sizing: border-box;
-        gap: 3px;
+        gap: 2px;
         overflow: hidden;
         position: relative;
       `;
       card.innerHTML = `
-        <div style="display:flex;align-items:center;gap:6px;background:#000;color:#fff;padding:3px 6px;border-radius:3px;">
-          <span style="background:#fff;color:#000;padding:0 5px;border-radius:2px;font-size:9px;font-weight:800;">№${i + 1}</span>
-          <span style="font-family:'Courier New',monospace;font-weight:800;font-size:11px;letter-spacing:0.3px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(orderNo)}</span>
-          ${paid ? `<span style="background:#16a34a;color:#fff;padding:0 4px;border-radius:2px;font-size:7px;font-weight:800;letter-spacing:0.3px;">ТӨЛСӨН</span>` : ""}
+        <div style="display:flex;align-items:center;gap:5px;background:#000;color:#fff;padding:3px 6px;border-radius:3px;">
+          <span style="background:#fff;color:#000;padding:0 5px;border-radius:2px;font-size:10px;font-weight:800;">№${i + 1}</span>
+          <span style="font-family:'Courier New',monospace;font-weight:800;font-size:12px;letter-spacing:0.3px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(orderNo)}</span>
+          ${paid ? `<span style="background:#16a34a;color:#fff;padding:1px 4px;border-radius:2px;font-size:8px;font-weight:800;letter-spacing:0.3px;">ТӨЛСӨН</span>` : ""}
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;font-size:8px;color:#444;font-weight:600;">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:9px;color:#444;font-weight:600;">
           <span>${escapeHtml(dateStr)}</span>
-          ${!paid && totalNum > 0 ? `<span style="font-weight:800;color:#000;font-size:9px;">${escapeHtml(mnt(totalNum))}</span>` : ""}
+          ${!paid && totalNum > 0 ? `<span style="font-weight:800;color:#000;font-size:10px;">${escapeHtml(mnt(totalNum))}</span>` : ""}
         </div>
-        ${name ? `<div style="font-size:10px;font-weight:700;">${escapeHtml(name)}</div>` : ""}
-        ${combined ? `<div style="font-size:${fs}px;font-weight:600;line-height:${lh};word-break:break-word;overflow-wrap:anywhere;">${escapeHtml(combined)}</div>` : ""}
-        <div style="border-top:1px dashed #999;margin-top:1px;padding-top:2px;flex:1 1 auto;min-height:0;overflow:hidden;${qrUrl ? `padding-right:46px;` : ""}">
-          <div style="font-size:8px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:1px;">Бараа</div>
-          ${itemsHtml || '<div style="font-size:9px;color:#666;">—</div>'}
+        ${name ? `<div style="font-size:11px;font-weight:700;">${escapeHtml(name)}</div>` : ""}
+        ${combined ? `<div class="lbl-addr" style="font-size:${fs}px;font-weight:600;line-height:${lh};word-break:break-word;overflow-wrap:anywhere;">${escapeHtml(combined)}</div>` : ""}
+        <div class="lbl-items" style="border-top:1px dashed #999;margin-top:1px;padding-top:2px;flex:1 1 auto;min-height:0;overflow:hidden;${qrUrl ? `padding-right:54px;` : ""}">
+          <div style="font-size:8px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:2px;">Бараа</div>
+          ${itemsHtml || '<div class="lbl-item" style="font-size:10px;color:#666;">—</div>'}
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:flex-end;font-size:8px;font-weight:700;color:${paid ? "#15803d" : "#b45309"};border-top:1px solid #000;padding-top:2px;${qrUrl ? `padding-right:46px;` : ""}">
+        <div class="lbl-footer" style="display:flex;justify-content:space-between;align-items:flex-end;font-size:9px;font-weight:700;color:${paid ? "#15803d" : "#b45309"};border-top:1px solid #000;padding-top:2px;${qrUrl ? `padding-right:54px;` : ""}">
           <span>${escapeHtml(payLbl)}</span>
         </div>
-        ${qrUrl ? `<div style="position:absolute;right:4px;top:26px;background:#fff;padding:1px;border:1px solid #000;border-radius:2px;text-align:center;line-height:1;">
-          <img src="${qrUrl}" alt="QR" style="display:block;width:40px;height:40px;image-rendering:pixelated;"/>
+        ${qrUrl ? `<div style="position:absolute;right:4px;top:30px;background:#fff;padding:1px;border:1px solid #000;border-radius:2px;text-align:center;line-height:1;">
+          <img src="${qrUrl}" alt="QR" style="display:block;width:50px;height:50px;image-rendering:pixelated;"/>
           <div style="font-size:6px;font-weight:700;margin-top:1px;">QPay</div>
         </div>` : ""}
       `;
@@ -188,8 +188,8 @@ export async function downloadOrderLabelsPdf(
         const qrEl = card.querySelector<HTMLDivElement>('div[style*="position:absolute"]');
         const itemsBox = card.children[card.children.length - 3] as HTMLDivElement | undefined;
         const footerBox = card.children[card.children.length - 2] as HTMLDivElement | undefined;
-        let qrSize = 40;
-        const minQr = 24;
+        let qrSize = 50;
+        const minQr = 32;
         const fits = (): boolean => {
           if (!qrEl || !itemsBox) return true;
           const cardRect = card.getBoundingClientRect();
