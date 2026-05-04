@@ -131,15 +131,15 @@ export async function downloadOrderLabelsPdf(
           const sku = it.product_code || it.sku || "";
           const meta = [variant, sku].filter(Boolean).join(" · ");
           const m = meta ? ` <span style="color:#666;">(${escapeHtml(meta)})</span>` : "";
-          return `<div style="font-size:8.5px;line-height:1.25;">• ${escapeHtml(String(it.name))}${m} × ${it.quantity ?? 1}</div>`;
+          return `<div class="lbl-item" style="font-size:10px;line-height:1.3;margin-bottom:1px;">• ${escapeHtml(String(it.name))}${m} × ${it.quantity ?? 1}</div>`;
         })
         .join("");
 
       // Combine phone+address with dynamic font sizing
       const combined = [phone, addr].filter(Boolean).join(" • ");
       const len = combined.length;
-      const fs = len > 110 ? 7 : len > 80 ? 8 : len > 50 ? 9 : 10;
-      const lh = fs <= 8 ? 1.25 : 1.35;
+      const fs = len > 110 ? 8 : len > 80 ? 9 : len > 50 ? 10 : 11;
+      const lh = fs <= 9 ? 1.25 : 1.35;
 
       host.innerHTML = "";
       const card = document.createElement("div");
