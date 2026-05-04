@@ -160,10 +160,10 @@ export async function downloadOrderLabelsPdf(
         border: 1px solid #000;
       `;
       card.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:flex-start;gap:6px;background:#000;color:#fff;padding:6px 7px;min-height:26px;box-sizing:border-box;border-bottom:1px solid #000;">
-          <span style="display:inline-flex;align-items:center;justify-content:center;background:#fff;color:#000;padding:0 5px;height:16px;line-height:1;border-radius:2px;font-size:10px;font-weight:800;">№${i + 1}</span>
-          <span style="display:inline-flex;align-items:center;height:16px;line-height:1;font-family:'Courier New',monospace;font-weight:800;font-size:11px;letter-spacing:0.3px;flex:1;white-space:nowrap;">${escapeHtml(orderNo)}</span>
-          ${paid ? `<span style="display:inline-flex;align-items:center;justify-content:center;background:#fff;color:#000;padding:0 4px;height:14px;line-height:1;border-radius:2px;font-size:8px;font-weight:800;letter-spacing:0.3px;">ТӨЛСӨН</span>` : ""}
+        <div style="display:flex;align-items:center;justify-content:flex-start;gap:6px;background:#000;color:#fff;padding:7px 7px;min-height:30px;box-sizing:border-box;border-bottom:1px solid #000;">
+          <span style="display:inline-flex;align-items:center;justify-content:center;background:#fff;color:#000;padding:3px 5px 4px;border-radius:2px;font-size:9px;font-weight:800;line-height:1;">№${i + 1}</span>
+          <span style="display:inline-flex;align-items:center;font-family:'Courier New',monospace;font-weight:800;font-size:11px;letter-spacing:0.3px;flex:1;white-space:nowrap;line-height:1;padding:2px 0;">${escapeHtml(orderNo)}</span>
+          ${paid ? `<span style="display:inline-flex;align-items:center;justify-content:center;background:#fff;color:#000;padding:3px 4px 4px;border-radius:2px;font-size:8px;font-weight:800;letter-spacing:0.3px;line-height:1;">ТӨЛСӨН</span>` : ""}
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#000;font-weight:600;padding:3px 6px;border-bottom:1px solid #000;">
           <span>${escapeHtml(dateStr)}</span>
