@@ -44,9 +44,14 @@ const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "b
 
 const AdminPage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isAdmin, isModerator, loading: authLoading, authError } = useAuth();
   const hasAdminAccess = isAdmin || isModerator;
-  const [tab, setTab] = useState<Tab>("stats");
+  const [tab, setTab] = useState<Tab>(() => {
+    const t = searchParams.get("tab") as Tab | null;
+    const valid: Tab[] = ["stats","products","orders","users","categories","brands","delivery","payments","banner","collections","chatbot","analytics","diagnostics","settings"];
+    return t && valid.includes(t) ? t : "stats";
+  });
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
