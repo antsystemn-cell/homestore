@@ -1,6 +1,7 @@
 import jsPDF from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
 
+import { registerDejaVuFont } from "./pdfFonts";
 export interface OrderItemLite {
   name?: string;
   quantity?: number;
@@ -68,7 +69,8 @@ export async function downloadOrderLabelsPdf(
   const MARGIN = 2;
   const CONTENT_W = PAGE_W - MARGIN * 2;
 
-  const pdf = new jsPDF({ unit: "mm", format: [PAGE_W, PAGE_H], orientation: "portrait" });
+  const pdf = new jsPDF({ unit: "mm", format: [PAGE_W, PAGE_H], orientation: "portrait", putOnlyUsedFonts: true });
+  await registerDejaVuFont(pdf);
   pdf.setTextColor(0, 0, 0);
   pdf.setDrawColor(0, 0, 0);
 
@@ -94,7 +96,7 @@ export async function downloadOrderLabelsPdf(
     let y = MARGIN;
 
     // 1. HEADER — order number (left) and label number (right)
-    pdf.setFont("helvetica", "bold");
+    pdf.setFont("DejaVuSans", "bold");
     pdf.setFontSize(11);
     pdf.text(orderNo, MARGIN, y + 4);
     const labelNo = `№${i + 1}`;
@@ -107,24 +109,24 @@ export async function downloadOrderLabelsPdf(
     y += 3;
 
     // 2. PHONE
-    pdf.setFont("helvetica", "normal");
+    pdf.setFont("DejaVuSans", "normal");
     pdf.setFontSize(7);
     pdf.setTextColor(110, 110, 110);
     pdf.text("УТАС", MARGIN, y + 2.5);
     y += 3.5;
-    pdf.setFont("helvetica", "bold");
+    pdf.setFont("DejaVuSans", "bold");
     pdf.setFontSize(15);
     pdf.setTextColor(0, 0, 0);
     pdf.text(phone, MARGIN, y + 5);
     y += 8;
 
     // 3. ADDRESS
-    pdf.setFont("helvetica", "normal");
+    pdf.setFont("DejaVuSans", "normal");
     pdf.setFontSize(7);
     pdf.setTextColor(110, 110, 110);
     pdf.text("ХАЯГ", MARGIN, y + 2.5);
     y += 3.5;
-    pdf.setFont("helvetica", "normal");
+    pdf.setFont("DejaVuSans", "normal");
     pdf.setTextColor(0, 0, 0);
 
     // Decide product space first so address can flex
@@ -166,13 +168,13 @@ export async function downloadOrderLabelsPdf(
     let productY = productBottomLimit - PRODUCT_RESERVE + 2;
     if (productY < y + 2) productY = y + 2;
 
-    pdf.setFont("helvetica", "normal");
+    pdf.setFont("DejaVuSans", "normal");
     pdf.setFontSize(7);
     pdf.setTextColor(110, 110, 110);
     pdf.text("БАРАА", MARGIN, productY + 2.5);
     productY += 3.5;
 
-    pdf.setFont("helvetica", "bold");
+    pdf.setFont("DejaVuSans", "bold");
     pdf.setTextColor(0, 0, 0);
     let prodFs = 10;
     let prodLines: string[] = [];
