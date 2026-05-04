@@ -73,7 +73,7 @@ export async function downloadOrderLabelsPdf(
   let fontFamily = "helvetica";
   try {
     await registerDejaVuFont(pdf);
-    fontFamily = fontFamily;
+    fontFamily = "DejaVuSans";
   } catch (e) {
     console.error("[orderLabelsPdf] DejaVu font load failed, falling back to helvetica", e);
   }
