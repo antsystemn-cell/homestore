@@ -123,23 +123,25 @@ export async function downloadOrderLabelsPdf(
       const payLbl = paymentLabel(o);
       const qrUrl = !paid && o.id ? qrMap.get(o.id) || null : null;
 
-      const itemsArr: OrderItemLite[] = Array.isArray(o.items) ? (o.items as OrderItemLite[]) : [];
+      const itemsArr: OrderItemLite[] = (Array.isArray(o.items) ? (o.items as OrderItemLite[]) : []).filter((it) => it && it.name);
+      const itemCount = itemsArr.length;
+      // Dynamic item font: fewer items = larger
+      const itemFs = itemCount <= 1 ? 13 : itemCount === 2 ? 12 : itemCount === 3 ? 11 : itemCount <= 5 ? 10 : 9;
+      const itemLh = itemFs >= 12 ? 1.35 : 1.3;
       const itemsHtml = itemsArr
-        .filter((it) => it && it.name)
         .map((it) => {
           const variant = [it.color, it.size].filter(Boolean).join("/");
           const sku = it.product_code || it.sku || "";
           const meta = [variant, sku].filter(Boolean).join(" · ");
-          const m = meta ? ` <span style="color:#000;">(${escapeHtml(meta)})</span>` : "";
-          return `<div class="lbl-item" style="font-size:10px;line-height:1.3;margin-bottom:1px;color:#000;">• ${escapeHtml(String(it.name))}${m} × ${it.quantity ?? 1}</div>`;
+          const m = meta ? ` <span style="color:#000;font-weight:500;">(${escapeHtml(meta)})</span>` : "";
+          return `<div class="lbl-item" style="font-size:${itemFs}px;line-height:${itemLh};margin-bottom:2px;color:#000;font-weight:600;">• ${escapeHtml(String(it.name))}${m} × ${it.quantity ?? 1}</div>`;
         })
         .join("");
 
-      // Combine phone+address with dynamic font sizing
-      const combined = [phone, addr].filter(Boolean).join(" • ");
-      const len = combined.length;
-      const fs = len > 110 ? 8 : len > 80 ? 9 : len > 50 ? 10 : 11;
-      const lh = fs <= 9 ? 1.25 : 1.35;
+      // Address dynamic sizing — bigger by default
+      const addrLen = addr.length;
+      const addrFs = addrLen > 120 ? 11 : addrLen > 80 ? 12 : addrLen > 50 ? 13 : 14;
+      const addrLh = addrFs <= 11 ? 1.3 : 1.35;
 
       host.innerHTML = "";
       const card = document.createElement("div");
@@ -163,17 +165,18 @@ export async function downloadOrderLabelsPdf(
           <span style="display:inline-flex;align-items:center;height:16px;line-height:1;font-family:'Courier New',monospace;font-weight:800;font-size:11px;letter-spacing:0.3px;flex:1;white-space:nowrap;">${escapeHtml(orderNo)}</span>
           ${paid ? `<span style="display:inline-flex;align-items:center;justify-content:center;background:#fff;color:#000;padding:0 4px;height:14px;line-height:1;border-radius:2px;font-size:8px;font-weight:800;letter-spacing:0.3px;">ТӨЛСӨН</span>` : ""}
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;font-size:9px;color:#000;font-weight:600;padding:3px 6px;border-bottom:1px solid #000;">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#000;font-weight:600;padding:3px 6px;border-bottom:1px solid #000;">
           <span>${escapeHtml(dateStr)}</span>
-          ${!paid && totalNum > 0 ? `<span style="font-weight:800;color:#000;font-size:10px;">${escapeHtml(mnt(totalNum))}</span>` : ""}
+          ${!paid && totalNum > 0 ? `<span style="font-weight:800;color:#000;font-size:11px;">${escapeHtml(mnt(totalNum))}</span>` : ""}
         </div>
-        ${name ? `<div style="font-size:11px;font-weight:700;padding:3px 6px 1px;">${escapeHtml(name)}</div>` : ""}
-        ${combined ? `<div class="lbl-addr" style="font-size:${fs}px;font-weight:600;line-height:${lh};word-break:break-word;overflow-wrap:anywhere;padding:0 6px 3px;border-bottom:1px solid #000;">${escapeHtml(combined)}</div>` : `<div style="border-bottom:1px solid #000;"></div>`}
-        <div class="lbl-items" style="padding:3px 6px;flex:1 1 auto;min-height:0;overflow:hidden;${qrUrl ? `padding-right:${60 + 8}px;` : ""}">
+        ${name ? `<div style="font-size:13px;font-weight:800;padding:3px 6px 1px;line-height:1.25;">${escapeHtml(name)}</div>` : ""}
+        ${phone ? `<div class="lbl-phone" style="font-size:15px;font-weight:900;padding:1px 6px 2px;line-height:1.2;font-family:'Courier New',monospace;letter-spacing:0.5px;">${escapeHtml(phone)}</div>` : ""}
+        ${addr ? `<div class="lbl-addr" style="font-size:${addrFs}px;font-weight:600;line-height:${addrLh};word-break:break-word;overflow-wrap:anywhere;padding:0 6px 3px;border-bottom:1px solid #000;">${escapeHtml(addr)}</div>` : `<div style="border-bottom:1px solid #000;"></div>`}
+        <div class="lbl-items" style="padding:3px 6px;flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column;${qrUrl ? `padding-right:${60 + 8}px;` : ""}">
           <div style="font-size:8px;font-weight:700;color:#000;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:2px;">Бараа</div>
-          ${itemsHtml || '<div class="lbl-item" style="font-size:10px;color:#000;">—</div>'}
+          ${itemsHtml || `<div class="lbl-item" style="font-size:${itemFs}px;color:#000;">—</div>`}
         </div>
-        <div class="lbl-footer" style="display:flex;justify-content:space-between;align-items:center;font-size:9px;font-weight:800;color:#000;border-top:1px solid #000;padding:3px 6px;${qrUrl ? `padding-right:${60 + 8}px;` : ""}">
+        <div class="lbl-footer" style="display:flex;justify-content:space-between;align-items:center;font-size:10px;font-weight:800;color:#000;border-top:1px solid #000;padding:3px 6px;${qrUrl ? `padding-right:${60 + 8}px;` : ""}">
           <span>${escapeHtml(payLbl)}</span>
         </div>
         ${qrUrl ? `<div style="position:absolute;right:4px;bottom:4px;background:#fff;padding:2px;border:1px solid #000;text-align:center;line-height:1;">
@@ -221,6 +224,26 @@ export async function downloadOrderLabelsPdf(
               if (cur > 6.5) el.style.fontSize = `${cur - 0.5}px`;
             });
           }
+        }
+      }
+
+      // Generic shrink pass: if any element overflows the card, shrink item fonts
+      {
+        const itemsBox = card.querySelector<HTMLDivElement>(".lbl-items");
+        const overflows = (): boolean => {
+          const cardRect = card.getBoundingClientRect();
+          return Array.from(card.querySelectorAll<HTMLElement>("*")).some((el) => {
+            const r = el.getBoundingClientRect();
+            return r.right > cardRect.right + 0.5 || r.bottom > cardRect.bottom + 0.5;
+          });
+        };
+        let g = 0;
+        while (overflows() && g < 20) {
+          g++;
+          itemsBox?.querySelectorAll<HTMLElement>(".lbl-item").forEach((el) => {
+            const cur = parseFloat(getComputedStyle(el).fontSize) || 9;
+            if (cur > 6.5) el.style.fontSize = `${cur - 0.5}px`;
+          });
         }
       }
 
