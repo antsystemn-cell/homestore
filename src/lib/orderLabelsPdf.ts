@@ -183,6 +183,47 @@ export async function downloadOrderLabelsPdf(
       `;
       host.appendChild(card);
 
+      // Auto-fit: shrink QR (and items font as fallback) until no overlap/overflow
+      if (qrUrl) {
+        const qrEl = card.querySelector<HTMLDivElement>('div[style*="position:absolute"]');
+        const itemsBox = card.children[card.children.length - 3] as HTMLDivElement | undefined;
+        const footerBox = card.children[card.children.length - 2] as HTMLDivElement | undefined;
+        let qrSize = 40;
+        const minQr = 24;
+        const fits = (): boolean => {
+          if (!qrEl || !itemsBox) return true;
+          const cardRect = card.getBoundingClientRect();
+          const qrRect = qrEl.getBoundingClientRect();
+          const overflow = Array.from(card.querySelectorAll<HTMLElement>("*")).some((el) => {
+            const r = el.getBoundingClientRect();
+            return r.right > cardRect.right + 0.5 || r.bottom > cardRect.bottom + 0.5;
+          });
+          if (overflow) return false;
+          const overlap = Array.from(itemsBox.querySelectorAll<HTMLElement>("div")).some((el) => {
+            const r = el.getBoundingClientRect();
+            return !(r.right <= qrRect.left || r.left >= qrRect.right || r.bottom <= qrRect.top || r.top >= qrRect.bottom);
+          });
+          return !overlap;
+        };
+        let guard = 0;
+        while (!fits() && guard < 12) {
+          guard++;
+          if (qrSize > minQr) {
+            qrSize -= 2;
+            const img = qrEl?.querySelector("img") as HTMLImageElement | null;
+            if (img) { img.style.width = `${qrSize}px`; img.style.height = `${qrSize}px`; }
+            const pad = `${qrSize + 6}px`;
+            if (itemsBox) itemsBox.style.paddingRight = pad;
+            if (footerBox) footerBox.style.paddingRight = pad;
+          } else {
+            itemsBox?.querySelectorAll<HTMLElement>("div").forEach((el) => {
+              const cur = parseFloat(getComputedStyle(el).fontSize) || 8.5;
+              if (cur > 6.5) el.style.fontSize = `${cur - 0.5}px`;
+            });
+          }
+        }
+      }
+
       const canvas = await html2canvas(card, {
         backgroundColor: "#ffffff",
         scale: 3,
