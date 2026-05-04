@@ -123,23 +123,25 @@ export async function downloadOrderLabelsPdf(
       const payLbl = paymentLabel(o);
       const qrUrl = !paid && o.id ? qrMap.get(o.id) || null : null;
 
-      const itemsArr: OrderItemLite[] = Array.isArray(o.items) ? (o.items as OrderItemLite[]) : [];
+      const itemsArr: OrderItemLite[] = (Array.isArray(o.items) ? (o.items as OrderItemLite[]) : []).filter((it) => it && it.name);
+      const itemCount = itemsArr.length;
+      // Dynamic item font: fewer items = larger
+      const itemFs = itemCount <= 1 ? 13 : itemCount === 2 ? 12 : itemCount === 3 ? 11 : itemCount <= 5 ? 10 : 9;
+      const itemLh = itemFs >= 12 ? 1.35 : 1.3;
       const itemsHtml = itemsArr
-        .filter((it) => it && it.name)
         .map((it) => {
           const variant = [it.color, it.size].filter(Boolean).join("/");
           const sku = it.product_code || it.sku || "";
           const meta = [variant, sku].filter(Boolean).join(" · ");
-          const m = meta ? ` <span style="color:#000;">(${escapeHtml(meta)})</span>` : "";
-          return `<div class="lbl-item" style="font-size:10px;line-height:1.3;margin-bottom:1px;color:#000;">• ${escapeHtml(String(it.name))}${m} × ${it.quantity ?? 1}</div>`;
+          const m = meta ? ` <span style="color:#000;font-weight:500;">(${escapeHtml(meta)})</span>` : "";
+          return `<div class="lbl-item" style="font-size:${itemFs}px;line-height:${itemLh};margin-bottom:2px;color:#000;font-weight:600;">• ${escapeHtml(String(it.name))}${m} × ${it.quantity ?? 1}</div>`;
         })
         .join("");
 
-      // Combine phone+address with dynamic font sizing
-      const combined = [phone, addr].filter(Boolean).join(" • ");
-      const len = combined.length;
-      const fs = len > 110 ? 8 : len > 80 ? 9 : len > 50 ? 10 : 11;
-      const lh = fs <= 9 ? 1.25 : 1.35;
+      // Address dynamic sizing — bigger by default
+      const addrLen = addr.length;
+      const addrFs = addrLen > 120 ? 11 : addrLen > 80 ? 12 : addrLen > 50 ? 13 : 14;
+      const addrLh = addrFs <= 11 ? 1.3 : 1.35;
 
       host.innerHTML = "";
       const card = document.createElement("div");
