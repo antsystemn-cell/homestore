@@ -158,10 +158,10 @@ export async function downloadOrderLabelsPdf(
         position: relative;
       `;
       card.innerHTML = `
-        <div style="display:flex;align-items:center;gap:5px;background:#000;color:#fff;padding:3px 6px;border-radius:3px;">
-          <span style="background:#fff;color:#000;padding:0 5px;border-radius:2px;font-size:10px;font-weight:800;">№${i + 1}</span>
-          <span style="font-family:'Courier New',monospace;font-weight:800;font-size:12px;letter-spacing:0.3px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(orderNo)}</span>
-          ${paid ? `<span style="background:#16a34a;color:#fff;padding:1px 4px;border-radius:2px;font-size:8px;font-weight:800;letter-spacing:0.3px;">ТӨЛСӨН</span>` : ""}
+        <div style="display:flex;align-items:center;gap:5px;background:#000;color:#fff;padding:5px 6px;border-radius:3px;line-height:1.3;">
+          <span style="background:#fff;color:#000;padding:1px 5px;border-radius:2px;font-size:10px;font-weight:800;line-height:1.2;">№${i + 1}</span>
+          <span style="font-family:'Courier New',monospace;font-weight:800;font-size:11px;letter-spacing:0.3px;flex:1;white-space:nowrap;line-height:1.3;">${escapeHtml(orderNo)}</span>
+          ${paid ? `<span style="background:#16a34a;color:#fff;padding:2px 4px;border-radius:2px;font-size:8px;font-weight:800;letter-spacing:0.3px;line-height:1.2;">ТӨЛСӨН</span>` : ""}
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;font-size:9px;color:#444;font-weight:600;">
           <span>${escapeHtml(dateStr)}</span>
