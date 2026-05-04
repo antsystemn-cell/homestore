@@ -124,24 +124,17 @@ export async function downloadOrderLabelsPdf(
       const qrUrl = !paid && o.id ? qrMap.get(o.id) || null : null;
 
       const itemsArr: OrderItemLite[] = (Array.isArray(o.items) ? (o.items as OrderItemLite[]) : []).filter((it) => it && it.name);
-      const itemCount = itemsArr.length;
-      // Dynamic item font: fewer items = larger
-      const itemFs = itemCount <= 1 ? 13 : itemCount === 2 ? 12 : itemCount === 3 ? 11 : itemCount <= 5 ? 10 : 9;
-      const itemLh = itemFs >= 12 ? 1.35 : 1.3;
+      // Uniform font size across the whole label
+      const BASE_FS = 12;
       const itemsHtml = itemsArr
         .map((it) => {
           const variant = [it.color, it.size].filter(Boolean).join("/");
           const sku = it.product_code || it.sku || "";
           const meta = [variant, sku].filter(Boolean).join(" · ");
-          const m = meta ? ` <span style="color:#000;font-weight:500;">(${escapeHtml(meta)})</span>` : "";
-          return `<div class="lbl-item" style="font-size:${itemFs}px;line-height:${itemLh};margin-bottom:2px;color:#000;font-weight:600;">• ${escapeHtml(String(it.name))}${m} × ${it.quantity ?? 1}</div>`;
+          const m = meta ? ` <span style="font-weight:500;">(${escapeHtml(meta)})</span>` : "";
+          return `<div class="lbl-item" style="font-size:${BASE_FS}px;line-height:1.3;margin-bottom:2px;color:#000;font-weight:600;">• ${escapeHtml(String(it.name))}${m} × ${it.quantity ?? 1}</div>`;
         })
         .join("");
-
-      // Address dynamic sizing — bigger by default
-      const addrLen = addr.length;
-      const addrFs = addrLen > 120 ? 11 : addrLen > 80 ? 12 : addrLen > 50 ? 13 : 14;
-      const addrLh = addrFs <= 11 ? 1.3 : 1.35;
 
       host.innerHTML = "";
       const card = document.createElement("div");
@@ -160,28 +153,22 @@ export async function downloadOrderLabelsPdf(
         border: 1px solid #000;
       `;
       card.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:flex-start;gap:6px;background:#000;color:#fff;padding:7px 7px;min-height:30px;box-sizing:border-box;border-bottom:1px solid #000;">
-          <span style="display:inline-flex;align-items:center;justify-content:center;background:#fff;color:#000;padding:3px 5px 4px;border-radius:2px;font-size:9px;font-weight:800;line-height:1;">№${i + 1}</span>
-          <span style="display:inline-flex;align-items:center;font-family:'Courier New',monospace;font-weight:800;font-size:11px;letter-spacing:0.3px;flex:1;white-space:nowrap;line-height:1;padding:2px 0;">${escapeHtml(orderNo)}</span>
-          ${paid ? `<span style="display:inline-flex;align-items:center;justify-content:center;background:#fff;color:#000;padding:3px 4px 4px;border-radius:2px;font-size:8px;font-weight:800;letter-spacing:0.3px;line-height:1;">ТӨЛСӨН</span>` : ""}
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 8px;border-bottom:1px solid #000;font-size:${BASE_FS}px;">
+          <span style="font-family:'Courier New',monospace;font-weight:800;font-size:${BASE_FS + 2}px;line-height:1.1;">${escapeHtml(orderNo)}</span>
+          <span style="font-weight:600;font-size:${BASE_FS - 1}px;line-height:1.1;">№${i + 1}</span>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#000;font-weight:600;padding:3px 6px;border-bottom:1px solid #000;">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:${BASE_FS}px;color:#000;font-weight:600;padding:4px 8px;border-bottom:1px solid #000;line-height:1.2;">
           <span>${escapeHtml(dateStr)}</span>
-          ${!paid && totalNum > 0 ? `<span style="font-weight:800;color:#000;font-size:11px;">${escapeHtml(mnt(totalNum))}</span>` : ""}
+          ${totalNum > 0 ? `<span style="font-weight:800;">${escapeHtml(mnt(totalNum))}</span>` : ""}
         </div>
-        ${name ? `<div style="font-size:13px;font-weight:800;padding:3px 6px 1px;line-height:1.25;">${escapeHtml(name)}</div>` : ""}
-        ${phone ? `<div class="lbl-phone" style="font-size:15px;font-weight:900;padding:1px 6px 2px;line-height:1.2;font-family:'Courier New',monospace;letter-spacing:0.5px;">${escapeHtml(phone)}</div>` : ""}
-        ${addr ? `<div class="lbl-addr" style="font-size:${addrFs}px;font-weight:600;line-height:${addrLh};word-break:break-word;overflow-wrap:anywhere;padding:0 6px 3px;border-bottom:1px solid #000;">${escapeHtml(addr)}</div>` : `<div style="border-bottom:1px solid #000;"></div>`}
-        <div class="lbl-items" style="padding:3px 6px;flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column;${qrUrl ? `padding-right:${60 + 8}px;` : ""}">
-          <div style="font-size:8px;font-weight:700;color:#000;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:2px;">Бараа</div>
-          ${itemsHtml || `<div class="lbl-item" style="font-size:${itemFs}px;color:#000;">—</div>`}
+        ${name ? `<div style="font-size:${BASE_FS + 1}px;font-weight:800;padding:4px 8px 1px;line-height:1.25;">${escapeHtml(name)}</div>` : ""}
+        ${phone ? `<div style="font-size:${BASE_FS + 2}px;font-weight:900;padding:1px 8px 3px;line-height:1.2;font-family:'Courier New',monospace;letter-spacing:0.5px;">${escapeHtml(phone)}</div>` : ""}
+        ${addr ? `<div class="lbl-addr" style="font-size:${BASE_FS}px;font-weight:600;line-height:1.3;word-break:break-word;overflow-wrap:anywhere;padding:0 8px 4px;border-bottom:1px solid #000;">${escapeHtml(addr)}</div>` : `<div style="border-bottom:1px solid #000;"></div>`}
+        <div class="lbl-items" style="padding:4px 8px;flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column;${qrUrl ? `padding-right:${72 + 8}px;` : ""}">
+          ${itemsHtml || `<div class="lbl-item" style="font-size:${BASE_FS}px;color:#000;">—</div>`}
         </div>
-        <div class="lbl-footer" style="display:flex;justify-content:space-between;align-items:center;font-size:10px;font-weight:800;color:#000;border-top:1px solid #000;padding:3px 6px;${qrUrl ? `padding-right:${60 + 8}px;` : ""}">
-          <span>${escapeHtml(payLbl)}</span>
-        </div>
-        ${qrUrl ? `<div style="position:absolute;right:4px;bottom:4px;background:#fff;padding:2px;border:1px solid #000;text-align:center;line-height:1;">
-          <img src="${qrUrl}" alt="QR" style="display:block;width:60px;height:60px;image-rendering:pixelated;filter:grayscale(100%) contrast(1.2);"/>
-          <div style="font-size:6px;font-weight:700;margin-top:1px;color:#000;">QPay</div>
+        ${qrUrl ? `<div style="position:absolute;right:5px;bottom:5px;background:#fff;padding:2px;border:1px solid #000;line-height:0;">
+          <img src="${qrUrl}" alt="QR" style="display:block;width:72px;height:72px;image-rendering:pixelated;filter:grayscale(100%) contrast(1.2);"/>
         </div>` : ""}
       `;
       host.appendChild(card);
@@ -189,10 +176,9 @@ export async function downloadOrderLabelsPdf(
       // Auto-fit: shrink QR (and items font as fallback) until no overlap/overflow
       if (qrUrl) {
         const qrEl = card.querySelector<HTMLDivElement>('div[style*="position:absolute"]');
-        const itemsBox = card.children[card.children.length - 3] as HTMLDivElement | undefined;
-        const footerBox = card.children[card.children.length - 2] as HTMLDivElement | undefined;
-        let qrSize = 60;
-        const minQr = 36;
+        const itemsBox = card.querySelector<HTMLDivElement>(".lbl-items");
+        let qrSize = 72;
+        const minQr = 44;
         const fits = (): boolean => {
           if (!qrEl || !itemsBox) return true;
           const cardRect = card.getBoundingClientRect();
@@ -209,19 +195,17 @@ export async function downloadOrderLabelsPdf(
           return !overlap;
         };
         let guard = 0;
-        while (!fits() && guard < 12) {
+        while (!fits() && guard < 14) {
           guard++;
           if (qrSize > minQr) {
             qrSize -= 2;
             const img = qrEl?.querySelector("img") as HTMLImageElement | null;
             if (img) { img.style.width = `${qrSize}px`; img.style.height = `${qrSize}px`; }
-            const pad = `${qrSize + 6}px`;
-            if (itemsBox) itemsBox.style.paddingRight = pad;
-            if (footerBox) footerBox.style.paddingRight = pad;
+            if (itemsBox) itemsBox.style.paddingRight = `${qrSize + 8}px`;
           } else {
             itemsBox?.querySelectorAll<HTMLElement>("div").forEach((el) => {
-              const cur = parseFloat(getComputedStyle(el).fontSize) || 8.5;
-              if (cur > 6.5) el.style.fontSize = `${cur - 0.5}px`;
+              const cur = parseFloat(getComputedStyle(el).fontSize) || 10;
+              if (cur > 7) el.style.fontSize = `${cur - 0.5}px`;
             });
           }
         }
