@@ -2451,10 +2451,18 @@ const AdminPage = () => {
                                 className="p-2 rounded-lg hover:bg-secondary transition-colors" title="Харах">
                                 <Eye className="h-3.5 w-3.5 text-muted-foreground" />
                               </button>
-                              <button onClick={() => handleEditProduct(p)}
-                                className="p-2 rounded-lg hover:bg-secondary transition-colors" title="Засах">
+                              <a
+                                href={`/admin?tab=products&edit=${p.id}`}
+                                onClick={(e) => {
+                                  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+                                  e.preventDefault();
+                                  setSearchParams({ tab: "products", edit: p.id });
+                                  handleEditProduct(p);
+                                  window.scrollTo({ top: 0, behavior: "smooth" });
+                                }}
+                                className="p-2 rounded-lg hover:bg-secondary transition-colors inline-flex" title="Засах">
                                 <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-                              </button>
+                              </a>
                               <button onClick={() => handleDuplicateProduct(p)}
                                 className="p-2 rounded-lg hover:bg-secondary transition-colors" title="Хуулбарлах">
                                 <Copy className="h-3.5 w-3.5 text-muted-foreground" />
