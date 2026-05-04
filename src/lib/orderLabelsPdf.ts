@@ -1,24 +1,5 @@
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import { supabase } from "@/integrations/supabase/client";
-
-function formatUlaanbaatarDate(iso: string): string {
-  try {
-    const parts = new Intl.DateTimeFormat("en-GB", {
-      timeZone: "Asia/Ulaanbaatar",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    }).formatToParts(new Date(iso));
-    const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
-    return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}`;
-  } catch {
-    return "";
-  }
-}
 
 export interface OrderItemLite {
   name?: string;
@@ -43,8 +24,6 @@ export interface OrderForLabel {
   payment_status?: string | null;
 }
 
-const mnt = (n: number) => `${(n ?? 0).toLocaleString("mn-MN")}₮`;
-
 function isPaid(o: OrderForLabel): boolean {
   const status = (o.payment_status || "").toLowerCase();
   return status === "confirmed" || status === "paid";
@@ -53,15 +32,6 @@ function isPaid(o: OrderForLabel): boolean {
 function isCashLike(o: OrderForLabel): boolean {
   const m = (o.payment_method || "cash").toLowerCase();
   return m === "cash" || m === "cod" || m === "" || m === "qpay";
-}
-
-function paymentLabel(o: OrderForLabel): string {
-  const method = (o.payment_method || "cash").toLowerCase();
-  const map: Record<string, string> = {
-    cash: "Бэлэн", cod: "Бэлэн", qpay: "QPay", storepay: "Storepay", pocket: "Pocket",
-  };
-  const m = map[method] || method.toUpperCase();
-  return isPaid(o) ? `Төлсөн (${m})` : `Төлөөгүй (${m})`;
 }
 
 async function fetchQpayQr(orderId: string): Promise<string | null> {
@@ -78,10 +48,8 @@ async function fetchQpayQr(orderId: string): Promise<string | null> {
 }
 
 /**
- * Generate a PDF where each order occupies one 70x80mm portrait page.
- * Mirrors the printOrdersTable design (header bar, payment status, items list).
- * - Hides amount/price for paid orders
- * - Embeds a small QPay QR in the corner for unpaid cash-like orders
+ * 70x80mm thermal label, vector PDF (jsPDF native draw — not rasterized).
+ * Clean, minimal, black-only on pure white background.
  */
 export async function downloadOrderLabelsPdf(
   orders: OrderForLabel[],
@@ -89,7 +57,6 @@ export async function downloadOrderLabelsPdf(
 ) {
   if (!orders.length) return;
 
-  // Pre-fetch QR codes in parallel for unpaid orders
   const needsQr = orders.filter((o) => !isPaid(o) && isCashLike(o) && o.id);
   const qrEntries = await Promise.all(
     needsQr.map(async (o) => [o.id, await fetchQpayQr(o.id)] as const)
@@ -98,166 +65,144 @@ export async function downloadOrderLabelsPdf(
 
   const PAGE_W = 70;
   const PAGE_H = 80;
+  const MARGIN = 2;
+  const CONTENT_W = PAGE_W - MARGIN * 2;
+
   const pdf = new jsPDF({ unit: "mm", format: [PAGE_W, PAGE_H], orientation: "portrait" });
+  pdf.setTextColor(0, 0, 0);
+  pdf.setDrawColor(0, 0, 0);
 
-  const host = document.createElement("div");
-  host.style.position = "fixed";
-  host.style.left = "-10000px";
-  host.style.top = "0";
-  document.body.appendChild(host);
+  // pt -> mm helper (jsPDF "pt" font sizes scale — we'll treat numbers as pt)
+  for (let i = 0; i < orders.length; i++) {
+    const o = orders[i];
+    if (i > 0) pdf.addPage([PAGE_W, PAGE_H], "portrait");
 
-  try {
-    const PX_PER_MM = 3.78;
-    const wPx = Math.round(PAGE_W * PX_PER_MM);
-    const hPx = Math.round(PAGE_H * PX_PER_MM);
+    const orderNo = o.order_ref || `#${o.id.slice(0, 8).toUpperCase()}`;
+    const phone = (o.phone || "—").trim();
+    const addr = (o.shipping_address || "—").trim();
+    const paid = isPaid(o);
+    const qrUrl = !paid && o.id ? qrMap.get(o.id) || null : null;
 
-    for (let i = 0; i < orders.length; i++) {
-      const o = orders[i];
-      const orderNo = o.order_ref || `#${o.id.slice(0, 8).toUpperCase()}`;
-      const name = (o.guest_name || "").trim();
-      const phone = (o.phone || "").trim();
-      const addr = (o.shipping_address || "").trim();
-      const dateStr = o.created_at ? formatUlaanbaatarDate(o.created_at) : "";
-      const paid = isPaid(o);
-      const totalNum = Number(o.total) || 0;
-      const payLbl = paymentLabel(o);
-      const qrUrl = !paid && o.id ? qrMap.get(o.id) || null : null;
+    const itemsArr: OrderItemLite[] = (Array.isArray(o.items) ? (o.items as OrderItemLite[]) : []).filter((it) => it && it.name);
+    const itemsText = itemsArr
+      .map((it) => {
+        const variant = [it.color, it.size].filter(Boolean).join(" ");
+        return `${it.name}${variant ? ` - ${variant}` : ""} x${it.quantity ?? 1}`;
+      })
+      .join(" | ") || "—";
 
-      const itemsArr: OrderItemLite[] = (Array.isArray(o.items) ? (o.items as OrderItemLite[]) : []).filter((it) => it && it.name);
-      const BASE_FS = 11;
-      const itemsText = itemsArr
-        .map((it) => `${String(it.name)} x${it.quantity ?? 1}`)
-        .join(" | ");
+    let y = MARGIN;
 
-      // Table row helpers
-      const labelRow = (label: string) => `
-        <div style="display:flex;align-items:center;justify-content:flex-start;height:16px;padding:0 6px;font-size:${BASE_FS - 2}px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#000;border-top:1px solid #000;border-bottom:1px solid #000;background:#f0f0f0;line-height:1;">${escapeHtml(label)}</div>`;
-      const valueRow = (html: string, extra = "") => `
-        <div style="padding:4px 6px;border-bottom:1px solid #000;line-height:1.3;${extra}">${html}</div>`;
+    // 1. HEADER — order number (left) and label number (right)
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(11);
+    pdf.text(orderNo, MARGIN, y + 4);
+    const labelNo = `№${i + 1}`;
+    const labelNoW = pdf.getTextWidth(labelNo);
+    pdf.text(labelNo, PAGE_W - MARGIN - labelNoW, y + 4);
+    y += 6;
+    // separator
+    pdf.setLineWidth(0.2);
+    pdf.line(MARGIN, y, PAGE_W - MARGIN, y);
+    y += 3;
 
-      host.innerHTML = "";
-      const card = document.createElement("div");
-      card.style.cssText = `
-        width: ${wPx}px;
-        height: ${hPx}px;
-        background: #ffffff;
-        color: #000000;
-        font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
-        display: flex;
-        flex-direction: column;
-        padding: 0;
-        box-sizing: border-box;
-        overflow: hidden;
-        position: relative;
-        border: 1px solid #000;
-      `;
-      const headerRow = `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 6px;border-bottom:1px solid #000;line-height:1.2;">
-          <span style="font-family:'Courier New',monospace;font-weight:800;font-size:${BASE_FS + 1}px;">${escapeHtml(orderNo)}</span>
-          <span style="font-size:${BASE_FS - 2}px;font-weight:700;">№${i + 1}</span>
-        </div>`;
-      const totalRow = (!paid && totalNum > 0)
-        ? `<div style="padding:3px 6px;border-bottom:1px solid #000;display:flex;justify-content:space-between;align-items:center;font-size:${BASE_FS}px;font-weight:800;line-height:1.2;"><span>НИЙТ</span><span style="font-family:'Courier New',monospace;">${escapeHtml(mnt(totalNum))}</span></div>`
-        : "";
-      card.innerHTML = `
-        ${headerRow}
-        ${name ? valueRow(`<span style="font-size:${BASE_FS + 1}px;font-weight:800;">${escapeHtml(name)}</span>`) : ""}
-        ${labelRow("Утас")}
-        ${valueRow(`<span style="font-family:'Courier New',monospace;font-weight:900;font-size:${BASE_FS + 3}px;letter-spacing:0.5px;">${escapeHtml(phone || "—")}</span>`)}
-        ${labelRow("Хаяг")}
-        ${valueRow(`<span class="lbl-addr" style="font-size:${BASE_FS}px;font-weight:600;word-break:break-word;overflow-wrap:anywhere;">${escapeHtml(addr || "—")}</span>`)}
-        ${labelRow("Бараа")}
-        <div class="lbl-items" style="padding:4px 6px;flex:1 1 auto;min-height:0;overflow:hidden;${qrUrl ? `padding-right:${108}px;padding-bottom:${108}px;` : ""}">
-          <span class="lbl-item" style="font-size:${BASE_FS}px;font-weight:600;line-height:1.35;word-break:break-word;">${escapeHtml(itemsText || "—")}</span>
-        </div>
-        ${totalRow}
-        ${qrUrl ? `<div style="position:absolute;right:4px;bottom:4px;background:#fff;padding:2px;border:1px solid #000;line-height:0;">
-          <img src="${qrUrl}" alt="QR" style="display:block;width:100px;height:100px;image-rendering:pixelated;filter:grayscale(100%) contrast(1.2);"/>
-        </div>` : ""}
-      `;
-      host.appendChild(card);
+    // 2. PHONE
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(7);
+    pdf.setTextColor(110, 110, 110);
+    pdf.text("УТАС", MARGIN, y + 2.5);
+    y += 3.5;
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(15);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text(phone, MARGIN, y + 5);
+    y += 8;
 
-      // Auto-fit: shrink QR (and items font as fallback) until no overlap/overflow
-      if (qrUrl) {
-        const qrEl = card.querySelector<HTMLDivElement>('div[style*="position:absolute"]');
-        const itemsBox = card.querySelector<HTMLDivElement>(".lbl-items");
-        let qrSize = 100;
-        const minQr = 60;
-        const fits = (): boolean => {
-          if (!qrEl || !itemsBox) return true;
-          const cardRect = card.getBoundingClientRect();
-          const qrRect = qrEl.getBoundingClientRect();
-          const overflow = Array.from(card.querySelectorAll<HTMLElement>("*")).some((el) => {
-            const r = el.getBoundingClientRect();
-            return r.right > cardRect.right + 0.5 || r.bottom > cardRect.bottom + 0.5;
-          });
-          if (overflow) return false;
-          const overlap = Array.from(itemsBox.querySelectorAll<HTMLElement>("div")).some((el) => {
-            const r = el.getBoundingClientRect();
-            return !(r.right <= qrRect.left || r.left >= qrRect.right || r.bottom <= qrRect.top || r.top >= qrRect.bottom);
-          });
-          return !overlap;
-        };
-        let guard = 0;
-        while (!fits() && guard < 14) {
-          guard++;
-          if (qrSize > minQr) {
-            qrSize -= 2;
-            const img = qrEl?.querySelector("img") as HTMLImageElement | null;
-            if (img) { img.style.width = `${qrSize}px`; img.style.height = `${qrSize}px`; }
-            if (itemsBox) itemsBox.style.paddingRight = `${qrSize + 8}px`;
-          } else {
-            itemsBox?.querySelectorAll<HTMLElement>("div").forEach((el) => {
-              const cur = parseFloat(getComputedStyle(el).fontSize) || 10;
-              if (cur > 7) el.style.fontSize = `${cur - 0.5}px`;
-            });
-          }
-        }
-      }
+    // 3. ADDRESS
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(7);
+    pdf.setTextColor(110, 110, 110);
+    pdf.text("ХАЯГ", MARGIN, y + 2.5);
+    y += 3.5;
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(0, 0, 0);
 
-      // Generic shrink pass: if any element overflows the card, shrink item fonts
-      {
-        const itemsBox = card.querySelector<HTMLDivElement>(".lbl-items");
-        const overflows = (): boolean => {
-          const cardRect = card.getBoundingClientRect();
-          return Array.from(card.querySelectorAll<HTMLElement>("*")).some((el) => {
-            const r = el.getBoundingClientRect();
-            return r.right > cardRect.right + 0.5 || r.bottom > cardRect.bottom + 0.5;
-          });
-        };
-        let g = 0;
-        while (overflows() && g < 20) {
-          g++;
-          itemsBox?.querySelectorAll<HTMLElement>(".lbl-item").forEach((el) => {
-            const cur = parseFloat(getComputedStyle(el).fontSize) || 9;
-            if (cur > 6.5) el.style.fontSize = `${cur - 0.5}px`;
-          });
-        }
-      }
+    // Decide product space first so address can flex
+    // Reserve product section: label (3.5mm) + 2 lines (~9mm) + spacing (2mm)
+    const PRODUCT_RESERVE = 16;
+    const QR_SIZE = qrUrl ? 22 : 0;
+    const QR_MARGIN = qrUrl ? 1 : 0;
+    const productBottomLimit = PAGE_H - MARGIN - QR_SIZE - QR_MARGIN;
+    const addrBottomLimit = productBottomLimit - PRODUCT_RESERVE;
 
-      const canvas = await html2canvas(card, {
-        backgroundColor: "#ffffff",
-        scale: 3,
-        useCORS: true,
-        logging: false,
-      });
-      const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
-
-      if (i > 0) pdf.addPage([PAGE_W, PAGE_H], "portrait");
-      pdf.addImage(dataUrl, "JPEG", 0, 0, PAGE_W, PAGE_H);
+    // Pick address font size that fits; try 10, 9, 8, 7
+    let addrFs = 10;
+    let addrLines: string[] = [];
+    let addrLineH = 0;
+    while (addrFs >= 7) {
+      pdf.setFontSize(addrFs);
+      addrLineH = addrFs * 0.4 + 0.4; // approx line height in mm (~1.35)
+      addrLines = pdf.splitTextToSize(addr, CONTENT_W) as string[];
+      const totalH = addrLines.length * addrLineH;
+      if (y + totalH <= addrBottomLimit) break;
+      addrFs -= 1;
     }
-  } finally {
-    document.body.removeChild(host);
+    // Final clamp: if still too tall at 7pt, truncate
+    pdf.setFontSize(addrFs);
+    addrLineH = addrFs * 0.4 + 0.4;
+    const maxLines = Math.max(1, Math.floor((addrBottomLimit - y) / addrLineH));
+    if (addrLines.length > maxLines) {
+      addrLines = addrLines.slice(0, maxLines);
+      // ellipsize last line
+      const last = addrLines[addrLines.length - 1];
+      addrLines[addrLines.length - 1] = last.replace(/.{3}$/, "...");
+    }
+    for (const line of addrLines) {
+      pdf.text(line, MARGIN, y + addrFs * 0.35);
+      y += addrLineH;
+    }
+
+    // 4. PRODUCT — anchored above QR area
+    let productY = productBottomLimit - PRODUCT_RESERVE + 2;
+    if (productY < y + 2) productY = y + 2;
+
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(7);
+    pdf.setTextColor(110, 110, 110);
+    pdf.text("БАРАА", MARGIN, productY + 2.5);
+    productY += 3.5;
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(0, 0, 0);
+    let prodFs = 10;
+    let prodLines: string[] = [];
+    while (prodFs >= 7) {
+      pdf.setFontSize(prodFs);
+      prodLines = pdf.splitTextToSize(itemsText, CONTENT_W - (qrUrl ? QR_SIZE + 1 : 0)) as string[];
+      if (prodLines.length <= 2) break;
+      prodFs -= 1;
+    }
+    pdf.setFontSize(prodFs);
+    if (prodLines.length > 2) {
+      prodLines = prodLines.slice(0, 2);
+      const last = prodLines[1];
+      prodLines[1] = last.replace(/.{3}$/, "...");
+    }
+    const prodLineH = prodFs * 0.4 + 0.4;
+    for (const line of prodLines) {
+      pdf.text(line, MARGIN, productY + prodFs * 0.35);
+      productY += prodLineH;
+    }
+
+    // QR (bottom-right) — only for unpaid cash-like
+    if (qrUrl) {
+      try {
+        pdf.addImage(qrUrl, "PNG", PAGE_W - MARGIN - QR_SIZE, PAGE_H - MARGIN - QR_SIZE, QR_SIZE, QR_SIZE);
+      } catch {
+        // ignore
+      }
+    }
   }
 
   pdf.save(filename);
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 }
