@@ -227,6 +227,26 @@ export async function downloadOrderLabelsPdf(
         }
       }
 
+      // Generic shrink pass: if any element overflows the card, shrink item fonts
+      {
+        const itemsBox = card.querySelector<HTMLDivElement>(".lbl-items");
+        const overflows = (): boolean => {
+          const cardRect = card.getBoundingClientRect();
+          return Array.from(card.querySelectorAll<HTMLElement>("*")).some((el) => {
+            const r = el.getBoundingClientRect();
+            return r.right > cardRect.right + 0.5 || r.bottom > cardRect.bottom + 0.5;
+          });
+        };
+        let g = 0;
+        while (overflows() && g < 20) {
+          g++;
+          itemsBox?.querySelectorAll<HTMLElement>(".lbl-item").forEach((el) => {
+            const cur = parseFloat(getComputedStyle(el).fontSize) || 9;
+            if (cur > 6.5) el.style.fontSize = `${cur - 0.5}px`;
+          });
+        }
+      }
+
       const canvas = await html2canvas(card, {
         backgroundColor: "#ffffff",
         scale: 3,
