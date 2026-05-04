@@ -7,7 +7,16 @@ let cachedBold: string | null = null;
 
 async function fetchAsBase64(url: string): Promise<string> {
   const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`Font fetch failed: ${res.status}`);
+  }
   const buf = await res.arrayBuffer();
+  const header = new Uint8Array(buf.slice(0, 4));
+  const signature = String.fromCharCode(...header);
+  const isTtf = header[0] === 0x00 && header[1] === 0x01 && header[2] === 0x00 && header[3] === 0x00;
+  if (!isTtf && signature !== "OTTO" && signature !== "ttcf") {
+    throw new Error("Invalid font file loaded for PDF generation");
+  }
   let binary = "";
   const bytes = new Uint8Array(buf);
   const chunk = 0x8000;
