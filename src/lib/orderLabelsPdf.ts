@@ -124,17 +124,16 @@ export async function downloadOrderLabelsPdf(
       const qrUrl = !paid && o.id ? qrMap.get(o.id) || null : null;
 
       const itemsArr: OrderItemLite[] = (Array.isArray(o.items) ? (o.items as OrderItemLite[]) : []).filter((it) => it && it.name);
-      // Uniform font size across the whole label
-      const BASE_FS = 12;
-      const itemsHtml = itemsArr
-        .map((it) => {
-          const variant = [it.color, it.size].filter(Boolean).join("/");
-          const sku = it.product_code || it.sku || "";
-          const meta = [variant, sku].filter(Boolean).join(" · ");
-          const m = meta ? ` <span style="font-weight:500;">(${escapeHtml(meta)})</span>` : "";
-          return `<div class="lbl-item" style="font-size:${BASE_FS}px;line-height:1.3;margin-bottom:2px;color:#000;font-weight:600;">• ${escapeHtml(String(it.name))}${m} × ${it.quantity ?? 1}</div>`;
-        })
-        .join("");
+      const BASE_FS = 11;
+      const itemsText = itemsArr
+        .map((it) => `${String(it.name)} x${it.quantity ?? 1}`)
+        .join(" | ");
+
+      // Table row helpers
+      const labelRow = (label: string) => `
+        <div style="padding:2px 6px;font-size:${BASE_FS - 2}px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#000;border-bottom:1px solid #000;background:#f0f0f0;line-height:1.2;">${escapeHtml(label)}</div>`;
+      const valueRow = (html: string, extra = "") => `
+        <div style="padding:4px 6px;border-bottom:1px solid #000;line-height:1.3;${extra}">${html}</div>`;
 
       host.innerHTML = "";
       const card = document.createElement("div");
@@ -152,23 +151,28 @@ export async function downloadOrderLabelsPdf(
         position: relative;
         border: 1px solid #000;
       `;
+      const headerRow = `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 6px;border-bottom:1px solid #000;line-height:1.2;">
+          <span style="font-family:'Courier New',monospace;font-weight:800;font-size:${BASE_FS + 1}px;">${escapeHtml(orderNo)}</span>
+          <span style="font-size:${BASE_FS - 2}px;font-weight:700;">№${i + 1}</span>
+        </div>`;
+      const totalRow = (!paid && totalNum > 0)
+        ? `<div style="padding:3px 6px;border-bottom:1px solid #000;display:flex;justify-content:space-between;align-items:center;font-size:${BASE_FS}px;font-weight:800;line-height:1.2;"><span>НИЙТ</span><span style="font-family:'Courier New',monospace;">${escapeHtml(mnt(totalNum))}</span></div>`
+        : "";
       card.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 8px;border-bottom:1px solid #000;font-size:${BASE_FS}px;">
-          <span style="font-family:'Courier New',monospace;font-weight:800;font-size:${BASE_FS + 2}px;line-height:1.1;">${escapeHtml(orderNo)}</span>
-          <span style="font-weight:600;font-size:${BASE_FS - 1}px;line-height:1.1;">№${i + 1}</span>
+        ${headerRow}
+        ${name ? valueRow(`<span style="font-size:${BASE_FS + 1}px;font-weight:800;">${escapeHtml(name)}</span>`) : ""}
+        ${labelRow("Утас")}
+        ${valueRow(`<span style="font-family:'Courier New',monospace;font-weight:900;font-size:${BASE_FS + 3}px;letter-spacing:0.5px;">${escapeHtml(phone || "—")}</span>`)}
+        ${labelRow("Хаяг")}
+        ${valueRow(`<span class="lbl-addr" style="font-size:${BASE_FS}px;font-weight:600;word-break:break-word;overflow-wrap:anywhere;">${escapeHtml(addr || "—")}</span>`)}
+        ${labelRow("Бараа")}
+        <div class="lbl-items" style="padding:4px 6px;flex:1 1 auto;min-height:0;overflow:hidden;${qrUrl ? `padding-right:${108}px;padding-bottom:${108}px;` : ""}">
+          <span class="lbl-item" style="font-size:${BASE_FS}px;font-weight:600;line-height:1.35;word-break:break-word;">${escapeHtml(itemsText || "—")}</span>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;font-size:${BASE_FS}px;color:#000;font-weight:600;padding:4px 8px;border-bottom:1px solid #000;line-height:1.2;">
-          <span>${escapeHtml(dateStr)}</span>
-          ${totalNum > 0 ? `<span style="font-weight:800;">${escapeHtml(mnt(totalNum))}</span>` : ""}
-        </div>
-        ${name ? `<div style="font-size:${BASE_FS + 1}px;font-weight:800;padding:4px 8px 1px;line-height:1.25;">${escapeHtml(name)}</div>` : ""}
-        ${phone ? `<div style="font-size:${BASE_FS + 2}px;font-weight:900;padding:1px 8px 3px;line-height:1.2;font-family:'Courier New',monospace;letter-spacing:0.5px;">${escapeHtml(phone)}</div>` : ""}
-        ${addr ? `<div class="lbl-addr" style="font-size:${BASE_FS}px;font-weight:600;line-height:1.3;word-break:break-word;overflow-wrap:anywhere;padding:0 8px 4px;border-bottom:1px solid #000;">${escapeHtml(addr)}</div>` : `<div style="border-bottom:1px solid #000;"></div>`}
-        <div class="lbl-items" style="padding:4px 8px;flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column;${qrUrl ? `padding-right:${72 + 8}px;` : ""}">
-          ${itemsHtml || `<div class="lbl-item" style="font-size:${BASE_FS}px;color:#000;">—</div>`}
-        </div>
-        ${qrUrl ? `<div style="position:absolute;right:5px;bottom:5px;background:#fff;padding:2px;border:1px solid #000;line-height:0;">
-          <img src="${qrUrl}" alt="QR" style="display:block;width:72px;height:72px;image-rendering:pixelated;filter:grayscale(100%) contrast(1.2);"/>
+        ${totalRow}
+        ${qrUrl ? `<div style="position:absolute;right:4px;bottom:4px;background:#fff;padding:2px;border:1px solid #000;line-height:0;">
+          <img src="${qrUrl}" alt="QR" style="display:block;width:100px;height:100px;image-rendering:pixelated;filter:grayscale(100%) contrast(1.2);"/>
         </div>` : ""}
       `;
       host.appendChild(card);
