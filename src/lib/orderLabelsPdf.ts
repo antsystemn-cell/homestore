@@ -188,8 +188,8 @@ export async function downloadOrderLabelsPdf(
         const qrEl = card.querySelector<HTMLDivElement>('div[style*="position:absolute"]');
         const itemsBox = card.children[card.children.length - 3] as HTMLDivElement | undefined;
         const footerBox = card.children[card.children.length - 2] as HTMLDivElement | undefined;
-        let qrSize = 40;
-        const minQr = 24;
+        let qrSize = 50;
+        const minQr = 32;
         const fits = (): boolean => {
           if (!qrEl || !itemsBox) return true;
           const cardRect = card.getBoundingClientRect();
