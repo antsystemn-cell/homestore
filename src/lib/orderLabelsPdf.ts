@@ -130,8 +130,8 @@ export async function downloadOrderLabelsPdf(
           const variant = [it.color, it.size].filter(Boolean).join("/");
           const sku = it.product_code || it.sku || "";
           const meta = [variant, sku].filter(Boolean).join(" · ");
-          const m = meta ? ` <span style="color:#666;">(${escapeHtml(meta)})</span>` : "";
-          return `<div class="lbl-item" style="font-size:10px;line-height:1.3;margin-bottom:1px;">• ${escapeHtml(String(it.name))}${m} × ${it.quantity ?? 1}</div>`;
+          const m = meta ? ` <span style="color:#000;">(${escapeHtml(meta)})</span>` : "";
+          return `<div class="lbl-item" style="font-size:10px;line-height:1.3;margin-bottom:1px;color:#000;">• ${escapeHtml(String(it.name))}${m} × ${it.quantity ?? 1}</div>`;
         })
         .join("");
 
@@ -151,34 +151,34 @@ export async function downloadOrderLabelsPdf(
         font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
         display: flex;
         flex-direction: column;
-        padding: 5px;
+        padding: 0;
         box-sizing: border-box;
-        gap: 2px;
         overflow: hidden;
         position: relative;
+        border: 1px solid #000;
       `;
       card.innerHTML = `
-        <div style="display:flex;align-items:center;gap:5px;background:#000;color:#fff;padding:5px 6px;border-radius:3px;line-height:1.3;">
-          <span style="background:#fff;color:#000;padding:1px 5px;border-radius:2px;font-size:10px;font-weight:800;line-height:1.2;">№${i + 1}</span>
-          <span style="font-family:'Courier New',monospace;font-weight:800;font-size:11px;letter-spacing:0.3px;flex:1;white-space:nowrap;line-height:1.3;">${escapeHtml(orderNo)}</span>
-          ${paid ? `<span style="background:#16a34a;color:#fff;padding:2px 4px;border-radius:2px;font-size:8px;font-weight:800;letter-spacing:0.3px;line-height:1.2;">ТӨЛСӨН</span>` : ""}
+        <div style="display:flex;align-items:center;justify-content:flex-start;gap:6px;background:#000;color:#fff;padding:6px 7px;min-height:26px;box-sizing:border-box;border-bottom:1px solid #000;">
+          <span style="display:inline-flex;align-items:center;justify-content:center;background:#fff;color:#000;padding:0 5px;height:16px;line-height:1;border-radius:2px;font-size:10px;font-weight:800;">№${i + 1}</span>
+          <span style="display:inline-flex;align-items:center;height:16px;line-height:1;font-family:'Courier New',monospace;font-weight:800;font-size:11px;letter-spacing:0.3px;flex:1;white-space:nowrap;">${escapeHtml(orderNo)}</span>
+          ${paid ? `<span style="display:inline-flex;align-items:center;justify-content:center;background:#fff;color:#000;padding:0 4px;height:14px;line-height:1;border-radius:2px;font-size:8px;font-weight:800;letter-spacing:0.3px;">ТӨЛСӨН</span>` : ""}
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;font-size:9px;color:#444;font-weight:600;">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:9px;color:#000;font-weight:600;padding:3px 6px;border-bottom:1px solid #000;">
           <span>${escapeHtml(dateStr)}</span>
           ${!paid && totalNum > 0 ? `<span style="font-weight:800;color:#000;font-size:10px;">${escapeHtml(mnt(totalNum))}</span>` : ""}
         </div>
-        ${name ? `<div style="font-size:11px;font-weight:700;">${escapeHtml(name)}</div>` : ""}
-        ${combined ? `<div class="lbl-addr" style="font-size:${fs}px;font-weight:600;line-height:${lh};word-break:break-word;overflow-wrap:anywhere;">${escapeHtml(combined)}</div>` : ""}
-        <div class="lbl-items" style="border-top:1px dashed #999;margin-top:1px;padding-top:2px;flex:1 1 auto;min-height:0;overflow:hidden;${qrUrl ? `padding-right:54px;` : ""}">
-          <div style="font-size:8px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:2px;">Бараа</div>
-          ${itemsHtml || '<div class="lbl-item" style="font-size:10px;color:#666;">—</div>'}
+        ${name ? `<div style="font-size:11px;font-weight:700;padding:3px 6px 1px;">${escapeHtml(name)}</div>` : ""}
+        ${combined ? `<div class="lbl-addr" style="font-size:${fs}px;font-weight:600;line-height:${lh};word-break:break-word;overflow-wrap:anywhere;padding:0 6px 3px;border-bottom:1px solid #000;">${escapeHtml(combined)}</div>` : `<div style="border-bottom:1px solid #000;"></div>`}
+        <div class="lbl-items" style="padding:3px 6px;flex:1 1 auto;min-height:0;overflow:hidden;${qrUrl ? `padding-right:${60 + 8}px;` : ""}">
+          <div style="font-size:8px;font-weight:700;color:#000;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:2px;">Бараа</div>
+          ${itemsHtml || '<div class="lbl-item" style="font-size:10px;color:#000;">—</div>'}
         </div>
-        <div class="lbl-footer" style="display:flex;justify-content:space-between;align-items:flex-end;font-size:9px;font-weight:700;color:${paid ? "#15803d" : "#b45309"};border-top:1px solid #000;padding-top:2px;${qrUrl ? `padding-right:54px;` : ""}">
+        <div class="lbl-footer" style="display:flex;justify-content:space-between;align-items:center;font-size:9px;font-weight:800;color:#000;border-top:1px solid #000;padding:3px 6px;${qrUrl ? `padding-right:${60 + 8}px;` : ""}">
           <span>${escapeHtml(payLbl)}</span>
         </div>
-        ${qrUrl ? `<div style="position:absolute;right:4px;bottom:4px;background:#fff;padding:1px;border:1px solid #000;border-radius:2px;text-align:center;line-height:1;">
-          <img src="${qrUrl}" alt="QR" style="display:block;width:60px;height:60px;image-rendering:pixelated;"/>
-          <div style="font-size:6px;font-weight:700;margin-top:1px;">QPay</div>
+        ${qrUrl ? `<div style="position:absolute;right:4px;bottom:4px;background:#fff;padding:2px;border:1px solid #000;text-align:center;line-height:1;">
+          <img src="${qrUrl}" alt="QR" style="display:block;width:60px;height:60px;image-rendering:pixelated;filter:grayscale(100%) contrast(1.2);"/>
+          <div style="font-size:6px;font-weight:700;margin-top:1px;color:#000;">QPay</div>
         </div>` : ""}
       `;
       host.appendChild(card);
