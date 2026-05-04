@@ -165,17 +165,18 @@ export async function downloadOrderLabelsPdf(
           <span style="display:inline-flex;align-items:center;height:16px;line-height:1;font-family:'Courier New',monospace;font-weight:800;font-size:11px;letter-spacing:0.3px;flex:1;white-space:nowrap;">${escapeHtml(orderNo)}</span>
           ${paid ? `<span style="display:inline-flex;align-items:center;justify-content:center;background:#fff;color:#000;padding:0 4px;height:14px;line-height:1;border-radius:2px;font-size:8px;font-weight:800;letter-spacing:0.3px;">ТӨЛСӨН</span>` : ""}
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;font-size:9px;color:#000;font-weight:600;padding:3px 6px;border-bottom:1px solid #000;">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#000;font-weight:600;padding:3px 6px;border-bottom:1px solid #000;">
           <span>${escapeHtml(dateStr)}</span>
-          ${!paid && totalNum > 0 ? `<span style="font-weight:800;color:#000;font-size:10px;">${escapeHtml(mnt(totalNum))}</span>` : ""}
+          ${!paid && totalNum > 0 ? `<span style="font-weight:800;color:#000;font-size:11px;">${escapeHtml(mnt(totalNum))}</span>` : ""}
         </div>
-        ${name ? `<div style="font-size:11px;font-weight:700;padding:3px 6px 1px;">${escapeHtml(name)}</div>` : ""}
-        ${combined ? `<div class="lbl-addr" style="font-size:${fs}px;font-weight:600;line-height:${lh};word-break:break-word;overflow-wrap:anywhere;padding:0 6px 3px;border-bottom:1px solid #000;">${escapeHtml(combined)}</div>` : `<div style="border-bottom:1px solid #000;"></div>`}
-        <div class="lbl-items" style="padding:3px 6px;flex:1 1 auto;min-height:0;overflow:hidden;${qrUrl ? `padding-right:${60 + 8}px;` : ""}">
+        ${name ? `<div style="font-size:13px;font-weight:800;padding:3px 6px 1px;line-height:1.25;">${escapeHtml(name)}</div>` : ""}
+        ${phone ? `<div class="lbl-phone" style="font-size:15px;font-weight:900;padding:1px 6px 2px;line-height:1.2;font-family:'Courier New',monospace;letter-spacing:0.5px;">${escapeHtml(phone)}</div>` : ""}
+        ${addr ? `<div class="lbl-addr" style="font-size:${addrFs}px;font-weight:600;line-height:${addrLh};word-break:break-word;overflow-wrap:anywhere;padding:0 6px 3px;border-bottom:1px solid #000;">${escapeHtml(addr)}</div>` : `<div style="border-bottom:1px solid #000;"></div>`}
+        <div class="lbl-items" style="padding:3px 6px;flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column;${qrUrl ? `padding-right:${60 + 8}px;` : ""}">
           <div style="font-size:8px;font-weight:700;color:#000;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:2px;">Бараа</div>
-          ${itemsHtml || '<div class="lbl-item" style="font-size:10px;color:#000;">—</div>'}
+          ${itemsHtml || `<div class="lbl-item" style="font-size:${itemFs}px;color:#000;">—</div>`}
         </div>
-        <div class="lbl-footer" style="display:flex;justify-content:space-between;align-items:center;font-size:9px;font-weight:800;color:#000;border-top:1px solid #000;padding:3px 6px;${qrUrl ? `padding-right:${60 + 8}px;` : ""}">
+        <div class="lbl-footer" style="display:flex;justify-content:space-between;align-items:center;font-size:10px;font-weight:800;color:#000;border-top:1px solid #000;padding:3px 6px;${qrUrl ? `padding-right:${60 + 8}px;` : ""}">
           <span>${escapeHtml(payLbl)}</span>
         </div>
         ${qrUrl ? `<div style="position:absolute;right:4px;bottom:4px;background:#fff;padding:2px;border:1px solid #000;text-align:center;line-height:1;">
