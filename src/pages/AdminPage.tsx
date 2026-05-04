@@ -280,6 +280,19 @@ const AdminPage = () => {
     loadAdminData();
   }, [authLoading, isAdmin]);
 
+  // Open product editor when URL has ?edit=<id> (supports new tab / right-click open)
+  useEffect(() => {
+    const editParam = searchParams.get("edit");
+    if (!editParam || products.length === 0) return;
+    const p = products.find((x) => x.id === editParam);
+    if (p && editId !== p.id) {
+      handleEditProduct(p);
+      if (tab !== "products") setTab("products");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products, searchParams]);
+
   const fetchPromoBanners = async () => {
     try {
       const { data } = await supabase.from("promo_banners").select("*").order("position");
