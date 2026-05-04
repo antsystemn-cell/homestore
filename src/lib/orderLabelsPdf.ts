@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { supabase } from "@/integrations/supabase/client";
 
 function formatUlaanbaatarDate(iso: string): string {
   try {
@@ -13,7 +14,7 @@ function formatUlaanbaatarDate(iso: string): string {
       hour12: false,
     }).formatToParts(new Date(iso));
     const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
-    return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")} (УБ)`;
+    return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}`;
   } catch {
     return "";
   }
@@ -24,6 +25,9 @@ export interface OrderItemLite {
   quantity?: number;
   size?: string;
   color?: string;
+  product_code?: string;
+  sku?: string;
+  price?: number;
 }
 
 export interface OrderForLabel {
@@ -35,17 +39,62 @@ export interface OrderForLabel {
   items?: unknown;
   total?: number | null;
   created_at?: string | null;
+  payment_method?: string | null;
+  payment_status?: string | null;
+}
+
+const mnt = (n: number) => `${(n ?? 0).toLocaleString("mn-MN")}₮`;
+
+function isPaid(o: OrderForLabel): boolean {
+  const status = (o.payment_status || "").toLowerCase();
+  return status === "confirmed" || status === "paid";
+}
+
+function isCashLike(o: OrderForLabel): boolean {
+  const m = (o.payment_method || "cash").toLowerCase();
+  return m === "cash" || m === "cod" || m === "" || m === "qpay";
+}
+
+function paymentLabel(o: OrderForLabel): string {
+  const method = (o.payment_method || "cash").toLowerCase();
+  const map: Record<string, string> = {
+    cash: "Бэлэн", cod: "Бэлэн", qpay: "QPay", storepay: "Storepay", pocket: "Pocket",
+  };
+  const m = map[method] || method.toUpperCase();
+  return isPaid(o) ? `Төлсөн (${m})` : `Төлөөгүй (${m})`;
+}
+
+async function fetchQpayQr(orderId: string): Promise<string | null> {
+  try {
+    const { data, error } = await supabase.functions.invoke("qpay", {
+      body: { action: "print-invoice", orderId },
+    });
+    if (error || !data?.qrImage) return null;
+    const qr: string = data.qrImage;
+    return qr.startsWith("data:") ? qr : `data:image/png;base64,${qr}`;
+  } catch {
+    return null;
+  }
 }
 
 /**
  * Generate a PDF where each order occupies one 70x80mm portrait page.
- * Contains: order ref, customer name, phone, delivery address, item list (no images).
+ * Mirrors the printOrdersTable design (header bar, payment status, items list).
+ * - Hides amount/price for paid orders
+ * - Embeds a small QPay QR in the corner for unpaid cash-like orders
  */
 export async function downloadOrderLabelsPdf(
   orders: OrderForLabel[],
   filename = `orders-${new Date().toISOString().slice(0, 10)}.pdf`
 ) {
   if (!orders.length) return;
+
+  // Pre-fetch QR codes in parallel for unpaid orders
+  const needsQr = orders.filter((o) => !isPaid(o) && isCashLike(o) && o.id);
+  const qrEntries = await Promise.all(
+    needsQr.map(async (o) => [o.id, await fetchQpayQr(o.id)] as const)
+  );
+  const qrMap = new Map<string, string | null>(qrEntries);
 
   const PAGE_W = 70;
   const PAGE_H = 80;
@@ -69,17 +118,28 @@ export async function downloadOrderLabelsPdf(
       const phone = (o.phone || "").trim();
       const addr = (o.shipping_address || "").trim();
       const dateStr = o.created_at ? formatUlaanbaatarDate(o.created_at) : "";
-      const totalStr = o.total != null ? `₮${Number(o.total).toLocaleString("mn-MN")}` : "";
+      const paid = isPaid(o);
+      const totalNum = Number(o.total) || 0;
+      const payLbl = paymentLabel(o);
+      const qrUrl = !paid && o.id ? qrMap.get(o.id) || null : null;
 
       const itemsArr: OrderItemLite[] = Array.isArray(o.items) ? (o.items as OrderItemLite[]) : [];
       const itemsHtml = itemsArr
         .filter((it) => it && it.name)
         .map((it) => {
-          const variant = [it.color, it.size].filter(Boolean).join(" / ");
-          const v = variant ? ` (${escapeHtml(variant)})` : "";
-          return `<div style="font-size:9px;line-height:1.25;">• ${escapeHtml(String(it.name))}${v} × ${it.quantity ?? 1}</div>`;
+          const variant = [it.color, it.size].filter(Boolean).join("/");
+          const sku = it.product_code || it.sku || "";
+          const meta = [variant, sku].filter(Boolean).join(" · ");
+          const m = meta ? ` <span style="color:#666;">(${escapeHtml(meta)})</span>` : "";
+          return `<div style="font-size:8.5px;line-height:1.25;">• ${escapeHtml(String(it.name))}${m} × ${it.quantity ?? 1}</div>`;
         })
         .join("");
+
+      // Combine phone+address with dynamic font sizing
+      const combined = [phone, addr].filter(Boolean).join(" • ");
+      const len = combined.length;
+      const fs = len > 110 ? 7 : len > 80 ? 8 : len > 50 ? 9 : 10;
+      const lh = fs <= 8 ? 1.25 : 1.35;
 
       host.innerHTML = "";
       const card = document.createElement("div");
@@ -91,32 +151,35 @@ export async function downloadOrderLabelsPdf(
         font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
         display: flex;
         flex-direction: column;
-        padding: 8px;
+        padding: 6px;
         box-sizing: border-box;
-        gap: 4px;
+        gap: 3px;
         overflow: hidden;
+        position: relative;
       `;
       card.innerHTML = `
-        <div style="text-align:center;border:2px solid #000;border-radius:4px;padding:4px 6px;margin-bottom:2px;background:#000;color:#fff;">
-          <div style="font-size:8px;font-weight:600;letter-spacing:1px;opacity:0.8;text-transform:uppercase;">Order</div>
-          <div style="font-size:16px;font-weight:900;line-height:1.1;letter-spacing:0.5px;">${escapeHtml(orderNo)}</div>
+        <div style="display:flex;align-items:center;gap:6px;background:#000;color:#fff;padding:3px 6px;border-radius:3px;">
+          <span style="background:#fff;color:#000;padding:0 5px;border-radius:2px;font-size:9px;font-weight:800;">№${i + 1}</span>
+          <span style="font-family:'Courier New',monospace;font-weight:800;font-size:11px;letter-spacing:0.3px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(orderNo)}</span>
+          ${paid ? `<span style="background:#16a34a;color:#fff;padding:0 4px;border-radius:2px;font-size:7px;font-weight:800;letter-spacing:0.3px;">ТӨЛСӨН</span>` : ""}
         </div>
-        ${(dateStr || totalStr) ? `<div style="display:flex;justify-content:space-between;align-items:center;font-size:8px;color:#444;font-weight:600;">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:8px;color:#444;font-weight:600;">
           <span>${escapeHtml(dateStr)}</span>
-          <span style="font-weight:800;color:#000;">${escapeHtml(totalStr)}</span>
-        </div>` : ""}
+          ${!paid && totalNum > 0 ? `<span style="font-weight:800;color:#000;font-size:9px;">${escapeHtml(mnt(totalNum))}</span>` : ""}
+        </div>
         ${name ? `<div style="font-size:10px;font-weight:700;">${escapeHtml(name)}</div>` : ""}
-        ${(phone || addr) ? (() => {
-          const combined = [phone, addr].filter(Boolean).join(" • ");
-          const len = combined.length;
-          const fs = len > 110 ? 7 : len > 80 ? 8 : len > 50 ? 9 : 10;
-          const lh = fs <= 8 ? 1.25 : 1.35;
-          return `<div style="font-size:${fs}px;font-weight:600;line-height:${lh};word-break:break-word;overflow-wrap:anywhere;white-space:normal;">${escapeHtml(combined)}</div>`;
-        })() : ""}
-        <div style="border-top:1px dashed #999;margin-top:2px;padding-top:3px;flex:1 1 auto;min-height:0;overflow:hidden;">
-          <div style="font-size:9px;font-weight:700;margin-bottom:2px;">Бараа:</div>
+        ${combined ? `<div style="font-size:${fs}px;font-weight:600;line-height:${lh};word-break:break-word;overflow-wrap:anywhere;">${escapeHtml(combined)}</div>` : ""}
+        <div style="border-top:1px dashed #999;margin-top:1px;padding-top:2px;flex:1 1 auto;min-height:0;overflow:hidden;${qrUrl ? `padding-right:54px;` : ""}">
+          <div style="font-size:8px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:1px;">Бараа</div>
           ${itemsHtml || '<div style="font-size:9px;color:#666;">—</div>'}
         </div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;font-size:8px;font-weight:700;color:${paid ? "#15803d" : "#b45309"};border-top:1px solid #000;padding-top:2px;">
+          <span>${escapeHtml(payLbl)}</span>
+        </div>
+        ${qrUrl ? `<div style="position:absolute;right:5px;bottom:18px;background:#fff;padding:2px;border:1px solid #000;border-radius:2px;text-align:center;">
+          <img src="${qrUrl}" alt="QR" style="display:block;width:48px;height:48px;image-rendering:pixelated;"/>
+          <div style="font-size:6px;font-weight:700;margin-top:1px;">QPay</div>
+        </div>` : ""}
       `;
       host.appendChild(card);
 
