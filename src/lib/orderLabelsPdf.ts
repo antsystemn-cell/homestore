@@ -130,8 +130,8 @@ export async function downloadOrderLabelsPdf(
           const variant = [it.color, it.size].filter(Boolean).join("/");
           const sku = it.product_code || it.sku || "";
           const meta = [variant, sku].filter(Boolean).join(" · ");
-          const m = meta ? ` <span style="color:#666;">(${escapeHtml(meta)})</span>` : "";
-          return `<div class="lbl-item" style="font-size:10px;line-height:1.3;margin-bottom:1px;">• ${escapeHtml(String(it.name))}${m} × ${it.quantity ?? 1}</div>`;
+          const m = meta ? ` <span style="color:#000;">(${escapeHtml(meta)})</span>` : "";
+          return `<div class="lbl-item" style="font-size:10px;line-height:1.3;margin-bottom:1px;color:#000;">• ${escapeHtml(String(it.name))}${m} × ${it.quantity ?? 1}</div>`;
         })
         .join("");
 
