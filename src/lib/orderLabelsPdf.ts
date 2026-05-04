@@ -126,53 +126,60 @@ export async function downloadOrderLabelsPdf(
     pdf.text(phone, MARGIN, y + 5);
     y += 8;
 
-    // 3. ADDRESS
+    // Available vertical space for address + product
+    const QR_SIZE = qrUrl ? 22 : 0;
+    const QR_GAP = qrUrl ? 1 : 0;
+    const bottomLimit = PAGE_H - MARGIN - QR_SIZE - QR_GAP;
+    const productAreaW = CONTENT_W - (qrUrl ? QR_SIZE + 1 : 0);
+
+    // Pre-compute product layout (priority section). Try sizes 9 -> 7.
+    let prodFs = 9;
+    let prodLines: string[] = [];
+    let prodLineH = 0;
+    for (let fs = 9; fs >= 7; fs--) {
+      pdf.setFont(fontFamily, "bold");
+      pdf.setFontSize(fs);
+      const lines = pdf.splitTextToSize(itemsText, productAreaW) as string[];
+      const lh = fs * 0.38 + 0.3; // tight line-height ~1.2
+      prodFs = fs;
+      prodLines = lines;
+      prodLineH = lh;
+      if (lines.length <= 5) break;
+    }
+    const productBlockH = 3.5 /*label*/ + prodLines.length * prodLineH + 1;
+
+    // 3. ADDRESS — flex grow, fills space between phone and product block
     pdf.setFont(fontFamily, "normal");
     pdf.setFontSize(7);
     pdf.setTextColor(110, 110, 110);
     pdf.text("ХАЯГ", MARGIN, y + 2.5);
     y += 3.5;
-    pdf.setFont(fontFamily, "normal");
     pdf.setTextColor(0, 0, 0);
 
-    // Decide product space first so address can flex
-    // Reserve product section: label (3.5mm) + 2 lines (~9mm) + spacing (2mm)
-    const PRODUCT_RESERVE = 16;
-    const QR_SIZE = qrUrl ? 22 : 0;
-    const QR_MARGIN = qrUrl ? 1 : 0;
-    const productBottomLimit = PAGE_H - MARGIN - QR_SIZE - QR_MARGIN;
-    const addrBottomLimit = productBottomLimit - PRODUCT_RESERVE;
-
-    // Pick address font size that fits; try 10, 9, 8, 7
-    let addrFs = 10;
+    const addrBottomLimit = bottomLimit - productBlockH - 1;
+    let addrFs = 9;
     let addrLines: string[] = [];
     let addrLineH = 0;
-    while (addrFs >= 7) {
-      pdf.setFontSize(addrFs);
-      addrLineH = addrFs * 0.4 + 0.4; // approx line height in mm (~1.35)
-      addrLines = pdf.splitTextToSize(addr, CONTENT_W) as string[];
-      const totalH = addrLines.length * addrLineH;
-      if (y + totalH <= addrBottomLimit) break;
-      addrFs -= 1;
+    for (let fs = 9; fs >= 7; fs--) {
+      pdf.setFont(fontFamily, "normal");
+      pdf.setFontSize(fs);
+      const lh = fs * 0.42 + 0.3; // ~1.3
+      const lines = pdf.splitTextToSize(addr, CONTENT_W) as string[];
+      addrFs = fs;
+      addrLines = lines;
+      addrLineH = lh;
+      if (y + lines.length * lh <= addrBottomLimit) break;
     }
-    // Final clamp: if still too tall at 7pt, truncate
+    pdf.setFont(fontFamily, "normal");
     pdf.setFontSize(addrFs);
-    addrLineH = addrFs * 0.4 + 0.4;
-    const maxLines = Math.max(1, Math.floor((addrBottomLimit - y) / addrLineH));
-    if (addrLines.length > maxLines) {
-      addrLines = addrLines.slice(0, maxLines);
-      // ellipsize last line
-      const last = addrLines[addrLines.length - 1];
-      addrLines[addrLines.length - 1] = last.replace(/.{3}$/, "...");
-    }
     for (const line of addrLines) {
       pdf.text(line, MARGIN, y + addrFs * 0.35);
       y += addrLineH;
     }
 
-    // 4. PRODUCT — anchored above QR area
-    let productY = productBottomLimit - PRODUCT_RESERVE + 2;
-    if (productY < y + 2) productY = y + 2;
+    // 4. PRODUCT — anchored at bottom of available area
+    let productY = bottomLimit - (prodLines.length * prodLineH + 3.5 + 1);
+    if (productY < y + 1) productY = y + 1;
 
     pdf.setFont(fontFamily, "normal");
     pdf.setFontSize(7);
@@ -181,22 +188,8 @@ export async function downloadOrderLabelsPdf(
     productY += 3.5;
 
     pdf.setFont(fontFamily, "bold");
-    pdf.setTextColor(0, 0, 0);
-    let prodFs = 10;
-    let prodLines: string[] = [];
-    while (prodFs >= 7) {
-      pdf.setFontSize(prodFs);
-      prodLines = pdf.splitTextToSize(itemsText, CONTENT_W - (qrUrl ? QR_SIZE + 1 : 0)) as string[];
-      if (prodLines.length <= 2) break;
-      prodFs -= 1;
-    }
     pdf.setFontSize(prodFs);
-    if (prodLines.length > 2) {
-      prodLines = prodLines.slice(0, 2);
-      const last = prodLines[1];
-      prodLines[1] = last.replace(/.{3}$/, "...");
-    }
-    const prodLineH = prodFs * 0.4 + 0.4;
+    pdf.setTextColor(0, 0, 0);
     for (const line of prodLines) {
       pdf.text(line, MARGIN, productY + prodFs * 0.35);
       productY += prodLineH;
