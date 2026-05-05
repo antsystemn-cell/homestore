@@ -10,6 +10,7 @@ import {
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
 import ChatbotSettingsManager from "@/components/admin/ChatbotSettingsManager";
+import StockDeductionLog from "@/components/admin/StockDeductionLog";
 
 import { useRef } from "react";
 import { toast } from "sonner";
@@ -38,9 +39,9 @@ import { printOrdersTable, loadPrintFields, buildSelectedOrdersXlsxRows, type Pr
 import { PrintFieldsSettings } from "@/components/admin/PrintFieldsSettings";
 import * as XLSX from "xlsx";
 
-type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "settings";
+type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "settings";
 
-const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "collections", "analytics", "diagnostics"];
+const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "collections", "analytics", "diagnostics", "stocklog"];
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -1045,6 +1046,7 @@ const AdminPage = () => {
     { id: "collections", label: "Багц линк", icon: Link2 },
     { id: "analytics", label: "Хандалт", icon: Globe },
     { id: "diagnostics", label: "Оношлогоо", icon: AlertTriangle },
+    { id: "stocklog", label: "Нөөцийн хасалт", icon: Package },
   ];
 
   const sidebarItems = isAdmin
@@ -1774,6 +1776,7 @@ const AdminPage = () => {
               {tab === "analytics" && "Вэб сайтын хандалтын мэдээлэл"}
               {tab === "collections" && "Барааны багц үүсгэж линкээр хуваалцах"}
               {tab === "diagnostics" && "Зургийн оношлогоо & Cloud зардал"}
+              {tab === "stocklog" && "Elle Sport нөөцөөс хасагдсан түүх"}
             </p>
           </div>
           {tab === "products" && (
@@ -3579,6 +3582,9 @@ const AdminPage = () => {
               </div>
             );
           })()}
+
+          {/* Stock Deduction Log Tab */}
+          {tab === "stocklog" && <StockDeductionLog />}
 
           {/* Categories Tab */}
           {tab === "categories" && (
