@@ -924,6 +924,51 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_list_orders_light: {
+        Args: never
+        Returns: {
+          assigned_at: string | null
+          branch: string | null
+          created_at: string
+          delivered_at: string | null
+          delivery_completed_photo: string | null
+          delivery_fee: number | null
+          delivery_gps_lat: number | null
+          delivery_gps_lng: number | null
+          delivery_option_id: string | null
+          delivery_order_id: string | null
+          delivery_pickup_photo: string | null
+          delivery_proof_photo: string | null
+          delivery_signature_name: string | null
+          delivery_status: string | null
+          driver_id: string | null
+          external_ref: string | null
+          guest_name: string | null
+          id: string
+          is_guest: boolean | null
+          items: Json
+          order_ref: string | null
+          payment_intent_id: string | null
+          payment_method: string | null
+          payment_status: string | null
+          phone: string | null
+          picked_up_at: string | null
+          sale_date: string | null
+          shipping_address: string | null
+          source: string
+          source_note: string | null
+          status: string
+          total: number
+          updated_at: string
+          user_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       admin_list_users: {
         Args: never
         Returns: {
