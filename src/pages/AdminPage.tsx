@@ -549,9 +549,11 @@ const AdminPage = () => {
         name: it.name,
         price: it.price,
         quantity: it.quantity,
-        product_code: it.product_code || null,
+        product_code: it.sku || it.product_code || null,
         image: it.image || null,
         is_custom: it.is_custom || false,
+        color: it.color || null,
+        size: it.size || null,
       }));
       const payload: any = {
         items,
