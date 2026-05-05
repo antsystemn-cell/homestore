@@ -155,6 +155,16 @@ export async function downloadOrderLabelsPdf(
     }
     const productBlockH = 3.5 /*label*/ + prodLines.length * prodLineH + 1;
 
+    // Note lines (if any) — rendered between address and product
+    let noteLines: string[] = [];
+    if (noteText) {
+      pdf.setFont(fontFamily, "normal");
+      pdf.setFontSize(noteFs);
+      noteLines = pdf.splitTextToSize(noteText, CONTENT_W) as string[];
+      if (noteLines.length > 4) noteLines = noteLines.slice(0, 4);
+    }
+    const noteBlockH = noteLines.length ? (3.5 + noteLines.length * noteLineH + 1) : 0;
+
     // 3. ADDRESS — flex grow, fills space between phone and product block
     pdf.setFont(fontFamily, "normal");
     pdf.setFontSize(7);
@@ -163,7 +173,7 @@ export async function downloadOrderLabelsPdf(
     y += 3.5;
     pdf.setTextColor(0, 0, 0);
 
-    const addrBottomLimit = bottomLimit - productBlockH - 1;
+    const addrBottomLimit = bottomLimit - productBlockH - noteBlockH - 1;
     let addrFs = 9;
     let addrLines: string[] = [];
     let addrLineH = 0;
