@@ -1515,7 +1515,12 @@ const AdminPage = () => {
                             <p className="text-xs font-medium truncate">{it.name}</p>
                             {it.is_custom && <span className="shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded bg-primary/15 text-primary uppercase">Гараар</span>}
                           </div>
-                          <p className="text-[10px] text-muted-foreground">{formatPrice(it.price)} × {it.quantity}{it.product_code ? ` · ${it.product_code}` : ""}</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {formatPrice(it.price)} × {it.quantity}
+                            {(it.color || it.size) ? ` · ${[it.color, it.size].filter(Boolean).join(' / ')}` : ''}
+                            {it.sku || it.product_code ? ` · ${it.sku || it.product_code}` : ''}
+                            {it.variant_stock !== undefined ? ` · Үлд: ${it.variant_stock}ш` : ''}
+                          </p>
                         </div>
                         <input
                           type="number"
