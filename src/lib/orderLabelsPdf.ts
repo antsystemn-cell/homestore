@@ -98,7 +98,9 @@ export async function downloadOrderLabelsPdf(
     const itemsText = itemsArr
       .map((it) => {
         const variant = [it.color, it.size].filter(Boolean).join(" ");
-        return `${it.name}${variant ? ` - ${variant}` : ""} x${it.quantity ?? 1}`;
+        const skuCode = (it.sku || it.product_code || "").toString().trim();
+        const skuPart = skuCode ? ` [${skuCode}]` : "";
+        return `${it.name}${variant ? ` - ${variant}` : ""}${skuPart} x${it.quantity ?? 1}`;
       })
       .join(" | ") || "—";
 
