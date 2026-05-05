@@ -1776,6 +1776,7 @@ const AdminPage = () => {
               {tab === "analytics" && "Вэб сайтын хандалтын мэдээлэл"}
               {tab === "collections" && "Барааны багц үүсгэж линкээр хуваалцах"}
               {tab === "diagnostics" && "Зургийн оношлогоо & Cloud зардал"}
+              {tab === "stocklog" && "Elle Sport нөөцөөс хасагдсан түүх"}
             </p>
           </div>
           {tab === "products" && (
