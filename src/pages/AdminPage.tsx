@@ -3583,6 +3583,9 @@ const AdminPage = () => {
             );
           })()}
 
+          {/* Stock Deduction Log Tab */}
+          {tab === "stocklog" && <StockDeductionLog />}
+
           {/* Categories Tab */}
           {tab === "categories" && (
             <div className="space-y-4">
