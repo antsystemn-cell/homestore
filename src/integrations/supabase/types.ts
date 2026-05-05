@@ -738,6 +738,54 @@ export type Database = {
           },
         ]
       }
+      stock_deduction_log: {
+        Row: {
+          brand_id: string | null
+          color: string | null
+          created_at: string
+          id: string
+          order_id: string | null
+          order_ref: string | null
+          product_id: string | null
+          product_name: string | null
+          quantity_deducted: number
+          size: string | null
+          stock_after: number | null
+          stock_before: number | null
+          variant_key: string | null
+        }
+        Insert: {
+          brand_id?: string | null
+          color?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          order_ref?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          quantity_deducted: number
+          size?: string | null
+          stock_after?: number | null
+          stock_before?: number | null
+          variant_key?: string | null
+        }
+        Update: {
+          brand_id?: string | null
+          color?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          order_ref?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          quantity_deducted?: number
+          size?: string | null
+          stock_after?: number | null
+          stock_before?: number | null
+          variant_key?: string | null
+        }
+        Relationships: []
+      }
       stock_movements: {
         Row: {
           created_at: string
