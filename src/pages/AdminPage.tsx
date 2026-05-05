@@ -87,6 +87,7 @@ const AdminPage = () => {
   const [editDeliveryId, setEditDeliveryId] = useState<string | null>(null);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [editingOrderItem, setEditingOrderItem] = useState<{ orderId: string; idx: number } | null>(null);
+  const [orderItemSearch, setOrderItemSearch] = useState("");
   const [savingOrderItems, setSavingOrderItems] = useState<string | null>(null);
 
   const updateOrderItemLocal = (orderId: string, idx: number, patch: Record<string, any>) => {
