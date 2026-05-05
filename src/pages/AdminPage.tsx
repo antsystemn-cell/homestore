@@ -3153,57 +3153,6 @@ const AdminPage = () => {
                           </select>
                         </div>
 
-                        {/* Delivery Photos — admin only */}
-                        {isAdmin && (
-                        <div>
-                          <h4 className="text-xs font-bold text-muted-foreground mb-2">Хүргэлтийн зургууд</h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* Pickup photo */}
-                            <div className="space-y-2">
-                              <p className="text-[11px] font-medium text-foreground">📦 Авч явсан зураг</p>
-                              {o.delivery_pickup_photo ? (
-                                <div className="relative group">
-                                  <img src={o.delivery_pickup_photo} alt="Авч явсан" className="w-full h-40 object-cover rounded-xl border border-border" />
-                                  <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 rounded-xl cursor-pointer transition-opacity">
-                                    <span className="text-white text-xs font-medium">Солих</span>
-                                    <input type="file" accept="image/*" className="hidden"
-                                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleDeliveryPhotoUpload(o.id, "delivery_pickup_photo", f); }} />
-                                  </label>
-                                </div>
-                              ) : (
-                                <label className="flex flex-col items-center justify-center h-32 rounded-xl border-2 border-dashed border-border hover:border-primary/40 cursor-pointer transition-colors bg-secondary/30">
-                                  <Upload className="h-5 w-5 text-muted-foreground mb-1" />
-                                  <span className="text-[10px] text-muted-foreground">Зураг оруулах</span>
-                                  <input type="file" accept="image/*" className="hidden"
-                                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleDeliveryPhotoUpload(o.id, "delivery_pickup_photo", f); }} />
-                                </label>
-                              )}
-                            </div>
-
-                            {/* Completed photo */}
-                            <div className="space-y-2">
-                              <p className="text-[11px] font-medium text-foreground">✅ Хүргэлт дууссан зураг</p>
-                              {o.delivery_completed_photo ? (
-                                <div className="relative group">
-                                  <img src={o.delivery_completed_photo} alt="Дууссан" className="w-full h-40 object-cover rounded-xl border border-border" />
-                                  <label className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 rounded-xl cursor-pointer transition-opacity">
-                                    <span className="text-white text-xs font-medium">Солих</span>
-                                    <input type="file" accept="image/*" className="hidden"
-                                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleDeliveryPhotoUpload(o.id, "delivery_completed_photo", f); }} />
-                                  </label>
-                                </div>
-                              ) : (
-                                <label className="flex flex-col items-center justify-center h-32 rounded-xl border-2 border-dashed border-border hover:border-primary/40 cursor-pointer transition-colors bg-secondary/30">
-                                  <Upload className="h-5 w-5 text-muted-foreground mb-1" />
-                                  <span className="text-[10px] text-muted-foreground">Зураг оруулах</span>
-                                  <input type="file" accept="image/*" className="hidden"
-                                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleDeliveryPhotoUpload(o.id, "delivery_completed_photo", f); }} />
-                                </label>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        )}
                       </div>
                     )}
                   </div>
