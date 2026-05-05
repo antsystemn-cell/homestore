@@ -102,6 +102,10 @@ export async function downloadOrderLabelsPdf(
       })
       .join(" | ") || "—";
 
+    const noteText = (o.source_note || o.note || o.notes || "").toString().trim();
+    const noteFs = 7;
+    const noteLineH = noteFs * 0.42 + 0.3;
+
     let y = MARGIN;
 
     // 1. HEADER — order number (left) and label number (right)
