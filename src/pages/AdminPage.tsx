@@ -10,6 +10,7 @@ import {
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
 import ChatbotSettingsManager from "@/components/admin/ChatbotSettingsManager";
+import StockDeductionLog from "@/components/admin/StockDeductionLog";
 
 import { useRef } from "react";
 import { toast } from "sonner";
