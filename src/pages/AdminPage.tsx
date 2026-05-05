@@ -1420,48 +1420,91 @@ const AdminPage = () => {
                       </div>
                     </div>
                   )}
-                  {manualProductSearch.trim() && (
-                    <div className="border border-border rounded-xl max-h-48 overflow-y-auto">
-                      {products
-                        .filter((p) => {
-                          const q = manualProductSearch.toLowerCase();
-                          return p.name.toLowerCase().includes(q) || (p.product_code || "").toLowerCase().includes(q);
-                        })
-                        .slice(0, 20)
-                        .map((p) => (
-                          <button
-                            key={p.id}
-                            type="button"
-                            onClick={() => {
-                              setManualItems((prev) => {
-                                const existing = prev.find((it) => it.product_id === p.id);
-                                if (existing) {
-                                  return prev.map((it) => it.product_id === p.id ? { ...it, quantity: it.quantity + 1 } : it);
-                                }
-                                return [...prev, {
-                                  product_id: p.id,
-                                  name: p.name,
-                                  price: p.price,
-                                  quantity: 1,
-                                  product_code: p.product_code,
-                                  image: p.thumbnail_url || p.image_url,
-                                }];
-                              });
-                              setManualProductSearch("");
-                            }}
-                            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-secondary text-left border-b border-border last:border-b-0"
-                          >
-                            {(p.thumbnail_url || p.image_url) && (
-                              <img src={p.thumbnail_url || p.image_url} alt="" className="w-8 h-8 rounded object-cover bg-secondary" />
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-medium truncate">{p.name}</p>
-                              <p className="text-[10px] text-muted-foreground">{p.product_code || "—"} · {formatPrice(p.price)}</p>
-                            </div>
-                          </button>
-                        ))}
-                    </div>
-                  )}
+                  {manualProductSearch.trim() && (() => {
+                    const q = manualProductSearch.toLowerCase();
+                    type Row = { key: string; product: any; color?: string; size?: string; sku?: string; image?: string; stock?: number; };
+                    const rows: Row[] = [];
+                    for (const p of products) {
+                      const vs = (p.variant_stock && typeof p.variant_stock === 'object') ? p.variant_stock : {};
+                      const colors: any[] = Array.isArray(p.colors) ? p.colors : [];
+                      const variantKeys = Object.keys(vs);
+                      if (variantKeys.length > 0) {
+                        for (const key of variantKeys) {
+                          const [color, size] = key.split('|');
+                          const cmeta = colors.find((c: any) => (c?.name || '').trim() === (color || '').trim());
+                          const sku = cmeta?.sku || p.product_code || '';
+                          const image = cmeta?.image || p.thumbnail_url || p.image_url;
+                          const stock = Number(vs[key]) || 0;
+                          rows.push({ key: `${p.id}|${key}`, product: p, color, size, sku, image, stock });
+                        }
+                      } else {
+                        rows.push({ key: p.id, product: p, sku: p.product_code, image: p.thumbnail_url || p.image_url, stock: p.stock_quantity });
+                      }
+                    }
+                    const filtered = rows.filter((r) => {
+                      const hay = `${r.product.name} ${r.sku || ''} ${r.color || ''} ${r.size || ''}`.toLowerCase();
+                      return hay.includes(q);
+                    }).slice(0, 50);
+                    return (
+                      <div className="border border-border rounded-xl max-h-72 overflow-y-auto">
+                        {filtered.map((r) => {
+                          const p = r.product;
+                          const isVariant = !!(r.color || r.size);
+                          const outOfStock = isVariant && r.stock !== undefined && r.stock <= 0;
+                          return (
+                            <button
+                              key={r.key}
+                              type="button"
+                              disabled={outOfStock}
+                              onClick={() => {
+                                setManualItems((prev) => {
+                                  const existing = prev.find((it) => it.product_id === p.id && (it.color || '') === (r.color || '') && (it.size || '') === (r.size || ''));
+                                  if (existing) {
+                                    return prev.map((it) => it === existing ? { ...it, quantity: it.quantity + 1 } : it);
+                                  }
+                                  return [...prev, {
+                                    product_id: p.id,
+                                    name: p.name,
+                                    price: p.price,
+                                    quantity: 1,
+                                    product_code: p.product_code,
+                                    sku: r.sku,
+                                    image: r.image,
+                                    color: r.color,
+                                    size: r.size,
+                                    variant_stock: r.stock,
+                                  }];
+                                });
+                                setManualProductSearch("");
+                              }}
+                              className="w-full flex items-center gap-3 px-3 py-2 hover:bg-secondary text-left border-b border-border last:border-b-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                              {r.image && (
+                                <img src={r.image} alt="" className="w-10 h-10 rounded object-cover bg-secondary shrink-0" />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-medium truncate">{p.name}</p>
+                                <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                                  {r.color && <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary">{r.color}</span>}
+                                  {r.size && <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-semibold">{r.size}</span>}
+                                  <span className="text-[10px] text-muted-foreground">{r.sku || '—'}</span>
+                                  <span className="text-[10px] text-muted-foreground">· {formatPrice(p.price)}</span>
+                                </div>
+                              </div>
+                              {isVariant && (
+                                <span className={`text-[10px] font-bold px-2 py-1 rounded shrink-0 ${outOfStock ? 'bg-destructive/10 text-destructive' : (r.stock! <= 3 ? 'bg-amber-500/15 text-amber-600' : 'bg-green-500/10 text-green-600')}`}>
+                                  {r.stock} ш
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                        {filtered.length === 0 && (
+                          <p className="text-center text-xs text-muted-foreground py-4">Илэрц олдсонгүй</p>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   <div className="space-y-2">
                     {manualItems.map((it, idx) => (
