@@ -3102,23 +3102,95 @@ const AdminPage = () => {
                       <div className="border-t border-border p-4 space-y-4">
                         {/* Order items */}
                         <div>
-                          <h4 className="text-xs font-bold text-muted-foreground mb-2">Захиалсан бараанууд</h4>
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-xs font-bold text-muted-foreground">Захиалсан бараанууд</h4>
+                            <button
+                              type="button"
+                              onClick={() => saveOrderItems(o.id)}
+                              disabled={savingOrderItems === o.id}
+                              className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-primary text-primary-foreground disabled:opacity-50"
+                            >
+                              {savingOrderItems === o.id ? "Хадгалж байна..." : "Хадгалах"}
+                            </button>
+                          </div>
                           <div className="space-y-2">
-                            {orderItems.map((item: any, idx: number) => (
-                              <div key={idx} className="flex items-center gap-3">
-                                {item.image && <img src={item.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-secondary" />}
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-xs font-medium truncate">{item.name}</p>
-                                  <p className="text-[10px] text-muted-foreground">
-                                    {item.product_code && <span className="font-mono mr-1">SKU: {item.product_code}</span>}
-                                    {item.product_code && (item.color || item.size) && "· "}
-                                    {[item.color && `Өнгө: ${item.color}`, item.size && `Хэмжээ: ${item.size}`].filter(Boolean).join(" · ")}
-                                    {(item.product_code || item.color || item.size) ? " · " : ""}x{item.quantity}
-                                  </p>
+                            {orderItems.map((item: any, idx: number) => {
+                              const isEditingItem = editingOrderItem?.orderId === o.id && editingOrderItem?.idx === idx;
+                              const upd = (patch: Record<string, any>) => updateOrderItemLocal(o.id, idx, patch);
+                              return (
+                              <div key={idx} className="bg-secondary/30 rounded-lg p-2">
+                                <div className="flex items-center gap-3">
+                                  {item.image && <img src={item.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-secondary" />}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-medium truncate">{item.name}</p>
+                                    <p className="text-[10px] text-muted-foreground">
+                                      {item.product_code && <span className="font-mono mr-1">SKU: {item.product_code}</span>}
+                                      {item.product_code && (item.color || item.size) && "· "}
+                                      {[item.color && `Өнгө: ${item.color}`, item.size && `Хэмжээ: ${item.size}`].filter(Boolean).join(" · ")}
+                                      {(item.product_code || item.color || item.size) ? " · " : ""}x{item.quantity}
+                                    </p>
+                                  </div>
+                                  <span className="text-xs font-bold">{formatPrice(item.price * item.quantity)}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditingOrderItem(isEditingItem ? null : { orderId: o.id, idx })}
+                                    className={`p-1.5 rounded-lg ${isEditingItem ? "bg-primary text-primary-foreground" : "hover:bg-secondary"}`}
+                                    title="Засах"
+                                  >
+                                    <Pencil className="h-3.5 w-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => { removeOrderItemLocal(o.id, idx); if (isEditingItem) setEditingOrderItem(null); }}
+                                    className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"
+                                    title="Хасах"
+                                  >
+                                    <X className="h-3.5 w-3.5" />
+                                  </button>
                                 </div>
-                                <span className="text-xs font-bold">{formatPrice(item.price * item.quantity)}</span>
+                                {isEditingItem && (
+                                  <div className="mt-2 grid grid-cols-2 gap-2 pt-2 border-t border-border">
+                                    <div className="col-span-2">
+                                      <label className="text-[10px] font-semibold text-muted-foreground">Барааны нэр</label>
+                                      <input type="text" value={item.name || ""} onChange={(e) => upd({ name: e.target.value })}
+                                        className="w-full rounded-lg bg-card border border-border px-2 py-1.5 text-xs" />
+                                    </div>
+                                    <div>
+                                      <label className="text-[10px] font-semibold text-muted-foreground">Үнэ (₮)</label>
+                                      <input type="number" min={0} value={item.price ?? 0} onChange={(e) => upd({ price: Math.max(0, Number(e.target.value) || 0) })}
+                                        className="w-full rounded-lg bg-card border border-border px-2 py-1.5 text-xs" />
+                                    </div>
+                                    <div>
+                                      <label className="text-[10px] font-semibold text-muted-foreground">Тоо</label>
+                                      <input type="number" min={1} value={item.quantity ?? 1} onChange={(e) => upd({ quantity: Math.max(1, Number(e.target.value) || 1) })}
+                                        className="w-full rounded-lg bg-card border border-border px-2 py-1.5 text-xs" />
+                                    </div>
+                                    <div>
+                                      <label className="text-[10px] font-semibold text-muted-foreground">SKU / Код</label>
+                                      <input type="text" value={item.sku || item.product_code || ""} onChange={(e) => upd({ sku: e.target.value, product_code: e.target.value })}
+                                        className="w-full rounded-lg bg-card border border-border px-2 py-1.5 text-xs" />
+                                    </div>
+                                    <div>
+                                      <label className="text-[10px] font-semibold text-muted-foreground">Өнгө</label>
+                                      <input type="text" value={item.color || ""} onChange={(e) => upd({ color: e.target.value })}
+                                        className="w-full rounded-lg bg-card border border-border px-2 py-1.5 text-xs" />
+                                    </div>
+                                    <div>
+                                      <label className="text-[10px] font-semibold text-muted-foreground">Хэмжээ</label>
+                                      <input type="text" value={item.size || ""} onChange={(e) => upd({ size: e.target.value })}
+                                        className="w-full rounded-lg bg-card border border-border px-2 py-1.5 text-xs" />
+                                    </div>
+                                    <div className="col-span-2 flex justify-end">
+                                      <button type="button" onClick={() => setEditingOrderItem(null)}
+                                        className="px-3 py-1.5 rounded-lg bg-secondary text-foreground text-[11px] font-semibold">
+                                        Болсон
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
 
