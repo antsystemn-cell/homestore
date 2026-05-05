@@ -86,6 +86,40 @@ const AdminPage = () => {
   });
   const [editDeliveryId, setEditDeliveryId] = useState<string | null>(null);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
+  const [editingOrderItem, setEditingOrderItem] = useState<{ orderId: string; idx: number } | null>(null);
+  const [savingOrderItems, setSavingOrderItems] = useState<string | null>(null);
+
+  const updateOrderItemLocal = (orderId: string, idx: number, patch: Record<string, any>) => {
+    setOrders((prev) => prev.map((o) => {
+      if (o.id !== orderId) return o;
+      const items = Array.isArray(o.items) ? [...o.items] : [];
+      items[idx] = { ...items[idx], ...patch };
+      return { ...o, items };
+    }));
+  };
+
+  const removeOrderItemLocal = (orderId: string, idx: number) => {
+    setOrders((prev) => prev.map((o) => {
+      if (o.id !== orderId) return o;
+      const items = (Array.isArray(o.items) ? o.items : []).filter((_: any, i: number) => i !== idx);
+      return { ...o, items };
+    }));
+  };
+
+  const saveOrderItems = async (orderId: string) => {
+    const order = orders.find((o) => o.id === orderId);
+    if (!order) return;
+    setSavingOrderItems(orderId);
+    const items = Array.isArray(order.items) ? order.items : [];
+    const subtotal = items.reduce((s: number, it: any) => s + (Number(it.price) || 0) * (Number(it.quantity) || 0), 0);
+    const total = subtotal + (Number(order.delivery_fee) || 0);
+    const { error } = await supabase.from("orders").update({ items, total, updated_at: new Date().toISOString() }).eq("id", orderId);
+    setSavingOrderItems(null);
+    if (error) { toast.error("Хадгалахад алдаа: " + error.message); return; }
+    setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, total } : o));
+    setEditingOrderItem(null);
+    toast.success("Барааны мэдээлэл шинэчлэгдлээ");
+  };
 
   // Payment provider form state
   const [ppForm, setPpForm] = useState({ name: "", logo_url: "", color: "bg-blue-500", icon: "💳", description: "", is_active: true });
