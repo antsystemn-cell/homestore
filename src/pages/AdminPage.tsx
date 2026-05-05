@@ -1046,6 +1046,7 @@ const AdminPage = () => {
     { id: "collections", label: "Багц линк", icon: Link2 },
     { id: "analytics", label: "Хандалт", icon: Globe },
     { id: "diagnostics", label: "Оношлогоо", icon: AlertTriangle },
+    { id: "stocklog", label: "Нөөцийн хасалт", icon: Package },
   ];
 
   const sidebarItems = isAdmin
