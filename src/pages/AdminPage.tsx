@@ -88,7 +88,18 @@ const AdminPage = () => {
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [editingOrderItem, setEditingOrderItem] = useState<{ orderId: string; idx: number } | null>(null);
   const [orderItemSearch, setOrderItemSearch] = useState("");
+  const [addingItemToOrderId, setAddingItemToOrderId] = useState<string | null>(null);
+  const [addItemSearch, setAddItemSearch] = useState("");
   const [savingOrderItems, setSavingOrderItems] = useState<string | null>(null);
+
+  const addOrderItemLocal = (orderId: string, item: any) => {
+    setOrders((prev) => prev.map((o) => {
+      if (o.id !== orderId) return o;
+      const items = Array.isArray(o.items) ? [...o.items] : [];
+      items.push(item);
+      return { ...o, items };
+    }));
+  };
 
   const updateOrderItemLocal = (orderId: string, idx: number, patch: Record<string, any>) => {
     setOrders((prev) => prev.map((o) => {
