@@ -194,6 +194,24 @@ export async function downloadOrderLabelsPdf(
       y += addrLineH;
     }
 
+    // 3.5 NOTE — rendered just above product block when present
+    if (noteLines.length) {
+      let noteY = bottomLimit - productBlockH - noteBlockH;
+      if (noteY < y + 1) noteY = y + 1;
+      pdf.setFont(fontFamily, "normal");
+      pdf.setFontSize(7);
+      pdf.setTextColor(110, 110, 110);
+      pdf.text("ТАЙЛБАР", MARGIN, noteY + 2.5);
+      noteY += 3.5;
+      pdf.setFont(fontFamily, "bold");
+      pdf.setFontSize(noteFs);
+      pdf.setTextColor(0, 0, 0);
+      for (const line of noteLines) {
+        pdf.text(line, MARGIN, noteY + noteFs * 0.35);
+        noteY += noteLineH;
+      }
+    }
+
     // 4. PRODUCT — anchored at bottom of available area
     let productY = bottomLimit - (prodLines.length * prodLineH + 3.5 + 1);
     if (productY < y + 1) productY = y + 1;
