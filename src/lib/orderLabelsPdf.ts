@@ -23,6 +23,9 @@ export interface OrderForLabel {
   created_at?: string | null;
   payment_method?: string | null;
   payment_status?: string | null;
+  source_note?: string | null;
+  note?: string | null;
+  notes?: string | null;
 }
 
 function isPaid(o: OrderForLabel): boolean {
