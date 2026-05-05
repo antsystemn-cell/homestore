@@ -23,6 +23,9 @@ export interface OrderForLabel {
   created_at?: string | null;
   payment_method?: string | null;
   payment_status?: string | null;
+  source_note?: string | null;
+  note?: string | null;
+  notes?: string | null;
 }
 
 function isPaid(o: OrderForLabel): boolean {
@@ -99,6 +102,10 @@ export async function downloadOrderLabelsPdf(
       })
       .join(" | ") || "—";
 
+    const noteText = (o.source_note || o.note || o.notes || "").toString().trim();
+    const noteFs = 7;
+    const noteLineH = noteFs * 0.42 + 0.3;
+
     let y = MARGIN;
 
     // 1. HEADER — order number (left) and label number (right)
@@ -148,6 +155,16 @@ export async function downloadOrderLabelsPdf(
     }
     const productBlockH = 3.5 /*label*/ + prodLines.length * prodLineH + 1;
 
+    // Note lines (if any) — rendered between address and product
+    let noteLines: string[] = [];
+    if (noteText) {
+      pdf.setFont(fontFamily, "normal");
+      pdf.setFontSize(noteFs);
+      noteLines = pdf.splitTextToSize(noteText, CONTENT_W) as string[];
+      if (noteLines.length > 4) noteLines = noteLines.slice(0, 4);
+    }
+    const noteBlockH = noteLines.length ? (3.5 + noteLines.length * noteLineH + 1) : 0;
+
     // 3. ADDRESS — flex grow, fills space between phone and product block
     pdf.setFont(fontFamily, "normal");
     pdf.setFontSize(7);
@@ -156,7 +173,7 @@ export async function downloadOrderLabelsPdf(
     y += 3.5;
     pdf.setTextColor(0, 0, 0);
 
-    const addrBottomLimit = bottomLimit - productBlockH - 1;
+    const addrBottomLimit = bottomLimit - productBlockH - noteBlockH - 1;
     let addrFs = 9;
     let addrLines: string[] = [];
     let addrLineH = 0;
@@ -175,6 +192,24 @@ export async function downloadOrderLabelsPdf(
     for (const line of addrLines) {
       pdf.text(line, MARGIN, y + addrFs * 0.35);
       y += addrLineH;
+    }
+
+    // 3.5 NOTE — rendered just above product block when present
+    if (noteLines.length) {
+      let noteY = bottomLimit - productBlockH - noteBlockH;
+      if (noteY < y + 1) noteY = y + 1;
+      pdf.setFont(fontFamily, "normal");
+      pdf.setFontSize(7);
+      pdf.setTextColor(110, 110, 110);
+      pdf.text("ТАЙЛБАР", MARGIN, noteY + 2.5);
+      noteY += 3.5;
+      pdf.setFont(fontFamily, "bold");
+      pdf.setFontSize(noteFs);
+      pdf.setTextColor(0, 0, 0);
+      for (const line of noteLines) {
+        pdf.text(line, MARGIN, noteY + noteFs * 0.35);
+        noteY += noteLineH;
+      }
     }
 
     // 4. PRODUCT — anchored at bottom of available area
