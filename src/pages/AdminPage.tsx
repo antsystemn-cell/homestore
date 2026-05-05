@@ -447,12 +447,15 @@ const AdminPage = () => {
 
   const fetchOrders = async () => {
     try {
-      const { data, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+      // Use lightweight RPC that strips heavy base64 images from items jsonb
+      const { data, error } = await (supabase as any).rpc("admin_list_orders_light");
       if (error) throw error;
       setOrders(data || []);
     } catch (error) {
       console.error("Failed to load admin orders", error);
-      setOrders([]);
+      // Fallback to direct query
+      const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+      setOrders(data || []);
     }
   };
 
