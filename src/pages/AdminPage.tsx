@@ -1509,40 +1509,111 @@ const AdminPage = () => {
                   })()}
 
                   <div className="space-y-2">
-                    {manualItems.map((it, idx) => (
-                      <div key={idx} className="flex items-center gap-2 bg-secondary/40 rounded-xl p-2">
-                        {it.image && <img src={it.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-secondary" />}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <p className="text-xs font-medium truncate">{it.name}</p>
-                            {it.is_custom && <span className="shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded bg-primary/15 text-primary uppercase">Гараар</span>}
+                    {manualItems.map((it, idx) => {
+                      const isEditing = editingItemIdx === idx;
+                      const updateItem = (patch: Partial<typeof it>) =>
+                        setManualItems((prev) => prev.map((p, i) => i === idx ? { ...p, ...patch } : p));
+                      return (
+                      <div key={idx} className="bg-secondary/40 rounded-xl p-2">
+                        <div className="flex items-center gap-2">
+                          {it.image && <img src={it.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-secondary" />}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-xs font-medium truncate">{it.name}</p>
+                              {it.is_custom && <span className="shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded bg-primary/15 text-primary uppercase">Гараар</span>}
+                            </div>
+                            <p className="text-[10px] text-muted-foreground">
+                              {formatPrice(it.price)} × {it.quantity}
+                              {(it.color || it.size) ? ` · ${[it.color, it.size].filter(Boolean).join(' / ')}` : ''}
+                              {it.sku || it.product_code ? ` · ${it.sku || it.product_code}` : ''}
+                              {it.variant_stock !== undefined ? ` · Үлд: ${it.variant_stock}ш` : ''}
+                            </p>
                           </div>
-                          <p className="text-[10px] text-muted-foreground">
-                            {formatPrice(it.price)} × {it.quantity}
-                            {(it.color || it.size) ? ` · ${[it.color, it.size].filter(Boolean).join(' / ')}` : ''}
-                            {it.sku || it.product_code ? ` · ${it.sku || it.product_code}` : ''}
-                            {it.variant_stock !== undefined ? ` · Үлд: ${it.variant_stock}ш` : ''}
-                          </p>
+                          <input
+                            type="number"
+                            min={1}
+                            value={it.quantity}
+                            onChange={(e) => updateItem({ quantity: Math.max(1, Number(e.target.value) || 1) })}
+                            className="w-16 rounded-lg bg-card border border-border px-2 py-1 text-xs text-center"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setEditingItemIdx(isEditing ? null : idx)}
+                            className={`p-1.5 rounded-lg ${isEditing ? "bg-primary text-primary-foreground" : "hover:bg-secondary"}`}
+                            title="Засах"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setManualItems((prev) => prev.filter((_, i) => i !== idx)); if (isEditing) setEditingItemIdx(null); }}
+                            className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
                         </div>
-                        <input
-                          type="number"
-                          min={1}
-                          value={it.quantity}
-                          onChange={(e) => {
-                            const q = Math.max(1, Number(e.target.value) || 1);
-                            setManualItems((prev) => prev.map((p, i) => i === idx ? { ...p, quantity: q } : p));
-                          }}
-                          className="w-16 rounded-lg bg-card border border-border px-2 py-1 text-xs text-center"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setManualItems((prev) => prev.filter((_, i) => i !== idx))}
-                          className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"
-                        >
-                          <X className="h-3.5 w-3.5" />
-                        </button>
+                        {isEditing && (
+                          <div className="mt-2 grid grid-cols-2 gap-2 pt-2 border-t border-border">
+                            <div className="col-span-2">
+                              <label className="text-[10px] font-semibold text-muted-foreground">Барааны нэр</label>
+                              <input
+                                type="text"
+                                value={it.name}
+                                onChange={(e) => updateItem({ name: e.target.value })}
+                                className="w-full rounded-lg bg-card border border-border px-2 py-1.5 text-xs"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-semibold text-muted-foreground">Үнэ (₮)</label>
+                              <input
+                                type="number"
+                                min={0}
+                                value={it.price}
+                                onChange={(e) => updateItem({ price: Math.max(0, Number(e.target.value) || 0) })}
+                                className="w-full rounded-lg bg-card border border-border px-2 py-1.5 text-xs"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-semibold text-muted-foreground">SKU / Код</label>
+                              <input
+                                type="text"
+                                value={it.sku || it.product_code || ""}
+                                onChange={(e) => updateItem({ sku: e.target.value, product_code: e.target.value })}
+                                className="w-full rounded-lg bg-card border border-border px-2 py-1.5 text-xs"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-semibold text-muted-foreground">Өнгө</label>
+                              <input
+                                type="text"
+                                value={it.color || ""}
+                                onChange={(e) => updateItem({ color: e.target.value })}
+                                className="w-full rounded-lg bg-card border border-border px-2 py-1.5 text-xs"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-semibold text-muted-foreground">Хэмжээ</label>
+                              <input
+                                type="text"
+                                value={it.size || ""}
+                                onChange={(e) => updateItem({ size: e.target.value })}
+                                className="w-full rounded-lg bg-card border border-border px-2 py-1.5 text-xs"
+                              />
+                            </div>
+                            <div className="col-span-2 flex justify-end">
+                              <button
+                                type="button"
+                                onClick={() => setEditingItemIdx(null)}
+                                className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-[11px] font-semibold"
+                              >
+                                Болсон
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    ))}
+                      );
+                    })}
                     {manualItems.length === 0 && (
                       <p className="text-center text-xs text-muted-foreground py-4 border border-dashed border-border rounded-xl">
                         Дээрх хайлтаас бараа сонгоно уу
