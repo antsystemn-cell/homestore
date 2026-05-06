@@ -596,15 +596,16 @@ const ProductPage = () => {
         >
           <Heart className={`h-5 w-5 ${liked ? "fill-sale text-sale" : "text-muted-foreground"}`} />
         </button>
-        <Button variant="outline" className="flex-1 gap-2 rounded-2xl h-12 font-bold text-xs border-2" onClick={() => handleAddToCart()}>
+        <Button variant="outline" disabled={isOutOfStock} className="flex-1 gap-2 rounded-2xl h-12 font-bold text-xs border-2" onClick={() => handleAddToCart()}>
           <ShoppingCart className="h-4 w-4" />
-          Сагсанд
+          {isOutOfStock ? "Дууссан" : "Сагсанд"}
         </Button>
         <Button
+          disabled={isOutOfStock}
           className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl h-12 font-bold text-xs shadow-lg"
           onClick={() => handleAddToCart(true)}
         >
-          Шууд авах
+          {isOutOfStock ? "Дууссан" : "Шууд авах"}
         </Button>
       </div>
     </div>
