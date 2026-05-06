@@ -133,6 +133,17 @@ const ProductPage = () => {
     if (idx >= 0) setActiveImg(idx);
   }, [selectedColor, product, allImages]);
 
+  const normalizedBrand = (brandName || "").toLowerCase().replace(/\s+/g, "");
+  const isElleSportBrand = normalizedBrand.includes("elle") && normalizedBrand.includes("sport");
+  const variantKey = `${selectedColor || ""}|${selectedSize || ""}`;
+  const selectedVariantQty = Number(variantStock?.[variantKey]) || 0;
+  const hasColors = (product?.colors?.length || 0) > 0;
+  const hasSizes = (product?.sizes?.length || 0) > 0;
+  const variantSelected = (!hasColors || !!selectedColor) && (!hasSizes || !!selectedSize);
+  const isOutOfStock = isElleSportBrand
+    ? (variantSelected ? selectedVariantQty <= 0 : (stockQty !== null && stockQty <= 0))
+    : (stockQty !== null && stockQty <= 0);
+
   const handleAddToCart = (andNavigate?: boolean) => {
     if (product?.colors && product.colors.length > 0 && !selectedColor) {
       toast.error("Өнгөө сонгоно уу");
@@ -140,6 +151,14 @@ const ProductPage = () => {
     }
     if (product?.sizes && product.sizes.length > 0 && !selectedSize) {
       toast.error("Хэмжээгээ сонгоно уу");
+      return;
+    }
+    if (isOutOfStock) {
+      toast.error("Энэ бараа дууссан байна");
+      return;
+    }
+    if (isElleSportBrand && quantity > selectedVariantQty) {
+      toast.error(`Зөвхөн ${selectedVariantQty} ширхэг үлдсэн`);
       return;
     }
     addToCart(product!, selectedColor, selectedSize, quantity);
@@ -474,16 +493,17 @@ const ProductPage = () => {
             </div>
 
             <div className="hidden md:flex gap-3">
-              <Button variant="outline" size="lg" className="flex-1 gap-2 rounded-xl h-12" onClick={() => handleAddToCart()}>
+              <Button variant="outline" size="lg" disabled={isOutOfStock} className="flex-1 gap-2 rounded-xl h-12" onClick={() => handleAddToCart()}>
                 <ShoppingCart className="h-4 w-4" />
-                Сагсанд нэмэх
+                {isOutOfStock ? "Дууссан" : "Сагсанд нэмэх"}
               </Button>
               <Button
                 size="lg"
+                disabled={isOutOfStock}
                 className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl h-12"
                 onClick={() => handleAddToCart(true)}
               >
-                Худалдаж авах
+                {isOutOfStock ? "Дууссан" : "Худалдаж авах"}
               </Button>
             </div>
 
@@ -576,15 +596,16 @@ const ProductPage = () => {
         >
           <Heart className={`h-5 w-5 ${liked ? "fill-sale text-sale" : "text-muted-foreground"}`} />
         </button>
-        <Button variant="outline" className="flex-1 gap-2 rounded-2xl h-12 font-bold text-xs border-2" onClick={() => handleAddToCart()}>
+        <Button variant="outline" disabled={isOutOfStock} className="flex-1 gap-2 rounded-2xl h-12 font-bold text-xs border-2" onClick={() => handleAddToCart()}>
           <ShoppingCart className="h-4 w-4" />
-          Сагсанд
+          {isOutOfStock ? "Дууссан" : "Сагсанд"}
         </Button>
         <Button
+          disabled={isOutOfStock}
           className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl h-12 font-bold text-xs shadow-lg"
           onClick={() => handleAddToCart(true)}
         >
-          Шууд авах
+          {isOutOfStock ? "Дууссан" : "Шууд авах"}
         </Button>
       </div>
     </div>
