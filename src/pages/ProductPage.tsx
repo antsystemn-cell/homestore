@@ -133,6 +133,17 @@ const ProductPage = () => {
     if (idx >= 0) setActiveImg(idx);
   }, [selectedColor, product, allImages]);
 
+  const normalizedBrand = (brandName || "").toLowerCase().replace(/\s+/g, "");
+  const isElleSportBrand = normalizedBrand.includes("elle") && normalizedBrand.includes("sport");
+  const variantKey = `${selectedColor || ""}|${selectedSize || ""}`;
+  const selectedVariantQty = Number(variantStock?.[variantKey]) || 0;
+  const hasColors = (product?.colors?.length || 0) > 0;
+  const hasSizes = (product?.sizes?.length || 0) > 0;
+  const variantSelected = (!hasColors || !!selectedColor) && (!hasSizes || !!selectedSize);
+  const isOutOfStock = isElleSportBrand
+    ? (variantSelected ? selectedVariantQty <= 0 : (stockQty !== null && stockQty <= 0))
+    : (stockQty !== null && stockQty <= 0);
+
   const handleAddToCart = (andNavigate?: boolean) => {
     if (product?.colors && product.colors.length > 0 && !selectedColor) {
       toast.error("Өнгөө сонгоно уу");
@@ -140,6 +151,14 @@ const ProductPage = () => {
     }
     if (product?.sizes && product.sizes.length > 0 && !selectedSize) {
       toast.error("Хэмжээгээ сонгоно уу");
+      return;
+    }
+    if (isOutOfStock) {
+      toast.error("Энэ бараа дууссан байна");
+      return;
+    }
+    if (isElleSportBrand && quantity > selectedVariantQty) {
+      toast.error(`Зөвхөн ${selectedVariantQty} ширхэг үлдсэн`);
       return;
     }
     addToCart(product!, selectedColor, selectedSize, quantity);
