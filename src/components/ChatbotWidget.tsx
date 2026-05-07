@@ -85,12 +85,16 @@ function renderAssistant(content: string): JSX.Element {
 export default function ChatbotWidget() {
   const [settings, setSettings] = useState<ChatbotSettings | null>(null);
   const [open, setOpen] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+  const [initializing, setInitializing] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Lazy init: only fetch settings + open Realtime AFTER user clicks the button.
   useEffect(() => {
+    if (!initialized) return;
     let active = true;
     const load = async () => {
       const { data } = await supabase
@@ -102,7 +106,6 @@ export default function ChatbotWidget() {
     };
     load();
 
-    // Realtime: тохиргоо өөрчлөгдөнгүүт widget шууд шинэчлэгдэнэ
     const channel = supabase
       .channel("chatbot_settings_changes")
       .on(
@@ -116,7 +119,19 @@ export default function ChatbotWidget() {
       active = false;
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [initialized]);
+
+  const handleOpen = async () => {
+    if (!initialized) {
+      setInitializing(true);
+      setInitialized(true);
+    }
+    setOpen(true);
+  };
+
+  useEffect(() => {
+    if (settings && initializing) setInitializing(false);
+  }, [settings, initializing]);
 
   useEffect(() => {
     if (open && messages.length === 0 && settings) {
@@ -128,7 +143,8 @@ export default function ChatbotWidget() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, loading]);
 
-  if (!settings || !settings.is_enabled) return null;
+  // Hide widget only if settings loaded AND explicitly disabled.
+  if (initialized && settings && !settings.is_enabled) return null;
 
   const send = async () => {
     const text = input.trim();
