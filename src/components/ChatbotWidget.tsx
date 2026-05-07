@@ -179,7 +179,7 @@ export default function ChatbotWidget() {
       {/* Floating button */}
       {!open && (
         <button
-          onClick={() => setOpen(true)}
+          onClick={handleOpen}
           aria-label="Чатбот нээх"
           className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
         >
@@ -196,7 +196,7 @@ export default function ChatbotWidget() {
               <div className="h-8 w-8 rounded-full bg-primary-foreground/20 flex items-center justify-center">
                 <MessageCircle className="h-4 w-4" />
               </div>
-              <div className="font-semibold text-sm">{settings.bot_name}</div>
+              <div className="font-semibold text-sm">{settings?.bot_name ?? DEFAULT_SETTINGS.bot_name}</div>
             </div>
             <button
               onClick={() => setOpen(false)}
@@ -206,6 +206,15 @@ export default function ChatbotWidget() {
               <X className="h-4 w-4" />
             </button>
           </div>
+
+          {initializing && !settings && (
+            <div className="flex-1 flex items-center justify-center bg-background">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          )}
+
+          {settings && (
+          <>
 
           {/* Messages */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3 bg-background">
