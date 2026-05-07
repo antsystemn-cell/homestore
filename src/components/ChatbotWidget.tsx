@@ -264,7 +264,10 @@ export default function ChatbotWidget() {
               <Send className="h-4 w-4" />
             </Button>
           </div>
+          </>
+          )}
         </div>
+
       )}
     </>
   );
