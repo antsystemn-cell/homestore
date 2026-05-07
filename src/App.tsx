@@ -49,8 +49,8 @@ const CollectionPage = lazy(() => lazyRetry(() => import("./pages/CollectionPage
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 min
-      gcTime: 10 * 60 * 1000, // 10 min
+      staleTime: 30 * 60 * 1000, // 30 min
+      gcTime: 60 * 60 * 1000, // 60 min
       refetchOnWindowFocus: false,
     },
   },
