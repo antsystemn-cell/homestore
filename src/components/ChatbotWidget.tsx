@@ -85,12 +85,16 @@ function renderAssistant(content: string): JSX.Element {
 export default function ChatbotWidget() {
   const [settings, setSettings] = useState<ChatbotSettings | null>(null);
   const [open, setOpen] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+  const [initializing, setInitializing] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Lazy init: only fetch settings + open Realtime AFTER user clicks the button.
   useEffect(() => {
+    if (!initialized) return;
     let active = true;
     const load = async () => {
       const { data } = await supabase
@@ -102,7 +106,6 @@ export default function ChatbotWidget() {
     };
     load();
 
-    // Realtime: тохиргоо өөрчлөгдөнгүүт widget шууд шинэчлэгдэнэ
     const channel = supabase
       .channel("chatbot_settings_changes")
       .on(
@@ -116,7 +119,19 @@ export default function ChatbotWidget() {
       active = false;
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [initialized]);
+
+  const handleOpen = async () => {
+    if (!initialized) {
+      setInitializing(true);
+      setInitialized(true);
+    }
+    setOpen(true);
+  };
+
+  useEffect(() => {
+    if (settings && initializing) setInitializing(false);
+  }, [settings, initializing]);
 
   useEffect(() => {
     if (open && messages.length === 0 && settings) {
@@ -128,7 +143,8 @@ export default function ChatbotWidget() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, loading]);
 
-  if (!settings || !settings.is_enabled) return null;
+  // Hide widget only if settings loaded AND explicitly disabled.
+  if (initialized && settings && !settings.is_enabled) return null;
 
   const send = async () => {
     const text = input.trim();
@@ -142,7 +158,7 @@ export default function ChatbotWidget() {
     try {
       const apiMessages = next.filter((_, idx) => !(idx === 0 && next[0].role === "assistant"));
       const { data, error } = await supabase.functions.invoke("claude-chat", {
-        body: { messages: apiMessages, systemPrompt: settings.system_prompt },
+        body: { messages: apiMessages, systemPrompt: settings?.system_prompt ?? DEFAULT_SETTINGS.system_prompt },
       });
       if (error) throw error;
       const reply = (data as { reply?: string })?.reply ?? "Уучлаарай, хариу ирсэнгүй.";
@@ -163,7 +179,7 @@ export default function ChatbotWidget() {
       {/* Floating button */}
       {!open && (
         <button
-          onClick={() => setOpen(true)}
+          onClick={handleOpen}
           aria-label="Чатбот нээх"
           className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
         >
@@ -180,7 +196,7 @@ export default function ChatbotWidget() {
               <div className="h-8 w-8 rounded-full bg-primary-foreground/20 flex items-center justify-center">
                 <MessageCircle className="h-4 w-4" />
               </div>
-              <div className="font-semibold text-sm">{settings.bot_name}</div>
+              <div className="font-semibold text-sm">{settings?.bot_name ?? DEFAULT_SETTINGS.bot_name}</div>
             </div>
             <button
               onClick={() => setOpen(false)}
@@ -190,6 +206,15 @@ export default function ChatbotWidget() {
               <X className="h-4 w-4" />
             </button>
           </div>
+
+          {initializing && !settings && (
+            <div className="flex-1 flex items-center justify-center bg-background">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          )}
+
+          {settings && (
+          <>
 
           {/* Messages */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3 bg-background">
@@ -239,7 +264,10 @@ export default function ChatbotWidget() {
               <Send className="h-4 w-4" />
             </Button>
           </div>
+          </>
+          )}
         </div>
+
       )}
     </>
   );
