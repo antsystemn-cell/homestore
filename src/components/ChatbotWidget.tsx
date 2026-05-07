@@ -158,7 +158,7 @@ export default function ChatbotWidget() {
     try {
       const apiMessages = next.filter((_, idx) => !(idx === 0 && next[0].role === "assistant"));
       const { data, error } = await supabase.functions.invoke("claude-chat", {
-        body: { messages: apiMessages, systemPrompt: settings.system_prompt },
+        body: { messages: apiMessages, systemPrompt: settings?.system_prompt ?? DEFAULT_SETTINGS.system_prompt },
       });
       if (error) throw error;
       const reply = (data as { reply?: string })?.reply ?? "Уучлаарай, хариу ирсэнгүй.";
