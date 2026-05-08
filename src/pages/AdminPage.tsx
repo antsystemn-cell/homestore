@@ -240,7 +240,7 @@ const AdminPage = () => {
     delivery_fee: 0,
     payment_method: "cash",
     payment_status: "confirmed" as "unpaid" | "confirmed",
-    status: "confirmed" as "pending" | "phone_confirmed" | "confirmed" | "preparing",
+    status: "confirmed" as "pending" | "phone_confirmed" | "confirmed" | "preparing" | "delivering" | "completed" | "cancelled",
     note: "",
     sale_date: (() => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); })(),
     external_ref: "",
@@ -1736,6 +1736,22 @@ const AdminPage = () => {
                         </button>
                       ))}
                     </div>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="text-xs font-bold text-muted-foreground mb-1 block">Захиалгын төлөв</label>
+                    <select
+                      value={manualForm.status}
+                      onChange={(e) => setManualForm((f) => ({ ...f, status: e.target.value as any }))}
+                      className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    >
+                      <option value="pending">Хүлээгдэж буй</option>
+                      <option value="phone_confirmed">Утсаар баталгаажуулсан</option>
+                      <option value="confirmed">Төлбөр орсон</option>
+                      <option value="preparing">Бэлдэж байна</option>
+                      <option value="delivering">Хүргэлтэнд гарсан</option>
+                      <option value="completed">Дууссан</option>
+                      <option value="cancelled">Цуцлагдсан</option>
+                    </select>
                   </div>
                 </div>
               </section>
