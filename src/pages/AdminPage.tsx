@@ -240,7 +240,7 @@ const AdminPage = () => {
     delivery_fee: 0,
     payment_method: "cash",
     payment_status: "confirmed" as "unpaid" | "confirmed",
-    status: "confirmed" as "pending" | "phone_confirmed" | "confirmed" | "preparing",
+    status: "confirmed" as "pending" | "phone_confirmed" | "confirmed" | "preparing" | "delivering" | "completed" | "cancelled",
     note: "",
     sale_date: (() => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); })(),
     external_ref: "",
