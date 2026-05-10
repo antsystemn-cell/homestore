@@ -140,9 +140,10 @@ const ProductPage = () => {
   const hasColors = (product?.colors?.length || 0) > 0;
   const hasSizes = (product?.sizes?.length || 0) > 0;
   const variantSelected = (!hasColors || !!selectedColor) && (!hasSizes || !!selectedSize);
+  // Үлдэгдлийг зөвхөн Elle Sport брэнд дээр л тооцно. Бусад брэнд дээр үргэлж боломжтой.
   const isOutOfStock = isElleSportBrand
     ? (variantSelected ? selectedVariantQty <= 0 : (stockQty !== null && stockQty <= 0))
-    : (stockQty !== null && stockQty <= 0);
+    : false;
 
   const handleAddToCart = (andNavigate?: boolean) => {
     if (product?.colors && product.colors.length > 0 && !selectedColor) {
