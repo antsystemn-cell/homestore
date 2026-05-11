@@ -2671,6 +2671,19 @@ const AdminPage = () => {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-border text-left">
+                        <th className="px-3 py-4 w-8">
+                          <input
+                            type="checkbox"
+                            checked={filteredProducts.length > 0 && filteredProducts.every((p: any) => productSelected.has(p.id))}
+                            onChange={(e) => {
+                              const next = new Set(productSelected);
+                              if (e.target.checked) filteredProducts.forEach((p: any) => next.add(p.id));
+                              else filteredProducts.forEach((p: any) => next.delete(p.id));
+                              setProductSelected(next);
+                            }}
+                            className="rounded cursor-pointer"
+                          />
+                        </th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Бараа</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Ангилал</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Үнэ</th>
@@ -2680,7 +2693,19 @@ const AdminPage = () => {
                     </thead>
                     <tbody>
                       {filteredProducts.map((p) => (
-                        <tr key={p.id} className={`border-b border-border last:border-0 hover:bg-secondary/30 transition-colors ${p.is_active === false ? "opacity-50" : ""}`}>
+                        <tr key={p.id} className={`border-b border-border last:border-0 hover:bg-secondary/30 transition-colors ${p.is_active === false ? "opacity-50" : ""} ${productSelected.has(p.id) ? "bg-primary/5" : ""}`}>
+                          <td className="px-3 py-4">
+                            <input
+                              type="checkbox"
+                              checked={productSelected.has(p.id)}
+                              onChange={(e) => {
+                                const next = new Set(productSelected);
+                                if (e.target.checked) next.add(p.id); else next.delete(p.id);
+                                setProductSelected(next);
+                              }}
+                              className="rounded cursor-pointer"
+                            />
+                          </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div className="h-10 w-10 rounded-lg bg-secondary overflow-hidden shrink-0">
