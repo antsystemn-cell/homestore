@@ -3279,22 +3279,26 @@ const AdminPage = () => {
                                     </p>
                                   </div>
                                   <span className="text-xs font-bold">{formatPrice(item.price * item.quantity)}</span>
-                                  <button
-                                    type="button"
-                                    onClick={() => setEditingOrderItem(isEditingItem ? null : { orderId: o.id, idx })}
-                                    className={`p-1.5 rounded-lg ${isEditingItem ? "bg-primary text-primary-foreground" : "hover:bg-secondary"}`}
-                                    title="Засах"
-                                  >
-                                    <Pencil className="h-3.5 w-3.5" />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => { removeOrderItemLocal(o.id, idx); if (isEditingItem) setEditingOrderItem(null); }}
-                                    className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"
-                                    title="Хасах"
-                                  >
-                                    <X className="h-3.5 w-3.5" />
-                                  </button>
+                                  {isAdmin && (
+                                    <>
+                                      <button
+                                        type="button"
+                                        onClick={() => setEditingOrderItem(isEditingItem ? null : { orderId: o.id, idx })}
+                                        className={`p-1.5 rounded-lg ${isEditingItem ? "bg-primary text-primary-foreground" : "hover:bg-secondary"}`}
+                                        title="Засах"
+                                      >
+                                        <Pencil className="h-3.5 w-3.5" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => { removeOrderItemLocal(o.id, idx); if (isEditingItem) setEditingOrderItem(null); }}
+                                        className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"
+                                        title="Хасах"
+                                      >
+                                        <X className="h-3.5 w-3.5" />
+                                      </button>
+                                    </>
+                                  )}
                                 </div>
                                 {isEditingItem && (
                                   <div className="mt-2 space-y-2 pt-2 border-t border-border">
