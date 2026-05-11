@@ -2252,8 +2252,22 @@ const AdminPage = () => {
                     </div>
                     <div>
                       <label className="text-[11px] text-muted-foreground mb-1 block">Хямдрал %</label>
-                      <input type="number" placeholder="0" value={form.discount || ""} onChange={(e) => setForm({ ...form, discount: +e.target.value })}
+                      <input type="number" placeholder="0" value={form.discount || ""} onChange={(e) => {
+                        const pct = Math.max(0, Math.min(99, +e.target.value || 0));
+                        const base = (form.original_price && form.original_price > 0) ? form.original_price : form.price;
+                        if (pct > 0) {
+                          const newPrice = Math.round(base * (1 - pct / 100));
+                          setForm({ ...form, discount: pct, price: newPrice, original_price: base, is_on_sale: true });
+                        } else {
+                          setForm({ ...form, discount: 0, is_on_sale: false });
+                        }
+                      }}
                         className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                      {form.discount > 0 && form.original_price > 0 && (
+                        <p className="text-[10px] text-destructive font-semibold mt-1">
+                          Шинэ үнэ: {formatPrice(form.price)} <span className="text-muted-foreground line-through font-normal ml-1">{formatPrice(form.original_price)}</span>
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className="text-[11px] text-muted-foreground mb-1 block">Ангилал</label>
