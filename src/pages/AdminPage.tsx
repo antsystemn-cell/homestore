@@ -3400,96 +3400,98 @@ const AdminPage = () => {
                             })}
                           </div>
                           {/* Add new item */}
-                          <div className="mt-2">
-                            {addingItemToOrderId === o.id ? (
-                              <div className="bg-secondary/30 rounded-lg p-2 space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <label className="text-[10px] font-semibold text-muted-foreground">Шинэ бараа нэмэх</label>
-                                  <button type="button" onClick={() => { setAddingItemToOrderId(null); setAddItemSearch(""); }} className="text-[10px] text-muted-foreground hover:text-foreground">Болих</button>
-                                </div>
-                                <div className="relative">
-                                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                                  <input
-                                    type="text"
-                                    value={addItemSearch}
-                                    onChange={(e) => setAddItemSearch(e.target.value)}
-                                    placeholder="Бараа хайх (нэр / SKU / өнгө / хэмжээ)..."
-                                    autoFocus
-                                    className="w-full rounded-lg bg-card border border-border pl-8 pr-3 py-1.5 text-xs"
-                                  />
-                                </div>
-                                {addItemSearch.trim() && (() => {
-                                  const q = addItemSearch.toLowerCase();
-                                  type Row = { key: string; product: any; color?: string; size?: string; sku?: string; image?: string; stock?: number; };
-                                  const rows: Row[] = [];
-                                  for (const p of products) {
-                                    const vs = (p.variant_stock && typeof p.variant_stock === 'object') ? p.variant_stock : {};
-                                    const colors: any[] = Array.isArray(p.colors) ? p.colors : [];
-                                    const variantKeys = Object.keys(vs);
-                                    if (variantKeys.length > 0) {
-                                      for (const key of variantKeys) {
-                                        const [color, size] = key.split('|');
-                                        const cmeta = colors.find((c: any) => (c?.name || '').trim() === (color || '').trim());
-                                        const sku = cmeta?.sku || p.product_code || '';
-                                        const image = cmeta?.image || p.thumbnail_url || p.image_url;
-                                        rows.push({ key: `${p.id}|${key}`, product: p, color, size, sku, image, stock: Number(vs[key]) || 0 });
+                          {isAdmin && (
+                            <div className="mt-2">
+                              {addingItemToOrderId === o.id ? (
+                                <div className="bg-secondary/30 rounded-lg p-2 space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <label className="text-[10px] font-semibold text-muted-foreground">Шинэ бараа нэмэх</label>
+                                    <button type="button" onClick={() => { setAddingItemToOrderId(null); setAddItemSearch(""); }} className="text-[10px] text-muted-foreground hover:text-foreground">Болих</button>
+                                  </div>
+                                  <div className="relative">
+                                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                                    <input
+                                      type="text"
+                                      value={addItemSearch}
+                                      onChange={(e) => setAddItemSearch(e.target.value)}
+                                      placeholder="Бараа хайх (нэр / SKU / өнгө / хэмжээ)..."
+                                      autoFocus
+                                      className="w-full rounded-lg bg-card border border-border pl-8 pr-3 py-1.5 text-xs"
+                                    />
+                                  </div>
+                                  {addItemSearch.trim() && (() => {
+                                    const q = addItemSearch.toLowerCase();
+                                    type Row = { key: string; product: any; color?: string; size?: string; sku?: string; image?: string; stock?: number; };
+                                    const rows: Row[] = [];
+                                    for (const p of products) {
+                                      const vs = (p.variant_stock && typeof p.variant_stock === 'object') ? p.variant_stock : {};
+                                      const colors: any[] = Array.isArray(p.colors) ? p.colors : [];
+                                      const variantKeys = Object.keys(vs);
+                                      if (variantKeys.length > 0) {
+                                        for (const key of variantKeys) {
+                                          const [color, size] = key.split('|');
+                                          const cmeta = colors.find((c: any) => (c?.name || '').trim() === (color || '').trim());
+                                          const sku = cmeta?.sku || p.product_code || '';
+                                          const image = cmeta?.image || p.thumbnail_url || p.image_url;
+                                          rows.push({ key: `${p.id}|${key}`, product: p, color, size, sku, image, stock: Number(vs[key]) || 0 });
+                                        }
+                                      } else {
+                                        rows.push({ key: p.id, product: p, sku: p.product_code, image: p.thumbnail_url || p.image_url, stock: p.stock_quantity });
                                       }
-                                    } else {
-                                      rows.push({ key: p.id, product: p, sku: p.product_code, image: p.thumbnail_url || p.image_url, stock: p.stock_quantity });
                                     }
-                                  }
-                                  const filtered = rows.filter((r) => `${r.product.name} ${r.sku || ''} ${r.color || ''} ${r.size || ''}`.toLowerCase().includes(q)).slice(0, 30);
-                                  return (
-                                    <div className="border border-border rounded-lg max-h-56 overflow-y-auto bg-card">
-                                      {filtered.map((r) => (
-                                        <button
-                                          key={r.key}
-                                          type="button"
-                                          onClick={() => {
-                                            addOrderItemLocal(o.id, {
-                                              product_id: r.product.id,
-                                              name: r.product.name,
-                                              price: r.product.price,
-                                              quantity: 1,
-                                              product_code: r.sku || r.product.product_code,
-                                              sku: r.sku || r.product.product_code,
-                                              image: r.image,
-                                              color: r.color || "",
-                                              size: r.size || "",
-                                            });
-                                            setAddItemSearch("");
-                                          }}
-                                          className="w-full flex items-center gap-2 p-1.5 text-left hover:bg-secondary/60 border-b border-border last:border-b-0"
-                                        >
-                                          {r.image && <img src={r.image} alt="" className="w-8 h-8 rounded object-cover bg-secondary" />}
-                                          <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-medium truncate">{r.product.name}</p>
-                                            <p className="text-[10px] text-muted-foreground truncate">
-                                              {[r.color, r.size].filter(Boolean).join(' / ')}
-                                              {r.sku ? ` · ${r.sku}` : ''}
-                                              {r.stock !== undefined ? ` · Үлд: ${r.stock}` : ''}
-                                            </p>
-                                          </div>
-                                          <span className="text-[10px] font-bold">{formatPrice(r.product.price)}</span>
-                                        </button>
-                                      ))}
-                                      {filtered.length === 0 && (
-                                        <p className="text-center text-[11px] text-muted-foreground py-3">Илэрц олдсонгүй</p>
-                                      )}
-                                    </div>
-                                  );
-                                })()}
-                              </div>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => { setAddingItemToOrderId(o.id); setAddItemSearch(""); }}
-                                className="w-full text-[11px] font-semibold px-3 py-2 rounded-lg border border-dashed border-border hover:bg-secondary/50 text-muted-foreground"
-                              >
-                                + Бараа нэмэх
-                              </button>
-                            )}
-                          </div>
+                                    const filtered = rows.filter((r) => `${r.product.name} ${r.sku || ''} ${r.color || ''} ${r.size || ''}`.toLowerCase().includes(q)).slice(0, 30);
+                                    return (
+                                      <div className="border border-border rounded-lg max-h-56 overflow-y-auto bg-card">
+                                        {filtered.map((r) => (
+                                          <button
+                                            key={r.key}
+                                            type="button"
+                                            onClick={() => {
+                                              addOrderItemLocal(o.id, {
+                                                product_id: r.product.id,
+                                                name: r.product.name,
+                                                price: r.product.price,
+                                                quantity: 1,
+                                                product_code: r.sku || r.product.product_code,
+                                                sku: r.sku || r.product.product_code,
+                                                image: r.image,
+                                                color: r.color || "",
+                                                size: r.size || "",
+                                              });
+                                              setAddItemSearch("");
+                                            }}
+                                            className="w-full flex items-center gap-2 p-1.5 text-left hover:bg-secondary/60 border-b border-border last:border-b-0"
+                                          >
+                                            {r.image && <img src={r.image} alt="" className="w-8 h-8 rounded object-cover bg-secondary" />}
+                                            <div className="flex-1 min-w-0">
+                                              <p className="text-xs font-medium truncate">{r.product.name}</p>
+                                              <p className="text-[10px] text-muted-foreground truncate">
+                                                {[r.color, r.size].filter(Boolean).join(' / ')}
+                                                {r.sku ? ` · ${r.sku}` : ''}
+                                                {r.stock !== undefined ? ` · Үлд: ${r.stock}` : ''}
+                                              </p>
+                                            </div>
+                                            <span className="text-[10px] font-bold">{formatPrice(r.product.price)}</span>
+                                          </button>
+                                        ))}
+                                        {filtered.length === 0 && (
+                                          <p className="text-center text-[11px] text-muted-foreground py-3">Илэрц олдсонгүй</p>
+                                        )}
+                                      </div>
+                                    );
+                                  })()}
+                                </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => { setAddingItemToOrderId(o.id); setAddItemSearch(""); }}
+                                  className="w-full text-[11px] font-semibold px-3 py-2 rounded-lg border border-dashed border-border hover:bg-secondary/50 text-muted-foreground"
+                                >
+                                  + Бараа нэмэх
+                                </button>
+                              )}
+                            </div>
+                          )}
                         </div>
 
                         {/* Payment method info */}
