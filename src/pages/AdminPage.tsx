@@ -2783,7 +2783,17 @@ const AdminPage = () => {
               {/* Mobile card view */}
               <div className="md:hidden space-y-2">
                 {filteredProducts.map((p) => (
-                  <div key={p.id} className={`flex items-center gap-3 bg-card rounded-xl p-3 border border-border ${p.is_active === false ? "opacity-50" : ""}`}>
+                  <div key={p.id} className={`flex items-center gap-3 bg-card rounded-xl p-3 border border-border ${p.is_active === false ? "opacity-50" : ""} ${productSelected.has(p.id) ? "ring-2 ring-primary/40" : ""}`}>
+                    <input
+                      type="checkbox"
+                      checked={productSelected.has(p.id)}
+                      onChange={(e) => {
+                        const next = new Set(productSelected);
+                        if (e.target.checked) next.add(p.id); else next.delete(p.id);
+                        setProductSelected(next);
+                      }}
+                      className="rounded cursor-pointer shrink-0"
+                    />
                     <div className="h-12 w-12 rounded-lg bg-secondary overflow-hidden shrink-0">
                       {p.image_url ? (
                         <img src={p.image_url} alt="" className="h-full w-full object-cover" />
