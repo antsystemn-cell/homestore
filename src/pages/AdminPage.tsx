@@ -214,6 +214,9 @@ const AdminPage = () => {
   const [orderSearchPhone, setOrderSearchPhone] = useState("");
   const [showCancelledRecent, setShowCancelledRecent] = useState(false);
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
+  const [productSelected, setProductSelected] = useState<Set<string>>(new Set());
+  const [bulkDiscountPct, setBulkDiscountPct] = useState<number>(0);
+  const [bulkDiscountLoading, setBulkDiscountLoading] = useState(false);
   const [showXlsxHelp, setShowXlsxHelp] = useState(false);
   const [showPrintChecklist, setShowPrintChecklist] = useState(false);
   const [showPrintSettings, setShowPrintSettings] = useState(false);
@@ -1056,6 +1059,38 @@ const AdminPage = () => {
     setExtraImages((data || []).map((r: any) => r.image_url));
     toast.success("Бараа хуулагдлаа. SKU-г шалгаад хадгална уу.");
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleApplyBulkDiscount = async () => {
+    const ids = Array.from(productSelected);
+    if (ids.length === 0) { toast.error("Бараа сонгоно уу"); return; }
+    const pct = Math.max(0, Math.min(99, Math.round(bulkDiscountPct || 0)));
+    setBulkDiscountLoading(true);
+    try {
+      const targets = products.filter((p: any) => productSelected.has(p.id));
+      let okCount = 0;
+      for (const p of targets) {
+        const base = (p.original_price && p.original_price > 0) ? p.original_price : p.price;
+        let payload: any;
+        if (pct <= 0) {
+          // remove discount
+          payload = { price: base, original_price: null, discount: 0, is_on_sale: false };
+        } else {
+          const newPrice = Math.round(base * (1 - pct / 100));
+          payload = { price: newPrice, original_price: base, discount: pct, is_on_sale: true };
+        }
+        const { error } = await supabase.from("products").update(payload).eq("id", p.id);
+        if (!error) okCount++;
+      }
+      toast.success(pct > 0
+        ? `${okCount} бараанд ${pct}% хямдрал тооцлоо`
+        : `${okCount} бараанаас хямдрал хаслаа`);
+      setProductSelected(new Set());
+      setBulkDiscountPct(0);
+      fetchProducts();
+    } finally {
+      setBulkDiscountLoading(false);
+    }
   };
 
   // Filtered products
@@ -2111,6 +2146,37 @@ const AdminPage = () => {
                 </p>
               ) : null}
 
+              {/* Bulk discount bar */}
+              {productSelected.size > 0 && (
+                <div className="bg-card rounded-2xl border border-primary/30 p-3 mb-3 flex flex-col sm:flex-row sm:items-center gap-3">
+                  <div className="text-sm font-semibold flex-1">
+                    {productSelected.size} бараа сонгосон
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-muted-foreground">Хямдрал %:</label>
+                    <input
+                      type="number" min={0} max={99} placeholder="0"
+                      value={bulkDiscountPct || ""}
+                      onChange={(e) => setBulkDiscountPct(Math.max(0, Math.min(99, +e.target.value || 0)))}
+                      className="w-20 rounded-lg bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                    <button
+                      onClick={handleApplyBulkDiscount}
+                      disabled={bulkDiscountLoading}
+                      className="bg-primary text-primary-foreground rounded-lg px-4 py-2 text-xs font-bold disabled:opacity-50 hover:bg-primary/90 transition-colors"
+                    >
+                      {bulkDiscountLoading ? "Тооцож байна..." : (bulkDiscountPct > 0 ? `${bulkDiscountPct}% хэрэглэх` : "Хямдрал хасах")}
+                    </button>
+                    <button
+                      onClick={() => { setProductSelected(new Set()); setBulkDiscountPct(0); }}
+                      className="bg-secondary rounded-lg px-3 py-2 text-xs font-medium hover:bg-secondary/80"
+                    >
+                      Цуцлах
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Product Form */}
               {showForm && (
                 <div className="bg-card rounded-2xl p-4 md:p-6 border border-border mb-4 space-y-4">
@@ -2217,8 +2283,22 @@ const AdminPage = () => {
                     </div>
                     <div>
                       <label className="text-[11px] text-muted-foreground mb-1 block">Хямдрал %</label>
-                      <input type="number" placeholder="0" value={form.discount || ""} onChange={(e) => setForm({ ...form, discount: +e.target.value })}
+                      <input type="number" placeholder="0" value={form.discount || ""} onChange={(e) => {
+                        const pct = Math.max(0, Math.min(99, +e.target.value || 0));
+                        const base = (form.original_price && form.original_price > 0) ? form.original_price : form.price;
+                        if (pct > 0) {
+                          const newPrice = Math.round(base * (1 - pct / 100));
+                          setForm({ ...form, discount: pct, price: newPrice, original_price: base, is_on_sale: true });
+                        } else {
+                          setForm({ ...form, discount: 0, is_on_sale: false });
+                        }
+                      }}
                         className="w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                      {form.discount > 0 && form.original_price > 0 && (
+                        <p className="text-[10px] text-destructive font-semibold mt-1">
+                          Шинэ үнэ: {formatPrice(form.price)} <span className="text-muted-foreground line-through font-normal ml-1">{formatPrice(form.original_price)}</span>
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className="text-[11px] text-muted-foreground mb-1 block">Ангилал</label>
@@ -2591,6 +2671,19 @@ const AdminPage = () => {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-border text-left">
+                        <th className="px-3 py-4 w-8">
+                          <input
+                            type="checkbox"
+                            checked={filteredProducts.length > 0 && filteredProducts.every((p: any) => productSelected.has(p.id))}
+                            onChange={(e) => {
+                              const next = new Set(productSelected);
+                              if (e.target.checked) filteredProducts.forEach((p: any) => next.add(p.id));
+                              else filteredProducts.forEach((p: any) => next.delete(p.id));
+                              setProductSelected(next);
+                            }}
+                            className="rounded cursor-pointer"
+                          />
+                        </th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Бараа</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Ангилал</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Үнэ</th>
@@ -2600,7 +2693,19 @@ const AdminPage = () => {
                     </thead>
                     <tbody>
                       {filteredProducts.map((p) => (
-                        <tr key={p.id} className={`border-b border-border last:border-0 hover:bg-secondary/30 transition-colors ${p.is_active === false ? "opacity-50" : ""}`}>
+                        <tr key={p.id} className={`border-b border-border last:border-0 hover:bg-secondary/30 transition-colors ${p.is_active === false ? "opacity-50" : ""} ${productSelected.has(p.id) ? "bg-primary/5" : ""}`}>
+                          <td className="px-3 py-4">
+                            <input
+                              type="checkbox"
+                              checked={productSelected.has(p.id)}
+                              onChange={(e) => {
+                                const next = new Set(productSelected);
+                                if (e.target.checked) next.add(p.id); else next.delete(p.id);
+                                setProductSelected(next);
+                              }}
+                              className="rounded cursor-pointer"
+                            />
+                          </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div className="h-10 w-10 rounded-lg bg-secondary overflow-hidden shrink-0">
@@ -2678,7 +2783,17 @@ const AdminPage = () => {
               {/* Mobile card view */}
               <div className="md:hidden space-y-2">
                 {filteredProducts.map((p) => (
-                  <div key={p.id} className={`flex items-center gap-3 bg-card rounded-xl p-3 border border-border ${p.is_active === false ? "opacity-50" : ""}`}>
+                  <div key={p.id} className={`flex items-center gap-3 bg-card rounded-xl p-3 border border-border ${p.is_active === false ? "opacity-50" : ""} ${productSelected.has(p.id) ? "ring-2 ring-primary/40" : ""}`}>
+                    <input
+                      type="checkbox"
+                      checked={productSelected.has(p.id)}
+                      onChange={(e) => {
+                        const next = new Set(productSelected);
+                        if (e.target.checked) next.add(p.id); else next.delete(p.id);
+                        setProductSelected(next);
+                      }}
+                      className="rounded cursor-pointer shrink-0"
+                    />
                     <div className="h-12 w-12 rounded-lg bg-secondary overflow-hidden shrink-0">
                       {p.image_url ? (
                         <img src={p.image_url} alt="" className="h-full w-full object-cover" />
