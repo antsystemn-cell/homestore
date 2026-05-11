@@ -1061,6 +1061,38 @@ const AdminPage = () => {
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleApplyBulkDiscount = async () => {
+    const ids = Array.from(productSelected);
+    if (ids.length === 0) { toast.error("Бараа сонгоно уу"); return; }
+    const pct = Math.max(0, Math.min(99, Math.round(bulkDiscountPct || 0)));
+    setBulkDiscountLoading(true);
+    try {
+      const targets = products.filter((p: any) => productSelected.has(p.id));
+      let okCount = 0;
+      for (const p of targets) {
+        const base = (p.original_price && p.original_price > 0) ? p.original_price : p.price;
+        let payload: any;
+        if (pct <= 0) {
+          // remove discount
+          payload = { price: base, original_price: null, discount: 0, is_on_sale: false };
+        } else {
+          const newPrice = Math.round(base * (1 - pct / 100));
+          payload = { price: newPrice, original_price: base, discount: pct, is_on_sale: true };
+        }
+        const { error } = await supabase.from("products").update(payload).eq("id", p.id);
+        if (!error) okCount++;
+      }
+      toast.success(pct > 0
+        ? `${okCount} бараанд ${pct}% хямдрал тооцлоо`
+        : `${okCount} бараанаас хямдрал хаслаа`);
+      setProductSelected(new Set());
+      setBulkDiscountPct(0);
+      fetchProducts();
+    } finally {
+      setBulkDiscountLoading(false);
+    }
+  };
+
   // Filtered products
   const filteredProducts = products.filter((p) => {
     const q = searchQuery.toLowerCase();
