@@ -214,6 +214,9 @@ const AdminPage = () => {
   const [orderSearchPhone, setOrderSearchPhone] = useState("");
   const [showCancelledRecent, setShowCancelledRecent] = useState(false);
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
+  const [productSelected, setProductSelected] = useState<Set<string>>(new Set());
+  const [bulkDiscountPct, setBulkDiscountPct] = useState<number>(0);
+  const [bulkDiscountLoading, setBulkDiscountLoading] = useState(false);
   const [showXlsxHelp, setShowXlsxHelp] = useState(false);
   const [showPrintChecklist, setShowPrintChecklist] = useState(false);
   const [showPrintSettings, setShowPrintSettings] = useState(false);
