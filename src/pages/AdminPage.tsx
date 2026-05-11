@@ -3250,14 +3250,16 @@ const AdminPage = () => {
                         <div>
                           <div className="flex items-center justify-between mb-2">
                             <h4 className="text-xs font-bold text-muted-foreground">Захиалсан бараанууд</h4>
-                            <button
-                              type="button"
-                              onClick={() => saveOrderItems(o.id)}
-                              disabled={savingOrderItems === o.id}
-                              className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-primary text-primary-foreground disabled:opacity-50"
-                            >
-                              {savingOrderItems === o.id ? "Хадгалж байна..." : "Хадгалах"}
-                            </button>
+                            {isAdmin && (
+                              <button
+                                type="button"
+                                onClick={() => saveOrderItems(o.id)}
+                                disabled={savingOrderItems === o.id}
+                                className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-primary text-primary-foreground disabled:opacity-50"
+                              >
+                                {savingOrderItems === o.id ? "Хадгалж байна..." : "Хадгалах"}
+                              </button>
+                            )}
                           </div>
                           <div className="space-y-2">
                             {orderItems.map((item: any, idx: number) => {
