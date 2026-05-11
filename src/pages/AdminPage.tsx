@@ -2146,6 +2146,37 @@ const AdminPage = () => {
                 </p>
               ) : null}
 
+              {/* Bulk discount bar */}
+              {productSelected.size > 0 && (
+                <div className="bg-card rounded-2xl border border-primary/30 p-3 mb-3 flex flex-col sm:flex-row sm:items-center gap-3">
+                  <div className="text-sm font-semibold flex-1">
+                    {productSelected.size} бараа сонгосон
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-muted-foreground">Хямдрал %:</label>
+                    <input
+                      type="number" min={0} max={99} placeholder="0"
+                      value={bulkDiscountPct || ""}
+                      onChange={(e) => setBulkDiscountPct(Math.max(0, Math.min(99, +e.target.value || 0)))}
+                      className="w-20 rounded-lg bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                    <button
+                      onClick={handleApplyBulkDiscount}
+                      disabled={bulkDiscountLoading}
+                      className="bg-primary text-primary-foreground rounded-lg px-4 py-2 text-xs font-bold disabled:opacity-50 hover:bg-primary/90 transition-colors"
+                    >
+                      {bulkDiscountLoading ? "Тооцож байна..." : (bulkDiscountPct > 0 ? `${bulkDiscountPct}% хэрэглэх` : "Хямдрал хасах")}
+                    </button>
+                    <button
+                      onClick={() => { setProductSelected(new Set()); setBulkDiscountPct(0); }}
+                      className="bg-secondary rounded-lg px-3 py-2 text-xs font-medium hover:bg-secondary/80"
+                    >
+                      Цуцлах
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Product Form */}
               {showForm && (
                 <div className="bg-card rounded-2xl p-4 md:p-6 border border-border mb-4 space-y-4">
