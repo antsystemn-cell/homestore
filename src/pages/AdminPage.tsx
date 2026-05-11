@@ -3300,7 +3300,7 @@ const AdminPage = () => {
                                     </>
                                   )}
                                 </div>
-                                {isEditingItem && (
+                                {isAdmin && isEditingItem && (
                                   <div className="mt-2 space-y-2 pt-2 border-t border-border">
                                     <div>
                                       <label className="text-[10px] font-semibold text-muted-foreground">Системээс бараа сонгох</label>
