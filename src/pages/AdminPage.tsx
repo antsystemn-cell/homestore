@@ -165,7 +165,7 @@ const AdminPage = () => {
     for (const p of prodRows || []) {
       if (p.brand_id !== ELLE_BRAND_ID) continue;
       const changes = byProduct.get(p.id) || [];
-      const variantStock: Record<string, any> = { ...(p.variant_stock || {}) };
+      const variantStock: Record<string, any> = { ...((p.variant_stock as Record<string, any>) || {}) };
       let stockTotalDelta = 0;
       const logs: any[] = [];
       for (const ch of changes) {
