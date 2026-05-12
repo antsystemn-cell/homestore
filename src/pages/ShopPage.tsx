@@ -7,6 +7,7 @@ import ProductGridSkeleton from "@/components/store/ProductGridSkeleton";
 import LoadError from "@/components/store/LoadError";
 import ErrorBoundary from "@/components/store/ErrorBoundary";
 import BrandBanner from "@/components/store/BrandBanner";
+import WestinghouseHeader from "@/components/store/WestinghouseHeader";
 import { Product, mapDbProduct } from "@/data/products";
 import { fetchPublicBrands, fetchPublicProducts } from "@/lib/publicStoreApi";
 
