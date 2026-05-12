@@ -118,6 +118,88 @@ const AdminPage = () => {
     }));
   };
 
+  const ELLE_BRAND_ID = '24c51924-70f8-453c-b6cd-7e6eccbda36e';
+
+  const adjustElleStockForOrderEdit = async (orderId: string, orderRef: string | null, oldItems: any[], newItems: any[]) => {
+    // Build qty map per product+variant: key = productId | color | size
+    const buildMap = (arr: any[]) => {
+      const m = new Map<string, { product_id: string; color: string; size: string; qty: number }>();
+      for (const it of arr || []) {
+        const pid = it?.product_id; if (!pid) continue;
+        const color = String(it?.color || '');
+        const size = String(it?.size || '');
+        const qty = Number(it?.quantity) || 0;
+        if (qty <= 0) continue;
+        const key = `${pid}|${color}|${size}`;
+        const cur = m.get(key);
+        if (cur) cur.qty += qty;
+        else m.set(key, { product_id: pid, color, size, qty });
+      }
+      return m;
+    };
+    const oldMap = buildMap(oldItems);
+    const newMap = buildMap(newItems);
+    const allKeys = new Set([...oldMap.keys(), ...newMap.keys()]);
+
+    // Group deltas by product_id
+    const byProduct = new Map<string, { color: string; size: string; delta: number }[]>();
+    for (const key of allKeys) {
+      const o = oldMap.get(key)?.qty || 0;
+      const n = newMap.get(key)?.qty || 0;
+      const delta = n - o; // positive = need to deduct, negative = need to restore
+      if (delta === 0) continue;
+      const meta = (newMap.get(key) || oldMap.get(key))!;
+      const arr = byProduct.get(meta.product_id) || [];
+      arr.push({ color: meta.color, size: meta.size, delta });
+      byProduct.set(meta.product_id, arr);
+    }
+    if (byProduct.size === 0) return;
+
+    const productIds = Array.from(byProduct.keys());
+    const { data: prodRows, error: prodErr } = await supabase
+      .from('products')
+      .select('id, brand_id, variant_stock, stock_quantity, name')
+      .in('id', productIds);
+    if (prodErr) { console.error('Stock fetch error', prodErr); return; }
+
+    for (const p of prodRows || []) {
+      if (p.brand_id !== ELLE_BRAND_ID) continue;
+      const changes = byProduct.get(p.id) || [];
+      const variantStock: Record<string, any> = { ...(p.variant_stock || {}) };
+      let stockTotalDelta = 0;
+      const logs: any[] = [];
+      for (const ch of changes) {
+        const vKey = `${ch.color}|${ch.size}`;
+        const before = Number(variantStock[vKey] || 0);
+        // delta>0 => deduct; delta<0 => restore
+        const after = ch.delta > 0 ? Math.max(0, before - ch.delta) : before + Math.abs(ch.delta);
+        variantStock[vKey] = after;
+        stockTotalDelta += (after - before); // restore positive, deduct negative
+        logs.push({
+          order_id: orderId,
+          order_ref: orderRef,
+          product_id: p.id,
+          product_name: p.name,
+          color: ch.color,
+          size: ch.size,
+          variant_key: vKey,
+          quantity_deducted: ch.delta > 0 ? ch.delta : -Math.abs(ch.delta), // negative = restored
+          stock_before: before,
+          stock_after: after,
+          brand_id: p.brand_id,
+        });
+      }
+      const newStockQty = Math.max(0, Number(p.stock_quantity || 0) + stockTotalDelta);
+      const { error: upErr } = await supabase
+        .from('products')
+        .update({ variant_stock: variantStock, stock_quantity: newStockQty, updated_at: new Date().toISOString() })
+        .eq('id', p.id);
+      if (upErr) console.error('Stock update error', upErr);
+      // Best-effort log (table may reject inserts; ignore errors)
+      try { await (supabase as any).from('stock_deduction_log').insert(logs); } catch {}
+    }
+  };
+
   const saveOrderItems = async (orderId: string) => {
     const order = orders.find((o) => o.id === orderId);
     if (!order) return;
@@ -125,9 +207,23 @@ const AdminPage = () => {
     const items = Array.isArray(order.items) ? order.items : [];
     const subtotal = items.reduce((s: number, it: any) => s + (Number(it.price) || 0) * (Number(it.quantity) || 0), 0);
     const total = subtotal + (Number(order.delivery_fee) || 0);
+
+    // Fetch current DB items to compute Elle Sport stock delta
+    let dbOldItems: any[] = [];
+    try {
+      const { data: cur } = await supabase.from('orders').select('items').eq('id', orderId).maybeSingle();
+      dbOldItems = Array.isArray(cur?.items) ? cur!.items : [];
+    } catch (e) { console.error('Old items fetch failed', e); }
+
     const { error } = await supabase.from("orders").update({ items, total, updated_at: new Date().toISOString() }).eq("id", orderId);
+    if (error) { setSavingOrderItems(null); toast.error("Хадгалахад алдаа: " + error.message); return; }
+
+    // Apply Elle Sport variant stock adjustments based on diff
+    try {
+      await adjustElleStockForOrderEdit(orderId, order.order_ref || null, dbOldItems, items);
+    } catch (e) { console.error('Elle stock adjust error', e); }
+
     setSavingOrderItems(null);
-    if (error) { toast.error("Хадгалахад алдаа: " + error.message); return; }
     setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, total } : o));
     setEditingOrderItem(null);
     toast.success("Барааны мэдээлэл шинэчлэгдлээ");
