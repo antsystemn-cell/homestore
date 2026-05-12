@@ -81,7 +81,7 @@ const ShopPage = () => {
       {selectedBrand !== "all" && (
         <BrandBanner logoUrl={brands.find((b) => b.id === selectedBrand)?.logo_url} />
       )}
-      {brands.length > 0 && (
+      {brands.length > 0 && selectedBrand === "all" && (
         <div className="max-w-6xl mx-auto px-4 md:px-8 pt-4">
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             <button
