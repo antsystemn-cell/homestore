@@ -7,6 +7,7 @@ import ProductGridSkeleton from "@/components/store/ProductGridSkeleton";
 import LoadError from "@/components/store/LoadError";
 import ErrorBoundary from "@/components/store/ErrorBoundary";
 import BrandBanner from "@/components/store/BrandBanner";
+import WestinghouseHeader from "@/components/store/WestinghouseHeader";
 import { Product, mapDbProduct } from "@/data/products";
 import { fetchPublicBrands, fetchPublicProducts } from "@/lib/publicStoreApi";
 
@@ -74,12 +75,23 @@ const ShopPage = () => {
     [products, selectedBrand]
   );
 
+  const selectedBrandObj = useMemo(
+    () => brands.find((b) => b.id === selectedBrand),
+    [brands, selectedBrand]
+  );
+  const isWestinghouse = selectedBrandObj?.name?.toLowerCase() === "westinghouse";
+
   return (
     <div className="min-h-screen bg-secondary pb-16 md:pb-0">
-      <Header />
-      {/* Brand banner when a specific brand is selected */}
-      {selectedBrand !== "all" && (
-        <BrandBanner logoUrl={brands.find((b) => b.id === selectedBrand)?.logo_url} />
+      {isWestinghouse ? (
+        <WestinghouseHeader logoUrl={selectedBrandObj?.logo_url} />
+      ) : (
+        <>
+          <Header />
+          {selectedBrand !== "all" && (
+            <BrandBanner logoUrl={selectedBrandObj?.logo_url} />
+          )}
+        </>
       )}
       {brands.length > 0 && selectedBrand === "all" && (
         <div className="max-w-6xl mx-auto px-4 md:px-8 pt-4">
