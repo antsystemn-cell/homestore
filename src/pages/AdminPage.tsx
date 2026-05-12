@@ -3152,7 +3152,23 @@ const AdminPage = () => {
                               const t = toast.loading("PDF бэлдэж байна…");
                               try {
                                 await downloadOrderLabelsPdf(chosen as any, `orders-${new Date().toISOString().slice(0,10)}.pdf`);
-                                toast.success("PDF татагдлаа", { id: t });
+                                // Mark downloaded orders as "preparing" (Бэлдэж байна)
+                                const idsToUpdate = chosen
+                                  .filter((o: any) => o.status !== "preparing" && o.status !== "delivering" && o.status !== "completed" && o.status !== "cancelled")
+                                  .map((o: any) => o.id);
+                                if (idsToUpdate.length > 0) {
+                                  const { error: upErr } = await supabase
+                                    .from("orders")
+                                    .update({ status: "preparing", updated_at: new Date().toISOString() })
+                                    .in("id", idsToUpdate);
+                                  if (upErr) {
+                                    console.error(upErr);
+                                    toast.error("Төлөв шинэчлэхэд алдаа гарлаа");
+                                  } else {
+                                    setOrders((prev: any) => prev.map((o: any) => idsToUpdate.includes(o.id) ? { ...o, status: "preparing" } : o));
+                                  }
+                                }
+                                toast.success(`PDF татагдлаа${idsToUpdate.length > 0 ? ` · ${idsToUpdate.length} захиалга "Бэлдэж байна" болсон` : ""}`, { id: t });
                               } catch (e) {
                                 console.error(e);
                                 toast.error("PDF үүсгэхэд алдаа гарлаа", { id: t });
