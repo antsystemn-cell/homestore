@@ -126,8 +126,8 @@ const AdminPage = () => {
       const m = new Map<string, { product_id: string; color: string; size: string; qty: number }>();
       for (const it of arr || []) {
         const pid = it?.product_id; if (!pid) continue;
-        const color = String(it?.color || '');
-        const size = String(it?.size || '');
+        const color = String(it?.color || '').trim();
+        const size = String(it?.size || '').trim();
         const qty = Number(it?.quantity) || 0;
         if (qty <= 0) continue;
         const key = `${pid}|${color}|${size}`;
@@ -169,7 +169,9 @@ const AdminPage = () => {
       let stockTotalDelta = 0;
       const logs: any[] = [];
       for (const ch of changes) {
-        const vKey = `${ch.color}|${ch.size}`;
+        const colorPart = (ch.color || "").trim();
+        const sizePart = (ch.size || "").trim();
+        const vKey = `${colorPart}|${sizePart}`;
         const before = Number(variantStock[vKey] || 0);
         // delta>0 => deduct; delta<0 => restore
         const after = ch.delta > 0 ? Math.max(0, before - ch.delta) : before + Math.abs(ch.delta);
@@ -1018,7 +1020,7 @@ const AdminPage = () => {
         const norm = (b?.name || "").toLowerCase().replace(/\s+/g, "");
         const isElleSport = norm.includes("elle") && norm.includes("sport");
         if (!isElleSport) {
-          return { stock_quantity: 0, variant_stock: {} };
+          return { stock_quantity: form.stock_quantity || 0, variant_stock: {} };
         }
         // Filter variant_stock to only valid keys based on current colors/sizes
         const validColors = form.colors.filter(c => c.name.trim()).map(c => c.name);
