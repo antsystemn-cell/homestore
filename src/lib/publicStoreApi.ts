@@ -26,7 +26,7 @@ async function fetchPublic<T>(path: string, params: Record<string, string | numb
   const response = await withTimeout(
     fetch(buildUrl(path, params), {
       headers: DEFAULT_HEADERS,
-      cache: "force-cache",
+      cache: "no-store",
     })
   );
 
