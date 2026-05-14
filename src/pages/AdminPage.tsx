@@ -1729,6 +1729,14 @@ const AdminPage = () => {
                           </button>
                           <button
                             type="button"
+                            onClick={() => { setManualItems((prev) => { const dup = { ...prev[idx] }; return [...prev, dup]; }); }}
+                            className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground"
+                            title="Хувилах"
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => { setManualItems((prev) => prev.filter((_, i) => i !== idx)); if (isEditing) setEditingItemIdx(null); }}
                             className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"
                           >
