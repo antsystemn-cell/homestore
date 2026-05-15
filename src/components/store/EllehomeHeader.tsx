@@ -13,7 +13,7 @@ const EllehomeHeader: React.FC<Props> = ({
   sort = "default",
   onSortChange,
 }) => {
-  const fontStyle = { fontFamily: "'ModernMTStd-Extended', 'Times New Roman', Georgia, serif" } as const;
+  const fontStyle = { fontFamily: "'Montserrat', sans-serif" } as const;
 
   return (
     <section className="w-full bg-white border-b border-border">
