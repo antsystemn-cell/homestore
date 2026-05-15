@@ -77,6 +77,63 @@ const AdminPage = () => {
   const [brandLogo, setBrandLogo] = useState("");
   const [editBrandId, setEditBrandId] = useState<string | null>(null);
   const brandLogoFileRef = useRef<HTMLInputElement>(null);
+  const [orderingBrand, setOrderingBrand] = useState<{ id: string; name: string } | null>(null);
+  const [brandOrderItems, setBrandOrderItems] = useState<{ id: string; name: string; thumbnail_url: string | null; image_url: string | null }[]>([]);
+  const [brandOrderLoading, setBrandOrderLoading] = useState(false);
+  const [brandOrderSaving, setBrandOrderSaving] = useState(false);
+
+  const openBrandOrderModal = async (brand: { id: string; name: string }) => {
+    setOrderingBrand(brand);
+    setBrandOrderLoading(true);
+    setBrandOrderItems([]);
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id, name, thumbnail_url, image_url, brand_position")
+        .eq("brand_id", brand.id)
+        .eq("is_active", true)
+        .order("brand_position", { ascending: true, nullsFirst: false })
+        .order("name", { ascending: true });
+      if (error) throw error;
+      setBrandOrderItems((data || []).map((p: any) => ({ id: p.id, name: p.name, thumbnail_url: p.thumbnail_url, image_url: p.image_url })));
+    } catch (e) {
+      console.error(e);
+      toast.error("Бараа татахад алдаа гарлаа");
+    } finally {
+      setBrandOrderLoading(false);
+    }
+  };
+
+  const moveBrandOrderItem = (idx: number, dir: -1 | 1) => {
+    setBrandOrderItems((prev) => {
+      const next = [...prev];
+      const j = idx + dir;
+      if (j < 0 || j >= next.length) return prev;
+      [next[idx], next[j]] = [next[j], next[idx]];
+      return next;
+    });
+  };
+
+  const saveBrandOrder = async () => {
+    if (!orderingBrand) return;
+    setBrandOrderSaving(true);
+    try {
+      // Update each product's brand_position
+      const updates = brandOrderItems.map((p, i) =>
+        supabase.from("products").update({ brand_position: i }).eq("id", p.id)
+      );
+      const results = await Promise.all(updates);
+      const failed = results.find((r) => r.error);
+      if (failed?.error) throw failed.error;
+      toast.success("Барааны дараалал хадгалагдлаа");
+      setOrderingBrand(null);
+    } catch (e) {
+      console.error(e);
+      toast.error("Хадгалахад алдаа гарлаа");
+    } finally {
+      setBrandOrderSaving(false);
+    }
+  };
 
   // Delivery form state
   const [deliveryForm, setDeliveryForm] = useState({
