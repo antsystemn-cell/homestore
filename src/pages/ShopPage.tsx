@@ -8,6 +8,7 @@ import LoadError from "@/components/store/LoadError";
 import ErrorBoundary from "@/components/store/ErrorBoundary";
 import BrandBanner from "@/components/store/BrandBanner";
 import WestinghouseHeader from "@/components/store/WestinghouseHeader";
+import EllehomeHeader from "@/components/store/EllehomeHeader";
 import { Product, mapDbProduct } from "@/data/products";
 import { fetchPublicBrands, fetchPublicProducts } from "@/lib/publicStoreApi";
 
@@ -29,6 +30,7 @@ const ShopPage = () => {
   const [brands, setBrands] = useState<{ id: string; name: string; logo_url?: string | null }[]>([]);
   const [selectedBrand, setSelectedBrand] = useState<string>("all");
   const [error, setError] = useState(false);
+  const [sortBy, setSortBy] = useState<string>("default");
 
   // Resolve brand name from URL to brand id after brands load
   useEffect(() => {
@@ -73,7 +75,7 @@ const ShopPage = () => {
   const filtered = useMemo(() => {
     if (selectedBrand === "all") return products;
     const list = products.filter((p) => p.brand_id === selectedBrand);
-    return [...list].sort((a, b) => {
+    const sorted = [...list].sort((a, b) => {
       const ap = a.brand_position;
       const bp = b.brand_position;
       if (ap == null && bp == null) return 0;
@@ -81,13 +83,26 @@ const ShopPage = () => {
       if (bp == null) return -1;
       return ap - bp;
     });
-  }, [products, selectedBrand]);
+    switch (sortBy) {
+      case "name-asc":
+        return [...sorted].sort((a, b) => a.name.localeCompare(b.name));
+      case "name-desc":
+        return [...sorted].sort((a, b) => b.name.localeCompare(a.name));
+      case "price-asc":
+        return [...sorted].sort((a, b) => a.price - b.price);
+      case "price-desc":
+        return [...sorted].sort((a, b) => b.price - a.price);
+      default:
+        return sorted;
+    }
+  }, [products, selectedBrand, sortBy]);
 
   const selectedBrandObj = useMemo(
     () => brands.find((b) => b.id === selectedBrand),
     [brands, selectedBrand]
   );
   const isWestinghouse = selectedBrandObj?.name?.toLowerCase() === "westinghouse";
+  const isEllehome = selectedBrandObj?.name?.toLowerCase().replace(/\s+/g, "") === "ellehome";
 
   return (
     <div className="min-h-screen bg-secondary pb-16 md:pb-0">
@@ -96,8 +111,16 @@ const ShopPage = () => {
       ) : (
         <>
           <Header />
-          {selectedBrand !== "all" && (
+          {selectedBrand !== "all" && !isEllehome && (
             <BrandBanner logoUrl={selectedBrandObj?.logo_url} />
+          )}
+          {isEllehome && (
+            <EllehomeHeader
+              title={`${selectedBrandObj?.name ?? "Elle Home"} Series`}
+              count={filtered.length}
+              sort={sortBy}
+              onSortChange={setSortBy}
+            />
           )}
         </>
       )}
