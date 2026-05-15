@@ -4,13 +4,13 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap');
 
-/* Ellehome product cards: Canela font (with Cormorant Garamond fallback) and transparent card background */
+/* Ellehome product cards: ModernMTStd-Extended font and transparent card background */
 .ellehome-cards a[href^="/product/"] {
   background-color: transparent !important;
 }
 .ellehome-cards a[href^="/product/"] h3,
 .ellehome-cards a[href^="/product/"] span {
-  font-family: 'Canela', 'Cormorant Garamond', Georgia, serif !important;
+  font-family: 'ModernMTStd-Extended', 'Times New Roman', Georgia, serif !important;
   font-weight: 500;
   letter-spacing: 0.01em;
 }
