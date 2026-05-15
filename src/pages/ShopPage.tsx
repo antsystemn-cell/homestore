@@ -30,6 +30,7 @@ const ShopPage = () => {
   const [brands, setBrands] = useState<{ id: string; name: string; logo_url?: string | null }[]>([]);
   const [selectedBrand, setSelectedBrand] = useState<string>("all");
   const [error, setError] = useState(false);
+  const [sortBy, setSortBy] = useState<string>("default");
 
   // Resolve brand name from URL to brand id after brands load
   useEffect(() => {
