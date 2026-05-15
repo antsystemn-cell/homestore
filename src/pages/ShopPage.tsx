@@ -159,7 +159,9 @@ const ShopPage = () => {
         <LoadError onRetry={fetchData} retrying={loading} />
       ) : (
         <ErrorBoundary>
-          <ProductGrid title="Бүх бараа" products={filtered} />
+          <div className={isEllehome ? "ellehome-cards" : undefined}>
+            <ProductGrid title="Бүх бараа" products={filtered} />
+          </div>
         </ErrorBoundary>
       )}
       <BottomNav />
