@@ -70,10 +70,18 @@ const ShopPage = () => {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const filtered = useMemo(
-    () => selectedBrand === "all" ? products : products.filter((p) => p.brand_id === selectedBrand),
-    [products, selectedBrand]
-  );
+  const filtered = useMemo(() => {
+    if (selectedBrand === "all") return products;
+    const list = products.filter((p) => p.brand_id === selectedBrand);
+    return [...list].sort((a, b) => {
+      const ap = a.brand_position;
+      const bp = b.brand_position;
+      if (ap == null && bp == null) return 0;
+      if (ap == null) return 1;
+      if (bp == null) return -1;
+      return ap - bp;
+    });
+  }, [products, selectedBrand]);
 
   const selectedBrandObj = useMemo(
     () => brands.find((b) => b.id === selectedBrand),
