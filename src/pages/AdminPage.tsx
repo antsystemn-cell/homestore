@@ -4332,6 +4332,59 @@ const AdminPage = () => {
             </div>
           )}
 
+          {orderingBrand && (
+            <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => !brandOrderSaving && setOrderingBrand(null)}>
+              <div className="bg-card rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between p-4 border-b border-border">
+                  <h3 className="font-bold text-sm">"{orderingBrand.name}" — барааны дараалал</h3>
+                  <button onClick={() => setOrderingBrand(null)} className="p-2 rounded-lg hover:bg-secondary">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                  {brandOrderLoading ? (
+                    <div className="flex items-center justify-center py-12 text-muted-foreground">
+                      <Loader2 className="h-5 w-5 animate-spin mr-2" /> Уншиж байна...
+                    </div>
+                  ) : brandOrderItems.length === 0 ? (
+                    <p className="text-center text-sm text-muted-foreground py-8">Бараа байхгүй</p>
+                  ) : (
+                    brandOrderItems.map((p, idx) => (
+                      <div key={p.id} className="flex items-center gap-3 bg-secondary rounded-xl p-2">
+                        <span className="w-7 text-center text-xs font-bold text-muted-foreground">{idx + 1}</span>
+                        {(p.thumbnail_url || p.image_url) ? (
+                          <img src={p.thumbnail_url || p.image_url || ""} alt={p.name} className="h-10 w-10 rounded-lg object-cover bg-background" />
+                        ) : (
+                          <div className="h-10 w-10 rounded-lg bg-background flex items-center justify-center">
+                            <Package className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        )}
+                        <p className="flex-1 text-sm truncate">{p.name}</p>
+                        <div className="flex gap-1">
+                          <button disabled={idx === 0} onClick={() => moveBrandOrderItem(idx, -1)}
+                            className="p-1.5 rounded-lg bg-card hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed text-sm font-bold w-8">↑</button>
+                          <button disabled={idx === brandOrderItems.length - 1} onClick={() => moveBrandOrderItem(idx, 1)}
+                            className="p-1.5 rounded-lg bg-card hover:bg-accent disabled:opacity-30 disabled:cursor-not-allowed text-sm font-bold w-8">↓</button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <div className="flex items-center justify-end gap-2 p-4 border-t border-border">
+                  <button onClick={() => setOrderingBrand(null)} disabled={brandOrderSaving}
+                    className="bg-secondary rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors">
+                    Болих
+                  </button>
+                  <button onClick={saveBrandOrder} disabled={brandOrderSaving || brandOrderLoading || brandOrderItems.length === 0}
+                    className="bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors disabled:opacity-60 inline-flex items-center gap-2">
+                    {brandOrderSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+                    Хадгалах
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Delivery Tab */}
           {tab === "delivery" && (
             <div className="space-y-4">
