@@ -102,6 +102,7 @@ const ShopPage = () => {
     [brands, selectedBrand]
   );
   const isWestinghouse = selectedBrandObj?.name?.toLowerCase() === "westinghouse";
+  const isEllehome = selectedBrandObj?.name?.toLowerCase().replace(/\s+/g, "") === "ellehome";
 
   return (
     <div className="min-h-screen bg-secondary pb-16 md:pb-0">
@@ -110,8 +111,16 @@ const ShopPage = () => {
       ) : (
         <>
           <Header />
-          {selectedBrand !== "all" && (
+          {selectedBrand !== "all" && !isEllehome && (
             <BrandBanner logoUrl={selectedBrandObj?.logo_url} />
+          )}
+          {isEllehome && (
+            <EllehomeHeader
+              title={`${selectedBrandObj?.name ?? "Elle Home"} Series`}
+              count={filtered.length}
+              sort={sortBy}
+              onSortChange={setSortBy}
+            />
           )}
         </>
       )}
