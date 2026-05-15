@@ -4309,6 +4309,11 @@ const AdminPage = () => {
                       <p className="text-sm font-semibold">{b.name}</p>
                     </div>
                     <div className="flex gap-1">
+                      <button onClick={() => openBrandOrderModal({ id: b.id, name: b.name })}
+                        title="Барааны дараалал"
+                        className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                        <Layers className="h-4 w-4" />
+                      </button>
                       <button onClick={() => { setBrandName(b.name); setBrandLogo(b.logo_url || ""); setEditBrandId(b.id); }}
                         className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
                         <Pencil className="h-4 w-4" />
