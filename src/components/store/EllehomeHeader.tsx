@@ -38,7 +38,7 @@ const EllehomeHeader: React.FC<Props> = ({
             <select
               value={sort}
               onChange={(e) => onSortChange?.(e.target.value)}
-              style={mulish}
+              style={fontStyle}
               className="appearance-none bg-secondary text-foreground rounded-md pl-5 pr-10 py-3 text-sm md:text-base font-medium focus:outline-none cursor-pointer min-w-[200px]"
             >
               <option value="default">Default sorting</option>
