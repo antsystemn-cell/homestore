@@ -23,7 +23,7 @@ const EllehomeHeader: React.FC<Props> = () => {
           className="font-black tracking-tight text-foreground leading-none text-5xl md:text-8xl"
           style={{ fontFamily: "'Montserrat', sans-serif" }}
         >
-          ELLE HOME Mongolia
+          ELLE HOME МОНГОЛ
         </h1>
       </div>
     </section>
