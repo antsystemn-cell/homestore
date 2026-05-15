@@ -75,7 +75,7 @@ const ShopPage = () => {
   const filtered = useMemo(() => {
     if (selectedBrand === "all") return products;
     const list = products.filter((p) => p.brand_id === selectedBrand);
-    return [...list].sort((a, b) => {
+    const sorted = [...list].sort((a, b) => {
       const ap = a.brand_position;
       const bp = b.brand_position;
       if (ap == null && bp == null) return 0;
@@ -83,7 +83,19 @@ const ShopPage = () => {
       if (bp == null) return -1;
       return ap - bp;
     });
-  }, [products, selectedBrand]);
+    switch (sortBy) {
+      case "name-asc":
+        return [...sorted].sort((a, b) => a.name.localeCompare(b.name));
+      case "name-desc":
+        return [...sorted].sort((a, b) => b.name.localeCompare(a.name));
+      case "price-asc":
+        return [...sorted].sort((a, b) => a.price - b.price);
+      case "price-desc":
+        return [...sorted].sort((a, b) => b.price - a.price);
+      default:
+        return sorted;
+    }
+  }, [products, selectedBrand, sortBy]);
 
   const selectedBrandObj = useMemo(
     () => brands.find((b) => b.id === selectedBrand),
