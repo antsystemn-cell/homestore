@@ -35,6 +35,7 @@ export interface Product {
   specifications?: ProductSpec[];
   detailMedia?: DetailMedia[];
   brand_id?: string | null;
+  brand_position?: number | null;
   brandName?: string | null;
   brandLogo?: string | null;
   colors?: ProductColor[];
