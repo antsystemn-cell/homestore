@@ -21,13 +21,13 @@ const EllehomeHeader: React.FC<Props> = ({
         <div className="flex items-end gap-4 flex-wrap">
           <h1
             className="text-4xl md:text-6xl font-black tracking-tight text-foreground leading-none"
-            style={mulish}
+            style={fontStyle}
           >
             {title}
           </h1>
           <p
             className="text-base md:text-lg text-muted-foreground pb-1"
-            style={mulish}
+            style={fontStyle}
           >
             Showing all {count} results
           </p>
