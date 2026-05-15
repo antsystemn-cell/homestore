@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 
 interface Props {
   title?: string;
@@ -13,19 +13,7 @@ const EllehomeHeader: React.FC<Props> = ({
   sort = "default",
   onSortChange,
 }) => {
-  // Inject Mulish font once (rounded bold display look matching reference)
-  useEffect(() => {
-    const id = "elle-mulish-font";
-    if (document.getElementById(id)) return;
-    const link = document.createElement("link");
-    link.id = id;
-    link.rel = "stylesheet";
-    link.href =
-      "https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;900&display=swap";
-    document.head.appendChild(link);
-  }, []);
-
-  const mulish = { fontFamily: "'Mulish', 'Montserrat', sans-serif" } as const;
+  const fontStyle = { fontFamily: "'ModernMTStd-Extended', 'Times New Roman', Georgia, serif" } as const;
 
   return (
     <section className="w-full bg-white border-b border-border">
