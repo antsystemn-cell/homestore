@@ -2101,6 +2101,7 @@ const AdminPage = () => {
             </h2>
             <p className="text-sm text-muted-foreground mt-0.5">
               {tab === "stats" && "Дэлгүүрийн ерөнхий мэдээлэл"}
+              {tab === "tracking" && "Хяналт · Live зочин, hot lead, сэргээх"}
               {tab === "products" && `Нийт ${products.length} бараа`}
               {tab === "orders" && `Нийт ${orders.length} захиалга`}
               {tab === "users" && `Нийт ${users.length} хэрэглэгч`}
