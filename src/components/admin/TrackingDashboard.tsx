@@ -320,16 +320,100 @@ export default function TrackingDashboard() {
             <KPI label="Conv. %" value={`${kpi.conv}%`} />
           </div>
 
-          {/* Funnel */}
-          <Card title="Borloolt funnel (өнөөдөр)">
-            <Funnel steps={[
-              { label: "Зочин", value: kpi.sessions },
-              { label: "Бараа үзсэн", value: kpi.productViews },
-              { label: "Сагсанд нэмсэн", value: kpi.addToCart },
-              { label: "Захиалга эхэлсэн", value: kpi.checkout },
-              { label: "Худалдан авсан", value: kpi.purchase },
-            ]} />
-          </Card>
+          {/* Funnel: product_view → add_to_cart → checkout_start → purchase */}
+          <div className="bg-card border border-border rounded-2xl p-4 space-y-4">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <h3 className="text-sm font-bold">Борлуулалтын Funnel</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Нийт хөрвүүлэлт (үзсэн → авсан):{" "}
+                  <span className="font-bold text-foreground">{funnel.overallConv}%</span>
+                </p>
+              </div>
+              <div className="inline-flex rounded-lg bg-secondary p-0.5 text-xs">
+                {([
+                  { id: "today", label: "Өнөөдөр" },
+                  { id: "7d", label: "7 хоног" },
+                  { id: "30d", label: "30 хоног" },
+                ] as const).map((r) => (
+                  <button key={r.id} onClick={() => setFunnelRange(r.id)}
+                    className={`px-3 py-1.5 rounded-md font-medium transition ${
+                      funnelRange === r.id ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    }`}>{r.label}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Step KPIs */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {funnel.steps.map((s, i) => {
+                const Icon = s.icon === "eye" ? Eye : s.icon === "cart" ? PackagePlus : s.icon === "card" ? CreditCard : BadgeCheck;
+                return (
+                  <div key={s.key} className="rounded-xl p-3 border border-border bg-secondary/30">
+                    <div className="flex items-center justify-between">
+                      <Icon className="h-4 w-4" style={{ color: s.color }} />
+                      <span className="text-[10px] font-bold text-muted-foreground">{i + 1}/4</span>
+                    </div>
+                    <div className="text-[11px] text-muted-foreground mt-2">{s.label}</div>
+                    <div className="text-2xl font-bold mt-0.5">{s.value.toLocaleString()}</div>
+                    <div className="text-[10px] mt-1">
+                      {i === 0 ? (
+                        <span className="text-muted-foreground">эхлэл</span>
+                      ) : (
+                        <>
+                          <span className="text-emerald-600 font-medium">{s.stepConv}% үлдсэн</span>
+                          {s.drop > 0 && <span className="text-red-500 ml-1.5">−{s.drop}%</span>}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Horizontal funnel bar chart */}
+            <div className="h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={funnel.steps} layout="vertical" margin={{ left: 10, right: 40, top: 5, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                  <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={11} />
+                  <YAxis type="category" dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={11} width={120} />
+                  <Tooltip
+                    cursor={{ fill: "hsl(var(--secondary))" }}
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
+                    formatter={(v: number, _n, p: { payload?: { pctTop: number } }) =>
+                      [`${v.toLocaleString()} (${p.payload?.pctTop ?? 0}%)`, "Session"]
+                    }
+                  />
+                  <Bar dataKey="value" radius={[0, 8, 8, 0]}>
+                    {funnel.steps.map((s) => <Cell key={s.key} fill={s.color} />)}
+                    <LabelList dataKey="value" position="right" fontSize={11} fill="hsl(var(--foreground))" />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Daily trend */}
+            {funnelRange !== "today" && (
+              <div className="pt-2 border-t border-border">
+                <div className="text-xs font-medium text-muted-foreground mb-2">Өдрийн чиг хандлага</div>
+                <div className="h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={trend} margin={{ left: 0, right: 10, top: 5, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={10} />
+                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} />
+                      <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+                      <Line type="monotone" dataKey="product_view" name="Үзсэн" stroke="hsl(217 91% 60%)" strokeWidth={2} dot={false} />
+                      <Line type="monotone" dataKey="add_to_cart" name="Сагс" stroke="hsl(38 92% 50%)" strokeWidth={2} dot={false} />
+                      <Line type="monotone" dataKey="checkout_start" name="Захиалга" stroke="hsl(280 65% 60%)" strokeWidth={2} dot={false} />
+                      <Line type="monotone" dataKey="purchase" name="Худалдсан" stroke="hsl(142 71% 45%)" strokeWidth={2} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+          </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             <Card title="Топ үзсэн бараа">
