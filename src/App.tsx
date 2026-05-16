@@ -88,6 +88,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <CartProvider>
+            <PageViewTracker />
             <Suspense fallback={<PageFallback />}>
               <Routes>
                 {MAINTENANCE_MODE ? (
