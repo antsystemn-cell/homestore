@@ -8,6 +8,7 @@
  * - Manual recovery actions (Messenger / SMS / Call / Mark recovered)
  */
 import { useEffect, useMemo, useState } from "react";
+import { usePersistedState, dateSerialize, dateDeserialize } from "@/hooks/usePersistedState";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Users, Flame, Activity, TrendingUp, ShoppingCart, Phone,
@@ -93,15 +94,19 @@ export default function TrackingDashboard() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [recovery, setRecovery] = useState<Recovery[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeView, setActiveView] = useState<"overview" | "live" | "leads" | "recovery" | "feed">("overview");
+  const [activeView, setActiveView] = usePersistedState<"overview" | "live" | "leads" | "recovery" | "feed">("admin.tracking.view", "overview");
   const [tick, setTick] = useState(0);
-  const [funnelRange, setFunnelRange] = useState<"today" | "7d" | "30d" | "custom">("today");
-  const [customFrom, setCustomFrom] = useState<Date | undefined>(() => {
-    const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - 14); return d;
-  });
-  const [customTo, setCustomTo] = useState<Date | undefined>(() => {
-    const d = new Date(); d.setHours(23, 59, 59, 999); return d;
-  });
+  const [funnelRange, setFunnelRange] = usePersistedState<"today" | "7d" | "30d" | "custom">("admin.tracking.range", "today");
+  const [customFrom, setCustomFrom] = usePersistedState<Date | undefined>(
+    "admin.tracking.from",
+    () => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - 14); return d; },
+    { serialize: dateSerialize, deserialize: dateDeserialize }
+  );
+  const [customTo, setCustomTo] = usePersistedState<Date | undefined>(
+    "admin.tracking.to",
+    () => { const d = new Date(); d.setHours(23, 59, 59, 999); return d; },
+    { serialize: dateSerialize, deserialize: dateDeserialize }
+  );
 
   // Resolve the active range to concrete from/to dates
   const range = useMemo(() => {
