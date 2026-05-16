@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode, useEffect } from "react";
 import { Product } from "@/data/products";
+import { track } from "@/lib/tracking";
 
 interface CartItem {
   product: Product;
