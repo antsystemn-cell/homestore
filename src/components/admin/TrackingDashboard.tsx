@@ -147,6 +147,55 @@ export default function TrackingDashboard() {
   const hotLeads = useMemo(() => leads.filter((l) => l.status === "hot").slice(0, 50), [leads]);
   const warmLeads = useMemo(() => leads.filter((l) => l.status === "warm").slice(0, 50), [leads]);
 
+  // Funnel by selected range
+  const funnel = useMemo(() => {
+    const days = funnelRange === "today" ? 1 : funnelRange === "7d" ? 7 : 30;
+    let from: Date;
+    if (funnelRange === "today") { from = new Date(); from.setHours(0, 0, 0, 0); }
+    else { from = new Date(Date.now() - days * 24 * 60 * 60 * 1000); }
+    const inRange = events.filter((e) => new Date(e.created_at) >= from);
+    // Unique sessions per step (more meaningful than raw event counts)
+    const uniq = (type: string) => new Set(inRange.filter((e) => e.event_type === type).map((e) => e.session_id || e.id)).size;
+    const productView = uniq("product_view");
+    const addToCart = uniq("add_to_cart");
+    const checkoutStart = uniq("checkout_start");
+    const purchase = uniq("purchase");
+    const steps = [
+      { key: "product_view", label: "Бараа үзсэн", value: productView, icon: "eye", color: "hsl(217 91% 60%)" },
+      { key: "add_to_cart", label: "Сагсанд нэмсэн", value: addToCart, icon: "cart", color: "hsl(38 92% 50%)" },
+      { key: "checkout_start", label: "Захиалга эхэлсэн", value: checkoutStart, icon: "card", color: "hsl(280 65% 60%)" },
+      { key: "purchase", label: "Худалдан авсан", value: purchase, icon: "check", color: "hsl(142 71% 45%)" },
+    ];
+    const top = steps[0].value || 1;
+    const enriched = steps.map((s, i) => ({
+      ...s,
+      pctTop: Math.round((s.value / top) * 100),
+      drop: i > 0 && steps[i - 1].value > 0 ? Math.round((1 - s.value / steps[i - 1].value) * 100) : 0,
+      stepConv: i > 0 && steps[i - 1].value > 0 ? Math.round((s.value / steps[i - 1].value) * 100) : 100,
+    }));
+    const overallConv = productView > 0 ? ((purchase / productView) * 100).toFixed(1) : "0";
+    return { steps: enriched, overallConv };
+  }, [events, funnelRange, tick]);
+
+  // Daily trend (last N days) for the same 4 events
+  const trend = useMemo(() => {
+    const days = funnelRange === "today" ? 1 : funnelRange === "7d" ? 7 : 30;
+    const buckets: Record<string, { date: string; product_view: number; add_to_cart: number; checkout_start: number; purchase: number }> = {};
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
+      const k = d.toISOString().slice(0, 10);
+      buckets[k] = { date: k.slice(5), product_view: 0, add_to_cart: 0, checkout_start: 0, purchase: 0 };
+    }
+    for (const e of events) {
+      const k = e.created_at.slice(0, 10);
+      if (!buckets[k]) continue;
+      if (e.event_type in buckets[k]) {
+        (buckets[k] as Record<string, number | string>)[e.event_type] = (buckets[k] as Record<string, number>)[e.event_type] + 1;
+      }
+    }
+    return Object.values(buckets);
+  }, [events, funnelRange]);
+
   // Abandoned detection
   const abandoned = useMemo(() => {
     const now = Date.now();
