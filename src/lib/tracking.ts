@@ -66,10 +66,10 @@ async function ensureSession(): Promise<{ id: string; token: string } | null> {
         .from("analytics_sessions")
         .insert({
           session_token: token,
-          user_id: userData?.user?.id ?? null,
+          user_id: userData?.user?.id ?? undefined,
           device: getDevice(),
           user_agent: navigator.userAgent.slice(0, 500),
-          referrer: document.referrer || null,
+          referrer: document.referrer || undefined,
           landing_path: window.location.pathname,
           is_returning: isReturning,
           ...utm,
@@ -84,9 +84,9 @@ async function ensureSession(): Promise<{ id: string; token: string } | null> {
       await supabase.from("lead_scores").insert({
         session_id: data.id,
         session_token: token,
-        user_id: userData?.user?.id ?? null,
+        user_id: userData?.user?.id ?? undefined,
         score: isReturning ? 15 : 0,
-        status: isReturning ? "cold" : "cold",
+        status: "cold",
         last_activity: new Date().toISOString(),
       });
       return { id: data.id, token };
