@@ -74,6 +74,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const removeFromCart = useCallback((key: string) => {
     setItems((prev) => prev.filter((i) => makeCartKey(i.product.id, i.selectedColor, i.selectedSize) !== key));
+    track("remove_from_cart", { metadata: { key } });
   }, []);
 
   const updateQuantity = useCallback((key: string, quantity: number) => {
