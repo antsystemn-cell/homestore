@@ -183,12 +183,10 @@ export default function TrackingDashboard() {
 
   // Funnel by selected range
   const funnel = useMemo(() => {
-    const days = funnelRange === "today" ? 1 : funnelRange === "7d" ? 7 : 30;
-    let from: Date;
-    if (funnelRange === "today") { from = new Date(); from.setHours(0, 0, 0, 0); }
-    else { from = new Date(Date.now() - days * 24 * 60 * 60 * 1000); }
-    const inRange = events.filter((e) => new Date(e.created_at) >= from);
-    // Unique sessions per step (more meaningful than raw event counts)
+    const inRange = events.filter((e) => {
+      const t = new Date(e.created_at).getTime();
+      return t >= range.from.getTime() && t <= range.to.getTime();
+    });
     const uniq = (type: string) => new Set(inRange.filter((e) => e.event_type === type).map((e) => e.session_id || e.id)).size;
     const productView = uniq("product_view");
     const addToCart = uniq("add_to_cart");
@@ -209,14 +207,14 @@ export default function TrackingDashboard() {
     }));
     const overallConv = productView > 0 ? ((purchase / productView) * 100).toFixed(1) : "0";
     return { steps: enriched, overallConv };
-  }, [events, funnelRange, tick]);
+  }, [events, range, tick]);
 
-  // Daily trend (last N days) for the same 4 events
+  // Daily trend across the selected range
   const trend = useMemo(() => {
-    const days = funnelRange === "today" ? 1 : funnelRange === "7d" ? 7 : 30;
     const buckets: Record<string, { date: string; product_view: number; add_to_cart: number; checkout_start: number; purchase: number }> = {};
-    for (let i = days - 1; i >= 0; i--) {
-      const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
+    const start = new Date(range.from); start.setHours(0, 0, 0, 0);
+    const end = new Date(range.to); end.setHours(0, 0, 0, 0);
+    for (let d = new Date(start); d.getTime() <= end.getTime(); d.setDate(d.getDate() + 1)) {
       const k = d.toISOString().slice(0, 10);
       buckets[k] = { date: k.slice(5), product_view: 0, add_to_cart: 0, checkout_start: 0, purchase: 0 };
     }
@@ -230,7 +228,7 @@ export default function TrackingDashboard() {
       else if (e.event_type === "purchase") b.purchase += 1;
     }
     return Object.values(buckets);
-  }, [events, funnelRange]);
+  }, [events, range]);
 
   // Abandoned detection
   const abandoned = useMemo(() => {
