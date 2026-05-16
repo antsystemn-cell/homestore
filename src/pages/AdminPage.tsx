@@ -40,7 +40,7 @@ import { printOrdersTable, loadPrintFields, buildSelectedOrdersXlsxRows, type Pr
 import { PrintFieldsSettings } from "@/components/admin/PrintFieldsSettings";
 import * as XLSX from "xlsx";
 
-type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "settings";
+type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "settings";
 
 const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "collections", "analytics", "diagnostics", "stocklog"];
 
