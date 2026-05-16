@@ -115,7 +115,7 @@ async function bumpLead(sessionId: string, delta: number, lastEvent: string, pro
         status: statusFromScore(newScore),
         last_activity: new Date().toISOString(),
         last_event_type: lastEvent,
-        last_product_id: productId ?? null,
+        last_product_id: productId ?? undefined,
       })
       .eq("session_id", sessionId);
   } catch {
@@ -152,11 +152,11 @@ export async function track(eventType: string, payload: TrackPayload = {}) {
     // update last_seen_at
     await supabase
       .from("analytics_sessions")
-      .update({ last_seen_at: new Date().toISOString(), user_id: userData?.user?.id ?? null })
+      .update({ last_seen_at: new Date().toISOString(), user_id: userData?.user?.id ?? undefined })
       .eq("id", session.id);
 
     const delta = SCORE_RULES[eventType] ?? 0;
-    if (delta !== 0) await bumpLead(session.id, delta, eventType, payload.product_id ?? null);
+    if (delta !== 0) await bumpLead(session.id, delta, eventType, payload.product_id ?? undefined);
   } catch {
     // silent
   }
