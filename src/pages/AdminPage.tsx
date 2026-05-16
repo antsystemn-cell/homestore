@@ -3906,6 +3906,9 @@ const AdminPage = () => {
             );
           })()}
 
+          {/* Visitor & Lead Tracking */}
+          {tab === "tracking" && <TrackingDashboard />}
+
           {/* Web Analytics */}
           {tab === "analytics" && <WebAnalytics />}
 
