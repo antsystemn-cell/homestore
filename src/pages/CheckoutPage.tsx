@@ -48,6 +48,14 @@ const CheckoutPage = () => {
     }
   }, [user, isGuestCheckout, navigate]);
 
+  // Track checkout start once
+  useEffect(() => {
+    if (items.length > 0) {
+      track("checkout_start", { value: cartTotal, metadata: { items: items.length } });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     const fetchDelivery = async () => {
       const { data } = await supabase
