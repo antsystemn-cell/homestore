@@ -12,12 +12,16 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Users, Flame, Activity, TrendingUp, ShoppingCart, Phone,
   MessageCircle, CheckCircle2, X, Smartphone, Monitor, Tablet, RefreshCw,
-  Eye, PackagePlus, CreditCard, BadgeCheck
+  Eye, PackagePlus, CreditCard, BadgeCheck, CalendarIcon
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList,
   LineChart, Line, CartesianGrid
 } from "recharts";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 type Session = {
   id: string; session_token: string; user_id: string | null;
