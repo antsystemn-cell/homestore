@@ -1223,6 +1223,8 @@ const AdminPage = () => {
     const ids = Array.from(productSelected);
     if (ids.length === 0) { toast.error("Бараа сонгоно уу"); return; }
     const pct = Math.max(0, Math.min(99, Math.round(bulkDiscountPct || 0)));
+    const amt = Math.max(0, Math.round(bulkDiscountAmt || 0));
+    const isAmt = bulkDiscountMode === "amt";
     setBulkDiscountLoading(true);
     try {
       const targets = products.filter((p: any) => productSelected.has(p.id));
@@ -1230,9 +1232,13 @@ const AdminPage = () => {
       for (const p of targets) {
         const base = (p.original_price && p.original_price > 0) ? p.original_price : p.price;
         let payload: any;
-        if (pct <= 0) {
+        if ((isAmt && amt <= 0) || (!isAmt && pct <= 0)) {
           // remove discount
           payload = { price: base, original_price: null, discount: 0, is_on_sale: false };
+        } else if (isAmt) {
+          const newPrice = Math.max(0, base - amt);
+          const effectivePct = base > 0 ? Math.round((1 - newPrice / base) * 100) : 0;
+          payload = { price: newPrice, original_price: base, discount: effectivePct, is_on_sale: true };
         } else {
           const newPrice = Math.round(base * (1 - pct / 100));
           payload = { price: newPrice, original_price: base, discount: pct, is_on_sale: true };
@@ -1240,11 +1246,13 @@ const AdminPage = () => {
         const { error } = await supabase.from("products").update(payload).eq("id", p.id);
         if (!error) okCount++;
       }
-      toast.success(pct > 0
-        ? `${okCount} бараанд ${pct}% хямдрал тооцлоо`
-        : `${okCount} бараанаас хямдрал хаслаа`);
+      const msg = (isAmt ? amt > 0 : pct > 0)
+        ? (isAmt ? `${okCount} бараанаас ${amt.toLocaleString()}₮ хасч хямдрууллаа` : `${okCount} бараанд ${pct}% хямдрал тооцлоо`)
+        : `${okCount} бараанаас хямдрал хаслаа`;
+      toast.success(msg);
       setProductSelected(new Set());
       setBulkDiscountPct(0);
+      setBulkDiscountAmt(0);
       fetchProducts();
     } finally {
       setBulkDiscountLoading(false);
