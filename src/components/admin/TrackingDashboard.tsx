@@ -96,19 +96,30 @@ export default function TrackingDashboard() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [recovery, setRecovery] = useState<Recovery[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeView, setActiveView] = usePersistedState<"overview" | "live" | "leads" | "recovery" | "feed">("admin.tracking.view", "overview");
+  const [activeView, setActiveView] = usePersistedState<"overview" | "live" | "leads" | "recovery" | "feed">(
+    "admin.tracking.view", "overview",
+    { serialize: stringSerialize as (v: string) => string, deserialize: stringDeserialize as (raw: string) => "overview" | "live" | "leads" | "recovery" | "feed", urlKey: "view" }
+  );
   const [tick, setTick] = useState(0);
-  const [funnelRange, setFunnelRange] = usePersistedState<"today" | "7d" | "30d" | "custom">("admin.tracking.range", "today");
+  const [funnelRange, setFunnelRange] = usePersistedState<"today" | "7d" | "30d" | "custom">(
+    "admin.tracking.range", "today",
+    { serialize: stringSerialize as (v: string) => string, deserialize: stringDeserialize as (raw: string) => "today" | "7d" | "30d" | "custom", urlKey: "range" }
+  );
   const [customFrom, setCustomFrom] = usePersistedState<Date | undefined>(
     "admin.tracking.from",
     () => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - 14); return d; },
-    { serialize: dateSerialize, deserialize: dateDeserialize }
+    { serialize: dateSerialize, deserialize: dateDeserialize, urlKey: "from" }
   );
   const [customTo, setCustomTo] = usePersistedState<Date | undefined>(
     "admin.tracking.to",
     () => { const d = new Date(); d.setHours(23, 59, 59, 999); return d; },
-    { serialize: dateSerialize, deserialize: dateDeserialize }
+    { serialize: dateSerialize, deserialize: dateDeserialize, urlKey: "to" }
   );
+
+  async function handleShare() {
+    const ok = await shareCurrentUrl();
+    toast[ok ? "success" : "error"](ok ? "Холбоос хуулагдлаа" : "Холбоос хуулж чадсангүй");
+  }
 
   // Resolve the active range to concrete from/to dates
   const range = useMemo(() => {
