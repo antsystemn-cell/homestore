@@ -518,7 +518,7 @@ export default function TrackingDashboard() {
             </div>
 
             {/* Daily trend */}
-            {funnelRange !== "today" && (
+            {range.days > 1 && (
               <div className="pt-2 border-t border-border">
                 <div className="text-xs font-medium text-muted-foreground mb-2">Өдрийн чиг хандлага</div>
                 <div className="h-48">
