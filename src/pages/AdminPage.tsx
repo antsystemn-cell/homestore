@@ -5,12 +5,13 @@ import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
   BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, Printer, FileSpreadsheet,
-  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store
+  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
 import ChatbotSettingsManager from "@/components/admin/ChatbotSettingsManager";
 import StockDeductionLog from "@/components/admin/StockDeductionLog";
+import TrackingDashboard from "@/components/admin/TrackingDashboard";
 
 import { useRef } from "react";
 import { toast } from "sonner";
