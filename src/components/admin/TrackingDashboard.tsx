@@ -11,8 +11,13 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Users, Flame, Activity, TrendingUp, ShoppingCart, Phone,
-  MessageCircle, CheckCircle2, X, Smartphone, Monitor, Tablet, RefreshCw
+  MessageCircle, CheckCircle2, X, Smartphone, Monitor, Tablet, RefreshCw,
+  Eye, PackagePlus, CreditCard, BadgeCheck
 } from "lucide-react";
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList,
+  LineChart, Line, CartesianGrid
+} from "recharts";
 
 type Session = {
   id: string; session_token: string; user_id: string | null;
