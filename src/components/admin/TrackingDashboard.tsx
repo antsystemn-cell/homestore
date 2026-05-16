@@ -91,15 +91,41 @@ export default function TrackingDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<"overview" | "live" | "leads" | "recovery" | "feed">("overview");
   const [tick, setTick] = useState(0);
-  const [funnelRange, setFunnelRange] = useState<"today" | "7d" | "30d">("today");
+  const [funnelRange, setFunnelRange] = useState<"today" | "7d" | "30d" | "custom">("today");
+  const [customFrom, setCustomFrom] = useState<Date | undefined>(() => {
+    const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - 14); return d;
+  });
+  const [customTo, setCustomTo] = useState<Date | undefined>(() => {
+    const d = new Date(); d.setHours(23, 59, 59, 999); return d;
+  });
 
-  const refresh = async () => {
-    // Fetch up to 30 days for funnel/trend, lighter limits for the rest
-    const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  // Resolve the active range to concrete from/to dates
+  const range = useMemo(() => {
+    const now = new Date();
+    if (funnelRange === "today") {
+      const f = new Date(); f.setHours(0, 0, 0, 0);
+      return { from: f, to: now, days: 1 };
+    }
+    if (funnelRange === "7d" || funnelRange === "30d") {
+      const days = funnelRange === "7d" ? 7 : 30;
+      const f = new Date(); f.setHours(0, 0, 0, 0); f.setDate(f.getDate() - (days - 1));
+      return { from: f, to: now, days };
+    }
+    const f = customFrom ?? (() => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - 6); return d; })();
+    const t = customTo ?? now;
+    const days = Math.max(1, Math.ceil((t.getTime() - f.getTime()) / (24 * 60 * 60 * 1000)) + 1);
+    return { from: f, to: t, days };
+  }, [funnelRange, customFrom, customTo]);
+
+  const refresh = async (sinceOverride?: string) => {
+    const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const fetchSince = sinceOverride
+      ? sinceOverride
+      : (funnelRange === "custom" && range.from < since30 ? range.from.toISOString() : since30.toISOString());
     const since24 = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const [s, e, l, r] = await Promise.all([
-      supabase.from("analytics_sessions").select("*").gte("last_seen_at", since30).order("last_seen_at", { ascending: false }).limit(2000),
-      supabase.from("analytics_events").select("*").gte("created_at", since30).order("created_at", { ascending: false }).limit(5000),
+      supabase.from("analytics_sessions").select("*").gte("last_seen_at", fetchSince).order("last_seen_at", { ascending: false }).limit(2000),
+      supabase.from("analytics_events").select("*").gte("created_at", fetchSince).order("created_at", { ascending: false }).limit(10000),
       supabase.from("lead_scores").select("*").order("score", { ascending: false }).limit(200),
       supabase.from("recovery_actions").select("*").gte("created_at", since24).order("created_at", { ascending: false }).limit(100),
     ]);
@@ -123,6 +149,14 @@ export default function TrackingDashboard() {
     return () => { supabase.removeChannel(ch); clearInterval(t); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Refetch when custom range needs older data than already loaded
+  useEffect(() => {
+    if (funnelRange === "custom" && range.from < new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)) {
+      refresh(range.from.toISOString());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [funnelRange, customFrom]);
 
   // Live = last 5 min
   const liveSessions = useMemo(() => {
