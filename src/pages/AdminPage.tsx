@@ -2324,27 +2324,57 @@ const AdminPage = () => {
 
               {/* Bulk discount bar */}
               {productSelected.size > 0 && (
-                <div className="bg-card rounded-2xl border border-primary/30 p-3 mb-3 flex flex-col sm:flex-row sm:items-center gap-3">
-                  <div className="text-sm font-semibold flex-1">
+                <div className="bg-card rounded-2xl border border-primary/30 p-3 mb-3 flex flex-col sm:flex-row sm:items-center gap-3 flex-wrap">
+                  <div className="text-sm font-semibold flex-1 min-w-[140px]">
                     {productSelected.size} бараа сонгосон
                   </div>
-                  <div className="flex items-center gap-2">
-                    <label className="text-xs text-muted-foreground">Хямдрал %:</label>
-                    <input
-                      type="number" min={0} max={99} placeholder="0"
-                      value={bulkDiscountPct || ""}
-                      onChange={(e) => setBulkDiscountPct(Math.max(0, Math.min(99, +e.target.value || 0)))}
-                      className="w-20 rounded-lg bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    />
+                  <div className="inline-flex rounded-lg bg-secondary p-0.5 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setBulkDiscountMode("pct")}
+                      className={`px-3 py-1.5 rounded-md font-medium transition ${bulkDiscountMode === "pct" ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                    >Хувиар %</button>
+                    <button
+                      type="button"
+                      onClick={() => setBulkDiscountMode("amt")}
+                      className={`px-3 py-1.5 rounded-md font-medium transition ${bulkDiscountMode === "amt" ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                    >Төгрөгөөр ₮</button>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {bulkDiscountMode === "pct" ? (
+                      <>
+                        <label className="text-xs text-muted-foreground">Хямдрал %:</label>
+                        <input
+                          type="number" min={0} max={99} placeholder="0"
+                          value={bulkDiscountPct || ""}
+                          onChange={(e) => setBulkDiscountPct(Math.max(0, Math.min(99, +e.target.value || 0)))}
+                          className="w-20 rounded-lg bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <label className="text-xs text-muted-foreground">Хасах ₮:</label>
+                        <input
+                          type="number" min={0} step={500} placeholder="0"
+                          value={bulkDiscountAmt || ""}
+                          onChange={(e) => setBulkDiscountAmt(Math.max(0, +e.target.value || 0))}
+                          className="w-28 rounded-lg bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                      </>
+                    )}
                     <button
                       onClick={handleApplyBulkDiscount}
                       disabled={bulkDiscountLoading}
                       className="bg-primary text-primary-foreground rounded-lg px-4 py-2 text-xs font-bold disabled:opacity-50 hover:bg-primary/90 transition-colors"
                     >
-                      {bulkDiscountLoading ? "Тооцож байна..." : (bulkDiscountPct > 0 ? `${bulkDiscountPct}% хэрэглэх` : "Хямдрал хасах")}
+                      {bulkDiscountLoading
+                        ? "Тооцож байна..."
+                        : bulkDiscountMode === "pct"
+                          ? (bulkDiscountPct > 0 ? `${bulkDiscountPct}% хэрэглэх` : "Хямдрал хасах")
+                          : (bulkDiscountAmt > 0 ? `${bulkDiscountAmt.toLocaleString()}₮ хасах` : "Хямдрал хасах")}
                     </button>
                     <button
-                      onClick={() => { setProductSelected(new Set()); setBulkDiscountPct(0); }}
+                      onClick={() => { setProductSelected(new Set()); setBulkDiscountPct(0); setBulkDiscountAmt(0); }}
                       className="bg-secondary rounded-lg px-3 py-2 text-xs font-medium hover:bg-secondary/80"
                     >
                       Цуцлах
