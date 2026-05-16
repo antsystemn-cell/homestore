@@ -362,21 +362,62 @@ export default function TrackingDashboard() {
               <div>
                 <h3 className="text-sm font-bold">Борлуулалтын Funnel</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Нийт хөрвүүлэлт (үзсэн → авсан):{" "}
+                  {format(range.from, "yyyy.MM.dd")} – {format(range.to, "yyyy.MM.dd")} · Нийт хөрвүүлэлт:{" "}
                   <span className="font-bold text-foreground">{funnel.overallConv}%</span>
                 </p>
               </div>
-              <div className="inline-flex rounded-lg bg-secondary p-0.5 text-xs">
-                {([
-                  { id: "today", label: "Өнөөдөр" },
-                  { id: "7d", label: "7 хоног" },
-                  { id: "30d", label: "30 хоног" },
-                ] as const).map((r) => (
-                  <button key={r.id} onClick={() => setFunnelRange(r.id)}
-                    className={`px-3 py-1.5 rounded-md font-medium transition ${
-                      funnelRange === r.id ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
-                    }`}>{r.label}</button>
-                ))}
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="inline-flex rounded-lg bg-secondary p-0.5 text-xs">
+                  {([
+                    { id: "today", label: "Өнөөдөр" },
+                    { id: "7d", label: "7 хоног" },
+                    { id: "30d", label: "30 хоног" },
+                    { id: "custom", label: "Хувийн" },
+                  ] as const).map((r) => (
+                    <button key={r.id} onClick={() => setFunnelRange(r.id)}
+                      className={`px-3 py-1.5 rounded-md font-medium transition ${
+                        funnelRange === r.id ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      }`}>{r.label}</button>
+                  ))}
+                </div>
+                {funnelRange === "custom" && (
+                  <div className="flex items-center gap-1.5">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs border border-border bg-background hover:bg-secondary",
+                          !customFrom && "text-muted-foreground"
+                        )}>
+                          <CalendarIcon className="h-3.5 w-3.5" />
+                          {customFrom ? format(customFrom, "yyyy.MM.dd") : "Эхлэх"}
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="end">
+                        <Calendar mode="single" selected={customFrom} onSelect={setCustomFrom}
+                          disabled={(d) => d > new Date() || (customTo ? d > customTo : false)}
+                          initialFocus className={cn("p-3 pointer-events-auto")} />
+                      </PopoverContent>
+                    </Popover>
+                    <span className="text-xs text-muted-foreground">—</span>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs border border-border bg-background hover:bg-secondary",
+                          !customTo && "text-muted-foreground"
+                        )}>
+                          <CalendarIcon className="h-3.5 w-3.5" />
+                          {customTo ? format(customTo, "yyyy.MM.dd") : "Дуусах"}
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="end">
+                        <Calendar mode="single" selected={customTo}
+                          onSelect={(d) => { if (d) { const x = new Date(d); x.setHours(23, 59, 59, 999); setCustomTo(x); } }}
+                          disabled={(d) => d > new Date() || (customFrom ? d < customFrom : false)}
+                          initialFocus className={cn("p-3 pointer-events-auto")} />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                )}
               </div>
             </div>
 
