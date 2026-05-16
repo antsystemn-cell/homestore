@@ -372,6 +372,8 @@ const AdminPage = () => {
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
   const [productSelected, setProductSelected] = useState<Set<string>>(new Set());
   const [bulkDiscountPct, setBulkDiscountPct] = useState<number>(0);
+  const [bulkDiscountAmt, setBulkDiscountAmt] = useState<number>(0);
+  const [bulkDiscountMode, setBulkDiscountMode] = useState<"pct" | "amt">("pct");
   const [bulkDiscountLoading, setBulkDiscountLoading] = useState(false);
   const [showXlsxHelp, setShowXlsxHelp] = useState(false);
   const [showPrintChecklist, setShowPrintChecklist] = useState(false);
@@ -1221,6 +1223,8 @@ const AdminPage = () => {
     const ids = Array.from(productSelected);
     if (ids.length === 0) { toast.error("Бараа сонгоно уу"); return; }
     const pct = Math.max(0, Math.min(99, Math.round(bulkDiscountPct || 0)));
+    const amt = Math.max(0, Math.round(bulkDiscountAmt || 0));
+    const isAmt = bulkDiscountMode === "amt";
     setBulkDiscountLoading(true);
     try {
       const targets = products.filter((p: any) => productSelected.has(p.id));
@@ -1228,9 +1232,13 @@ const AdminPage = () => {
       for (const p of targets) {
         const base = (p.original_price && p.original_price > 0) ? p.original_price : p.price;
         let payload: any;
-        if (pct <= 0) {
+        if ((isAmt && amt <= 0) || (!isAmt && pct <= 0)) {
           // remove discount
           payload = { price: base, original_price: null, discount: 0, is_on_sale: false };
+        } else if (isAmt) {
+          const newPrice = Math.max(0, base - amt);
+          const effectivePct = base > 0 ? Math.round((1 - newPrice / base) * 100) : 0;
+          payload = { price: newPrice, original_price: base, discount: effectivePct, is_on_sale: true };
         } else {
           const newPrice = Math.round(base * (1 - pct / 100));
           payload = { price: newPrice, original_price: base, discount: pct, is_on_sale: true };
@@ -1238,11 +1246,13 @@ const AdminPage = () => {
         const { error } = await supabase.from("products").update(payload).eq("id", p.id);
         if (!error) okCount++;
       }
-      toast.success(pct > 0
-        ? `${okCount} бараанд ${pct}% хямдрал тооцлоо`
-        : `${okCount} бараанаас хямдрал хаслаа`);
+      const msg = (isAmt ? amt > 0 : pct > 0)
+        ? (isAmt ? `${okCount} бараанаас ${amt.toLocaleString()}₮ хасч хямдрууллаа` : `${okCount} бараанд ${pct}% хямдрал тооцлоо`)
+        : `${okCount} бараанаас хямдрал хаслаа`;
+      toast.success(msg);
       setProductSelected(new Set());
       setBulkDiscountPct(0);
+      setBulkDiscountAmt(0);
       fetchProducts();
     } finally {
       setBulkDiscountLoading(false);
@@ -2314,27 +2324,57 @@ const AdminPage = () => {
 
               {/* Bulk discount bar */}
               {productSelected.size > 0 && (
-                <div className="bg-card rounded-2xl border border-primary/30 p-3 mb-3 flex flex-col sm:flex-row sm:items-center gap-3">
-                  <div className="text-sm font-semibold flex-1">
+                <div className="bg-card rounded-2xl border border-primary/30 p-3 mb-3 flex flex-col sm:flex-row sm:items-center gap-3 flex-wrap">
+                  <div className="text-sm font-semibold flex-1 min-w-[140px]">
                     {productSelected.size} бараа сонгосон
                   </div>
-                  <div className="flex items-center gap-2">
-                    <label className="text-xs text-muted-foreground">Хямдрал %:</label>
-                    <input
-                      type="number" min={0} max={99} placeholder="0"
-                      value={bulkDiscountPct || ""}
-                      onChange={(e) => setBulkDiscountPct(Math.max(0, Math.min(99, +e.target.value || 0)))}
-                      className="w-20 rounded-lg bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    />
+                  <div className="inline-flex rounded-lg bg-secondary p-0.5 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setBulkDiscountMode("pct")}
+                      className={`px-3 py-1.5 rounded-md font-medium transition ${bulkDiscountMode === "pct" ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                    >Хувиар %</button>
+                    <button
+                      type="button"
+                      onClick={() => setBulkDiscountMode("amt")}
+                      className={`px-3 py-1.5 rounded-md font-medium transition ${bulkDiscountMode === "amt" ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                    >Төгрөгөөр ₮</button>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {bulkDiscountMode === "pct" ? (
+                      <>
+                        <label className="text-xs text-muted-foreground">Хямдрал %:</label>
+                        <input
+                          type="number" min={0} max={99} placeholder="0"
+                          value={bulkDiscountPct || ""}
+                          onChange={(e) => setBulkDiscountPct(Math.max(0, Math.min(99, +e.target.value || 0)))}
+                          className="w-20 rounded-lg bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <label className="text-xs text-muted-foreground">Хасах ₮:</label>
+                        <input
+                          type="number" min={0} step={500} placeholder="0"
+                          value={bulkDiscountAmt || ""}
+                          onChange={(e) => setBulkDiscountAmt(Math.max(0, +e.target.value || 0))}
+                          className="w-28 rounded-lg bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                      </>
+                    )}
                     <button
                       onClick={handleApplyBulkDiscount}
                       disabled={bulkDiscountLoading}
                       className="bg-primary text-primary-foreground rounded-lg px-4 py-2 text-xs font-bold disabled:opacity-50 hover:bg-primary/90 transition-colors"
                     >
-                      {bulkDiscountLoading ? "Тооцож байна..." : (bulkDiscountPct > 0 ? `${bulkDiscountPct}% хэрэглэх` : "Хямдрал хасах")}
+                      {bulkDiscountLoading
+                        ? "Тооцож байна..."
+                        : bulkDiscountMode === "pct"
+                          ? (bulkDiscountPct > 0 ? `${bulkDiscountPct}% хэрэглэх` : "Хямдрал хасах")
+                          : (bulkDiscountAmt > 0 ? `${bulkDiscountAmt.toLocaleString()}₮ хасах` : "Хямдрал хасах")}
                     </button>
                     <button
-                      onClick={() => { setProductSelected(new Set()); setBulkDiscountPct(0); }}
+                      onClick={() => { setProductSelected(new Set()); setBulkDiscountPct(0); setBulkDiscountAmt(0); }}
                       className="bg-secondary rounded-lg px-3 py-2 text-xs font-medium hover:bg-secondary/80"
                     >
                       Цуцлах
