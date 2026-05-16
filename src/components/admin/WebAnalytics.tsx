@@ -196,7 +196,7 @@ const WebAnalytics = () => {
   return (
     <div className="space-y-6">
       {/* Time range picker */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center flex-wrap">
         {([
           { key: "7d" as TimeRange, label: "7 хоног" },
           { key: "14d" as TimeRange, label: "14 хоног" },
@@ -214,6 +214,13 @@ const WebAnalytics = () => {
             {r.label}
           </button>
         ))}
+        <button
+          onClick={handleShare}
+          className="ml-auto inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm bg-secondary text-muted-foreground hover:text-foreground"
+          title="Одоогийн шүүлтүүртэй холбоос хуулах"
+        >
+          <Share2 className="h-3.5 w-3.5" />Хуваалцах
+        </button>
       </div>
 
       {/* Summary stats */}
