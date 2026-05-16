@@ -189,6 +189,10 @@ const ProductPage = () => {
           setProduct(p);
           setStockQty(typeof data.stock_quantity === "number" ? data.stock_quantity : null);
           setVariantStock((data.variant_stock && typeof data.variant_stock === "object") ? data.variant_stock : {});
+          // Track product view
+          import("@/lib/tracking").then(({ track }) => track("product_view", {
+            product_id: p.id, category: p.category, value: p.price,
+          }));
 
           if (data.brand_id) {
             try {

@@ -5,12 +5,13 @@ import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
   BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, Printer, FileSpreadsheet,
-  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store
+  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
 import ChatbotSettingsManager from "@/components/admin/ChatbotSettingsManager";
 import StockDeductionLog from "@/components/admin/StockDeductionLog";
+import TrackingDashboard from "@/components/admin/TrackingDashboard";
 
 import { useRef } from "react";
 import { toast } from "sonner";
@@ -39,7 +40,7 @@ import { printOrdersTable, loadPrintFields, buildSelectedOrdersXlsxRows, type Pr
 import { PrintFieldsSettings } from "@/components/admin/PrintFieldsSettings";
 import * as XLSX from "xlsx";
 
-type Tab = "stats" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "settings";
+type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "settings";
 
 const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "collections", "analytics", "diagnostics", "stocklog"];
 
@@ -1270,6 +1271,7 @@ const AdminPage = () => {
 
   const allSidebarItems: { id: Tab; label: string; icon: any }[] = [
     { id: "stats", label: "Статистик", icon: BarChart3 },
+    { id: "tracking", label: "Хяналт", icon: Activity },
     { id: "products", label: "Бараа", icon: Package },
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
     { id: "users", label: "Хэрэглэгч", icon: Users },
@@ -2099,6 +2101,7 @@ const AdminPage = () => {
             </h2>
             <p className="text-sm text-muted-foreground mt-0.5">
               {tab === "stats" && "Дэлгүүрийн ерөнхий мэдээлэл"}
+              {tab === "tracking" && "Хяналт · Live зочин, hot lead, сэргээх"}
               {tab === "products" && `Нийт ${products.length} бараа`}
               {tab === "orders" && `Нийт ${orders.length} захиалга`}
               {tab === "users" && `Нийт ${users.length} хэрэглэгч`}
@@ -3903,6 +3906,9 @@ const AdminPage = () => {
             </div>
             );
           })()}
+
+          {/* Visitor & Lead Tracking */}
+          {tab === "tracking" && <TrackingDashboard />}
 
           {/* Web Analytics */}
           {tab === "analytics" && <WebAnalytics />}

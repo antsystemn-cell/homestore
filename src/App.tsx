@@ -14,6 +14,7 @@ const MAINTENANCE_MODE = false;
 import Index from "./pages/Index";
 import MaintenancePage from "./components/MaintenancePage";
 import ChatbotWidget from "./components/ChatbotWidget";
+import PageViewTracker from "./components/PageViewTracker";
 
 // Retry wrapper for lazy imports (handles stale chunk hashes after redeploy)
 function lazyRetry<T extends { default: React.ComponentType<any> }>(
@@ -87,6 +88,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <CartProvider>
+            <PageViewTracker />
             <Suspense fallback={<PageFallback />}>
               <Routes>
                 {MAINTENANCE_MODE ? (

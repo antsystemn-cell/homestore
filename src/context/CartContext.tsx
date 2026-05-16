@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode, useEffect } from "react";
 import { Product } from "@/data/products";
+import { track } from "@/lib/tracking";
 
 interface CartItem {
   product: Product;
@@ -63,10 +64,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
       return [...prev, { product, quantity, selectedColor: color || null, selectedSize: size || null }];
     });
+    track("add_to_cart", {
+      product_id: product.id,
+      category: product.category,
+      value: product.price * quantity,
+      metadata: { color: color || null, size: size || null, quantity },
+    });
   }, []);
 
   const removeFromCart = useCallback((key: string) => {
     setItems((prev) => prev.filter((i) => makeCartKey(i.product.id, i.selectedColor, i.selectedSize) !== key));
+    track("remove_from_cart", { metadata: { key } });
   }, []);
 
   const updateQuantity = useCallback((key: string, quantity: number) => {

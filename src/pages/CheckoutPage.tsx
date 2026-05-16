@@ -12,6 +12,7 @@ import BottomNav from "@/components/store/BottomNav";
 import StorepayPayment from "@/components/store/StorepayPayment";
 import QPayPayment from "@/components/store/QPayPayment";
 import PocketPayment from "@/components/store/PocketPayment";
+import { track, attachLeadContact } from "@/lib/tracking";
 
 type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket";
 
@@ -46,6 +47,14 @@ const CheckoutPage = () => {
       navigate("/cart");
     }
   }, [user, isGuestCheckout, navigate]);
+
+  // Track checkout start once
+  useEffect(() => {
+    if (items.length > 0) {
+      track("checkout_start", { value: cartTotal, metadata: { items: items.length } });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const fetchDelivery = async () => {
@@ -141,6 +150,14 @@ const CheckoutPage = () => {
     supabase.functions.invoke("send-to-delivery", {
       body: { order_id: data.id },
     }).catch((e) => console.error("Failed to send to delivery:", e));
+
+    // Track: invoice for online payments, purchase for cash
+    const eventName = pm === "cash" ? "purchase" : "invoice_create";
+    attachLeadContact({ phone, name: isGuestCheckout ? name : undefined });
+    track(eventName, {
+      value: grandTotal,
+      metadata: { order_id: data.id, order_ref: data.order_ref, payment_method: pm },
+    });
 
     return data.id;
   };
