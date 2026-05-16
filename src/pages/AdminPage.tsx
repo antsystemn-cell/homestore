@@ -1271,6 +1271,7 @@ const AdminPage = () => {
 
   const allSidebarItems: { id: Tab; label: string; icon: any }[] = [
     { id: "stats", label: "Статистик", icon: BarChart3 },
+    { id: "tracking", label: "Хяналт", icon: Activity },
     { id: "products", label: "Бараа", icon: Package },
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
     { id: "users", label: "Хэрэглэгч", icon: Users },
