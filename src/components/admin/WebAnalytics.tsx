@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
-import { usePersistedState } from "@/hooks/usePersistedState";
+import { usePersistedState, stringSerialize, stringDeserialize, shareCurrentUrl } from "@/hooks/usePersistedState";
 import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
-import { Globe, Users, Eye, Clock, TrendingDown, Monitor, Smartphone, Tablet, Loader2 } from "lucide-react";
+import { Globe, Users, Eye, Clock, TrendingDown, Monitor, Smartphone, Tablet, Loader2, Share2 } from "lucide-react";
+import { toast } from "sonner";
 
 const CHART_COLORS = [
   "hsl(var(--primary))",
@@ -57,7 +58,15 @@ const WebAnalytics = () => {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [range, setRange] = usePersistedState<TimeRange>("admin.webanalytics.range", "7d");
+  const [range, setRange] = usePersistedState<TimeRange>(
+    "admin.webanalytics.range", "7d",
+    { serialize: stringSerialize as (v: string) => string, deserialize: stringDeserialize as (raw: string) => TimeRange, urlKey: "wa_range" }
+  );
+
+  const handleShare = async () => {
+    const ok = await shareCurrentUrl();
+    toast[ok ? "success" : "error"](ok ? "Холбоос хуулагдлаа" : "Холбоос хуулж чадсангүй");
+  };
 
   const fetchAnalytics = async (timeRange: TimeRange) => {
     setLoading(true);
@@ -187,7 +196,7 @@ const WebAnalytics = () => {
   return (
     <div className="space-y-6">
       {/* Time range picker */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center flex-wrap">
         {([
           { key: "7d" as TimeRange, label: "7 хоног" },
           { key: "14d" as TimeRange, label: "14 хоног" },
@@ -205,6 +214,13 @@ const WebAnalytics = () => {
             {r.label}
           </button>
         ))}
+        <button
+          onClick={handleShare}
+          className="ml-auto inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm bg-secondary text-muted-foreground hover:text-foreground"
+          title="Одоогийн шүүлтүүртэй холбоос хуулах"
+        >
+          <Share2 className="h-3.5 w-3.5" />Хуваалцах
+        </button>
       </div>
 
       {/* Summary stats */}
