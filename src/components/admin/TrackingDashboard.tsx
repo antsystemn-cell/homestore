@@ -393,6 +393,53 @@ export default function TrackingDashboard() {
               </ResponsiveContainer>
             </div>
 
+            {/* Step-by-step table */}
+            <div className="pt-2 border-t border-border overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-muted-foreground border-b border-border">
+                    <th className="text-left font-medium py-2 px-2">Алхам</th>
+                    <th className="text-right font-medium py-2 px-2">Тоо</th>
+                    <th className="text-right font-medium py-2 px-2">% эхнээс</th>
+                    <th className="text-right font-medium py-2 px-2">Өмнөхөөс</th>
+                    <th className="text-right font-medium py-2 px-2">Алдагдал</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {funnel.steps.map((s, i) => {
+                    const prev = i > 0 ? funnel.steps[i - 1].value : s.value;
+                    const lost = i > 0 ? prev - s.value : 0;
+                    return (
+                      <tr key={s.key} className="border-b border-border/50 last:border-0">
+                        <td className="py-2 px-2">
+                          <div className="flex items-center gap-2">
+                            <span className="h-2.5 w-2.5 rounded-full" style={{ background: s.color }} />
+                            <span className="font-medium">{i + 1}. {s.label}</span>
+                          </div>
+                        </td>
+                        <td className="text-right font-bold py-2 px-2">{s.value.toLocaleString()}</td>
+                        <td className="text-right py-2 px-2">{s.pctTop}%</td>
+                        <td className="text-right py-2 px-2">
+                          {i === 0 ? <span className="text-muted-foreground">—</span> : (
+                            <span className="text-emerald-600 font-medium">{s.stepConv}%</span>
+                          )}
+                        </td>
+                        <td className="text-right py-2 px-2">
+                          {i === 0 ? <span className="text-muted-foreground">—</span> : (
+                            <span className="text-red-500">−{lost.toLocaleString()} ({s.drop}%)</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  <tr className="bg-secondary/40 font-bold">
+                    <td className="py-2 px-2">Нийт хөрвүүлэлт</td>
+                    <td colSpan={4} className="text-right py-2 px-2 text-primary">{funnel.overallConv}% (үзсэн → авсан)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
             {/* Daily trend */}
             {funnelRange !== "today" && (
               <div className="pt-2 border-t border-border">
