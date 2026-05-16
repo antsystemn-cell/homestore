@@ -91,14 +91,17 @@ export default function TrackingDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<"overview" | "live" | "leads" | "recovery" | "feed">("overview");
   const [tick, setTick] = useState(0);
+  const [funnelRange, setFunnelRange] = useState<"today" | "7d" | "30d">("today");
 
   const refresh = async () => {
-    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    // Fetch up to 30 days for funnel/trend, lighter limits for the rest
+    const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const since24 = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const [s, e, l, r] = await Promise.all([
-      supabase.from("analytics_sessions").select("*").gte("last_seen_at", since).order("last_seen_at", { ascending: false }).limit(500),
-      supabase.from("analytics_events").select("*").gte("created_at", since).order("created_at", { ascending: false }).limit(500),
+      supabase.from("analytics_sessions").select("*").gte("last_seen_at", since30).order("last_seen_at", { ascending: false }).limit(2000),
+      supabase.from("analytics_events").select("*").gte("created_at", since30).order("created_at", { ascending: false }).limit(5000),
       supabase.from("lead_scores").select("*").order("score", { ascending: false }).limit(200),
-      supabase.from("recovery_actions").select("*").order("created_at", { ascending: false }).limit(100),
+      supabase.from("recovery_actions").select("*").gte("created_at", since24).order("created_at", { ascending: false }).limit(100),
     ]);
     setSessions((s.data as Session[]) || []);
     setEvents((e.data as Event[]) || []);
