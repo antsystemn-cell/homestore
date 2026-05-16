@@ -9,7 +9,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { usePersistedState, dateSerialize, dateDeserialize, stringSerialize, stringDeserialize, shareCurrentUrl } from "@/hooks/usePersistedState";
-import { Share2, Check } from "lucide-react";
+import { Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
