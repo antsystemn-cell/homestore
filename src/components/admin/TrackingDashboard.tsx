@@ -188,10 +188,12 @@ export default function TrackingDashboard() {
     }
     for (const e of events) {
       const k = e.created_at.slice(0, 10);
-      if (!buckets[k]) continue;
-      if (e.event_type in buckets[k]) {
-        (buckets[k] as Record<string, number | string>)[e.event_type] = (buckets[k] as Record<string, number>)[e.event_type] + 1;
-      }
+      const b = buckets[k];
+      if (!b) continue;
+      if (e.event_type === "product_view") b.product_view += 1;
+      else if (e.event_type === "add_to_cart") b.add_to_cart += 1;
+      else if (e.event_type === "checkout_start") b.checkout_start += 1;
+      else if (e.event_type === "purchase") b.purchase += 1;
     }
     return Object.values(buckets);
   }, [events, funnelRange]);
