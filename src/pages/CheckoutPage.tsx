@@ -12,6 +12,7 @@ import BottomNav from "@/components/store/BottomNav";
 import StorepayPayment from "@/components/store/StorepayPayment";
 import QPayPayment from "@/components/store/QPayPayment";
 import PocketPayment from "@/components/store/PocketPayment";
+import { track, attachLeadContact } from "@/lib/tracking";
 
 type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket";
 
