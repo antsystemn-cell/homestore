@@ -14,6 +14,110 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          category: string | null
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          page_path: string | null
+          product_id: string | null
+          session_id: string | null
+          session_token: string | null
+          user_id: string | null
+          value: number | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          page_path?: string | null
+          product_id?: string | null
+          session_id?: string | null
+          session_token?: string | null
+          user_id?: string | null
+          value?: number | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          page_path?: string | null
+          product_id?: string | null
+          session_id?: string | null
+          session_token?: string | null
+          user_id?: string | null
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analytics_sessions: {
+        Row: {
+          country: string | null
+          device: string | null
+          id: string
+          ip_hash: string | null
+          is_returning: boolean
+          landing_path: string | null
+          last_seen_at: string
+          referrer: string | null
+          session_token: string
+          started_at: string
+          user_agent: string | null
+          user_id: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          country?: string | null
+          device?: string | null
+          id?: string
+          ip_hash?: string | null
+          is_returning?: boolean
+          landing_path?: string | null
+          last_seen_at?: string
+          referrer?: string | null
+          session_token: string
+          started_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          country?: string | null
+          device?: string | null
+          id?: string
+          ip_hash?: string | null
+          is_returning?: boolean
+          landing_path?: string | null
+          last_seen_at?: string
+          referrer?: string | null
+          session_token?: string
+          started_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: []
+      }
       brands: {
         Row: {
           created_at: string
@@ -220,6 +324,62 @@ export type Database = {
           used_at?: string | null
         }
         Relationships: []
+      }
+      lead_scores: {
+        Row: {
+          created_at: string
+          id: string
+          last_activity: string
+          last_event_type: string | null
+          last_product_id: string | null
+          name: string | null
+          phone: string | null
+          score: number
+          session_id: string | null
+          session_token: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_activity?: string
+          last_event_type?: string | null
+          last_product_id?: string | null
+          name?: string | null
+          phone?: string | null
+          score?: number
+          session_id?: string | null
+          session_token?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_activity?: string
+          last_event_type?: string | null
+          last_product_id?: string | null
+          name?: string | null
+          phone?: string | null
+          score?: number
+          session_id?: string | null
+          session_token?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_scores_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "analytics_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       order_status_history: {
         Row: {
@@ -702,6 +862,74 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      recovery_actions: {
+        Row: {
+          cart_snapshot: Json | null
+          channel: string | null
+          contacted_at: string | null
+          created_at: string
+          handled_by: string | null
+          handled_by_email: string | null
+          id: string
+          invoice_id: string | null
+          name: string | null
+          note: string | null
+          phone: string | null
+          recovered_at: string | null
+          session_id: string | null
+          status: string
+          type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          cart_snapshot?: Json | null
+          channel?: string | null
+          contacted_at?: string | null
+          created_at?: string
+          handled_by?: string | null
+          handled_by_email?: string | null
+          id?: string
+          invoice_id?: string | null
+          name?: string | null
+          note?: string | null
+          phone?: string | null
+          recovered_at?: string | null
+          session_id?: string | null
+          status?: string
+          type: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          cart_snapshot?: Json | null
+          channel?: string | null
+          contacted_at?: string | null
+          created_at?: string
+          handled_by?: string | null
+          handled_by_email?: string | null
+          id?: string
+          invoice_id?: string | null
+          name?: string | null
+          note?: string | null
+          phone?: string | null
+          recovered_at?: string | null
+          session_id?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recovery_actions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {
