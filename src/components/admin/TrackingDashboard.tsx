@@ -11,8 +11,13 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Users, Flame, Activity, TrendingUp, ShoppingCart, Phone,
-  MessageCircle, CheckCircle2, X, Smartphone, Monitor, Tablet, RefreshCw
+  MessageCircle, CheckCircle2, X, Smartphone, Monitor, Tablet, RefreshCw,
+  Eye, PackagePlus, CreditCard, BadgeCheck
 } from "lucide-react";
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList,
+  LineChart, Line, CartesianGrid
+} from "recharts";
 
 type Session = {
   id: string; session_token: string; user_id: string | null;
@@ -86,14 +91,17 @@ export default function TrackingDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<"overview" | "live" | "leads" | "recovery" | "feed">("overview");
   const [tick, setTick] = useState(0);
+  const [funnelRange, setFunnelRange] = useState<"today" | "7d" | "30d">("today");
 
   const refresh = async () => {
-    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    // Fetch up to 30 days for funnel/trend, lighter limits for the rest
+    const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const since24 = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const [s, e, l, r] = await Promise.all([
-      supabase.from("analytics_sessions").select("*").gte("last_seen_at", since).order("last_seen_at", { ascending: false }).limit(500),
-      supabase.from("analytics_events").select("*").gte("created_at", since).order("created_at", { ascending: false }).limit(500),
+      supabase.from("analytics_sessions").select("*").gte("last_seen_at", since30).order("last_seen_at", { ascending: false }).limit(2000),
+      supabase.from("analytics_events").select("*").gte("created_at", since30).order("created_at", { ascending: false }).limit(5000),
       supabase.from("lead_scores").select("*").order("score", { ascending: false }).limit(200),
-      supabase.from("recovery_actions").select("*").order("created_at", { ascending: false }).limit(100),
+      supabase.from("recovery_actions").select("*").gte("created_at", since24).order("created_at", { ascending: false }).limit(100),
     ]);
     setSessions((s.data as Session[]) || []);
     setEvents((e.data as Event[]) || []);
@@ -138,6 +146,57 @@ export default function TrackingDashboard() {
   // Hot leads
   const hotLeads = useMemo(() => leads.filter((l) => l.status === "hot").slice(0, 50), [leads]);
   const warmLeads = useMemo(() => leads.filter((l) => l.status === "warm").slice(0, 50), [leads]);
+
+  // Funnel by selected range
+  const funnel = useMemo(() => {
+    const days = funnelRange === "today" ? 1 : funnelRange === "7d" ? 7 : 30;
+    let from: Date;
+    if (funnelRange === "today") { from = new Date(); from.setHours(0, 0, 0, 0); }
+    else { from = new Date(Date.now() - days * 24 * 60 * 60 * 1000); }
+    const inRange = events.filter((e) => new Date(e.created_at) >= from);
+    // Unique sessions per step (more meaningful than raw event counts)
+    const uniq = (type: string) => new Set(inRange.filter((e) => e.event_type === type).map((e) => e.session_id || e.id)).size;
+    const productView = uniq("product_view");
+    const addToCart = uniq("add_to_cart");
+    const checkoutStart = uniq("checkout_start");
+    const purchase = uniq("purchase");
+    const steps = [
+      { key: "product_view", label: "Бараа үзсэн", value: productView, icon: "eye", color: "hsl(217 91% 60%)" },
+      { key: "add_to_cart", label: "Сагсанд нэмсэн", value: addToCart, icon: "cart", color: "hsl(38 92% 50%)" },
+      { key: "checkout_start", label: "Захиалга эхэлсэн", value: checkoutStart, icon: "card", color: "hsl(280 65% 60%)" },
+      { key: "purchase", label: "Худалдан авсан", value: purchase, icon: "check", color: "hsl(142 71% 45%)" },
+    ];
+    const top = steps[0].value || 1;
+    const enriched = steps.map((s, i) => ({
+      ...s,
+      pctTop: Math.round((s.value / top) * 100),
+      drop: i > 0 && steps[i - 1].value > 0 ? Math.round((1 - s.value / steps[i - 1].value) * 100) : 0,
+      stepConv: i > 0 && steps[i - 1].value > 0 ? Math.round((s.value / steps[i - 1].value) * 100) : 100,
+    }));
+    const overallConv = productView > 0 ? ((purchase / productView) * 100).toFixed(1) : "0";
+    return { steps: enriched, overallConv };
+  }, [events, funnelRange, tick]);
+
+  // Daily trend (last N days) for the same 4 events
+  const trend = useMemo(() => {
+    const days = funnelRange === "today" ? 1 : funnelRange === "7d" ? 7 : 30;
+    const buckets: Record<string, { date: string; product_view: number; add_to_cart: number; checkout_start: number; purchase: number }> = {};
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
+      const k = d.toISOString().slice(0, 10);
+      buckets[k] = { date: k.slice(5), product_view: 0, add_to_cart: 0, checkout_start: 0, purchase: 0 };
+    }
+    for (const e of events) {
+      const k = e.created_at.slice(0, 10);
+      const b = buckets[k];
+      if (!b) continue;
+      if (e.event_type === "product_view") b.product_view += 1;
+      else if (e.event_type === "add_to_cart") b.add_to_cart += 1;
+      else if (e.event_type === "checkout_start") b.checkout_start += 1;
+      else if (e.event_type === "purchase") b.purchase += 1;
+    }
+    return Object.values(buckets);
+  }, [events, funnelRange]);
 
   // Abandoned detection
   const abandoned = useMemo(() => {
@@ -261,16 +320,100 @@ export default function TrackingDashboard() {
             <KPI label="Conv. %" value={`${kpi.conv}%`} />
           </div>
 
-          {/* Funnel */}
-          <Card title="Borloolt funnel (өнөөдөр)">
-            <Funnel steps={[
-              { label: "Зочин", value: kpi.sessions },
-              { label: "Бараа үзсэн", value: kpi.productViews },
-              { label: "Сагсанд нэмсэн", value: kpi.addToCart },
-              { label: "Захиалга эхэлсэн", value: kpi.checkout },
-              { label: "Худалдан авсан", value: kpi.purchase },
-            ]} />
-          </Card>
+          {/* Funnel: product_view → add_to_cart → checkout_start → purchase */}
+          <div className="bg-card border border-border rounded-2xl p-4 space-y-4">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <h3 className="text-sm font-bold">Борлуулалтын Funnel</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Нийт хөрвүүлэлт (үзсэн → авсан):{" "}
+                  <span className="font-bold text-foreground">{funnel.overallConv}%</span>
+                </p>
+              </div>
+              <div className="inline-flex rounded-lg bg-secondary p-0.5 text-xs">
+                {([
+                  { id: "today", label: "Өнөөдөр" },
+                  { id: "7d", label: "7 хоног" },
+                  { id: "30d", label: "30 хоног" },
+                ] as const).map((r) => (
+                  <button key={r.id} onClick={() => setFunnelRange(r.id)}
+                    className={`px-3 py-1.5 rounded-md font-medium transition ${
+                      funnelRange === r.id ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    }`}>{r.label}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Step KPIs */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {funnel.steps.map((s, i) => {
+                const Icon = s.icon === "eye" ? Eye : s.icon === "cart" ? PackagePlus : s.icon === "card" ? CreditCard : BadgeCheck;
+                return (
+                  <div key={s.key} className="rounded-xl p-3 border border-border bg-secondary/30">
+                    <div className="flex items-center justify-between">
+                      <Icon className="h-4 w-4" style={{ color: s.color }} />
+                      <span className="text-[10px] font-bold text-muted-foreground">{i + 1}/4</span>
+                    </div>
+                    <div className="text-[11px] text-muted-foreground mt-2">{s.label}</div>
+                    <div className="text-2xl font-bold mt-0.5">{s.value.toLocaleString()}</div>
+                    <div className="text-[10px] mt-1">
+                      {i === 0 ? (
+                        <span className="text-muted-foreground">эхлэл</span>
+                      ) : (
+                        <>
+                          <span className="text-emerald-600 font-medium">{s.stepConv}% үлдсэн</span>
+                          {s.drop > 0 && <span className="text-red-500 ml-1.5">−{s.drop}%</span>}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Horizontal funnel bar chart */}
+            <div className="h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={funnel.steps} layout="vertical" margin={{ left: 10, right: 40, top: 5, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                  <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={11} />
+                  <YAxis type="category" dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={11} width={120} />
+                  <Tooltip
+                    cursor={{ fill: "hsl(var(--secondary))" }}
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
+                    formatter={(v: number, _n, p: { payload?: { pctTop: number } }) =>
+                      [`${v.toLocaleString()} (${p.payload?.pctTop ?? 0}%)`, "Session"]
+                    }
+                  />
+                  <Bar dataKey="value" radius={[0, 8, 8, 0]}>
+                    {funnel.steps.map((s) => <Cell key={s.key} fill={s.color} />)}
+                    <LabelList dataKey="value" position="right" fontSize={11} fill="hsl(var(--foreground))" />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Daily trend */}
+            {funnelRange !== "today" && (
+              <div className="pt-2 border-t border-border">
+                <div className="text-xs font-medium text-muted-foreground mb-2">Өдрийн чиг хандлага</div>
+                <div className="h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={trend} margin={{ left: 0, right: 10, top: 5, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={10} />
+                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} />
+                      <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+                      <Line type="monotone" dataKey="product_view" name="Үзсэн" stroke="hsl(217 91% 60%)" strokeWidth={2} dot={false} />
+                      <Line type="monotone" dataKey="add_to_cart" name="Сагс" stroke="hsl(38 92% 50%)" strokeWidth={2} dot={false} />
+                      <Line type="monotone" dataKey="checkout_start" name="Захиалга" stroke="hsl(280 65% 60%)" strokeWidth={2} dot={false} />
+                      <Line type="monotone" dataKey="purchase" name="Худалдсан" stroke="hsl(142 71% 45%)" strokeWidth={2} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+          </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             <Card title="Топ үзсэн бараа">
@@ -497,29 +640,6 @@ function Empty({ children }: { children: React.ReactNode }) {
   return <div className="text-xs text-muted-foreground py-4 text-center">{children}</div>;
 }
 
-function Funnel({ steps }: { steps: Array<{ label: string; value: number }> }) {
-  const max = Math.max(...steps.map((s) => s.value), 1);
-  return (
-    <div className="space-y-2">
-      {steps.map((s, i) => {
-        const pct = (s.value / max) * 100;
-        const prev = i > 0 ? steps[i - 1].value : s.value;
-        const drop = prev > 0 ? ((1 - s.value / prev) * 100).toFixed(0) : "0";
-        return (
-          <div key={s.label}>
-            <div className="flex justify-between text-xs mb-1">
-              <span>{s.label}</span>
-              <span className="font-bold">{s.value}{i > 0 && <span className="text-muted-foreground ml-1">(-{drop}%)</span>}</span>
-            </div>
-            <div className="h-7 rounded-lg bg-secondary overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-primary to-primary/70 transition-all" style={{ width: `${pct}%` }} />
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
 
 function LeadList({ items, sessions }: { items: Lead[]; sessions: Session[] }) {
   if (items.length === 0) return <Empty>Лид алга</Empty>;
