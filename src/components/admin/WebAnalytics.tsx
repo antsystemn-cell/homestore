@@ -58,7 +58,15 @@ const WebAnalytics = () => {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [range, setRange] = usePersistedState<TimeRange>("admin.webanalytics.range", "7d");
+  const [range, setRange] = usePersistedState<TimeRange>(
+    "admin.webanalytics.range", "7d",
+    { serialize: stringSerialize as (v: string) => string, deserialize: stringDeserialize as (raw: string) => TimeRange, urlKey: "wa_range" }
+  );
+
+  const handleShare = async () => {
+    const ok = await shareCurrentUrl();
+    toast[ok ? "success" : "error"](ok ? "Холбоос хуулагдлаа" : "Холбоос хуулж чадсангүй");
+  };
 
   const fetchAnalytics = async (timeRange: TimeRange) => {
     setLoading(true);
