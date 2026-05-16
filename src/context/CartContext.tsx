@@ -64,6 +64,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
       return [...prev, { product, quantity, selectedColor: color || null, selectedSize: size || null }];
     });
+    track("add_to_cart", {
+      product_id: product.id,
+      category: product.category,
+      value: product.price * quantity,
+      metadata: { color: color || null, size: size || null, quantity },
+    });
   }, []);
 
   const removeFromCart = useCallback((key: string) => {
