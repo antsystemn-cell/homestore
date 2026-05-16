@@ -140,13 +140,13 @@ export async function track(eventType: string, payload: TrackPayload = {}) {
     await supabase.from("analytics_events").insert({
       session_id: session.id,
       session_token: session.token,
-      user_id: userData?.user?.id ?? null,
+      user_id: userData?.user?.id ?? undefined,
       event_type: eventType,
-      product_id: payload.product_id ?? null,
-      category: payload.category ?? null,
-      value: payload.value ?? null,
-      page_path: payload.page_path ?? (typeof window !== "undefined" ? window.location.pathname : null),
-      metadata: payload.metadata ?? {},
+      product_id: payload.product_id ?? undefined,
+      category: payload.category ?? undefined,
+      value: payload.value ?? undefined,
+      page_path: payload.page_path ?? (typeof window !== "undefined" ? window.location.pathname : undefined),
+      metadata: (payload.metadata ?? {}) as never,
     });
 
     // update last_seen_at
