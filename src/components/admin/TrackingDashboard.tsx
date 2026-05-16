@@ -337,7 +337,7 @@ export default function TrackingDashboard() {
             </button>
           );
         })}
-        <button onClick={refresh} className="ml-auto inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs bg-secondary hover:bg-secondary/80">
+        <button onClick={() => refresh()} className="ml-auto inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs bg-secondary hover:bg-secondary/80">
           <RefreshCw className="h-3.5 w-3.5" />Шинэчлэх
         </button>
       </div>
