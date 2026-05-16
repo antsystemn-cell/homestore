@@ -640,29 +640,6 @@ function Empty({ children }: { children: React.ReactNode }) {
   return <div className="text-xs text-muted-foreground py-4 text-center">{children}</div>;
 }
 
-function Funnel({ steps }: { steps: Array<{ label: string; value: number }> }) {
-  const max = Math.max(...steps.map((s) => s.value), 1);
-  return (
-    <div className="space-y-2">
-      {steps.map((s, i) => {
-        const pct = (s.value / max) * 100;
-        const prev = i > 0 ? steps[i - 1].value : s.value;
-        const drop = prev > 0 ? ((1 - s.value / prev) * 100).toFixed(0) : "0";
-        return (
-          <div key={s.label}>
-            <div className="flex justify-between text-xs mb-1">
-              <span>{s.label}</span>
-              <span className="font-bold">{s.value}{i > 0 && <span className="text-muted-foreground ml-1">(-{drop}%)</span>}</span>
-            </div>
-            <div className="h-7 rounded-lg bg-secondary overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-primary to-primary/70 transition-all" style={{ width: `${pct}%` }} />
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
 
 function LeadList({ items, sessions }: { items: Lead[]; sessions: Session[] }) {
   if (items.length === 0) return <Empty>Лид алга</Empty>;
