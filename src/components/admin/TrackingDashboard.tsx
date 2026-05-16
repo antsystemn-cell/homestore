@@ -319,7 +319,7 @@ export default function TrackingDashboard() {
                     <li key={l.id} className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="inline-flex h-2 w-2 rounded-full bg-red-500" />
-                        <span className="truncate">{l.name || l.phone || `${l.session_token?.slice(0, 6)}…`}</span>
+                        <span className="truncate">{l.name || l.phone || `${sessions.find(s=>s.id===l.session_id)?.session_token.slice(0,6)}…`}</span>
                       </div>
                       <span className="font-bold text-red-600">{l.score}</span>
                     </li>
@@ -534,7 +534,7 @@ function LeadList({ items, sessions }: { items: Lead[]; sessions: Session[] }) {
             </span>
             <DeviceIcon device={sess?.device || null} />
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium truncate">{l.name || l.phone || `Зочин #${l.session_token?.slice(0, 6)}`}</div>
+              <div className="text-sm font-medium truncate">{l.name || l.phone || `Зочин #${sessions.find(s=>s.id===l.session_id)?.session_token.slice(0,6)}`}</div>
               <div className="text-xs text-muted-foreground truncate">
                 Сүүлийнх: {EVENT_LABELS[l.last_event_type || ""] || l.last_event_type || "—"} · {timeAgo(l.last_activity)}
               </div>
