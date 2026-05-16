@@ -372,6 +372,8 @@ const AdminPage = () => {
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
   const [productSelected, setProductSelected] = useState<Set<string>>(new Set());
   const [bulkDiscountPct, setBulkDiscountPct] = useState<number>(0);
+  const [bulkDiscountAmt, setBulkDiscountAmt] = useState<number>(0);
+  const [bulkDiscountMode, setBulkDiscountMode] = useState<"pct" | "amt">("pct");
   const [bulkDiscountLoading, setBulkDiscountLoading] = useState(false);
   const [showXlsxHelp, setShowXlsxHelp] = useState(false);
   const [showPrintChecklist, setShowPrintChecklist] = useState(false);
