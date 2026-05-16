@@ -151,6 +151,14 @@ const CheckoutPage = () => {
       body: { order_id: data.id },
     }).catch((e) => console.error("Failed to send to delivery:", e));
 
+    // Track: invoice for online payments, purchase for cash
+    const eventName = pm === "cash" ? "purchase" : "invoice_create";
+    attachLeadContact({ phone, name: isGuestCheckout ? name : undefined });
+    track(eventName, {
+      value: grandTotal,
+      metadata: { order_id: data.id, order_ref: data.order_ref, payment_method: pm },
+    });
+
     return data.id;
   };
 
