@@ -12,12 +12,16 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Users, Flame, Activity, TrendingUp, ShoppingCart, Phone,
   MessageCircle, CheckCircle2, X, Smartphone, Monitor, Tablet, RefreshCw,
-  Eye, PackagePlus, CreditCard, BadgeCheck
+  Eye, PackagePlus, CreditCard, BadgeCheck, CalendarIcon
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList,
   LineChart, Line, CartesianGrid
 } from "recharts";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 type Session = {
   id: string; session_token: string; user_id: string | null;
@@ -91,15 +95,41 @@ export default function TrackingDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<"overview" | "live" | "leads" | "recovery" | "feed">("overview");
   const [tick, setTick] = useState(0);
-  const [funnelRange, setFunnelRange] = useState<"today" | "7d" | "30d">("today");
+  const [funnelRange, setFunnelRange] = useState<"today" | "7d" | "30d" | "custom">("today");
+  const [customFrom, setCustomFrom] = useState<Date | undefined>(() => {
+    const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - 14); return d;
+  });
+  const [customTo, setCustomTo] = useState<Date | undefined>(() => {
+    const d = new Date(); d.setHours(23, 59, 59, 999); return d;
+  });
 
-  const refresh = async () => {
-    // Fetch up to 30 days for funnel/trend, lighter limits for the rest
-    const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  // Resolve the active range to concrete from/to dates
+  const range = useMemo(() => {
+    const now = new Date();
+    if (funnelRange === "today") {
+      const f = new Date(); f.setHours(0, 0, 0, 0);
+      return { from: f, to: now, days: 1 };
+    }
+    if (funnelRange === "7d" || funnelRange === "30d") {
+      const days = funnelRange === "7d" ? 7 : 30;
+      const f = new Date(); f.setHours(0, 0, 0, 0); f.setDate(f.getDate() - (days - 1));
+      return { from: f, to: now, days };
+    }
+    const f = customFrom ?? (() => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - 6); return d; })();
+    const t = customTo ?? now;
+    const days = Math.max(1, Math.ceil((t.getTime() - f.getTime()) / (24 * 60 * 60 * 1000)) + 1);
+    return { from: f, to: t, days };
+  }, [funnelRange, customFrom, customTo]);
+
+  const refresh = async (sinceOverride?: string) => {
+    const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const fetchSince = sinceOverride
+      ? sinceOverride
+      : (funnelRange === "custom" && range.from < since30 ? range.from.toISOString() : since30.toISOString());
     const since24 = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const [s, e, l, r] = await Promise.all([
-      supabase.from("analytics_sessions").select("*").gte("last_seen_at", since30).order("last_seen_at", { ascending: false }).limit(2000),
-      supabase.from("analytics_events").select("*").gte("created_at", since30).order("created_at", { ascending: false }).limit(5000),
+      supabase.from("analytics_sessions").select("*").gte("last_seen_at", fetchSince).order("last_seen_at", { ascending: false }).limit(2000),
+      supabase.from("analytics_events").select("*").gte("created_at", fetchSince).order("created_at", { ascending: false }).limit(10000),
       supabase.from("lead_scores").select("*").order("score", { ascending: false }).limit(200),
       supabase.from("recovery_actions").select("*").gte("created_at", since24).order("created_at", { ascending: false }).limit(100),
     ]);
@@ -123,6 +153,14 @@ export default function TrackingDashboard() {
     return () => { supabase.removeChannel(ch); clearInterval(t); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Refetch when custom range needs older data than already loaded
+  useEffect(() => {
+    if (funnelRange === "custom" && range.from < new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)) {
+      refresh(range.from.toISOString());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [funnelRange, customFrom]);
 
   // Live = last 5 min
   const liveSessions = useMemo(() => {
@@ -149,12 +187,10 @@ export default function TrackingDashboard() {
 
   // Funnel by selected range
   const funnel = useMemo(() => {
-    const days = funnelRange === "today" ? 1 : funnelRange === "7d" ? 7 : 30;
-    let from: Date;
-    if (funnelRange === "today") { from = new Date(); from.setHours(0, 0, 0, 0); }
-    else { from = new Date(Date.now() - days * 24 * 60 * 60 * 1000); }
-    const inRange = events.filter((e) => new Date(e.created_at) >= from);
-    // Unique sessions per step (more meaningful than raw event counts)
+    const inRange = events.filter((e) => {
+      const t = new Date(e.created_at).getTime();
+      return t >= range.from.getTime() && t <= range.to.getTime();
+    });
     const uniq = (type: string) => new Set(inRange.filter((e) => e.event_type === type).map((e) => e.session_id || e.id)).size;
     const productView = uniq("product_view");
     const addToCart = uniq("add_to_cart");
@@ -175,14 +211,14 @@ export default function TrackingDashboard() {
     }));
     const overallConv = productView > 0 ? ((purchase / productView) * 100).toFixed(1) : "0";
     return { steps: enriched, overallConv };
-  }, [events, funnelRange, tick]);
+  }, [events, range, tick]);
 
-  // Daily trend (last N days) for the same 4 events
+  // Daily trend across the selected range
   const trend = useMemo(() => {
-    const days = funnelRange === "today" ? 1 : funnelRange === "7d" ? 7 : 30;
     const buckets: Record<string, { date: string; product_view: number; add_to_cart: number; checkout_start: number; purchase: number }> = {};
-    for (let i = days - 1; i >= 0; i--) {
-      const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
+    const start = new Date(range.from); start.setHours(0, 0, 0, 0);
+    const end = new Date(range.to); end.setHours(0, 0, 0, 0);
+    for (let d = new Date(start); d.getTime() <= end.getTime(); d.setDate(d.getDate() + 1)) {
       const k = d.toISOString().slice(0, 10);
       buckets[k] = { date: k.slice(5), product_view: 0, add_to_cart: 0, checkout_start: 0, purchase: 0 };
     }
@@ -196,7 +232,7 @@ export default function TrackingDashboard() {
       else if (e.event_type === "purchase") b.purchase += 1;
     }
     return Object.values(buckets);
-  }, [events, funnelRange]);
+  }, [events, range]);
 
   // Abandoned detection
   const abandoned = useMemo(() => {
@@ -303,7 +339,7 @@ export default function TrackingDashboard() {
             </button>
           );
         })}
-        <button onClick={refresh} className="ml-auto inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs bg-secondary hover:bg-secondary/80">
+        <button onClick={() => refresh()} className="ml-auto inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs bg-secondary hover:bg-secondary/80">
           <RefreshCw className="h-3.5 w-3.5" />Шинэчлэх
         </button>
       </div>
@@ -326,21 +362,62 @@ export default function TrackingDashboard() {
               <div>
                 <h3 className="text-sm font-bold">Борлуулалтын Funnel</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Нийт хөрвүүлэлт (үзсэн → авсан):{" "}
+                  {format(range.from, "yyyy.MM.dd")} – {format(range.to, "yyyy.MM.dd")} · Нийт хөрвүүлэлт:{" "}
                   <span className="font-bold text-foreground">{funnel.overallConv}%</span>
                 </p>
               </div>
-              <div className="inline-flex rounded-lg bg-secondary p-0.5 text-xs">
-                {([
-                  { id: "today", label: "Өнөөдөр" },
-                  { id: "7d", label: "7 хоног" },
-                  { id: "30d", label: "30 хоног" },
-                ] as const).map((r) => (
-                  <button key={r.id} onClick={() => setFunnelRange(r.id)}
-                    className={`px-3 py-1.5 rounded-md font-medium transition ${
-                      funnelRange === r.id ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
-                    }`}>{r.label}</button>
-                ))}
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="inline-flex rounded-lg bg-secondary p-0.5 text-xs">
+                  {([
+                    { id: "today", label: "Өнөөдөр" },
+                    { id: "7d", label: "7 хоног" },
+                    { id: "30d", label: "30 хоног" },
+                    { id: "custom", label: "Хувийн" },
+                  ] as const).map((r) => (
+                    <button key={r.id} onClick={() => setFunnelRange(r.id)}
+                      className={`px-3 py-1.5 rounded-md font-medium transition ${
+                        funnelRange === r.id ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      }`}>{r.label}</button>
+                  ))}
+                </div>
+                {funnelRange === "custom" && (
+                  <div className="flex items-center gap-1.5">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs border border-border bg-background hover:bg-secondary",
+                          !customFrom && "text-muted-foreground"
+                        )}>
+                          <CalendarIcon className="h-3.5 w-3.5" />
+                          {customFrom ? format(customFrom, "yyyy.MM.dd") : "Эхлэх"}
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="end">
+                        <Calendar mode="single" selected={customFrom} onSelect={setCustomFrom}
+                          disabled={(d) => d > new Date() || (customTo ? d > customTo : false)}
+                          initialFocus className={cn("p-3 pointer-events-auto")} />
+                      </PopoverContent>
+                    </Popover>
+                    <span className="text-xs text-muted-foreground">—</span>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs border border-border bg-background hover:bg-secondary",
+                          !customTo && "text-muted-foreground"
+                        )}>
+                          <CalendarIcon className="h-3.5 w-3.5" />
+                          {customTo ? format(customTo, "yyyy.MM.dd") : "Дуусах"}
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="end">
+                        <Calendar mode="single" selected={customTo}
+                          onSelect={(d) => { if (d) { const x = new Date(d); x.setHours(23, 59, 59, 999); setCustomTo(x); } }}
+                          disabled={(d) => d > new Date() || (customFrom ? d < customFrom : false)}
+                          initialFocus className={cn("p-3 pointer-events-auto")} />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -441,7 +518,7 @@ export default function TrackingDashboard() {
             </div>
 
             {/* Daily trend */}
-            {funnelRange !== "today" && (
+            {range.days > 1 && (
               <div className="pt-2 border-t border-border">
                 <div className="text-xs font-medium text-muted-foreground mb-2">Өдрийн чиг хандлага</div>
                 <div className="h-48">
