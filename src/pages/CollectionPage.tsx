@@ -120,6 +120,7 @@ const CollectionPage = () => {
     } else {
       toast.success(`${selectedProducts.length} бараа сагсанд нэмэгдлээ`);
     }
+    navigate("/checkout");
   };
 
   if (notFound) {
