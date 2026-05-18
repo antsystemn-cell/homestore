@@ -8,11 +8,14 @@ import { Product, mapDbProduct } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchCollectionByCode, incrementCollectionView, type ProductCollection } from "@/lib/collections";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Package, AlertCircle } from "lucide-react";
+import { ShoppingBag, Package, AlertCircle, Truck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
+import { setBundleFreeDelivery, BUNDLE_FREE_DELIVERY_THRESHOLD } from "@/lib/bundleDelivery";
 
 const formatPrice = (n: number) => new Intl.NumberFormat("mn-MN").format(n) + "₮";
+
+const BUNDLE_ENABLED_CODES = new Set(["tools"]);
 
 const CollectionPage = () => {
   const { code } = useParams<{ code: string }>();
