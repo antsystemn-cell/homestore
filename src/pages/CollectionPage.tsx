@@ -208,10 +208,16 @@ const CollectionPage = () => {
                     <button
                       type="button"
                       onClick={() => toggleSelect(p.id)}
-                      className="absolute top-2 left-2 z-10 bg-background/90 backdrop-blur rounded-md p-1 shadow-sm"
+                      className="absolute top-2 left-2 z-10 flex items-center gap-1.5 bg-background/90 backdrop-blur rounded-md px-2 py-1.5 shadow-sm"
                       aria-label="Сонгох"
                     >
-                      <Checkbox checked={checked} className="pointer-events-none" />
+                      <Checkbox
+                        checked={checked}
+                        className="h-5 w-5 pointer-events-none"
+                      />
+                      <span className="text-xs font-semibold text-foreground">
+                        {checked ? "Сонгосон" : "Сонгох"}
+                      </span>
                     </button>
                     <Link
                       to={`/product/${p.slug || p.id}`}
