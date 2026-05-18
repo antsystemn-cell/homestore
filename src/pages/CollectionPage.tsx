@@ -74,11 +74,21 @@ const CollectionPage = () => {
   }, [collection]);
 
   const totalPrice = products.reduce((s, p) => s + p.price, 0);
+  const bundleEnabled = !!code && BUNDLE_ENABLED_CODES.has(code.toLowerCase());
 
   const addAllToCart = () => {
-    if (products.length === 0) return;
+    if (products.length === 0 || !code) return;
     products.forEach((p) => addToCart(p, null, null, 1));
-    toast.success(`${products.length} бараа сагсанд нэмэгдлээ`);
+    if (bundleEnabled) {
+      setBundleFreeDelivery(code.toLowerCase());
+      if (totalPrice >= BUNDLE_FREE_DELIVERY_THRESHOLD) {
+        toast.success(`${products.length} бараа сагсанд нэмэгдлээ — хүргэлт үнэгүй!`);
+      } else {
+        toast.success(`${products.length} бараа сагсанд нэмэгдлээ`);
+      }
+    } else {
+      toast.success(`${products.length} бараа сагсанд нэмэгдлээ`);
+    }
   };
 
   if (notFound) {
