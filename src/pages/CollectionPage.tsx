@@ -20,6 +20,7 @@ const BUNDLE_ENABLED_CODES = new Set(["tools"]);
 
 const CollectionPage = () => {
   const { code } = useParams<{ code: string }>();
+  const navigate = useNavigate();
   const [collection, setCollection] = useState<ProductCollection | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
