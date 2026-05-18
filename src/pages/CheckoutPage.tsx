@@ -13,6 +13,7 @@ import StorepayPayment from "@/components/store/StorepayPayment";
 import QPayPayment from "@/components/store/QPayPayment";
 import PocketPayment from "@/components/store/PocketPayment";
 import { track, attachLeadContact } from "@/lib/tracking";
+import { useBundleFreeDelivery } from "@/lib/bundleDelivery";
 
 type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket";
 
