@@ -125,12 +125,28 @@ const CollectionPage = () => {
           )}
 
           {!loading && products.length > 0 && (
-            <div className="mt-6 text-sm text-muted-foreground">
-              {products.length} бараа
+            <div className="mt-6 flex flex-col gap-3">
+              <div className="text-sm text-muted-foreground">
+                {products.length} бараа · Нийт {formatPrice(totalPrice)}
+              </div>
+              {bundleEnabled && (
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <Button onClick={addAllToCart} size="lg" className="gap-2">
+                    <ShoppingBag size={18} />
+                    Багцаар нь авах ({formatPrice(totalPrice)})
+                  </Button>
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                    <Truck size={16} className="text-primary" />
+                    <span>
+                      {totalPrice >= BUNDLE_FREE_DELIVERY_THRESHOLD
+                        ? "Багцаар авбал хүргэлт ҮНЭГҮЙ"
+                        : `50,000₮-өөс дээш багц авбал хүргэлт үнэгүй`}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
-        </div>
-      </div>
 
       {/* Products */}
       <div className="max-w-6xl mx-auto px-2 md:px-4 py-6">
