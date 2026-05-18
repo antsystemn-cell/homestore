@@ -42,17 +42,34 @@ export async function fetchCollectionByCode(code: string): Promise<ProductCollec
   return (data as any) || null;
 }
 
-export async function createCollection(input: { title: string; description?: string; product_ids: string[] }) {
-  let short_code = generateShortCode();
-  // ensure uniqueness with a couple of retries
-  for (let i = 0; i < 3; i++) {
-    const { data: exists } = await supabase
-      .from("product_collections")
-      .select("id")
-      .eq("short_code", short_code)
-      .maybeSingle();
-    if (!exists) break;
+// Validate custom short codes: 3-32 chars, letters/numbers/hyphen/underscore only
+export function isValidShortCode(code: string): boolean {
+  return /^[A-Za-z0-9_-]{3,32}$/.test(code);
+}
+
+export async function isShortCodeAvailable(code: string): Promise<boolean> {
+  const { data } = await supabase
+    .from("product_collections")
+    .select("id")
+    .eq("short_code", code)
+    .maybeSingle();
+  return !data;
+}
+
+export async function createCollection(input: { title: string; description?: string; product_ids: string[]; short_code?: string }) {
+  let short_code = (input.short_code || "").trim();
+  if (short_code) {
+    if (!isValidShortCode(short_code)) {
+      throw new Error("URL зөвхөн үсэг, тоо, - _ агуулсан 3-32 тэмдэгт байх ёстой");
+    }
+    const available = await isShortCodeAvailable(short_code);
+    if (!available) throw new Error("Энэ URL аль хэдийн ашиглагдсан байна");
+  } else {
     short_code = generateShortCode();
+    for (let i = 0; i < 3; i++) {
+      if (await isShortCodeAvailable(short_code)) break;
+      short_code = generateShortCode();
+    }
   }
   const { data, error } = await supabase
     .from("product_collections")

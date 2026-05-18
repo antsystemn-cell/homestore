@@ -36,6 +36,7 @@ const CollectionsManager = ({ products }: Props) => {
   // form state
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [customCode, setCustomCode] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -68,7 +69,7 @@ const CollectionsManager = ({ products }: Props) => {
   }, [products, search]);
 
   const resetForm = () => {
-    setTitle(""); setDescription(""); setSelected([]); setSearch("");
+    setTitle(""); setDescription(""); setCustomCode(""); setSelected([]); setSearch("");
     setShowForm(false);
   };
 
@@ -77,7 +78,12 @@ const CollectionsManager = ({ products }: Props) => {
     if (selected.length === 0) return toast.error("Дор хаяж 1 бараа сонгоно уу");
     setSubmitting(true);
     try {
-      const c = await createCollection({ title: title.trim(), description: description.trim(), product_ids: selected });
+      const c = await createCollection({
+        title: title.trim(),
+        description: description.trim(),
+        product_ids: selected,
+        short_code: customCode.trim() || undefined,
+      });
       toast.success("Багц үүсгэгдлээ");
       resetForm();
       await load();
@@ -144,6 +150,23 @@ const CollectionsManager = ({ products }: Props) => {
             <div>
               <label className="text-sm font-medium mb-1 block">Тайлбар (заавал биш)</label>
               <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">Хүссэн URL (заавал биш)</label>
+              <div className="flex items-stretch rounded-md border overflow-hidden focus-within:ring-2 focus-within:ring-ring">
+                <span className="px-3 flex items-center text-xs text-muted-foreground bg-muted border-r whitespace-nowrap">
+                  {typeof window !== "undefined" ? window.location.origin : "https://easyshop.mn"}/c/
+                </span>
+                <input
+                  value={customCode}
+                  onChange={(e) => setCustomCode(e.target.value.replace(/\s+/g, ""))}
+                  placeholder="зуны-цуглуулга эсвэл хоосон үлдээвэл автоматаар"
+                  className="flex-1 px-3 py-2 text-sm bg-background outline-none"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                3-32 тэмдэгт. Зөвхөн үсэг, тоо, - _ зөвшөөрнө. Хоосон үлдээвэл системээс автоматаар үүсгэнэ.
+              </p>
             </div>
           </div>
 
