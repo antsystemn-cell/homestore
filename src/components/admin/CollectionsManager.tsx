@@ -69,7 +69,7 @@ const CollectionsManager = ({ products }: Props) => {
   }, [products, search]);
 
   const resetForm = () => {
-    setTitle(""); setDescription(""); setSelected([]); setSearch("");
+    setTitle(""); setDescription(""); setCustomCode(""); setSelected([]); setSearch("");
     setShowForm(false);
   };
 
@@ -78,7 +78,12 @@ const CollectionsManager = ({ products }: Props) => {
     if (selected.length === 0) return toast.error("Дор хаяж 1 бараа сонгоно уу");
     setSubmitting(true);
     try {
-      const c = await createCollection({ title: title.trim(), description: description.trim(), product_ids: selected });
+      const c = await createCollection({
+        title: title.trim(),
+        description: description.trim(),
+        product_ids: selected,
+        short_code: customCode.trim() || undefined,
+      });
       toast.success("Багц үүсгэгдлээ");
       resetForm();
       await load();
