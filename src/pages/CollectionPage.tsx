@@ -75,21 +75,49 @@ const CollectionPage = () => {
     }
   }, [collection]);
 
-  const totalPrice = products.reduce((s, p) => s + p.price, 0);
   const bundleEnabled = !!code && BUNDLE_ENABLED_CODES.has(code.toLowerCase());
 
-  const addAllToCart = () => {
-    if (products.length === 0 || !code) return;
-    products.forEach((p) => addToCart(p, null, null, 1));
-    if (bundleEnabled) {
-      setBundleFreeDelivery(code.toLowerCase());
-      if (totalPrice >= BUNDLE_FREE_DELIVERY_THRESHOLD) {
-        toast.success(`${products.length} бараа сагсанд нэмэгдлээ — хүргэлт үнэгүй!`);
-      } else {
-        toast.success(`${products.length} бараа сагсанд нэмэгдлээ`);
-      }
+  // Pre-select all products on load (bundle mode)
+  useEffect(() => {
+    if (bundleEnabled && products.length > 0) {
+      setSelectedIds(new Set(products.map((p) => p.id)));
+    }
+  }, [bundleEnabled, products]);
+
+  const totalPrice = products.reduce((s, p) => s + p.price, 0);
+  const selectedProducts = useMemo(
+    () => products.filter((p) => selectedIds.has(p.id)),
+    [products, selectedIds]
+  );
+  const selectedTotal = selectedProducts.reduce((s, p) => s + p.price, 0);
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === products.length) {
+      setSelectedIds(new Set());
     } else {
-      toast.success(`${products.length} бараа сагсанд нэмэгдлээ`);
+      setSelectedIds(new Set(products.map((p) => p.id)));
+    }
+  };
+
+  const addSelectedToCart = () => {
+    if (selectedProducts.length === 0 || !code) {
+      toast.error("Дор хаяж нэг бараа сонгоно уу");
+      return;
+    }
+    selectedProducts.forEach((p) => addToCart(p, null, null, 1));
+    setBundleFreeDelivery(code.toLowerCase());
+    if (selectedTotal >= BUNDLE_FREE_DELIVERY_THRESHOLD) {
+      toast.success(`${selectedProducts.length} бараа сагсанд нэмэгдлээ — хүргэлт үнэгүй!`);
+    } else {
+      toast.success(`${selectedProducts.length} бараа сагсанд нэмэгдлээ`);
     }
   };
 
