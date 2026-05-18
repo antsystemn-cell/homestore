@@ -77,10 +77,10 @@ const CollectionPage = () => {
 
   const bundleEnabled = !!code && BUNDLE_ENABLED_CODES.has(code.toLowerCase());
 
-  // Pre-select all products on load (bundle mode)
+  // Default: nothing selected in bundle mode
   useEffect(() => {
-    if (bundleEnabled && products.length > 0) {
-      setSelectedIds(new Set(products.map((p) => p.id)));
+    if (bundleEnabled) {
+      setSelectedIds(new Set());
     }
   }, [bundleEnabled, products]);
 
