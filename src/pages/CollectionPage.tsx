@@ -160,19 +160,13 @@ const CollectionPage = () => {
                 {products.length} бараа · Нийт {formatPrice(totalPrice)}
               </div>
               {bundleEnabled && (
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                  <Button onClick={addAllToCart} size="lg" className="gap-2">
-                    <ShoppingBag size={18} />
-                    Багцаар нь авах ({formatPrice(totalPrice)})
-                  </Button>
-                  <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-                    <Truck size={16} className="text-primary" />
-                    <span>
-                      {totalPrice >= BUNDLE_FREE_DELIVERY_THRESHOLD
-                        ? "Багцаар авбал хүргэлт ҮНЭГҮЙ"
-                        : `50,000₮-өөс дээш багц авбал хүргэлт үнэгүй`}
-                    </span>
-                  </div>
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                  <Truck size={16} className="text-primary" />
+                  <span>
+                    {selectedTotal >= BUNDLE_FREE_DELIVERY_THRESHOLD
+                      ? "Сонгосон багц 50,000₮-өөс дээш — хүргэлт ҮНЭГҮЙ"
+                      : `50,000₮-өөс дээш багц авбал хүргэлт үнэгүй`}
+                  </span>
                 </div>
               )}
             </div>
@@ -188,10 +182,87 @@ const CollectionPage = () => {
           <div className="text-center py-16 text-muted-foreground">
             Энэ багцад бараа байхгүй байна.
           </div>
+        ) : bundleEnabled ? (
+          <div className="md:px-4">
+            <div className="flex items-center justify-between mb-3 px-2 md:px-0">
+              <button
+                onClick={toggleSelectAll}
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                {selectedIds.size === products.length ? "Бүгдийг арилгах" : "Бүгдийг сонгох"}
+              </button>
+              <span className="text-xs text-muted-foreground">
+                {selectedIds.size}/{products.length} сонгосон
+              </span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {products.map((p) => {
+                const checked = selectedIds.has(p.id);
+                return (
+                  <div
+                    key={p.id}
+                    className={`relative rounded-xl border overflow-hidden bg-card transition ${
+                      checked ? "border-primary ring-2 ring-primary/30" : "border-border"
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => toggleSelect(p.id)}
+                      className="absolute top-2 left-2 z-10 bg-background/90 backdrop-blur rounded-md p-1 shadow-sm"
+                      aria-label="Сонгох"
+                    >
+                      <Checkbox checked={checked} className="pointer-events-none" />
+                    </button>
+                    <Link
+                      to={`/product/${p.slug || p.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="block"
+                    >
+                      <div className="aspect-square bg-muted overflow-hidden">
+                        <img
+                          src={p.thumbnail || p.image || "/placeholder.svg"}
+                          alt={p.name}
+                          loading="lazy"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="p-2 md:p-3">
+                        <p className="text-xs md:text-sm font-medium line-clamp-2 min-h-[2.5em]">{p.name}</p>
+                        <p className="mt-1 text-sm md:text-base font-bold">{formatPrice(p.price)}</p>
+                      </div>
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         ) : (
           <ProductGrid products={products} />
         )}
       </div>
+
+      {/* Sticky bundle bar */}
+      {bundleEnabled && !loading && products.length > 0 && (
+        <div className="fixed bottom-16 md:bottom-4 left-0 right-0 z-30 px-3">
+          <div className="max-w-6xl mx-auto bg-card border border-border shadow-lg rounded-2xl p-3 flex items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">
+                {selectedProducts.length} сонгосон
+              </p>
+              <p className="text-base md:text-lg font-bold">{formatPrice(selectedTotal)}</p>
+            </div>
+            <Button
+              onClick={addSelectedToCart}
+              size="lg"
+              disabled={selectedProducts.length === 0}
+              className="gap-2 shrink-0"
+            >
+              <ShoppingBag size={18} />
+              Багцаар нь авах
+            </Button>
+          </div>
+        </div>
+      )}
 
       <BottomNav />
     </div>
