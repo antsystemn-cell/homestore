@@ -147,6 +147,8 @@ const CollectionPage = () => {
               )}
             </div>
           )}
+        </div>
+      </div>
 
       {/* Products */}
       <div className="max-w-6xl mx-auto px-2 md:px-4 py-6">
