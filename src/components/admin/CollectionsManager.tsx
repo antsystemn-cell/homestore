@@ -168,6 +168,7 @@ const CollectionsManager = ({ products }: Props) => {
                 3-32 тэмдэгт. Зөвхөн үсэг, тоо, - _ зөвшөөрнө. Хоосон үлдээвэл системээс автоматаар үүсгэнэ.
               </p>
             </div>
+          </div>
 
           <div>
             <div className="flex items-center justify-between mb-2">
