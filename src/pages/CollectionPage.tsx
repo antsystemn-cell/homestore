@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Header from "@/components/store/Header";
 import BottomNav from "@/components/store/BottomNav";
@@ -8,7 +8,8 @@ import { Product, mapDbProduct } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchCollectionByCode, incrementCollectionView, type ProductCollection } from "@/lib/collections";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Package, AlertCircle, Truck } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ShoppingBag, Package, AlertCircle, Truck, Check } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import { setBundleFreeDelivery, BUNDLE_FREE_DELIVERY_THRESHOLD } from "@/lib/bundleDelivery";
