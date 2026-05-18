@@ -8,11 +8,14 @@ import { Product, mapDbProduct } from "@/data/products";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchCollectionByCode, incrementCollectionView, type ProductCollection } from "@/lib/collections";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Package, AlertCircle } from "lucide-react";
+import { ShoppingBag, Package, AlertCircle, Truck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
+import { setBundleFreeDelivery, BUNDLE_FREE_DELIVERY_THRESHOLD } from "@/lib/bundleDelivery";
 
 const formatPrice = (n: number) => new Intl.NumberFormat("mn-MN").format(n) + "₮";
+
+const BUNDLE_ENABLED_CODES = new Set(["tools"]);
 
 const CollectionPage = () => {
   const { code } = useParams<{ code: string }>();
@@ -71,11 +74,21 @@ const CollectionPage = () => {
   }, [collection]);
 
   const totalPrice = products.reduce((s, p) => s + p.price, 0);
+  const bundleEnabled = !!code && BUNDLE_ENABLED_CODES.has(code.toLowerCase());
 
   const addAllToCart = () => {
-    if (products.length === 0) return;
+    if (products.length === 0 || !code) return;
     products.forEach((p) => addToCart(p, null, null, 1));
-    toast.success(`${products.length} бараа сагсанд нэмэгдлээ`);
+    if (bundleEnabled) {
+      setBundleFreeDelivery(code.toLowerCase());
+      if (totalPrice >= BUNDLE_FREE_DELIVERY_THRESHOLD) {
+        toast.success(`${products.length} бараа сагсанд нэмэгдлээ — хүргэлт үнэгүй!`);
+      } else {
+        toast.success(`${products.length} бараа сагсанд нэмэгдлээ`);
+      }
+    } else {
+      toast.success(`${products.length} бараа сагсанд нэмэгдлээ`);
+    }
   };
 
   if (notFound) {
@@ -112,8 +125,26 @@ const CollectionPage = () => {
           )}
 
           {!loading && products.length > 0 && (
-            <div className="mt-6 text-sm text-muted-foreground">
-              {products.length} бараа
+            <div className="mt-6 flex flex-col gap-3">
+              <div className="text-sm text-muted-foreground">
+                {products.length} бараа · Нийт {formatPrice(totalPrice)}
+              </div>
+              {bundleEnabled && (
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <Button onClick={addAllToCart} size="lg" className="gap-2">
+                    <ShoppingBag size={18} />
+                    Багцаар нь авах ({formatPrice(totalPrice)})
+                  </Button>
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                    <Truck size={16} className="text-primary" />
+                    <span>
+                      {totalPrice >= BUNDLE_FREE_DELIVERY_THRESHOLD
+                        ? "Багцаар авбал хүргэлт ҮНЭГҮЙ"
+                        : `50,000₮-өөс дээш багц авбал хүргэлт үнэгүй`}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
