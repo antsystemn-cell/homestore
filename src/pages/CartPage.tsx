@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import Header from "@/components/store/Header";
 import BottomNav from "@/components/store/BottomNav";
 import GuestCheckoutModal from "@/components/store/GuestCheckoutModal";
+import { useBundleFreeDelivery } from "@/lib/bundleDelivery";
 
 const CartPage = () => {
   const { items, updateQuantity, removeFromCart, cartTotal } = useCart();
@@ -16,7 +17,8 @@ const CartPage = () => {
   const [showGuestModal, setShowGuestModal] = useState(false);
 
   const hasSaleItems = items.some(item => item.product.isOnSale || (item.product.discount && item.product.discount > 0));
-  const deliverySurcharge = (cartTotal < 50000 || hasSaleItems) ? 8000 : 0;
+  const { eligible: bundleFree } = useBundleFreeDelivery(cartTotal, items.length);
+  const deliverySurcharge = bundleFree ? 0 : ((cartTotal < 50000 || hasSaleItems) ? 8000 : 0);
 
   const handleCheckout = () => {
     if (user) {
