@@ -24,6 +24,7 @@ const CollectionPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const { addToCart } = useCart();
 
   useEffect(() => {
