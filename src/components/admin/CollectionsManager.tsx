@@ -151,7 +151,23 @@ const CollectionsManager = ({ products }: Props) => {
               <label className="text-sm font-medium mb-1 block">Тайлбар (заавал биш)</label>
               <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
             </div>
-          </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">Хүссэн URL (заавал биш)</label>
+              <div className="flex items-stretch rounded-md border overflow-hidden focus-within:ring-2 focus-within:ring-ring">
+                <span className="px-3 flex items-center text-xs text-muted-foreground bg-muted border-r whitespace-nowrap">
+                  {typeof window !== "undefined" ? window.location.origin : "https://easyshop.mn"}/c/
+                </span>
+                <input
+                  value={customCode}
+                  onChange={(e) => setCustomCode(e.target.value.replace(/\s+/g, ""))}
+                  placeholder="зуны-цуглуулга эсвэл хоосон үлдээвэл автоматаар"
+                  className="flex-1 px-3 py-2 text-sm bg-background outline-none"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                3-32 тэмдэгт. Зөвхөн үсэг, тоо, - _ зөвшөөрнө. Хоосон үлдээвэл системээс автоматаар үүсгэнэ.
+              </p>
+            </div>
 
           <div>
             <div className="flex items-center justify-between mb-2">
