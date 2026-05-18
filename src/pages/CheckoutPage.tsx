@@ -602,6 +602,11 @@ const CheckoutPage = () => {
                         : "Хямдралтай бараа агуулсан захиалга"}
                   </p>
                 )}
+                {bundleFree && (
+                  <p className="text-[10px] text-primary">
+                    Багцаар авсан тул хүргэлт үнэгүй.
+                  </p>
+                )}
                 {selectedDeliveryOption && (
                   <p className="text-[10px] text-muted-foreground">
                     {selectedDeliveryOption.name} · {selectedDeliveryOption.estimated_days_min}-{selectedDeliveryOption.estimated_days_max} хоног
