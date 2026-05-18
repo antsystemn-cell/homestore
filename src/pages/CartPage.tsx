@@ -134,6 +134,11 @@ const CartPage = () => {
                     Хямдралтай бараа болон 50,000₮ доош худалдан авалтанд хамаарна.
                   </p>
                 )}
+                {bundleFree && (
+                  <p className="text-[10px] text-primary">
+                    Багцаар авсан тул хүргэлт үнэгүй.
+                  </p>
+                )}
                 <div className="border-t border-border pt-3 flex justify-between">
                   <span className="font-bold text-foreground">Төлөх дүн</span>
                   <span className="font-extrabold text-foreground text-lg">{formatPrice(cartTotal + deliverySurcharge)}</span>
