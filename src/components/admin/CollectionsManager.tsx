@@ -36,6 +36,7 @@ const CollectionsManager = ({ products }: Props) => {
   // form state
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [customCode, setCustomCode] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [submitting, setSubmitting] = useState(false);
