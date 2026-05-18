@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import Header from "@/components/store/Header";
 import BottomNav from "@/components/store/BottomNav";
 import ProductGrid from "@/components/store/ProductGrid";
@@ -20,6 +20,7 @@ const BUNDLE_ENABLED_CODES = new Set(["tools"]);
 
 const CollectionPage = () => {
   const { code } = useParams<{ code: string }>();
+  const navigate = useNavigate();
   const [collection, setCollection] = useState<ProductCollection | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -119,6 +120,7 @@ const CollectionPage = () => {
     } else {
       toast.success(`${selectedProducts.length} бараа сагсанд нэмэгдлээ`);
     }
+    navigate("/checkout");
   };
 
   if (notFound) {
