@@ -2850,6 +2850,10 @@ const AdminPage = () => {
                       <input type="checkbox" checked={form.is_bogo} onChange={(e) => setForm({ ...form, is_bogo: e.target.checked })} className="rounded" />
                       1+1 Үнэгүй
                     </label>
+                    <label className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input type="checkbox" checked={form.has_gift} onChange={(e) => setForm({ ...form, has_gift: e.target.checked })} className="rounded" />
+                      🎁 Бэлэгтэй
+                    </label>
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-secondary/30">
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
