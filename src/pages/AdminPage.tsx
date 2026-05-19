@@ -299,7 +299,7 @@ const AdminPage = () => {
   const [form, setForm] = useState({
     name: "", description: "", price: 0, original_price: 0,
     image_url: "", category: "general", discount: 0,
-    is_new: false, is_on_sale: false, is_bogo: false, has_gift: false, is_active: true,
+    is_new: false, is_on_sale: false, is_bogo: false, has_gift: false, gift_name: "", is_active: true,
     product_code: "", slug: "", specifications: [] as { key: string; value: string }[],
     detail_media: [] as { type: "image" | "video"; url: string; caption: string; thumbnail?: string }[],
     brand_id: "",
@@ -595,7 +595,7 @@ const AdminPage = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from("products").select("id, name, price, original_price, image_url, thumbnail_url, category, sales, is_new, is_on_sale, is_bogo, has_gift, is_active, discount, product_code, slug, brand_id, stock_quantity, variant_stock, colors, sizes, created_at").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("products").select("id, name, price, original_price, image_url, thumbnail_url, category, sales, is_new, is_on_sale, is_bogo, has_gift, gift_name, is_active, discount, product_code, slug, brand_id, stock_quantity, variant_stock, colors, sizes, created_at").order("created_at", { ascending: false });
       if (error) throw error;
       setProducts(data || []);
     } catch (error) {
@@ -1025,7 +1025,7 @@ const AdminPage = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, is_bogo: false, has_gift: false, is_active: true, product_code: "", slug: "", specifications: [], detail_media: [], brand_id: "", colors: [], sizes: [], stock_quantity: 0, variant_stock: {} });
+    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, is_bogo: false, has_gift: false, gift_name: "", is_active: true, product_code: "", slug: "", specifications: [], detail_media: [], brand_id: "", colors: [], sizes: [], stock_quantity: 0, variant_stock: {} });
     setNewColor(""); setNewSize("");
     setEditId(null);
     setShowForm(false);
@@ -1067,7 +1067,7 @@ const AdminPage = () => {
       original_price: form.original_price, image_url: form.image_url,
       thumbnail_url: thumbnailUrl,
       category: form.category, discount: form.discount,
-      is_new: form.is_new, is_on_sale: form.is_on_sale, is_bogo: form.is_bogo, has_gift: form.has_gift, is_active: form.is_active,
+      is_new: form.is_new, is_on_sale: form.is_on_sale, is_bogo: form.is_bogo, has_gift: form.has_gift, gift_name: form.has_gift ? (form.gift_name?.trim() || null) : null, is_active: form.is_active,
       product_code: form.product_code || null,
       slug: form.slug.trim() || cyrillicToLatinSlug(form.name),
       specifications: form.specifications.filter(s => s.key.trim() && s.value.trim()),
@@ -1151,7 +1151,7 @@ const AdminPage = () => {
       name: p.name, description: full.description || "", price: p.price,
       original_price: p.original_price || 0, image_url: p.image_url || "",
       category: p.category, discount: p.discount || 0,
-      is_new: p.is_new, is_on_sale: p.is_on_sale, is_bogo: p.is_bogo || false, has_gift: p.has_gift || false, is_active: p.is_active !== false,
+      is_new: p.is_new, is_on_sale: p.is_on_sale, is_bogo: p.is_bogo || false, has_gift: p.has_gift || false, gift_name: p.gift_name || "", is_active: p.is_active !== false,
       product_code: p.product_code || "",
       slug: p.slug || "",
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
@@ -1196,6 +1196,7 @@ const AdminPage = () => {
       is_on_sale: p.is_on_sale,
       is_bogo: p.is_bogo || false,
       has_gift: p.has_gift || false,
+      gift_name: p.gift_name || "",
       is_active: p.is_active !== false,
       product_code: "", // clear SKU — must be unique
       slug: "",          // auto-generated on save
@@ -2851,10 +2852,22 @@ const AdminPage = () => {
                       1+1 Үнэгүй
                     </label>
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
-                      <input type="checkbox" checked={form.has_gift} onChange={(e) => setForm({ ...form, has_gift: e.target.checked })} className="rounded" />
+                      <input type="checkbox" checked={form.has_gift} onChange={(e) => setForm({ ...form, has_gift: e.target.checked, gift_name: e.target.checked ? form.gift_name : "" })} className="rounded" />
                       🎁 Бэлэгтэй
                     </label>
                   </div>
+                  {form.has_gift && (
+                    <div className="p-3 rounded-xl border border-border bg-secondary/30 space-y-2">
+                      <label className="text-sm font-medium flex items-center gap-2">🎁 Бэлэг сонгох</label>
+                      <input
+                        type="text"
+                        value={form.gift_name || ""}
+                        onChange={(e) => setForm({ ...form, gift_name: e.target.value })}
+                        placeholder="Бэлэгний нэр (жишээ: Аяга, Цүнх...)"
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                  )}
                   <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-secondary/30">
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
                       <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="rounded accent-primary" />
