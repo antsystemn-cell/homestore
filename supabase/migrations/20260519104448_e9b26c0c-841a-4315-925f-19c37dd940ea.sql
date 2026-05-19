@@ -1,0 +1,1 @@
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS has_gift boolean NOT NULL DEFAULT false;

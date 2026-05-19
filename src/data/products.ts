@@ -41,6 +41,7 @@ export interface Product {
   colors?: ProductColor[];
   sizes?: string[];
   isBogo?: boolean | null;
+  hasGift?: boolean | null;
 }
 
 export const categories = [
@@ -81,5 +82,6 @@ export function mapDbProduct(row: any): Product {
     colors: Array.isArray(row.colors) ? row.colors.map((c: any) => typeof c === 'string' ? { name: c, image: '', sku: '' } : { name: c.name || '', image: c.image || '', sku: c.sku || '' }) : [],
     sizes: Array.isArray(row.sizes) ? row.sizes : [],
     isBogo: row.is_bogo ?? false,
+    hasGift: row.has_gift ?? false,
   };
 }

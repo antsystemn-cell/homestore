@@ -216,6 +216,11 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
             1+1
           </span>
         )}
+        {product.hasGift && !product.isBogo && (
+          <span className="absolute top-2 left-2 bg-accent text-accent-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded z-10 flex items-center gap-1">
+            🎁 Бэлэгтэй
+          </span>
+        )}
         {product.originalPrice != null && product.originalPrice > product.price && (
           <span className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded z-10">
             -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
