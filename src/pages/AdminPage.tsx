@@ -2851,10 +2851,22 @@ const AdminPage = () => {
                       1+1 Үнэгүй
                     </label>
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
-                      <input type="checkbox" checked={form.has_gift} onChange={(e) => setForm({ ...form, has_gift: e.target.checked })} className="rounded" />
+                      <input type="checkbox" checked={form.has_gift} onChange={(e) => setForm({ ...form, has_gift: e.target.checked, gift_name: e.target.checked ? form.gift_name : "" })} className="rounded" />
                       🎁 Бэлэгтэй
                     </label>
                   </div>
+                  {form.has_gift && (
+                    <div className="p-3 rounded-xl border border-border bg-secondary/30 space-y-2">
+                      <label className="text-sm font-medium flex items-center gap-2">🎁 Бэлэг сонгох</label>
+                      <input
+                        type="text"
+                        value={form.gift_name || ""}
+                        onChange={(e) => setForm({ ...form, gift_name: e.target.value })}
+                        placeholder="Бэлэгний нэр (жишээ: Аяга, Цүнх...)"
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                  )}
                   <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-secondary/30">
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
                       <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="rounded accent-primary" />
