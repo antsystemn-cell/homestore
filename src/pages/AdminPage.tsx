@@ -1196,6 +1196,7 @@ const AdminPage = () => {
       is_on_sale: p.is_on_sale,
       is_bogo: p.is_bogo || false,
       has_gift: p.has_gift || false,
+      gift_name: p.gift_name || "",
       is_active: p.is_active !== false,
       product_code: "", // clear SKU — must be unique
       slug: "",          // auto-generated on save
