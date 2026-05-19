@@ -41,6 +41,7 @@ export interface Product {
   colors?: ProductColor[];
   sizes?: string[];
   isBogo?: boolean | null;
+  hasGift?: boolean | null;
 }
 
 export const categories = [
