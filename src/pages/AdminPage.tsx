@@ -1074,7 +1074,16 @@ const AdminPage = () => {
       is_new: form.is_new, is_on_sale: form.is_on_sale, is_bogo: form.is_bogo,
       has_gift: form.has_gift,
       gifts: form.has_gift ? (form.gifts || []).filter(g => g && g.product_id && (g.name || "").trim()).map(g => ({ product_id: g.product_id, name: g.name.trim(), image: g.image || "" })) : [],
-      gift_name: form.has_gift ? ((form.gifts || []).filter(g => g && (g.name || "").trim())[0]?.name?.trim() || null) : null,
+      gift_packages: form.has_gift
+        ? (form.gift_packages || [])
+            .map(pkg => ({
+              id: pkg.id,
+              name: (pkg.name || "").trim() || "Бэлэг",
+              items: (pkg.items || []).filter(g => g && g.product_id && (g.name || "").trim()).map(g => ({ product_id: g.product_id, name: g.name.trim(), image: g.image || "" })),
+            }))
+            .filter(pkg => pkg.items.length > 0)
+        : [],
+      gift_name: form.has_gift ? ((form.gift_packages || [])[0]?.name || (form.gifts || []).filter(g => g && (g.name || "").trim())[0]?.name?.trim() || null) : null,
       is_active: form.is_active,
       product_code: form.product_code || null,
       slug: form.slug.trim() || cyrillicToLatinSlug(form.name),
