@@ -16,6 +16,12 @@ export interface DetailMedia {
   thumbnail?: string;
 }
 
+export interface ProductGift {
+  product_id: string;
+  name: string;
+  image?: string;
+}
+
 export interface Product {
   id: string;
   slug?: string;
