@@ -2865,48 +2865,29 @@ const AdminPage = () => {
                       <input
                         type="checkbox"
                         checked={form.has_gift}
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          setForm({
-                            ...form,
-                            has_gift: checked,
-                            gifts: checked ? (form.gifts && form.gifts.length > 0 ? form.gifts : [form.gift_name || ""]) : [],
-                          });
-                        }}
+                        onChange={(e) => setForm({ ...form, has_gift: e.target.checked, gifts: e.target.checked ? form.gifts : [] })}
                         className="rounded"
                       />
                       🎁 Бэлэгтэй
                     </label>
                   </div>
                   {form.has_gift && (
-                    <div className="p-3 rounded-xl border border-border bg-secondary/30 space-y-2">
-                      <label className="text-sm font-medium flex items-center justify-between gap-2">
-                        <span>🎁 Бэлэгний жагсаалт ({form.gifts.length})</span>
-                        <button
-                          type="button"
-                          onClick={() => setForm({ ...form, gifts: [...form.gifts, ""] })}
-                          className="text-xs px-2 py-1 rounded-md bg-primary text-primary-foreground hover:opacity-90"
-                        >
-                          + Бэлэг нэмэх
-                        </button>
-                      </label>
+                    <div className="p-3 rounded-xl border border-border bg-secondary/30 space-y-3">
+                      <div className="text-sm font-medium">🎁 Бэлэгний жагсаалт ({form.gifts.length})</div>
+
                       {form.gifts.length === 0 && (
-                        <p className="text-xs text-muted-foreground">"Бэлэг нэмэх" дарж эхний бэлэгээ оруулна уу.</p>
+                        <p className="text-xs text-muted-foreground">Доороос өөрийн бараанаас бэлэг сонгоно уу.</p>
                       )}
+
                       {form.gifts.map((g, idx) => (
-                        <div key={idx} className="flex items-center gap-2">
+                        <div key={`${g.product_id}-${idx}`} className="flex items-center gap-2 p-2 rounded-lg bg-background border border-border">
                           <span className="text-xs text-muted-foreground w-5 text-center">{idx + 1}.</span>
-                          <input
-                            type="text"
-                            value={g}
-                            onChange={(e) => {
-                              const next = [...form.gifts];
-                              next[idx] = e.target.value;
-                              setForm({ ...form, gifts: next });
-                            }}
-                            placeholder="Бэлэгний нэр (жишээ: Аяга, Цүнх...)"
-                            className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                          />
+                          {g.image ? (
+                            <img src={g.image} alt={g.name} className="w-10 h-10 rounded object-cover border border-border" />
+                          ) : (
+                            <div className="w-10 h-10 rounded bg-muted flex items-center justify-center text-lg">🎁</div>
+                          )}
+                          <span className="flex-1 text-sm truncate">{g.name}</span>
                           <button
                             type="button"
                             onClick={() => setForm({ ...form, gifts: form.gifts.filter((_, i) => i !== idx) })}
@@ -2917,6 +2898,55 @@ const AdminPage = () => {
                           </button>
                         </div>
                       ))}
+
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">Өөрийн бараанаас сонгох:</label>
+                        <input
+                          type="text"
+                          value={giftSearch}
+                          onChange={(e) => setGiftSearch(e.target.value)}
+                          placeholder="Барааны нэр эсвэл код хайх..."
+                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                        {giftSearch.trim().length >= 1 && (
+                          <div className="mt-2 max-h-56 overflow-auto rounded-lg border border-border bg-background divide-y divide-border">
+                            {products
+                              .filter((p: any) => {
+                                if (editId && p.id === editId) return false;
+                                if (form.gifts.some(x => x.product_id === p.id)) return false;
+                                const q = giftSearch.trim().toLowerCase();
+                                return (p.name || "").toLowerCase().includes(q) || (p.product_code || "").toLowerCase().includes(q);
+                              })
+                              .slice(0, 20)
+                              .map((p: any) => (
+                                <button
+                                  key={p.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setForm({
+                                      ...form,
+                                      gifts: [...form.gifts, { product_id: p.id, name: p.name, image: p.thumbnail_url || p.image_url || "" }],
+                                    });
+                                    setGiftSearch("");
+                                  }}
+                                  className="w-full flex items-center gap-2 p-2 text-left hover:bg-secondary"
+                                >
+                                  <img src={p.thumbnail_url || p.image_url || "/placeholder.svg"} alt={p.name} className="w-8 h-8 rounded object-cover" />
+                                  <span className="flex-1 text-sm truncate">{p.name}</span>
+                                  {p.product_code && <span className="text-xs text-muted-foreground">{p.product_code}</span>}
+                                </button>
+                              ))}
+                            {products.filter((p: any) => {
+                              if (editId && p.id === editId) return false;
+                              if (form.gifts.some(x => x.product_id === p.id)) return false;
+                              const q = giftSearch.trim().toLowerCase();
+                              return (p.name || "").toLowerCase().includes(q) || (p.product_code || "").toLowerCase().includes(q);
+                            }).length === 0 && (
+                              <div className="p-3 text-xs text-muted-foreground text-center">Илэрц олдсонгүй</div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                   <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-secondary/30">
