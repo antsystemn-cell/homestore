@@ -87,7 +87,7 @@ const ProductPage = () => {
   const [activeImg, setActiveImg] = useState(0);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [selectedGiftId, setSelectedGiftId] = useState<string | null>(null);
+  const [selectedGiftPackageId, setSelectedGiftPackageId] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [brandName, setBrandName] = useState<string | null>(null);
   const [stockQty, setStockQty] = useState<number | null>(null);
