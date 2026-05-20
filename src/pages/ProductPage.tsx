@@ -385,6 +385,30 @@ const ProductPage = () => {
               ) : null}
             </div>
 
+            {/* Gifts */}
+            {product.gifts && product.gifts.length > 0 && (
+              <div className="bg-accent/30 rounded-xl p-4 space-y-2">
+                <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <Gift className="h-4 w-4 text-accent-foreground" />
+                  <span>🎁 Бэлэгтэй</span>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {product.gifts.map((gift) => (
+                    <div key={gift.product_id} className="flex items-center gap-2 bg-background rounded-lg px-3 py-2 border border-border">
+                      {gift.image ? (
+                        <img src={gift.image} alt={gift.name} className="w-10 h-10 rounded-md object-cover" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-md bg-secondary flex items-center justify-center">
+                          <Gift className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      )}
+                      <span className="text-sm font-medium text-foreground">{gift.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Stock — shown only for Elle Sport brand. Per-variant when color/size selected. */}
             {(() => {
               const normalized = (brandName || "").toLowerCase().replace(/\s+/g, "");
