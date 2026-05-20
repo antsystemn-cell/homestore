@@ -2903,7 +2903,13 @@ const AdminPage = () => {
                       <input
                         type="checkbox"
                         checked={form.has_gift}
-                        onChange={(e) => setForm({ ...form, has_gift: e.target.checked, gifts: e.target.checked ? form.gifts : [] })}
+                        onChange={(e) => setForm({
+                          ...form,
+                          has_gift: e.target.checked,
+                          gift_packages: e.target.checked
+                            ? (form.gift_packages.length > 0 ? form.gift_packages : [{ id: crypto.randomUUID(), name: "Багц 1", items: [] }])
+                            : [],
+                        })}
                         className="rounded"
                       />
                       🎁 Бэлэгтэй
@@ -2911,80 +2917,128 @@ const AdminPage = () => {
                   </div>
                   {form.has_gift && (
                     <div className="p-3 rounded-xl border border-border bg-secondary/30 space-y-3">
-                      <div className="text-sm font-medium">🎁 Бэлэгний жагсаалт ({form.gifts.length})</div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm font-medium">🎁 Бэлгийн багцууд ({form.gift_packages.length})</div>
+                        <button
+                          type="button"
+                          onClick={() => setForm({
+                            ...form,
+                            gift_packages: [...form.gift_packages, { id: crypto.randomUUID(), name: `Багц ${form.gift_packages.length + 1}`, items: [] }],
+                          })}
+                          className="text-xs px-3 py-1.5 rounded-md bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center gap-1"
+                        >
+                          <Plus className="h-3.5 w-3.5" /> Багц нэмэх
+                        </button>
+                      </div>
 
-                      {form.gifts.length === 0 && (
-                        <p className="text-xs text-muted-foreground">Доороос өөрийн бараанаас бэлэг сонгоно уу.</p>
+                      {form.gift_packages.length === 0 && (
+                        <p className="text-xs text-muted-foreground">Дээрх товчоор бэлгийн багц нэмнэ үү.</p>
                       )}
 
-                      {form.gifts.map((g, idx) => (
-                        <div key={`${g.product_id}-${idx}`} className="flex items-center gap-2 p-2 rounded-lg bg-background border border-border">
-                          <span className="text-xs text-muted-foreground w-5 text-center">{idx + 1}.</span>
-                          {g.image ? (
-                            <img src={g.image} alt={g.name} className="w-10 h-10 rounded object-cover border border-border" />
-                          ) : (
-                            <div className="w-10 h-10 rounded bg-muted flex items-center justify-center text-lg">🎁</div>
-                          )}
-                          <span className="flex-1 text-sm truncate">{g.name}</span>
-                          <button
-                            type="button"
-                            onClick={() => setForm({ ...form, gifts: form.gifts.filter((_, i) => i !== idx) })}
-                            className="text-xs px-2 py-1 rounded-md border border-border hover:bg-destructive hover:text-destructive-foreground"
-                            aria-label="Бэлэг устгах"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ))}
+                      {form.gift_packages.map((pkg, pkgIdx) => (
+                        <div key={pkg.id} className="rounded-lg border border-border bg-background p-3 space-y-2">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={pkg.name}
+                              onChange={(e) => {
+                                const next = [...form.gift_packages];
+                                next[pkgIdx] = { ...pkg, name: e.target.value };
+                                setForm({ ...form, gift_packages: next });
+                              }}
+                              placeholder="Багцын нэр"
+                              className="flex-1 rounded-md border border-border bg-background px-2 py-1.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary"
+                            />
+                            <span className="text-[10px] text-muted-foreground">{pkg.items.length} зүйл</span>
+                            <button
+                              type="button"
+                              onClick={() => setForm({ ...form, gift_packages: form.gift_packages.filter((_, i) => i !== pkgIdx) })}
+                              className="text-xs px-2 py-1 rounded-md border border-border hover:bg-destructive hover:text-destructive-foreground"
+                              aria-label="Багц устгах"
+                            >
+                              ✕ Багц
+                            </button>
+                          </div>
 
-                      <div>
-                        <label className="text-xs text-muted-foreground mb-1 block">Өөрийн бараанаас сонгох:</label>
-                        <input
-                          type="text"
-                          value={giftSearch}
-                          onChange={(e) => setGiftSearch(e.target.value)}
-                          placeholder="Барааны нэр эсвэл код хайх..."
-                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                        />
-                        {giftSearch.trim().length >= 1 && (
-                          <div className="mt-2 max-h-56 overflow-auto rounded-lg border border-border bg-background divide-y divide-border">
-                            {products
-                              .filter((p: any) => {
-                                if (editId && p.id === editId) return false;
-                                if (form.gifts.some(x => x.product_id === p.id)) return false;
-                                const q = giftSearch.trim().toLowerCase();
-                                return (p.name || "").toLowerCase().includes(q) || (p.product_code || "").toLowerCase().includes(q);
-                              })
-                              .slice(0, 20)
-                              .map((p: any) => (
-                                <button
-                                  key={p.id}
-                                  type="button"
-                                  onClick={() => {
-                                    setForm({
-                                      ...form,
-                                      gifts: [...form.gifts, { product_id: p.id, name: p.name, image: p.thumbnail_url || p.image_url || "" }],
-                                    });
-                                    setGiftSearch("");
-                                  }}
-                                  className="w-full flex items-center gap-2 p-2 text-left hover:bg-secondary"
-                                >
-                                  <img src={p.thumbnail_url || p.image_url || "/placeholder.svg"} alt={p.name} className="w-8 h-8 rounded object-cover" />
-                                  <span className="flex-1 text-sm truncate">{p.name}</span>
-                                  {p.product_code && <span className="text-xs text-muted-foreground">{p.product_code}</span>}
-                                </button>
+                          {pkg.items.length > 0 && (
+                            <div className="space-y-1.5">
+                              {pkg.items.map((g, idx) => (
+                                <div key={`${g.product_id}-${idx}`} className="flex items-center gap-2 p-1.5 rounded-md bg-secondary/40 border border-border">
+                                  <span className="text-xs text-muted-foreground w-5 text-center">{idx + 1}.</span>
+                                  {g.image ? (
+                                    <img src={g.image} alt={g.name} className="w-8 h-8 rounded object-cover border border-border" />
+                                  ) : (
+                                    <div className="w-8 h-8 rounded bg-muted flex items-center justify-center text-base">🎁</div>
+                                  )}
+                                  <span className="flex-1 text-xs truncate">{g.name}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const next = [...form.gift_packages];
+                                      next[pkgIdx] = { ...pkg, items: pkg.items.filter((_, i) => i !== idx) };
+                                      setForm({ ...form, gift_packages: next });
+                                    }}
+                                    className="text-[10px] px-1.5 py-0.5 rounded border border-border hover:bg-destructive hover:text-destructive-foreground"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
                               ))}
-                            {products.filter((p: any) => {
-                              if (editId && p.id === editId) return false;
-                              if (form.gifts.some(x => x.product_id === p.id)) return false;
-                              const q = giftSearch.trim().toLowerCase();
-                              return (p.name || "").toLowerCase().includes(q) || (p.product_code || "").toLowerCase().includes(q);
-                            }).length === 0 && (
-                              <div className="p-3 text-xs text-muted-foreground text-center">Илэрц олдсонгүй</div>
+                            </div>
+                          )}
+
+                          <div>
+                            <input
+                              type="text"
+                              value={giftSearch.pkgId === pkg.id ? giftSearch.q : ""}
+                              onFocus={() => setGiftSearch({ pkgId: pkg.id, q: giftSearch.pkgId === pkg.id ? giftSearch.q : "" })}
+                              onChange={(e) => setGiftSearch({ pkgId: pkg.id, q: e.target.value })}
+                              placeholder="Энэ багцад бараа нэмэх (нэр эсвэл код хайх)..."
+                              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                            />
+                            {giftSearch.pkgId === pkg.id && giftSearch.q.trim().length >= 1 && (
+                              <div className="mt-1.5 max-h-48 overflow-auto rounded-md border border-border bg-background divide-y divide-border">
+                                {products
+                                  .filter((p: any) => {
+                                    if (editId && p.id === editId) return false;
+                                    if (pkg.items.some(x => x.product_id === p.id)) return false;
+                                    const q = giftSearch.q.trim().toLowerCase();
+                                    return (p.name || "").toLowerCase().includes(q) || (p.product_code || "").toLowerCase().includes(q);
+                                  })
+                                  .slice(0, 20)
+                                  .map((p: any) => (
+                                    <button
+                                      key={p.id}
+                                      type="button"
+                                      onClick={() => {
+                                        const next = [...form.gift_packages];
+                                        next[pkgIdx] = {
+                                          ...pkg,
+                                          items: [...pkg.items, { product_id: p.id, name: p.name, image: p.thumbnail_url || p.image_url || "" }],
+                                        };
+                                        setForm({ ...form, gift_packages: next });
+                                        setGiftSearch({ pkgId: pkg.id, q: "" });
+                                      }}
+                                      className="w-full flex items-center gap-2 p-1.5 text-left hover:bg-secondary"
+                                    >
+                                      <img src={p.thumbnail_url || p.image_url || "/placeholder.svg"} alt={p.name} className="w-7 h-7 rounded object-cover" />
+                                      <span className="flex-1 text-xs truncate">{p.name}</span>
+                                      {p.product_code && <span className="text-[10px] text-muted-foreground">{p.product_code}</span>}
+                                    </button>
+                                  ))}
+                                {products.filter((p: any) => {
+                                  if (editId && p.id === editId) return false;
+                                  if (pkg.items.some(x => x.product_id === p.id)) return false;
+                                  const q = giftSearch.q.trim().toLowerCase();
+                                  return (p.name || "").toLowerCase().includes(q) || (p.product_code || "").toLowerCase().includes(q);
+                                }).length === 0 && (
+                                  <div className="p-2 text-[11px] text-muted-foreground text-center">Илэрц олдсонгүй</div>
+                                )}
+                              </div>
                             )}
                           </div>
-                        )}
-                      </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                   <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-secondary/30">
