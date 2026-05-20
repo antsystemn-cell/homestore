@@ -299,7 +299,7 @@ const AdminPage = () => {
   const [form, setForm] = useState({
     name: "", description: "", price: 0, original_price: 0,
     image_url: "", category: "general", discount: 0,
-    is_new: false, is_on_sale: false, is_bogo: false, has_gift: false, gift_name: "", is_active: true,
+    is_new: false, is_on_sale: false, is_bogo: false, has_gift: false, gift_name: "", gifts: [] as string[], is_active: true,
     product_code: "", slug: "", specifications: [] as { key: string; value: string }[],
     detail_media: [] as { type: "image" | "video"; url: string; caption: string; thumbnail?: string }[],
     brand_id: "",
@@ -1025,7 +1025,7 @@ const AdminPage = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, is_bogo: false, has_gift: false, gift_name: "", is_active: true, product_code: "", slug: "", specifications: [], detail_media: [], brand_id: "", colors: [], sizes: [], stock_quantity: 0, variant_stock: {} });
+    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, is_bogo: false, has_gift: false, gift_name: "", gifts: [], is_active: true, product_code: "", slug: "", specifications: [], detail_media: [], brand_id: "", colors: [], sizes: [], stock_quantity: 0, variant_stock: {} });
     setNewColor(""); setNewSize("");
     setEditId(null);
     setShowForm(false);
@@ -1067,7 +1067,11 @@ const AdminPage = () => {
       original_price: form.original_price, image_url: form.image_url,
       thumbnail_url: thumbnailUrl,
       category: form.category, discount: form.discount,
-      is_new: form.is_new, is_on_sale: form.is_on_sale, is_bogo: form.is_bogo, has_gift: form.has_gift, gift_name: form.has_gift ? (form.gift_name?.trim() || null) : null, is_active: form.is_active,
+      is_new: form.is_new, is_on_sale: form.is_on_sale, is_bogo: form.is_bogo,
+      has_gift: form.has_gift,
+      gifts: form.has_gift ? (form.gifts || []).map(g => (g || "").trim()).filter(Boolean).map(name => ({ name })) : [],
+      gift_name: form.has_gift ? ((form.gifts || []).map(g => (g || "").trim()).filter(Boolean)[0] || form.gift_name?.trim() || null) : null,
+      is_active: form.is_active,
       product_code: form.product_code || null,
       slug: form.slug.trim() || cyrillicToLatinSlug(form.name),
       specifications: form.specifications.filter(s => s.key.trim() && s.value.trim()),
@@ -1140,18 +1144,21 @@ const AdminPage = () => {
     // Fetch heavy data (colors, sizes, specifications, detail_media, description) only when editing
     const { data: fullProduct } = await supabase
       .from("products")
-      .select("description, colors, sizes, specifications, detail_media, variant_stock")
+      .select("description, colors, sizes, specifications, detail_media, variant_stock, gifts")
       .eq("id", p.id)
       .single();
 
     const full: any = fullProduct || {};
     const specs = Array.isArray(full.specifications) ? full.specifications : [];
     const media = Array.isArray(full.detail_media) ? full.detail_media : [];
+    const giftsArr = Array.isArray(full.gifts)
+      ? full.gifts.map((g: any) => (typeof g === "string" ? g : (g?.name || ""))).filter(Boolean)
+      : (p.gift_name ? [p.gift_name] : []);
     setForm({
       name: p.name, description: full.description || "", price: p.price,
       original_price: p.original_price || 0, image_url: p.image_url || "",
       category: p.category, discount: p.discount || 0,
-      is_new: p.is_new, is_on_sale: p.is_on_sale, is_bogo: p.is_bogo || false, has_gift: p.has_gift || false, gift_name: p.gift_name || "", is_active: p.is_active !== false,
+      is_new: p.is_new, is_on_sale: p.is_on_sale, is_bogo: p.is_bogo || false, has_gift: p.has_gift || false, gift_name: p.gift_name || "", gifts: giftsArr, is_active: p.is_active !== false,
       product_code: p.product_code || "",
       slug: p.slug || "",
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
