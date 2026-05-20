@@ -48,6 +48,7 @@ export interface Product {
   sizes?: string[];
   isBogo?: boolean | null;
   hasGift?: boolean | null;
+  gifts?: ProductGift[];
 }
 
 export const categories = [
