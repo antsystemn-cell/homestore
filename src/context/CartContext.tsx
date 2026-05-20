@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode, useEffect } from "react";
-import { Product } from "@/data/products";
+import { Product, ProductGift } from "@/data/products";
 import { track } from "@/lib/tracking";
 
 interface CartItem {
@@ -7,12 +7,13 @@ interface CartItem {
   quantity: number;
   selectedColor?: string | null;
   selectedSize?: string | null;
+  selectedGift?: ProductGift | null;
 }
 
 interface CartContextType {
   items: CartItem[];
   wishlist: Product[];
-  addToCart: (product: Product, color?: string | null, size?: string | null, quantity?: number) => void;
+  addToCart: (product: Product, color?: string | null, size?: string | null, quantity?: number, gift?: ProductGift | null) => void;
   removeFromCart: (cartKey: string) => void;
   updateQuantity: (cartKey: string, quantity: number) => void;
   toggleWishlist: (product: Product) => void;
