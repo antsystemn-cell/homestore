@@ -1203,13 +1203,24 @@ const AdminPage = () => {
     // Fetch heavy data so duplicate carries everything
     const { data: fullProduct } = await supabase
       .from("products")
-      .select("description, colors, sizes, specifications, detail_media, gifts")
+      .select("description, colors, sizes, specifications, detail_media, gifts, gift_packages")
       .eq("id", p.id)
       .single();
 
     const full: any = fullProduct || {};
     const specs = Array.isArray(full.specifications) ? full.specifications : [];
     const media = Array.isArray(full.detail_media) ? full.detail_media : [];
+    const dupGifts: { product_id: string; name: string; image?: string }[] = Array.isArray(full.gifts) ? (full.gifts.map((g: any) => (typeof g === "string" ? null : (g?.product_id ? { product_id: g.product_id, name: g.name || "", image: g.image || "" } : null))).filter(Boolean) as any) : [];
+    let dupPkgs: { id: string; name: string; items: { product_id: string; name: string; image?: string }[] }[] = Array.isArray(full.gift_packages)
+      ? full.gift_packages.map((pkg: any) => ({
+          id: crypto.randomUUID(),
+          name: pkg?.name || "Бэлэг",
+          items: Array.isArray(pkg?.items) ? pkg.items.map((g: any) => ({ product_id: g?.product_id || "", name: g?.name || "", image: g?.image || "" })) : [],
+        }))
+      : [];
+    if (dupPkgs.length === 0 && dupGifts.length > 0) {
+      dupPkgs = [{ id: crypto.randomUUID(), name: "Бэлэг", items: dupGifts }];
+    }
     setForm({
       name: `${p.name} (хуулбар)`,
       description: full.description || "",
@@ -1223,7 +1234,8 @@ const AdminPage = () => {
       is_bogo: p.is_bogo || false,
       has_gift: p.has_gift || false,
       gift_name: p.gift_name || "",
-      gifts: Array.isArray(full.gifts) ? (full.gifts.map((g: any) => (typeof g === "string" ? null : (g?.product_id ? { product_id: g.product_id, name: g.name || "", image: g.image || "" } : null))).filter(Boolean) as any) : [],
+      gifts: dupGifts,
+      gift_packages: dupPkgs,
       is_active: p.is_active !== false,
       product_code: "", // clear SKU — must be unique
       slug: "",          // auto-generated on save
