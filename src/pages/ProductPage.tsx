@@ -155,8 +155,8 @@ const ProductPage = () => {
       toast.error("Хэмжээгээ сонгоно уу");
       return;
     }
-    if (product?.gifts && product.gifts.length > 0 && !selectedGiftId) {
-      toast.error("Бэлгээ сонгоно уу 🎁");
+    if (product?.giftPackages && product.giftPackages.length > 0 && !selectedGiftPackageId) {
+      toast.error("Бэлгийн багцаа сонгоно уу 🎁");
       return;
     }
     if (isOutOfStock) {
@@ -167,8 +167,8 @@ const ProductPage = () => {
       toast.error(`Зөвхөн ${selectedVariantQty} ширхэг үлдсэн`);
       return;
     }
-    const chosenGift = product?.gifts?.find((g) => g.product_id === selectedGiftId) || null;
-    addToCart(product!, selectedColor, selectedSize, quantity, chosenGift);
+    const chosenPackage = product?.giftPackages?.find((p) => p.id === selectedGiftPackageId) || null;
+    addToCart(product!, selectedColor, selectedSize, quantity, chosenPackage);
     setQuantity(1);
     if (andNavigate) {
       navigate("/cart");
