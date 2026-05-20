@@ -299,7 +299,7 @@ const AdminPage = () => {
   const [form, setForm] = useState({
     name: "", description: "", price: 0, original_price: 0,
     image_url: "", category: "general", discount: 0,
-    is_new: false, is_on_sale: false, is_bogo: false, has_gift: false, gift_name: "", is_active: true,
+    is_new: false, is_on_sale: false, is_bogo: false, has_gift: false, gift_name: "", gifts: [] as string[], is_active: true,
     product_code: "", slug: "", specifications: [] as { key: string; value: string }[],
     detail_media: [] as { type: "image" | "video"; url: string; caption: string; thumbnail?: string }[],
     brand_id: "",
@@ -1025,7 +1025,7 @@ const AdminPage = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, is_bogo: false, has_gift: false, gift_name: "", is_active: true, product_code: "", slug: "", specifications: [], detail_media: [], brand_id: "", colors: [], sizes: [], stock_quantity: 0, variant_stock: {} });
+    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, is_bogo: false, has_gift: false, gift_name: "", gifts: [], is_active: true, product_code: "", slug: "", specifications: [], detail_media: [], brand_id: "", colors: [], sizes: [], stock_quantity: 0, variant_stock: {} });
     setNewColor(""); setNewSize("");
     setEditId(null);
     setShowForm(false);
@@ -1067,7 +1067,11 @@ const AdminPage = () => {
       original_price: form.original_price, image_url: form.image_url,
       thumbnail_url: thumbnailUrl,
       category: form.category, discount: form.discount,
-      is_new: form.is_new, is_on_sale: form.is_on_sale, is_bogo: form.is_bogo, has_gift: form.has_gift, gift_name: form.has_gift ? (form.gift_name?.trim() || null) : null, is_active: form.is_active,
+      is_new: form.is_new, is_on_sale: form.is_on_sale, is_bogo: form.is_bogo,
+      has_gift: form.has_gift,
+      gifts: form.has_gift ? (form.gifts || []).map(g => (g || "").trim()).filter(Boolean).map(name => ({ name })) : [],
+      gift_name: form.has_gift ? ((form.gifts || []).map(g => (g || "").trim()).filter(Boolean)[0] || form.gift_name?.trim() || null) : null,
+      is_active: form.is_active,
       product_code: form.product_code || null,
       slug: form.slug.trim() || cyrillicToLatinSlug(form.name),
       specifications: form.specifications.filter(s => s.key.trim() && s.value.trim()),
@@ -1140,18 +1144,21 @@ const AdminPage = () => {
     // Fetch heavy data (colors, sizes, specifications, detail_media, description) only when editing
     const { data: fullProduct } = await supabase
       .from("products")
-      .select("description, colors, sizes, specifications, detail_media, variant_stock")
+      .select("description, colors, sizes, specifications, detail_media, variant_stock, gifts")
       .eq("id", p.id)
       .single();
 
     const full: any = fullProduct || {};
     const specs = Array.isArray(full.specifications) ? full.specifications : [];
     const media = Array.isArray(full.detail_media) ? full.detail_media : [];
+    const giftsArr = Array.isArray(full.gifts)
+      ? full.gifts.map((g: any) => (typeof g === "string" ? g : (g?.name || ""))).filter(Boolean)
+      : (p.gift_name ? [p.gift_name] : []);
     setForm({
       name: p.name, description: full.description || "", price: p.price,
       original_price: p.original_price || 0, image_url: p.image_url || "",
       category: p.category, discount: p.discount || 0,
-      is_new: p.is_new, is_on_sale: p.is_on_sale, is_bogo: p.is_bogo || false, has_gift: p.has_gift || false, gift_name: p.gift_name || "", is_active: p.is_active !== false,
+      is_new: p.is_new, is_on_sale: p.is_on_sale, is_bogo: p.is_bogo || false, has_gift: p.has_gift || false, gift_name: p.gift_name || "", gifts: giftsArr, is_active: p.is_active !== false,
       product_code: p.product_code || "",
       slug: p.slug || "",
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
@@ -1177,7 +1184,7 @@ const AdminPage = () => {
     // Fetch heavy data so duplicate carries everything
     const { data: fullProduct } = await supabase
       .from("products")
-      .select("description, colors, sizes, specifications, detail_media")
+      .select("description, colors, sizes, specifications, detail_media, gifts")
       .eq("id", p.id)
       .single();
 
@@ -1197,6 +1204,7 @@ const AdminPage = () => {
       is_bogo: p.is_bogo || false,
       has_gift: p.has_gift || false,
       gift_name: p.gift_name || "",
+      gifts: Array.isArray(full.gifts) ? full.gifts.map((g: any) => (typeof g === "string" ? g : (g?.name || ""))).filter(Boolean) : (p.gift_name ? [p.gift_name] : []),
       is_active: p.is_active !== false,
       product_code: "", // clear SKU — must be unique
       slug: "",          // auto-generated on save
@@ -2852,20 +2860,61 @@ const AdminPage = () => {
                       1+1 Үнэгүй
                     </label>
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
-                      <input type="checkbox" checked={form.has_gift} onChange={(e) => setForm({ ...form, has_gift: e.target.checked, gift_name: e.target.checked ? form.gift_name : "" })} className="rounded" />
+                      <input
+                        type="checkbox"
+                        checked={form.has_gift}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setForm({
+                            ...form,
+                            has_gift: checked,
+                            gifts: checked ? (form.gifts && form.gifts.length > 0 ? form.gifts : [form.gift_name || ""]) : [],
+                          });
+                        }}
+                        className="rounded"
+                      />
                       🎁 Бэлэгтэй
                     </label>
                   </div>
                   {form.has_gift && (
                     <div className="p-3 rounded-xl border border-border bg-secondary/30 space-y-2">
-                      <label className="text-sm font-medium flex items-center gap-2">🎁 Бэлэг сонгох</label>
-                      <input
-                        type="text"
-                        value={form.gift_name || ""}
-                        onChange={(e) => setForm({ ...form, gift_name: e.target.value })}
-                        placeholder="Бэлэгний нэр (жишээ: Аяга, Цүнх...)"
-                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
+                      <label className="text-sm font-medium flex items-center justify-between gap-2">
+                        <span>🎁 Бэлэгний жагсаалт ({form.gifts.length})</span>
+                        <button
+                          type="button"
+                          onClick={() => setForm({ ...form, gifts: [...form.gifts, ""] })}
+                          className="text-xs px-2 py-1 rounded-md bg-primary text-primary-foreground hover:opacity-90"
+                        >
+                          + Бэлэг нэмэх
+                        </button>
+                      </label>
+                      {form.gifts.length === 0 && (
+                        <p className="text-xs text-muted-foreground">"Бэлэг нэмэх" дарж эхний бэлэгээ оруулна уу.</p>
+                      )}
+                      {form.gifts.map((g, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground w-5 text-center">{idx + 1}.</span>
+                          <input
+                            type="text"
+                            value={g}
+                            onChange={(e) => {
+                              const next = [...form.gifts];
+                              next[idx] = e.target.value;
+                              setForm({ ...form, gifts: next });
+                            }}
+                            placeholder="Бэлэгний нэр (жишээ: Аяга, Цүнх...)"
+                            className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setForm({ ...form, gifts: form.gifts.filter((_, i) => i !== idx) })}
+                            className="text-xs px-2 py-1 rounded-md border border-border hover:bg-destructive hover:text-destructive-foreground"
+                            aria-label="Бэлэг устгах"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   )}
                   <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-secondary/30">
