@@ -23,8 +23,8 @@ interface CartContextType {
   clearCart: () => void;
 }
 
-function makeCartKey(productId: string, color?: string | null, size?: string | null) {
-  return `${productId}__${color || ""}__${size || ""}`;
+function makeCartKey(productId: string, color?: string | null, size?: string | null, giftId?: string | null) {
+  return `${productId}__${color || ""}__${size || ""}__${giftId || ""}`;
 }
 
 const CART_STORAGE_KEY = "easyshop_cart";
