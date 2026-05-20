@@ -300,7 +300,10 @@ const AdminPage = () => {
   const [form, setForm] = useState({
     name: "", description: "", price: 0, original_price: 0,
     image_url: "", category: "general", discount: 0,
-    is_new: false, is_on_sale: false, is_bogo: false, has_gift: false, gift_name: "", gifts: [] as { product_id: string; name: string; image?: string }[], is_active: true,
+    is_new: false, is_on_sale: false, is_bogo: false, has_gift: false, gift_name: "",
+    gifts: [] as { product_id: string; name: string; image?: string }[],
+    gift_packages: [] as { id: string; name: string; items: { product_id: string; name: string; image?: string }[] }[],
+    is_active: true,
     product_code: "", slug: "", specifications: [] as { key: string; value: string }[],
     detail_media: [] as { type: "image" | "video"; url: string; caption: string; thumbnail?: string }[],
     brand_id: "",
