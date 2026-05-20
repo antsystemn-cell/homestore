@@ -2860,20 +2860,61 @@ const AdminPage = () => {
                       1+1 Үнэгүй
                     </label>
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
-                      <input type="checkbox" checked={form.has_gift} onChange={(e) => setForm({ ...form, has_gift: e.target.checked, gift_name: e.target.checked ? form.gift_name : "" })} className="rounded" />
+                      <input
+                        type="checkbox"
+                        checked={form.has_gift}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setForm({
+                            ...form,
+                            has_gift: checked,
+                            gifts: checked ? (form.gifts && form.gifts.length > 0 ? form.gifts : [form.gift_name || ""]) : [],
+                          });
+                        }}
+                        className="rounded"
+                      />
                       🎁 Бэлэгтэй
                     </label>
                   </div>
                   {form.has_gift && (
                     <div className="p-3 rounded-xl border border-border bg-secondary/30 space-y-2">
-                      <label className="text-sm font-medium flex items-center gap-2">🎁 Бэлэг сонгох</label>
-                      <input
-                        type="text"
-                        value={form.gift_name || ""}
-                        onChange={(e) => setForm({ ...form, gift_name: e.target.value })}
-                        placeholder="Бэлэгний нэр (жишээ: Аяга, Цүнх...)"
-                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
+                      <label className="text-sm font-medium flex items-center justify-between gap-2">
+                        <span>🎁 Бэлэгний жагсаалт ({form.gifts.length})</span>
+                        <button
+                          type="button"
+                          onClick={() => setForm({ ...form, gifts: [...form.gifts, ""] })}
+                          className="text-xs px-2 py-1 rounded-md bg-primary text-primary-foreground hover:opacity-90"
+                        >
+                          + Бэлэг нэмэх
+                        </button>
+                      </label>
+                      {form.gifts.length === 0 && (
+                        <p className="text-xs text-muted-foreground">"Бэлэг нэмэх" дарж эхний бэлэгээ оруулна уу.</p>
+                      )}
+                      {form.gifts.map((g, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground w-5 text-center">{idx + 1}.</span>
+                          <input
+                            type="text"
+                            value={g}
+                            onChange={(e) => {
+                              const next = [...form.gifts];
+                              next[idx] = e.target.value;
+                              setForm({ ...form, gifts: next });
+                            }}
+                            placeholder="Бэлэгний нэр (жишээ: Аяга, Цүнх...)"
+                            className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setForm({ ...form, gifts: form.gifts.filter((_, i) => i !== idx) })}
+                            className="text-xs px-2 py-1 rounded-md border border-border hover:bg-destructive hover:text-destructive-foreground"
+                            aria-label="Бэлэг устгах"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   )}
                   <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-secondary/30">
