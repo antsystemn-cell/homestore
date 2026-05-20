@@ -112,6 +112,7 @@ const CheckoutPage = () => {
       size: item.selectedSize || null,
       image: item.product.image,
       product_code: item.product.productCode || null,
+      gift: item.selectedGift ? { product_id: item.selectedGift.product_id, name: item.selectedGift.name } : null,
     }));
 
     const orderData: any = {
@@ -564,8 +565,8 @@ const CheckoutPage = () => {
             <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-3 md:sticky md:top-20">
               <h2 className="font-bold text-foreground md:text-lg">Захиалгын мэдээлэл</h2>
               {items.map((item) => {
-                const { product, quantity, selectedColor, selectedSize } = item;
-                const key = `${product.id}__${selectedColor || ""}__${selectedSize || ""}`;
+                const { product, quantity, selectedColor, selectedSize, selectedGift } = item;
+                const key = `${product.id}__${selectedColor || ""}__${selectedSize || ""}__${selectedGift?.product_id || ""}`;
                 return (
                   <div key={key} className="flex items-center gap-3 py-2">
                     <img src={product.image} alt="" className="w-12 h-12 rounded-lg object-cover bg-secondary" />
@@ -575,6 +576,9 @@ const CheckoutPage = () => {
                         <p className="text-[10px] text-muted-foreground">
                           {[selectedColor && `Өнгө: ${selectedColor}`, selectedSize && `Хэмжээ: ${selectedSize}`].filter(Boolean).join(" · ")}
                         </p>
+                      )}
+                      {selectedGift && (
+                        <p className="text-[10px] text-primary font-medium">🎁 {selectedGift.name}</p>
                       )}
                       <p className="text-[10px] text-muted-foreground">x{quantity}</p>
                     </div>

@@ -47,8 +47,8 @@ const CartPage = () => {
             {/* Cart items */}
             <div className="md:col-span-2 space-y-3">
               {items.map((item) => {
-                const { product, quantity, selectedColor, selectedSize } = item;
-                const key = `${product.id}__${selectedColor || ""}__${selectedSize || ""}`;
+                const { product, quantity, selectedColor, selectedSize, selectedGift } = item;
+                const key = `${product.id}__${selectedColor || ""}__${selectedSize || ""}__${selectedGift?.product_id || ""}`;
                 return (
                 <div key={key} className="bg-card rounded-xl p-3 md:p-4 flex gap-3 md:gap-5 border border-border">
                   <img
@@ -68,13 +68,16 @@ const CartPage = () => {
                     >
                       {product.name}
                     </h3>
-                    {(selectedColor || selectedSize) && (
+                    {(selectedColor || selectedSize || selectedGift) && (
                       <div className="flex flex-wrap gap-1.5 mt-1">
                         {selectedColor && (
                           <span className="text-[11px] bg-secondary text-muted-foreground px-2 py-0.5 rounded-md">Өнгө: {selectedColor}</span>
                         )}
                         {selectedSize && (
                           <span className="text-[11px] bg-secondary text-muted-foreground px-2 py-0.5 rounded-md">Хэмжээ: {selectedSize}</span>
+                        )}
+                        {selectedGift && (
+                          <span className="text-[11px] bg-primary/10 text-primary font-medium px-2 py-0.5 rounded-md">🎁 {selectedGift.name}</span>
                         )}
                       </div>
                     )}

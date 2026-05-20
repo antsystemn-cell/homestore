@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode, useEffect } from "react";
-import { Product } from "@/data/products";
+import { Product, ProductGift } from "@/data/products";
 import { track } from "@/lib/tracking";
 
 interface CartItem {
@@ -7,12 +7,13 @@ interface CartItem {
   quantity: number;
   selectedColor?: string | null;
   selectedSize?: string | null;
+  selectedGift?: ProductGift | null;
 }
 
 interface CartContextType {
   items: CartItem[];
   wishlist: Product[];
-  addToCart: (product: Product, color?: string | null, size?: string | null, quantity?: number) => void;
+  addToCart: (product: Product, color?: string | null, size?: string | null, quantity?: number, gift?: ProductGift | null) => void;
   removeFromCart: (cartKey: string) => void;
   updateQuantity: (cartKey: string, quantity: number) => void;
   toggleWishlist: (product: Product) => void;
@@ -22,8 +23,8 @@ interface CartContextType {
   clearCart: () => void;
 }
 
-function makeCartKey(productId: string, color?: string | null, size?: string | null) {
-  return `${productId}__${color || ""}__${size || ""}`;
+function makeCartKey(productId: string, color?: string | null, size?: string | null, giftId?: string | null) {
+  return `${productId}__${color || ""}__${size || ""}__${giftId || ""}`;
 }
 
 const CART_STORAGE_KEY = "easyshop_cart";
@@ -53,37 +54,37 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     saveCartToStorage(items);
   }, [items]);
 
-  const addToCart = useCallback((product: Product, color?: string | null, size?: string | null, quantity: number = 1) => {
+  const addToCart = useCallback((product: Product, color?: string | null, size?: string | null, quantity: number = 1, gift?: ProductGift | null) => {
     setItems((prev) => {
-      const key = makeCartKey(product.id, color, size);
-      const existing = prev.find((i) => makeCartKey(i.product.id, i.selectedColor, i.selectedSize) === key);
+      const key = makeCartKey(product.id, color, size, gift?.product_id);
+      const existing = prev.find((i) => makeCartKey(i.product.id, i.selectedColor, i.selectedSize, i.selectedGift?.product_id) === key);
       if (existing) {
         return prev.map((i) =>
-          makeCartKey(i.product.id, i.selectedColor, i.selectedSize) === key ? { ...i, quantity: i.quantity + quantity } : i
+          makeCartKey(i.product.id, i.selectedColor, i.selectedSize, i.selectedGift?.product_id) === key ? { ...i, quantity: i.quantity + quantity } : i
         );
       }
-      return [...prev, { product, quantity, selectedColor: color || null, selectedSize: size || null }];
+      return [...prev, { product, quantity, selectedColor: color || null, selectedSize: size || null, selectedGift: gift || null }];
     });
     track("add_to_cart", {
       product_id: product.id,
       category: product.category,
       value: product.price * quantity,
-      metadata: { color: color || null, size: size || null, quantity },
+      metadata: { color: color || null, size: size || null, quantity, gift: gift?.name || null },
     });
   }, []);
 
   const removeFromCart = useCallback((key: string) => {
-    setItems((prev) => prev.filter((i) => makeCartKey(i.product.id, i.selectedColor, i.selectedSize) !== key));
+    setItems((prev) => prev.filter((i) => makeCartKey(i.product.id, i.selectedColor, i.selectedSize, i.selectedGift?.product_id) !== key));
     track("remove_from_cart", { metadata: { key } });
   }, []);
 
   const updateQuantity = useCallback((key: string, quantity: number) => {
     if (quantity <= 0) {
-      setItems((prev) => prev.filter((i) => makeCartKey(i.product.id, i.selectedColor, i.selectedSize) !== key));
+      setItems((prev) => prev.filter((i) => makeCartKey(i.product.id, i.selectedColor, i.selectedSize, i.selectedGift?.product_id) !== key));
       return;
     }
     setItems((prev) =>
-      prev.map((i) => (makeCartKey(i.product.id, i.selectedColor, i.selectedSize) === key ? { ...i, quantity } : i))
+      prev.map((i) => (makeCartKey(i.product.id, i.selectedColor, i.selectedSize, i.selectedGift?.product_id) === key ? { ...i, quantity } : i))
     );
   }, []);
 
