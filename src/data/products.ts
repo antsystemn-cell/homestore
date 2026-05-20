@@ -55,6 +55,7 @@ export interface Product {
   isBogo?: boolean | null;
   hasGift?: boolean | null;
   gifts?: ProductGift[];
+  giftPackages?: GiftPackage[];
 }
 
 export const categories = [
