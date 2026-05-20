@@ -16,6 +16,12 @@ export interface DetailMedia {
   thumbnail?: string;
 }
 
+export interface ProductGift {
+  product_id: string;
+  name: string;
+  image?: string;
+}
+
 export interface Product {
   id: string;
   slug?: string;
@@ -42,6 +48,7 @@ export interface Product {
   sizes?: string[];
   isBogo?: boolean | null;
   hasGift?: boolean | null;
+  gifts?: ProductGift[];
 }
 
 export const categories = [
@@ -83,5 +90,6 @@ export function mapDbProduct(row: any): Product {
     sizes: Array.isArray(row.sizes) ? row.sizes : [],
     isBogo: row.is_bogo ?? false,
     hasGift: row.has_gift ?? false,
+    gifts: Array.isArray(row.gifts) ? row.gifts.map((g: any) => ({ product_id: g?.product_id || '', name: g?.name || '', image: g?.image || '' })) : [],
   };
 }
