@@ -295,7 +295,7 @@ const AdminPage = () => {
   const ppLogoFileRef = useRef<HTMLInputElement>(null);
 
   const [showForm, setShowForm] = useState(false);
-  const [giftSearch, setGiftSearch] = useState("");
+  const [giftSearch, setGiftSearch] = useState<{ pkgId: string; q: string }>({ pkgId: "", q: "" });
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "", description: "", price: 0, original_price: 0,
