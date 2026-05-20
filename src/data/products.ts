@@ -90,5 +90,6 @@ export function mapDbProduct(row: any): Product {
     sizes: Array.isArray(row.sizes) ? row.sizes : [],
     isBogo: row.is_bogo ?? false,
     hasGift: row.has_gift ?? false,
+    gifts: Array.isArray(row.gifts) ? row.gifts.map((g: any) => ({ product_id: g?.product_id || '', name: g?.name || '', image: g?.image || '' })) : [],
   };
 }
