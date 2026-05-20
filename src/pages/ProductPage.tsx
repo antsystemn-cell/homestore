@@ -393,24 +393,47 @@ const ProductPage = () => {
 
             {/* Gifts */}
             {product.gifts && product.gifts.length > 0 && (
-              <div className="bg-accent/30 rounded-xl p-4 space-y-2">
-                <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                  <Gift className="h-4 w-4 text-accent-foreground" />
-                  <span>🎁 Бэлэгтэй</span>
+              <div className="bg-accent/30 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between gap-2 text-sm font-semibold text-foreground">
+                  <div className="flex items-center gap-2">
+                    <Gift className="h-4 w-4 text-accent-foreground" />
+                    <span>🎁 Бэлгээ сонгоно уу</span>
+                  </div>
+                  {selectedGiftId && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedGiftId(null)}
+                      className="text-xs font-medium text-muted-foreground hover:text-foreground underline"
+                    >
+                      Цэвэрлэх
+                    </button>
+                  )}
                 </div>
-                <div className="flex flex-wrap gap-3">
-                  {product.gifts.map((gift) => (
-                    <div key={gift.product_id} className="flex items-center gap-2 bg-background rounded-lg px-3 py-2 border border-border">
-                      {gift.image ? (
-                        <img src={gift.image} alt={gift.name} className="w-10 h-10 rounded-md object-cover" />
-                      ) : (
-                        <div className="w-10 h-10 rounded-md bg-secondary flex items-center justify-center">
-                          <Gift className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                      )}
-                      <span className="text-sm font-medium text-foreground">{gift.name}</span>
-                    </div>
-                  ))}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {product.gifts.map((gift) => {
+                    const active = selectedGiftId === gift.product_id;
+                    return (
+                      <button
+                        key={gift.product_id}
+                        type="button"
+                        onClick={() => setSelectedGiftId(active ? null : gift.product_id)}
+                        className={`flex items-center gap-2 rounded-lg px-2.5 py-2 border-2 text-left transition-colors ${
+                          active
+                            ? "border-primary bg-primary/10"
+                            : "border-border bg-background hover:border-primary/40"
+                        }`}
+                      >
+                        {gift.image ? (
+                          <img src={gift.image} alt={gift.name} className="w-10 h-10 rounded-md object-cover shrink-0" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-md bg-secondary flex items-center justify-center shrink-0">
+                            <Gift className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        )}
+                        <span className="text-xs font-medium text-foreground line-clamp-2">{gift.name}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
