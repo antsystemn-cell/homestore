@@ -1151,9 +1151,11 @@ const AdminPage = () => {
     const full: any = fullProduct || {};
     const specs = Array.isArray(full.specifications) ? full.specifications : [];
     const media = Array.isArray(full.detail_media) ? full.detail_media : [];
-    const giftsArr = Array.isArray(full.gifts)
-      ? full.gifts.map((g: any) => (typeof g === "string" ? g : (g?.name || ""))).filter(Boolean)
-      : (p.gift_name ? [p.gift_name] : []);
+    const giftsArr: { product_id: string; name: string; image?: string }[] = Array.isArray(full.gifts)
+      ? full.gifts
+          .map((g: any) => (typeof g === "string" ? null : (g?.product_id ? { product_id: g.product_id, name: g.name || "", image: g.image || "" } : null)))
+          .filter(Boolean) as any
+      : [];
     setForm({
       name: p.name, description: full.description || "", price: p.price,
       original_price: p.original_price || 0, image_url: p.image_url || "",
@@ -1204,7 +1206,7 @@ const AdminPage = () => {
       is_bogo: p.is_bogo || false,
       has_gift: p.has_gift || false,
       gift_name: p.gift_name || "",
-      gifts: Array.isArray(full.gifts) ? full.gifts.map((g: any) => (typeof g === "string" ? g : (g?.name || ""))).filter(Boolean) : (p.gift_name ? [p.gift_name] : []),
+      gifts: Array.isArray(full.gifts) ? (full.gifts.map((g: any) => (typeof g === "string" ? null : (g?.product_id ? { product_id: g.product_id, name: g.name || "", image: g.image || "" } : null))).filter(Boolean) as any) : [],
       is_active: p.is_active !== false,
       product_code: "", // clear SKU — must be unique
       slug: "",          // auto-generated on save
