@@ -112,6 +112,7 @@ const CheckoutPage = () => {
       size: item.selectedSize || null,
       image: item.product.image,
       product_code: item.product.productCode || null,
+      gift: item.selectedGift ? { product_id: item.selectedGift.product_id, name: item.selectedGift.name } : null,
     }));
 
     const orderData: any = {
