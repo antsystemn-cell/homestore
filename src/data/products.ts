@@ -22,6 +22,12 @@ export interface ProductGift {
   image?: string;
 }
 
+export interface GiftPackage {
+  id: string;
+  name: string;
+  items: ProductGift[];
+}
+
 export interface Product {
   id: string;
   slug?: string;
