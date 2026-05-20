@@ -1,0 +1,1 @@
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS gift_packages jsonb NOT NULL DEFAULT '[]'::jsonb;

@@ -22,6 +22,12 @@ export interface ProductGift {
   image?: string;
 }
 
+export interface GiftPackage {
+  id: string;
+  name: string;
+  items: ProductGift[];
+}
+
 export interface Product {
   id: string;
   slug?: string;
@@ -49,6 +55,7 @@ export interface Product {
   isBogo?: boolean | null;
   hasGift?: boolean | null;
   gifts?: ProductGift[];
+  giftPackages?: GiftPackage[];
 }
 
 export const categories = [
@@ -91,5 +98,14 @@ export function mapDbProduct(row: any): Product {
     isBogo: row.is_bogo ?? false,
     hasGift: row.has_gift ?? false,
     gifts: Array.isArray(row.gifts) ? row.gifts.map((g: any) => ({ product_id: g?.product_id || '', name: g?.name || '', image: g?.image || '' })) : [],
+    giftPackages: Array.isArray(row.gift_packages)
+      ? row.gift_packages.map((pkg: any) => ({
+          id: pkg?.id || crypto.randomUUID(),
+          name: pkg?.name || 'Бэлэг',
+          items: Array.isArray(pkg?.items)
+            ? pkg.items.map((g: any) => ({ product_id: g?.product_id || '', name: g?.name || '', image: g?.image || '' }))
+            : [],
+        }))
+      : [],
   };
 }
