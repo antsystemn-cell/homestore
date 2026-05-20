@@ -707,6 +707,7 @@ export type Database = {
           detail_media: Json | null
           discount: number | null
           gift_name: string | null
+          gifts: Json
           has_gift: boolean
           id: string
           image_url: string | null
@@ -737,6 +738,7 @@ export type Database = {
           detail_media?: Json | null
           discount?: number | null
           gift_name?: string | null
+          gifts?: Json
           has_gift?: boolean
           id?: string
           image_url?: string | null
@@ -767,6 +769,7 @@ export type Database = {
           detail_media?: Json | null
           discount?: number | null
           gift_name?: string | null
+          gifts?: Json
           has_gift?: boolean
           id?: string
           image_url?: string | null
