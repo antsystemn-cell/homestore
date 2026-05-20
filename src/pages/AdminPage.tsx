@@ -1148,7 +1148,7 @@ const AdminPage = () => {
     // Fetch heavy data (colors, sizes, specifications, detail_media, description) only when editing
     const { data: fullProduct } = await supabase
       .from("products")
-      .select("description, colors, sizes, specifications, detail_media, variant_stock, gifts")
+      .select("description, colors, sizes, specifications, detail_media, variant_stock, gifts, gift_packages")
       .eq("id", p.id)
       .single();
 
@@ -1160,11 +1160,24 @@ const AdminPage = () => {
           .map((g: any) => (typeof g === "string" ? null : (g?.product_id ? { product_id: g.product_id, name: g.name || "", image: g.image || "" } : null)))
           .filter(Boolean) as any
       : [];
+    let pkgArr: { id: string; name: string; items: { product_id: string; name: string; image?: string }[] }[] = Array.isArray(full.gift_packages)
+      ? full.gift_packages.map((pkg: any) => ({
+          id: pkg?.id || crypto.randomUUID(),
+          name: pkg?.name || "Бэлэг",
+          items: Array.isArray(pkg?.items)
+            ? pkg.items.map((g: any) => ({ product_id: g?.product_id || "", name: g?.name || "", image: g?.image || "" }))
+            : [],
+        }))
+      : [];
+    // Legacy fallback: if no packages but legacy gifts exist, convert to single package
+    if (pkgArr.length === 0 && giftsArr.length > 0) {
+      pkgArr = [{ id: crypto.randomUUID(), name: "Бэлэг", items: giftsArr }];
+    }
     setForm({
       name: p.name, description: full.description || "", price: p.price,
       original_price: p.original_price || 0, image_url: p.image_url || "",
       category: p.category, discount: p.discount || 0,
-      is_new: p.is_new, is_on_sale: p.is_on_sale, is_bogo: p.is_bogo || false, has_gift: p.has_gift || false, gift_name: p.gift_name || "", gifts: giftsArr, is_active: p.is_active !== false,
+      is_new: p.is_new, is_on_sale: p.is_on_sale, is_bogo: p.is_bogo || false, has_gift: p.has_gift || false, gift_name: p.gift_name || "", gifts: giftsArr, gift_packages: pkgArr, is_active: p.is_active !== false,
       product_code: p.product_code || "",
       slug: p.slug || "",
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
