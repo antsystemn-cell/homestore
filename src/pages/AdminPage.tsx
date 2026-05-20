@@ -1184,7 +1184,7 @@ const AdminPage = () => {
     // Fetch heavy data so duplicate carries everything
     const { data: fullProduct } = await supabase
       .from("products")
-      .select("description, colors, sizes, specifications, detail_media")
+      .select("description, colors, sizes, specifications, detail_media, gifts")
       .eq("id", p.id)
       .single();
 
