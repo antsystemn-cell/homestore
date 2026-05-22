@@ -500,30 +500,6 @@ const CheckoutPage = () => {
                   </div>
                 </label>
 
-                {/* Cash */}
-                <label
-                  className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    paymentMethod === "cash"
-                      ? "border-primary bg-primary/5 shadow-sm"
-                      : "border-border hover:border-muted-foreground/30"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="cash"
-                    checked={paymentMethod === "cash"}
-                    onChange={() => setPaymentMethod("cash")}
-                    className="w-4 h-4 accent-[hsl(var(--primary))]"
-                  />
-                  <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
-                    <Banknote className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-foreground">Бэлнээр / Шилжүүлэг</p>
-                    <p className="text-xs text-muted-foreground">Хүргэлтийн үед бэлнээр эсвэл дансаар төлөх</p>
-                  </div>
-                </label>
               </div>
             </div>
 
