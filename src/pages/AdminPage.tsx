@@ -16,7 +16,7 @@ import TrackingDashboard from "@/components/admin/TrackingDashboard";
 import { useRef } from "react";
 import { toast } from "sonner";
 import { formatPrice } from "@/data/products";
-import { optimizeImage, generateThumbnail, estimateBase64Size } from "@/lib/imageOptimize";
+import { optimizeImage, generateThumbnail, estimateBase64Size, cropAndOptimizeImage } from "@/lib/imageOptimize";
 import { resolveColor } from "@/lib/colorMap";
 import { cyrillicToLatinSlug } from "@/lib/cyrillicToLatin";
 import { parseAddressBlob } from "@/lib/addressParser";
@@ -72,7 +72,7 @@ const AdminPage = () => {
   const bannerImageFileRef = useRef<HTMLInputElement>(null);
 
   // ADS image form state
-  const [adForm, setAdForm] = useState<{ image_url: string; link_url: string; placement: "top" | "middle" }>({ image_url: "", link_url: "", placement: "top" });
+  const [adForm, setAdForm] = useState<{ image_url: string; link_url: string; placement: "top" | "middle"; aspect: string }>({ image_url: "", link_url: "", placement: "top", aspect: "21:9" });
   const [editAdId, setEditAdId] = useState<string | null>(null);
   const adImageFileRef = useRef<HTMLInputElement>(null);
 
@@ -574,11 +574,13 @@ const AdminPage = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) { toast.error("Зөвхөн зураг оруулна уу"); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.error("Зураг 5MB-ээс бага байх ёстой"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("Зураг 10MB-ээс бага байх ёстой"); return; }
     try {
-      const webpUrl = await optimizeImage(file);
+      const [w, h] = (adForm.aspect || "21:9").split(":").map(Number);
+      const ratio = (w && h) ? w / h : 21 / 9;
+      const webpUrl = await cropAndOptimizeImage(file, ratio);
       setAdForm(f => ({ ...f, image_url: webpUrl }));
-      toast.success("Зураг оруулагдлаа");
+      toast.success("Зураг ороод автоматаар хэмжээнд таарууллаа");
     } catch { toast.error("Зураг оновчлоход алдаа"); }
     if (adImageFileRef.current) adImageFileRef.current.value = "";
   };
@@ -595,7 +597,7 @@ const AdminPage = () => {
       if (error) { toast.error(error.message); return; }
       toast.success("ADS нэмэгдлээ");
     }
-    setAdForm({ image_url: "", link_url: "", placement: "top" });
+    setAdForm({ image_url: "", link_url: "", placement: "top", aspect: "21:9" });
     setEditAdId(null);
     fetchAdImages();
   };
@@ -5003,7 +5005,7 @@ const AdminPage = () => {
                 <h3 className="font-bold text-base mb-4">ADS зургууд (Баннер болон барааны дунд)</h3>
                 <div className="bg-card rounded-2xl p-4 md:p-6 border border-border space-y-4">
                   <h4 className="font-bold text-sm">{editAdId ? "ADS засах" : "Шинэ ADS нэмэх"}</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <input placeholder="Холбоос URL (заавал биш, жишээ: /shop)" value={adForm.link_url} onChange={(e) => setAdForm(f => ({ ...f, link_url: e.target.value }))}
                       className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
                     <select value={adForm.placement} onChange={(e) => setAdForm(f => ({ ...f, placement: e.target.value as "top" | "middle" }))}
@@ -5011,7 +5013,17 @@ const AdminPage = () => {
                       <option value="top">Баннерийн доор (дээд)</option>
                       <option value="middle">Барааны жагсаалтын дунд</option>
                     </select>
+                    <select value={adForm.aspect} onChange={(e) => setAdForm(f => ({ ...f, aspect: e.target.value }))}
+                      className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+                      <option value="21:9">Хэмжээ: 21:9 (өргөн баннер)</option>
+                      <option value="16:9">Хэмжээ: 16:9</option>
+                      <option value="4:1">Хэмжээ: 4:1 (нарийн)</option>
+                      <option value="3:1">Хэмжээ: 3:1</option>
+                      <option value="2:1">Хэмжээ: 2:1</option>
+                      <option value="1:1">Хэмжээ: 1:1 (квадрат)</option>
+                    </select>
                   </div>
+                  <p className="text-[11px] text-muted-foreground">Зураг оруулсны дараа сонгосон харьцаагаар автоматаар тайрагдана (төв хэсгийг хадгална).</p>
                   <div className="space-y-2">
                     <label className="text-xs text-muted-foreground">ADS зураг *</label>
                     <div className="flex items-center gap-3">
@@ -5041,7 +5053,7 @@ const AdminPage = () => {
                       {editAdId ? "Шинэчлэх" : "Нэмэх"}
                     </button>
                     {editAdId && (
-                      <button onClick={() => { setAdForm({ image_url: "", link_url: "", placement: "top" }); setEditAdId(null); }}
+                      <button onClick={() => { setAdForm({ image_url: "", link_url: "", placement: "top", aspect: "21:9" }); setEditAdId(null); }}
                         className="bg-secondary rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors">
                         Болих
                       </button>
@@ -5063,7 +5075,7 @@ const AdminPage = () => {
                             className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${a.is_active ? "bg-green-500/10 text-green-600" : "bg-secondary text-muted-foreground"}`}>
                             {a.is_active ? "Идэвхтэй" : "Идэвхгүй"}
                           </button>
-                          <button onClick={() => { setAdForm({ image_url: a.image_url, link_url: a.link_url || "", placement: a.placement }); setEditAdId(a.id); }}
+                          <button onClick={() => { setAdForm({ image_url: a.image_url, link_url: a.link_url || "", placement: a.placement, aspect: adForm.aspect || "21:9" }); setEditAdId(a.id); }}
                             className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
                             <Pencil className="h-4 w-4" />
                           </button>

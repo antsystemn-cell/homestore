@@ -165,6 +165,38 @@ export async function generateThumbnail(
   return uploadWebp(blob, "thumb");
 }
 
+/**
+ * Crop an image to a target aspect ratio (center crop), resize to maxWidth,
+ * encode as WebP and upload. aspectRatio = width / height (e.g. 16/9).
+ */
+export async function cropAndOptimizeImage(
+  file: File | string,
+  aspectRatio: number,
+  maxWidth = MAX_IMAGE_WIDTH,
+  quality = WEBP_QUALITY
+): Promise<string> {
+  const img = await loadImage(file);
+  const srcW = img.naturalWidth;
+  const srcH = img.naturalHeight;
+  const srcRatio = srcW / srcH;
+  let cropW = srcW;
+  let cropH = srcH;
+  if (srcRatio > aspectRatio) cropW = Math.round(srcH * aspectRatio);
+  else if (srcRatio < aspectRatio) cropH = Math.round(srcW / aspectRatio);
+  const sx = Math.round((srcW - cropW) / 2);
+  const sy = Math.round((srcH - cropH) / 2);
+  const outW = Math.min(cropW, maxWidth);
+  const outH = Math.round(outW / aspectRatio);
+  const canvas = document.createElement("canvas");
+  canvas.width = outW;
+  canvas.height = outH;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas context not available");
+  ctx.drawImage(img, sx, sy, cropW, cropH, 0, 0, outW, outH);
+  const blob = await canvasToWebpBlob(canvas, quality);
+  return uploadWebp(blob, "ads");
+}
+
 /** Generate a thumbnail directly from a File. */
 export async function generateThumbnailFromFile(
   file: File,
