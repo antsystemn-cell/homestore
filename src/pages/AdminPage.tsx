@@ -5005,7 +5005,7 @@ const AdminPage = () => {
                 <h3 className="font-bold text-base mb-4">ADS зургууд (Баннер болон барааны дунд)</h3>
                 <div className="bg-card rounded-2xl p-4 md:p-6 border border-border space-y-4">
                   <h4 className="font-bold text-sm">{editAdId ? "ADS засах" : "Шинэ ADS нэмэх"}</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <input placeholder="Холбоос URL (заавал биш, жишээ: /shop)" value={adForm.link_url} onChange={(e) => setAdForm(f => ({ ...f, link_url: e.target.value }))}
                       className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
                     <select value={adForm.placement} onChange={(e) => setAdForm(f => ({ ...f, placement: e.target.value as "top" | "middle" }))}
@@ -5013,7 +5013,17 @@ const AdminPage = () => {
                       <option value="top">Баннерийн доор (дээд)</option>
                       <option value="middle">Барааны жагсаалтын дунд</option>
                     </select>
+                    <select value={adForm.aspect} onChange={(e) => setAdForm(f => ({ ...f, aspect: e.target.value }))}
+                      className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+                      <option value="21:9">Хэмжээ: 21:9 (өргөн баннер)</option>
+                      <option value="16:9">Хэмжээ: 16:9</option>
+                      <option value="4:1">Хэмжээ: 4:1 (нарийн)</option>
+                      <option value="3:1">Хэмжээ: 3:1</option>
+                      <option value="2:1">Хэмжээ: 2:1</option>
+                      <option value="1:1">Хэмжээ: 1:1 (квадрат)</option>
+                    </select>
                   </div>
+                  <p className="text-[11px] text-muted-foreground">Зураг оруулсны дараа сонгосон харьцаагаар автоматаар тайрагдана (төв хэсгийг хадгална).</p>
                   <div className="space-y-2">
                     <label className="text-xs text-muted-foreground">ADS зураг *</label>
                     <div className="flex items-center gap-3">
