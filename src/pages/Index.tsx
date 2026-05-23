@@ -199,6 +199,15 @@ const Index = () => {
             <PromoBanner />
           </ErrorBoundary>
 
+          {/* Top ADS — banner-ийн доор */}
+          {topAds.length > 0 && (
+            <ErrorBoundary>
+              <AdBanners ads={topAds} />
+            </ErrorBoundary>
+          )}
+
+
+
           {/* Brand logos */}
           {brands.length > 0 && (
             <ErrorBoundary>
