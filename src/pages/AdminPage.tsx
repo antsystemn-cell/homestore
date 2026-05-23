@@ -597,7 +597,7 @@ const AdminPage = () => {
       if (error) { toast.error(error.message); return; }
       toast.success("ADS нэмэгдлээ");
     }
-    setAdForm({ image_url: "", link_url: "", placement: "top" });
+    setAdForm({ image_url: "", link_url: "", placement: "top", aspect: "21:9" });
     setEditAdId(null);
     fetchAdImages();
   };
