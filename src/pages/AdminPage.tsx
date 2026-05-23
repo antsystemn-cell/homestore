@@ -72,7 +72,7 @@ const AdminPage = () => {
   const bannerImageFileRef = useRef<HTMLInputElement>(null);
 
   // ADS image form state
-  const [adForm, setAdForm] = useState<{ image_url: string; link_url: string; placement: "top" | "middle"; aspect: string }>({ image_url: "", link_url: "", placement: "top", aspect: "21:9" });
+  const [adForm, setAdForm] = useState<{ image_url: string; link_url: string; placement: "top" | "middle"; aspect: string; device: "all" | "mobile" | "tablet" | "desktop" }>({ image_url: "", link_url: "", placement: "top", aspect: "21:9", device: "all" });
   const [editAdId, setEditAdId] = useState<string | null>(null);
   const adImageFileRef = useRef<HTMLInputElement>(null);
 
