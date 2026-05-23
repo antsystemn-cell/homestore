@@ -5086,7 +5086,7 @@ const AdminPage = () => {
                       {editAdId ? "Шинэчлэх" : "Нэмэх"}
                     </button>
                     {editAdId && (
-                      <button onClick={() => { setAdForm({ image_url: "", link_url: "", placement: "top", aspect: "21:9" }); setEditAdId(null); }}
+                      <button onClick={() => { setAdForm({ image_url: "", link_url: "", placement: "top", aspect: "21:9", device: "all" }); setEditAdId(null); }}
                         className="bg-secondary rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors">
                         Болих
                       </button>
