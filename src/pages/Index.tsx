@@ -9,6 +9,8 @@ import SaleCarousel from "@/components/store/SaleCarousel";
 import PromoBanner from "@/components/store/PromoBanner";
 import BrandLogos from "@/components/store/BrandLogos";
 import NewArrivals from "@/components/store/NewArrivals";
+import AdBanners, { useAdImages } from "@/components/store/AdBanners";
+
 
 import { Product, mapDbProduct } from "@/data/products";
 import {
