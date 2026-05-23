@@ -5075,7 +5075,7 @@ const AdminPage = () => {
                             className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${a.is_active ? "bg-green-500/10 text-green-600" : "bg-secondary text-muted-foreground"}`}>
                             {a.is_active ? "Идэвхтэй" : "Идэвхгүй"}
                           </button>
-                          <button onClick={() => { setAdForm({ image_url: a.image_url, link_url: a.link_url || "", placement: a.placement }); setEditAdId(a.id); }}
+                          <button onClick={() => { setAdForm({ image_url: a.image_url, link_url: a.link_url || "", placement: a.placement, aspect: adForm.aspect || "21:9" }); setEditAdId(a.id); }}
                             className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
                             <Pencil className="h-4 w-4" />
                           </button>
