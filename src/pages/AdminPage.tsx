@@ -574,11 +574,13 @@ const AdminPage = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) { toast.error("Зөвхөн зураг оруулна уу"); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.error("Зураг 5MB-ээс бага байх ёстой"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("Зураг 10MB-ээс бага байх ёстой"); return; }
     try {
-      const webpUrl = await optimizeImage(file);
+      const [w, h] = (adForm.aspect || "21:9").split(":").map(Number);
+      const ratio = (w && h) ? w / h : 21 / 9;
+      const webpUrl = await cropAndOptimizeImage(file, ratio);
       setAdForm(f => ({ ...f, image_url: webpUrl }));
-      toast.success("Зураг оруулагдлаа");
+      toast.success("Зураг ороод автоматаар хэмжээнд таарууллаа");
     } catch { toast.error("Зураг оновчлоход алдаа"); }
     if (adImageFileRef.current) adImageFileRef.current.value = "";
   };
