@@ -16,7 +16,7 @@ import TrackingDashboard from "@/components/admin/TrackingDashboard";
 import { useRef } from "react";
 import { toast } from "sonner";
 import { formatPrice } from "@/data/products";
-import { optimizeImage, generateThumbnail, estimateBase64Size } from "@/lib/imageOptimize";
+import { optimizeImage, generateThumbnail, estimateBase64Size, cropAndOptimizeImage } from "@/lib/imageOptimize";
 import { resolveColor } from "@/lib/colorMap";
 import { cyrillicToLatinSlug } from "@/lib/cyrillicToLatin";
 import { parseAddressBlob } from "@/lib/addressParser";
