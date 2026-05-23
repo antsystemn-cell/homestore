@@ -493,6 +493,8 @@ const AdminPage = () => {
     fetchDeliveryOptions();
     fetchPaymentProviders();
     fetchPromoBanners();
+    fetchAdImages();
+
   };
 
   useEffect(() => {
