@@ -399,14 +399,16 @@ const ProductPage = () => {
             </div>
 
             {/* Gift packages */}
-            {product.giftPackages && product.giftPackages.length > 0 && (
+            {product.giftPackages && product.giftPackages.length > 0 && (() => {
+              const singlePackage = product.giftPackages.length === 1;
+              return (
               <div className="bg-accent/30 rounded-xl p-4 space-y-3">
                 <div className="flex items-center justify-between gap-2 text-sm font-semibold text-foreground">
                   <div className="flex items-center gap-2">
                     <Gift className="h-4 w-4 text-accent-foreground" />
-                    <span>🎁 Бэлгийн багцаа сонгоно уу</span>
+                    <span>{singlePackage ? "🎁 Дагалдах бэлэг" : "🎁 Бэлгийн багцаа сонгоно уу"}</span>
                   </div>
-                  {selectedGiftPackageId && (
+                  {!singlePackage && selectedGiftPackageId && (
                     <button
                       type="button"
                       onClick={() => setSelectedGiftPackageId(null)}
@@ -419,26 +421,30 @@ const ProductPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {product.giftPackages.map((pkg) => {
                     const active = selectedGiftPackageId === pkg.id;
+                    const interactive = !singlePackage;
                     return (
                       <button
                         key={pkg.id}
                         type="button"
-                        onClick={() => setSelectedGiftPackageId(active ? null : pkg.id)}
+                        disabled={!interactive}
+                        onClick={() => interactive && setSelectedGiftPackageId(active ? null : pkg.id)}
                         className={`flex flex-col gap-2 rounded-lg p-3 border-2 text-left transition-colors ${
                           active
                             ? "border-primary bg-primary/10"
                             : "border-border bg-background hover:border-primary/40"
-                        }`}
+                        } ${!interactive ? "cursor-default" : ""}`}
                       >
                         <div className="flex items-center gap-2">
-                          <span className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${active ? "border-primary" : "border-muted-foreground/40"}`}>
-                            {active && <span className="w-2 h-2 rounded-full bg-primary" />}
-                          </span>
+                          {interactive && (
+                            <span className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${active ? "border-primary" : "border-muted-foreground/40"}`}>
+                              {active && <span className="w-2 h-2 rounded-full bg-primary" />}
+                            </span>
+                          )}
                           <span className="text-sm font-semibold text-foreground">{pkg.name}</span>
                           <span className="text-[10px] text-muted-foreground ml-auto">{pkg.items.length} зүйл</span>
                         </div>
                         {pkg.items.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 pl-6">
+                          <div className={`flex flex-wrap gap-1.5 ${interactive ? "pl-6" : ""}`}>
                             {pkg.items.map((gift) => (
                               <div key={gift.product_id} className="flex items-center gap-1.5 bg-secondary rounded-md px-1.5 py-1">
                                 {gift.image ? (
@@ -458,7 +464,8 @@ const ProductPage = () => {
                   })}
                 </div>
               </div>
-            )}
+              );
+            })()}
 
             {/* Stock — shown only for Elle Sport brand. Per-variant when color/size selected. */}
             {(() => {
