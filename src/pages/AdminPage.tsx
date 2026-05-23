@@ -585,9 +585,32 @@ const AdminPage = () => {
     if (adImageFileRef.current) adImageFileRef.current.value = "";
   };
 
+  const validateAdLinkUrl = (raw: string): { ok: true; value: string | null } | { ok: false; error: string } => {
+    const v = (raw || "").trim();
+    if (!v) return { ok: true, value: null };
+    if (v.length > 500) return { ok: false, error: "Холбоос хэт урт байна (500 тэмдэгтээс ихгүй)" };
+    // Internal path: must start with / and contain no spaces / control chars
+    if (v.startsWith("/")) {
+      if (/\s/.test(v)) return { ok: false, error: "Холбоост хоосон зай байж болохгүй" };
+      if (!/^\/[A-Za-z0-9\-._~!$&'()*+,;=:@%/?#]*$/.test(v)) return { ok: false, error: "Дотоод холбоосын формат буруу" };
+      return { ok: true, value: v };
+    }
+    // External: must be http(s)://
+    try {
+      const u = new URL(v);
+      if (u.protocol !== "http:" && u.protocol !== "https:") return { ok: false, error: "Зөвхөн http эсвэл https холбоос зөвшөөрнө" };
+      if (!u.hostname || !u.hostname.includes(".")) return { ok: false, error: "Холбоосын домэйн буруу" };
+      return { ok: true, value: u.toString() };
+    } catch {
+      return { ok: false, error: "URL формат буруу. Жишээ: /shop эсвэл https://example.com" };
+    }
+  };
+
   const handleSaveAd = async () => {
     if (!adForm.image_url) { toast.error("Зураг оруулна уу"); return; }
-    const payload = { image_url: adForm.image_url, link_url: adForm.link_url || null, placement: adForm.placement };
+    const linkCheck = validateAdLinkUrl(adForm.link_url);
+    if (!linkCheck.ok) { toast.error(linkCheck.error); return; }
+    const payload = { image_url: adForm.image_url, link_url: linkCheck.value, placement: adForm.placement };
     if (editAdId) {
       const { error } = await supabase.from("ad_images" as any).update(payload).eq("id", editAdId);
       if (error) { toast.error(error.message); return; }
