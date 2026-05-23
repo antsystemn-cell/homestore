@@ -162,7 +162,7 @@ const ProductPage = () => {
       toast.error("Хэмжээгээ сонгоно уу");
       return;
     }
-    if (product?.giftPackages && product.giftPackages.length > 0 && !selectedGiftPackageId) {
+    if (product?.giftPackages && product.giftPackages.length > 1 && !selectedGiftPackageId) {
       toast.error("Бэлгийн багцаа сонгоно уу 🎁");
       return;
     }
