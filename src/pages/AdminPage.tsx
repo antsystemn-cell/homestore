@@ -5054,6 +5054,8 @@ const AdminPage = () => {
                       <option value="1:1">Хэмжээ: 1:1 (квадрат)</option>
                     </select>
                   </div>
+                    );
+                  })()}
                   <p className="text-[11px] text-muted-foreground">Зураг оруулсны дараа сонгосон харьцаагаар автоматаар тайрагдана (төв хэсгийг хадгална).</p>
                   <div className="space-y-2">
                     <label className="text-xs text-muted-foreground">ADS зураг *</label>
