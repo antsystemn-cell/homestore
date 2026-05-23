@@ -5053,6 +5053,13 @@ const AdminPage = () => {
                       <option value="2:1">Хэмжээ: 2:1</option>
                       <option value="1:1">Хэмжээ: 1:1 (квадрат)</option>
                     </select>
+                    <select value={adForm.device} onChange={(e) => setAdForm(f => ({ ...f, device: e.target.value as any }))}
+                      className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+                      <option value="all">Бүх төхөөрөмж</option>
+                      <option value="mobile">📱 Зөвхөн мобайл (&lt; 768px)</option>
+                      <option value="tablet">📋 Зөвхөн таблет (768–1023px)</option>
+                      <option value="desktop">💻 Зөвхөн компьютер (≥ 1024px)</option>
+                    </select>
                   </div>
                     );
                   })()}
