@@ -5107,7 +5107,12 @@ const AdminPage = () => {
                       <div className="flex items-center gap-3">
                         <img src={a.image_url} alt="ADS" className="h-16 w-28 rounded-lg object-cover border border-border flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium">{a.placement === "top" ? "Баннерийн доор" : "Барааны дунд"}</p>
+                          <p className="text-xs font-medium">
+                            {a.placement === "top" ? "Баннерийн доор" : "Барааны дунд"}
+                            <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">
+                              {a.device === "mobile" ? "📱 Мобайл" : a.device === "tablet" ? "📋 Таблет" : a.device === "desktop" ? "💻 Компьютер" : "Бүх төхөөрөмж"}
+                            </span>
+                          </p>
                           {a.link_url && <p className="text-xs text-muted-foreground truncate">→ {a.link_url}</p>}
                         </div>
                         <div className="flex items-center gap-1">
