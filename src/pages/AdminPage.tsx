@@ -563,6 +563,56 @@ const AdminPage = () => {
     else fetchPromoBanners();
   };
 
+  const fetchAdImages = async () => {
+    try {
+      const { data } = await supabase.from("ad_images" as any).select("*").order("position");
+      setAdImages((data as any[]) || []);
+    } catch { setAdImages([]); }
+  };
+
+  const handleAdImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Зөвхөн зураг оруулна уу"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Зураг 5MB-ээс бага байх ёстой"); return; }
+    try {
+      const webpUrl = await optimizeImage(file);
+      setAdForm(f => ({ ...f, image_url: webpUrl }));
+      toast.success("Зураг оруулагдлаа");
+    } catch { toast.error("Зураг оновчлоход алдаа"); }
+    if (adImageFileRef.current) adImageFileRef.current.value = "";
+  };
+
+  const handleSaveAd = async () => {
+    if (!adForm.image_url) { toast.error("Зураг оруулна уу"); return; }
+    const payload = { image_url: adForm.image_url, link_url: adForm.link_url || null, placement: adForm.placement };
+    if (editAdId) {
+      const { error } = await supabase.from("ad_images" as any).update(payload).eq("id", editAdId);
+      if (error) { toast.error(error.message); return; }
+      toast.success("ADS шинэчлэгдлээ");
+    } else {
+      const { error } = await supabase.from("ad_images" as any).insert({ ...payload, position: adImages.length } as any);
+      if (error) { toast.error(error.message); return; }
+      toast.success("ADS нэмэгдлээ");
+    }
+    setAdForm({ image_url: "", link_url: "", placement: "top" });
+    setEditAdId(null);
+    fetchAdImages();
+  };
+
+  const handleDeleteAd = async (id: string) => {
+    const { error } = await supabase.from("ad_images" as any).delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success("ADS устгагдлаа"); fetchAdImages(); }
+  };
+
+  const toggleAdActive = async (id: string, currentActive: boolean) => {
+    const { error } = await supabase.from("ad_images" as any).update({ is_active: !currentActive }).eq("id", id);
+    if (error) toast.error(error.message);
+    else fetchAdImages();
+  };
+
+
   const fetchPaymentProviders = async () => {
     try {
       const { data } = await supabase.from("payment_providers").select("*").order("position");
