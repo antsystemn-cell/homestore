@@ -2,17 +2,30 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
+export type AdDevice = "all" | "mobile" | "tablet" | "desktop";
+
 export type AdImage = {
   id: string;
   image_url: string;
   link_url: string | null;
   placement: "top" | "middle";
+  device: AdDevice;
   position: number;
   is_active: boolean;
 };
 
+/** Detect current device based on viewport width (matches Tailwind md/lg). */
+function getCurrentDevice(): AdDevice {
+  if (typeof window === "undefined") return "desktop";
+  const w = window.innerWidth;
+  if (w < 768) return "mobile";
+  if (w < 1024) return "tablet";
+  return "desktop";
+}
+
 export function useAdImages() {
   const [ads, setAds] = useState<AdImage[]>([]);
+  const [device, setDevice] = useState<AdDevice>(getCurrentDevice());
 
   useEffect(() => {
     let cancelled = false;
@@ -31,7 +44,13 @@ export function useAdImages() {
     return () => { cancelled = true; };
   }, []);
 
-  return ads;
+  useEffect(() => {
+    const onResize = () => setDevice(getCurrentDevice());
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  return ads.filter((a) => !a.device || a.device === "all" || a.device === device);
 }
 
 const AdItem = ({ ad }: { ad: AdImage }) => {

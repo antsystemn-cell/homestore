@@ -1,0 +1,1 @@
+ALTER TABLE public.ad_images ADD COLUMN IF NOT EXISTS device text NOT NULL DEFAULT 'all';

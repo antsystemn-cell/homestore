@@ -72,7 +72,7 @@ const AdminPage = () => {
   const bannerImageFileRef = useRef<HTMLInputElement>(null);
 
   // ADS image form state
-  const [adForm, setAdForm] = useState<{ image_url: string; link_url: string; placement: "top" | "middle"; aspect: string }>({ image_url: "", link_url: "", placement: "top", aspect: "21:9" });
+  const [adForm, setAdForm] = useState<{ image_url: string; link_url: string; placement: "top" | "middle"; aspect: string; device: "all" | "mobile" | "tablet" | "desktop" }>({ image_url: "", link_url: "", placement: "top", aspect: "21:9", device: "all" });
   const [editAdId, setEditAdId] = useState<string | null>(null);
   const adImageFileRef = useRef<HTMLInputElement>(null);
 
@@ -610,7 +610,7 @@ const AdminPage = () => {
     if (!adForm.image_url) { toast.error("Зураг оруулна уу"); return; }
     const linkCheck = validateAdLinkUrl(adForm.link_url);
     if (!linkCheck.ok) { toast.error((linkCheck as { error: string }).error); return; }
-    const payload = { image_url: adForm.image_url, link_url: (linkCheck as { value: string | null }).value, placement: adForm.placement };
+    const payload = { image_url: adForm.image_url, link_url: (linkCheck as { value: string | null }).value, placement: adForm.placement, device: adForm.device };
     if (editAdId) {
       const { error } = await supabase.from("ad_images" as any).update(payload).eq("id", editAdId);
       if (error) { toast.error(error.message); return; }
@@ -620,7 +620,7 @@ const AdminPage = () => {
       if (error) { toast.error(error.message); return; }
       toast.success("ADS нэмэгдлээ");
     }
-    setAdForm({ image_url: "", link_url: "", placement: "top", aspect: "21:9" });
+    setAdForm({ image_url: "", link_url: "", placement: "top", aspect: "21:9", device: "all" });
     setEditAdId(null);
     fetchAdImages();
   };
@@ -5053,6 +5053,13 @@ const AdminPage = () => {
                       <option value="2:1">Хэмжээ: 2:1</option>
                       <option value="1:1">Хэмжээ: 1:1 (квадрат)</option>
                     </select>
+                    <select value={adForm.device} onChange={(e) => setAdForm(f => ({ ...f, device: e.target.value as any }))}
+                      className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+                      <option value="all">Бүх төхөөрөмж</option>
+                      <option value="mobile">📱 Зөвхөн мобайл (&lt; 768px)</option>
+                      <option value="tablet">📋 Зөвхөн таблет (768–1023px)</option>
+                      <option value="desktop">💻 Зөвхөн компьютер (≥ 1024px)</option>
+                    </select>
                   </div>
                     );
                   })()}
@@ -5086,7 +5093,7 @@ const AdminPage = () => {
                       {editAdId ? "Шинэчлэх" : "Нэмэх"}
                     </button>
                     {editAdId && (
-                      <button onClick={() => { setAdForm({ image_url: "", link_url: "", placement: "top", aspect: "21:9" }); setEditAdId(null); }}
+                      <button onClick={() => { setAdForm({ image_url: "", link_url: "", placement: "top", aspect: "21:9", device: "all" }); setEditAdId(null); }}
                         className="bg-secondary rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors">
                         Болих
                       </button>
@@ -5100,7 +5107,12 @@ const AdminPage = () => {
                       <div className="flex items-center gap-3">
                         <img src={a.image_url} alt="ADS" className="h-16 w-28 rounded-lg object-cover border border-border flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium">{a.placement === "top" ? "Баннерийн доор" : "Барааны дунд"}</p>
+                          <p className="text-xs font-medium">
+                            {a.placement === "top" ? "Баннерийн доор" : "Барааны дунд"}
+                            <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">
+                              {a.device === "mobile" ? "📱 Мобайл" : a.device === "tablet" ? "📋 Таблет" : a.device === "desktop" ? "💻 Компьютер" : "Бүх төхөөрөмж"}
+                            </span>
+                          </p>
                           {a.link_url && <p className="text-xs text-muted-foreground truncate">→ {a.link_url}</p>}
                         </div>
                         <div className="flex items-center gap-1">
@@ -5108,7 +5120,7 @@ const AdminPage = () => {
                             className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${a.is_active ? "bg-green-500/10 text-green-600" : "bg-secondary text-muted-foreground"}`}>
                             {a.is_active ? "Идэвхтэй" : "Идэвхгүй"}
                           </button>
-                          <button onClick={() => { setAdForm({ image_url: a.image_url, link_url: a.link_url || "", placement: a.placement, aspect: adForm.aspect || "21:9" }); setEditAdId(a.id); }}
+                          <button onClick={() => { setAdForm({ image_url: a.image_url, link_url: a.link_url || "", placement: a.placement, aspect: adForm.aspect || "21:9", device: (a.device as any) || "all" }); setEditAdId(a.id); }}
                             className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
                             <Pencil className="h-4 w-4" />
                           </button>

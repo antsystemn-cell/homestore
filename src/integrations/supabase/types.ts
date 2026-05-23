@@ -17,6 +17,7 @@ export type Database = {
       ad_images: {
         Row: {
           created_at: string
+          device: string
           id: string
           image_url: string
           is_active: boolean
@@ -27,6 +28,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          device?: string
           id?: string
           image_url: string
           is_active?: boolean
@@ -37,6 +39,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          device?: string
           id?: string
           image_url?: string
           is_active?: boolean
