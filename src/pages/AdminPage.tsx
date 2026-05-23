@@ -609,8 +609,8 @@ const AdminPage = () => {
   const handleSaveAd = async () => {
     if (!adForm.image_url) { toast.error("Зураг оруулна уу"); return; }
     const linkCheck = validateAdLinkUrl(adForm.link_url);
-    if (!linkCheck.ok) { toast.error(linkCheck.error); return; }
-    const payload = { image_url: adForm.image_url, link_url: linkCheck.value, placement: adForm.placement };
+    if (!linkCheck.ok) { toast.error((linkCheck as { error: string }).error); return; }
+    const payload = { image_url: adForm.image_url, link_url: (linkCheck as { value: string | null }).value, placement: adForm.placement };
     if (editAdId) {
       const { error } = await supabase.from("ad_images" as any).update(payload).eq("id", editAdId);
       if (error) { toast.error(error.message); return; }
