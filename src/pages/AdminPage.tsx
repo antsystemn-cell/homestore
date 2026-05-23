@@ -610,7 +610,7 @@ const AdminPage = () => {
     if (!adForm.image_url) { toast.error("Зураг оруулна уу"); return; }
     const linkCheck = validateAdLinkUrl(adForm.link_url);
     if (!linkCheck.ok) { toast.error((linkCheck as { error: string }).error); return; }
-    const payload = { image_url: adForm.image_url, link_url: (linkCheck as { value: string | null }).value, placement: adForm.placement };
+    const payload = { image_url: adForm.image_url, link_url: (linkCheck as { value: string | null }).value, placement: adForm.placement, device: adForm.device };
     if (editAdId) {
       const { error } = await supabase.from("ad_images" as any).update(payload).eq("id", editAdId);
       if (error) { toast.error(error.message); return; }
@@ -620,7 +620,7 @@ const AdminPage = () => {
       if (error) { toast.error(error.message); return; }
       toast.success("ADS нэмэгдлээ");
     }
-    setAdForm({ image_url: "", link_url: "", placement: "top", aspect: "21:9" });
+    setAdForm({ image_url: "", link_url: "", placement: "top", aspect: "21:9", device: "all" });
     setEditAdId(null);
     fetchAdImages();
   };
