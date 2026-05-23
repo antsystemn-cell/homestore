@@ -62,6 +62,7 @@ const AdminPage = () => {
   const [deliveryOptions, setDeliveryOptions] = useState<any[]>([]);
   const [paymentProviders, setPaymentProviders] = useState<any[]>([]);
   const [promoBanners, setPromoBanners] = useState<any[]>([]);
+  const [adImages, setAdImages] = useState<any[]>([]);
   
   const [loading, setLoading] = useState(false);
 
@@ -69,6 +70,12 @@ const AdminPage = () => {
   const [bannerForm, setBannerForm] = useState({ title: "", subtitle: "", button_text: "Бүтээгдхүүн үзэх", button_link: "/shop", banner_image: "" });
   const [editBannerId, setEditBannerId] = useState<string | null>(null);
   const bannerImageFileRef = useRef<HTMLInputElement>(null);
+
+  // ADS image form state
+  const [adForm, setAdForm] = useState<{ image_url: string; link_url: string; placement: "top" | "middle" }>({ image_url: "", link_url: "", placement: "top" });
+  const [editAdId, setEditAdId] = useState<string | null>(null);
+  const adImageFileRef = useRef<HTMLInputElement>(null);
+
 
   // Category/Brand form state
   const [catName, setCatName] = useState("");
