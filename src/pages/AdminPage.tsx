@@ -5028,9 +5028,17 @@ const AdminPage = () => {
                 <h3 className="font-bold text-base mb-4">ADS зургууд (Баннер болон барааны дунд)</h3>
                 <div className="bg-card rounded-2xl p-4 md:p-6 border border-border space-y-4">
                   <h4 className="font-bold text-sm">{editAdId ? "ADS засах" : "Шинэ ADS нэмэх"}</h4>
+                  {(() => {
+                    const linkCheck = validateAdLinkUrl(adForm.link_url);
+                    const linkErr = !linkCheck.ok ? (linkCheck as { error: string }).error : null;
+                    return (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <input placeholder="Холбоос URL (заавал биш, жишээ: /shop)" value={adForm.link_url} onChange={(e) => setAdForm(f => ({ ...f, link_url: e.target.value }))}
-                      className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                    <div className="md:col-span-1">
+                      <input placeholder="Холбоос URL (заавал биш) — /shop эсвэл https://..." value={adForm.link_url} maxLength={500}
+                        onChange={(e) => setAdForm(f => ({ ...f, link_url: e.target.value }))}
+                        className={`w-full rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 ${linkErr ? "ring-2 ring-destructive/40 focus:ring-destructive/30" : "focus:ring-primary/20"}`} />
+                      {linkErr && <p className="text-[11px] text-destructive mt-1">{linkErr}</p>}
+                    </div>
                     <select value={adForm.placement} onChange={(e) => setAdForm(f => ({ ...f, placement: e.target.value as "top" | "middle" }))}
                       className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
                       <option value="top">Баннерийн доор (дээд)</option>
