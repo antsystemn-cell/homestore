@@ -48,6 +48,10 @@ const Index = () => {
   const [mobileVisibleCount, setMobileVisibleCount] = useState(MOBILE_INITIAL);
   const isMobile = useIsMobile();
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const ads = useAdImages();
+  const topAds = useMemo(() => ads.filter((a) => a.placement === "top"), [ads]);
+  const middleAds = useMemo(() => ads.filter((a) => a.placement === "middle"), [ads]);
+
 
   const totalPages = Math.max(1, Math.ceil(allProducts.length / PAGE_SIZE));
   const visible = useMemo(() => {
