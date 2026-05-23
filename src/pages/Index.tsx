@@ -231,6 +231,13 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
+          {/* Middle ADS — барааны жагсаалтын дээр */}
+          {middleAds.length > 0 && (
+            <ErrorBoundary>
+              <AdBanners ads={middleAds} />
+            </ErrorBoundary>
+          )}
+
           {gridLoading && visible.length === 0 ? (
             <ProductGridSkeleton count={isMobile ? MOBILE_INITIAL : 8} />
           ) : visible.length > 0 ? (
@@ -239,6 +246,7 @@ const Index = () => {
               <ErrorBoundary>
                 <ProductGrid products={visible} />
               </ErrorBoundary>
+
 
               {/* Mobile: infinite scroll trigger */}
               {hasMoreMobile && (
