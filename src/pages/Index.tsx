@@ -9,6 +9,8 @@ import SaleCarousel from "@/components/store/SaleCarousel";
 import PromoBanner from "@/components/store/PromoBanner";
 import BrandLogos from "@/components/store/BrandLogos";
 import NewArrivals from "@/components/store/NewArrivals";
+import AdBanners, { useAdImages } from "@/components/store/AdBanners";
+
 
 import { Product, mapDbProduct } from "@/data/products";
 import {
@@ -46,6 +48,10 @@ const Index = () => {
   const [mobileVisibleCount, setMobileVisibleCount] = useState(MOBILE_INITIAL);
   const isMobile = useIsMobile();
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const ads = useAdImages();
+  const topAds = useMemo(() => ads.filter((a) => a.placement === "top"), [ads]);
+  const middleAds = useMemo(() => ads.filter((a) => a.placement === "middle"), [ads]);
+
 
   const totalPages = Math.max(1, Math.ceil(allProducts.length / PAGE_SIZE));
   const visible = useMemo(() => {
@@ -193,6 +199,15 @@ const Index = () => {
             <PromoBanner />
           </ErrorBoundary>
 
+          {/* Top ADS — banner-ийн доор */}
+          {topAds.length > 0 && (
+            <ErrorBoundary>
+              <AdBanners ads={topAds} />
+            </ErrorBoundary>
+          )}
+
+
+
           {/* Brand logos */}
           {brands.length > 0 && (
             <ErrorBoundary>
@@ -216,6 +231,13 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
+          {/* Middle ADS — барааны жагсаалтын дээр */}
+          {middleAds.length > 0 && (
+            <ErrorBoundary>
+              <AdBanners ads={middleAds} />
+            </ErrorBoundary>
+          )}
+
           {gridLoading && visible.length === 0 ? (
             <ProductGridSkeleton count={isMobile ? MOBILE_INITIAL : 8} />
           ) : visible.length > 0 ? (
@@ -224,6 +246,7 @@ const Index = () => {
               <ErrorBoundary>
                 <ProductGrid products={visible} />
               </ErrorBoundary>
+
 
               {/* Mobile: infinite scroll trigger */}
               {hasMoreMobile && (
