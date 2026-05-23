@@ -134,6 +134,13 @@ const ProductPage = () => {
     if (idx >= 0) setActiveImg(idx);
   }, [selectedColor, product, allImages]);
 
+  // Auto-select the only gift package when there's exactly one
+  useEffect(() => {
+    if (product?.giftPackages && product.giftPackages.length === 1) {
+      setSelectedGiftPackageId(product.giftPackages[0].id);
+    }
+  }, [product]);
+
   const normalizedBrand = (brandName || "").toLowerCase().replace(/\s+/g, "");
   const isElleSportBrand = normalizedBrand.includes("elle") && normalizedBrand.includes("sport");
   const variantKey = `${selectedColor || ""}|${selectedSize || ""}`;
