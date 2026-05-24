@@ -5046,12 +5046,12 @@ const AdminPage = () => {
                     </select>
                     <select value={adForm.aspect} onChange={(e) => setAdForm(f => ({ ...f, aspect: e.target.value }))}
                       className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
-                      <option value="21:9">Хэмжээ: 21:9 (өргөн баннер)</option>
-                      <option value="16:9">Хэмжээ: 16:9</option>
-                      <option value="4:1">Хэмжээ: 4:1 (нарийн)</option>
-                      <option value="3:1">Хэмжээ: 3:1</option>
-                      <option value="2:1">Хэмжээ: 2:1</option>
-                      <option value="1:1">Хэмжээ: 1:1 (квадрат)</option>
+                      <option value="21:9">Хэмжээ: 21:9 — 1200×514 px (өргөн баннер)</option>
+                      <option value="16:9">Хэмжээ: 16:9 — 1200×675 px</option>
+                      <option value="4:1">Хэмжээ: 4:1 — 1200×300 px (нарийн)</option>
+                      <option value="3:1">Хэмжээ: 3:1 — 1200×400 px</option>
+                      <option value="2:1">Хэмжээ: 2:1 — 1200×600 px</option>
+                      <option value="1:1">Хэмжээ: 1:1 — 1200×1200 px (квадрат)</option>
                     </select>
                     <select value={adForm.device} onChange={(e) => setAdForm(f => ({ ...f, device: e.target.value as any }))}
                       className="rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
@@ -5063,7 +5063,27 @@ const AdminPage = () => {
                   </div>
                     );
                   })()}
-                  <p className="text-[11px] text-muted-foreground">Зураг оруулсны дараа сонгосон харьцаагаар автоматаар тайрагдана (төв хэсгийг хадгална).</p>
+                  {(() => {
+                    const [rw, rh] = (adForm.aspect || "21:9").split(":").map(Number);
+                    const outW = 1200;
+                    const outH = Math.round((outW * rh) / rw);
+                    const deviceLabel: Record<string, string> = {
+                      all: "бүх төхөөрөмж",
+                      mobile: "мобайл (< 768px)",
+                      tablet: "таблет (768–1023px)",
+                      desktop: "компьютер (≥ 1024px)",
+                    };
+                    return (
+                      <div className="rounded-xl bg-secondary/50 border border-border px-4 py-3 text-[12px] text-muted-foreground space-y-1">
+                        <p>
+                          <span className="font-semibold text-foreground">📐 Санал болгох хэмжээ ({deviceLabel[adForm.device]}):</span>{" "}
+                          <span className="font-semibold text-foreground">{outW}×{outH} px</span> · харьцаа {adForm.aspect}
+                        </p>
+                        <p>Файлын дээд хэмжээ: <span className="font-semibold">10MB</span>. Зургийн өргөн автоматаар хамгийн ихдээ <span className="font-semibold">1200px</span>-руу багасч WebP форматаар хадгалагдана.</p>
+                        <p>Сонгосон харьцаагаар төв хэсгээс автоматаар тайрагдах тул зургийнхаа гол сэдвийг яг голд нь байрлуулна уу.</p>
+                      </div>
+                    );
+                  })()}
                   <div className="space-y-2">
                     <label className="text-xs text-muted-foreground">ADS зураг *</label>
                     <div className="flex items-center gap-3">
