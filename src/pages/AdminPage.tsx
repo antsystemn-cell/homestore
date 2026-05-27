@@ -2335,20 +2335,52 @@ const AdminPage = () => {
                 })}
               </div>
 
-              {/* Өнөөдөр & Долоо хоног */}
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mt-3 md:mt-4">
+              {/* Орлогын задаргаа: Сар / 7 хоног / Өдөр */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mt-3 md:mt-4">
                 <div onClick={() => setTab("orders")} className="bg-card rounded-2xl p-4 md:p-5 border border-border cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all active:scale-[0.98]">
-                  <p className="text-[10px] md:text-xs text-muted-foreground mb-0.5">Өнөөдрийн захиалга</p>
-                  <p className="text-lg md:text-2xl font-extrabold">{todayOrders.length}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">Орлого: {formatPrice(todayRevenue)}</p>
+                  <p className="text-[10px] md:text-xs text-muted-foreground mb-0.5">Сарын борлуулалт</p>
+                  <p className="text-lg md:text-2xl font-extrabold">{formatPrice(monthRevenue)}</p>
                 </div>
                 <div onClick={() => setTab("orders")} className="bg-card rounded-2xl p-4 md:p-5 border border-border cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all active:scale-[0.98]">
-                  <p className="text-[10px] md:text-xs text-muted-foreground mb-0.5">7 хоногийн орлого</p>
+                  <p className="text-[10px] md:text-xs text-muted-foreground mb-0.5">7 хоногийн борлуулалт</p>
                   <p className="text-lg md:text-2xl font-extrabold">{formatPrice(weekRevenue)}</p>
                 </div>
-                <div onClick={() => setTab("orders")} className="bg-card rounded-2xl p-4 md:p-5 border border-border col-span-2 lg:col-span-1 cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all active:scale-[0.98]">
+                <div onClick={() => setTab("orders")} className="bg-card rounded-2xl p-4 md:p-5 border border-border cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all active:scale-[0.98]">
+                  <p className="text-[10px] md:text-xs text-muted-foreground mb-0.5">Өдрийн борлуулалт</p>
+                  <p className="text-lg md:text-2xl font-extrabold">{formatPrice(todayRevenue)}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{todayOrders.length} захиалга</p>
+                </div>
+                <div onClick={() => setTab("orders")} className="bg-card rounded-2xl p-4 md:p-5 border border-border cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all active:scale-[0.98]">
                   <p className="text-[10px] md:text-xs text-muted-foreground mb-0.5">Дундаж захиалга</p>
                   <p className="text-lg md:text-2xl font-extrabold">{paidOrders.length > 0 ? formatPrice(Math.round(totalRevenue / paidOrders.length)) : "₮0"}</p>
+                </div>
+              </div>
+
+              {/* Өдрийн борлуулалтын төлвөөр задаргаа */}
+              <div className="bg-card rounded-2xl p-4 md:p-5 border border-border mt-3 md:mt-4">
+                <h3 className="text-sm font-bold mb-3">Өдрийн борлуулалт — төлвөөр</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="rounded-xl border border-border p-3 bg-amber-500/5">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs text-muted-foreground">Бэлдэж байна</p>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600">{todayPreparingCount}</span>
+                    </div>
+                    <p className="text-base md:text-lg font-extrabold">{formatPrice(todayPreparingRevenue)}</p>
+                  </div>
+                  <div className="rounded-xl border border-border p-3 bg-violet-500/5">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs text-muted-foreground">Хүргэлтэнд гарсан</p>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-600">{todayDeliveringCount}</span>
+                    </div>
+                    <p className="text-base md:text-lg font-extrabold">{formatPrice(todayDeliveringRevenue)}</p>
+                  </div>
+                  <div className="rounded-xl border border-border p-3 bg-emerald-500/5">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs text-muted-foreground">Дууссан</p>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">{todayCompletedCount}</span>
+                    </div>
+                    <p className="text-base md:text-lg font-extrabold">{formatPrice(todayCompletedRevenue)}</p>
+                  </div>
                 </div>
               </div>
 
