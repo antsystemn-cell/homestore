@@ -1448,14 +1448,33 @@ const AdminPage = () => {
     return orders.filter((o: any) => o.created_at?.startsWith(today));
   }, [orders]);
 
-  const todayRevenue = todayOrders.filter((o: any) => o.status === 'confirmed' || o.status === 'completed').reduce((s: number, o: any) => s + o.total, 0);
+  const isPaidStatus = (s: string) => s === 'confirmed' || s === 'preparing' || s === 'delivering' || s === 'completed';
+  const todayPaidOrders = todayOrders.filter((o: any) => isPaidStatus(o.status));
+  const todayRevenue = todayPaidOrders.reduce((s: number, o: any) => s + o.total, 0);
+
+  // Өнөөдрийн төлвөөр задаргаа
+  const todayPreparingRevenue = todayPaidOrders.filter((o: any) => o.status === 'preparing').reduce((s: number, o: any) => s + o.total, 0);
+  const todayPreparingCount = todayPaidOrders.filter((o: any) => o.status === 'preparing').length;
+  const todayDeliveringRevenue = todayPaidOrders.filter((o: any) => o.status === 'delivering').reduce((s: number, o: any) => s + o.total, 0);
+  const todayDeliveringCount = todayPaidOrders.filter((o: any) => o.status === 'delivering').length;
+  const todayCompletedRevenue = todayPaidOrders.filter((o: any) => o.status === 'completed').reduce((s: number, o: any) => s + o.total, 0);
+  const todayCompletedCount = todayPaidOrders.filter((o: any) => o.status === 'completed').length;
 
   // Энэ долоо хоногийн орлого
   const weekRevenue = useMemo(() => {
     const now = new Date();
     const weekAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
     return orders
-      .filter((o: any) => (o.status === 'confirmed' || o.status === 'completed') && new Date(o.created_at) >= weekAgo)
+      .filter((o: any) => isPaidStatus(o.status) && new Date(o.created_at) >= weekAgo)
+      .reduce((s: number, o: any) => s + o.total, 0);
+  }, [orders]);
+
+  // Энэ сарын орлого
+  const monthRevenue = useMemo(() => {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    return orders
+      .filter((o: any) => isPaidStatus(o.status) && new Date(o.created_at) >= monthStart)
       .reduce((s: number, o: any) => s + o.total, 0);
   }, [orders]);
 
