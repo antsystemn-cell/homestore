@@ -129,13 +129,14 @@ export const rankCandidates = <T extends CandidateRow>(
   seeds: RecommendationSeed[],
   excludeIds: Set<string>,
   limit: number,
+  weights?: Partial<ScoreWeights>,
 ): T[] => {
   const seen = new Set<string>();
   const scored: Array<{ row: T; score: number }> = [];
   for (const row of candidates || []) {
     if (!row?.id || excludeIds.has(row.id) || seen.has(row.id)) continue;
     seen.add(row.id);
-    scored.push({ row, score: scoreCandidate(row, seeds) });
+    scored.push({ row, score: scoreCandidate(row, seeds, weights) });
   }
   scored.sort((a, b) => b.score - a.score);
   return scored.slice(0, limit).map((s) => s.row);
