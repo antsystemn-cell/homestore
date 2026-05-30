@@ -17,6 +17,7 @@ const CartPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [showGuestModal, setShowGuestModal] = useState(false);
+  const cartWeights = useRecommendationWeights("cart");
 
   const hasSaleItems = items.some(item => item.product.isOnSale || (item.product.discount && item.product.discount > 0));
   const { eligible: bundleFree } = useBundleFreeDelivery(cartTotal, items.length);
@@ -163,7 +164,7 @@ const CartPage = () => {
           </div>
         )}
 
-        {items.length > 0 && <CartRecommendations items={items} />}
+        {items.length > 0 && <CartRecommendations items={items} weights={cartWeights} />}
       </div>
       <GuestCheckoutModal
         open={showGuestModal}
