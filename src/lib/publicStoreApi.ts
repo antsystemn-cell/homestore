@@ -233,6 +233,7 @@ export const fetchRelatedPublicProducts = async (
 export const fetchCartRecommendations = async (
   seeds: Array<{ id: string; category?: string | null; brand_id?: string | null; price?: number | null; name?: string | null }>,
   limit = 8,
+  weights?: Partial<ScoreWeights>,
 ) => {
   try {
     if (!seeds.length) return [];
