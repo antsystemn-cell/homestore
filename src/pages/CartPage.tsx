@@ -9,6 +9,7 @@ import Header from "@/components/store/Header";
 import BottomNav from "@/components/store/BottomNav";
 import GuestCheckoutModal from "@/components/store/GuestCheckoutModal";
 import CartRecommendations from "@/components/store/CartRecommendations";
+import { useRecommendationWeights } from "@/hooks/useRecommendationWeights";
 import { useBundleFreeDelivery } from "@/lib/bundleDelivery";
 
 const CartPage = () => {

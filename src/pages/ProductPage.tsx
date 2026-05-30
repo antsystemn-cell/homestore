@@ -233,11 +233,14 @@ const ProductPage = () => {
           setActiveImg(0);
           userInteractedRef.current = false;
 
+          const { fetchRecommendationConfig } = await import("@/hooks/useRecommendationWeights");
+          const cfg = await fetchRecommendationConfig();
           const rel = await fetchRelatedPublicProducts(data.category, data.id, {
             brandId: data.brand_id ?? null,
             price: data.price ?? null,
             name: data.name ?? null,
             limit: 8,
+            weights: cfg.related,
           });
           setRelated((rel || []).map(mapDbProduct));
         } else {
