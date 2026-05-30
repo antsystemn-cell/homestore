@@ -219,6 +219,7 @@ export const fetchRelatedPublicProducts = async (
       [{ id: excludeId, category, brand_id: opts?.brandId ?? null, price: opts?.price ?? null, name: opts?.name ?? null }],
       new Set([excludeId]),
       limit,
+      opts?.weights,
     );
     return stripColorImages(ranked);
   } catch (error) {
