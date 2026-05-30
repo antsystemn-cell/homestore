@@ -2321,12 +2321,13 @@ const AdminPage = () => {
           {/* Stats */}
           {tab === "stats" && (
             <>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
                 {[
                   { label: "Нийт бараа", value: products.length, icon: Package, color: "bg-blue-500/10 text-blue-600", tab: "products" as Tab },
                   { label: "Нийт захиалга", value: orders.length, icon: ShoppingBag, color: "bg-green-500/10 text-green-600", tab: "orders" as Tab },
                   { label: "Нийт хэрэглэгч", value: users.length, icon: Users, color: "bg-purple-500/10 text-purple-600", tab: "users" as Tab },
                   { label: "Нийт орлого", value: formatPrice(totalRevenue), icon: BarChart3, color: "bg-amber-500/10 text-amber-600", tab: "orders" as Tab },
+                  { label: "Хүргэлтийн орлого", value: formatPrice(totalDeliveryRevenue), icon: BarChart3, color: "bg-cyan-500/10 text-cyan-600", tab: "orders" as Tab },
                 ].map((stat, i) => {
                   const Icon = stat.icon;
                   return (
@@ -2340,6 +2341,7 @@ const AdminPage = () => {
                   );
                 })}
               </div>
+
 
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
