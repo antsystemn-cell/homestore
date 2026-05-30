@@ -35,7 +35,7 @@ const CartRecommendations = ({ items, weights }: Props) => {
           price: i.product.price ?? null,
           name: i.product.name ?? null,
         }));
-        const rows = await fetchCartRecommendations(seeds, 8);
+        const rows = await fetchCartRecommendations(seeds, 8, weights);
         if (!cancelled) setRecs((rows || []).map(mapDbProduct));
       } catch {
         if (!cancelled) setRecs([]);
