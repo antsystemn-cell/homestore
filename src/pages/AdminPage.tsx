@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
   BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, Printer, FileSpreadsheet,
-  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity
+  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
@@ -65,6 +65,7 @@ const AdminPage = () => {
   const [adImages, setAdImages] = useState<any[]>([]);
   
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Promo banner form state
   const [bannerForm, setBannerForm] = useState({ title: "", subtitle: "", button_text: "Бүтээгдхүүн үзэх", button_link: "/shop", banner_image: "" });
@@ -494,7 +495,23 @@ const AdminPage = () => {
     fetchPaymentProviders();
     fetchPromoBanners();
     fetchAdImages();
+  };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([
+      fetchProducts(),
+      fetchOrders(),
+      fetchUsers(),
+      fetchCategories(),
+      fetchBrands(),
+      fetchDeliveryOptions(),
+      fetchPaymentProviders(),
+      fetchPromoBanners(),
+      fetchAdImages(),
+    ]);
+    setRefreshing(false);
+    toast.success("Мэдээлэл шинэчлэгдлээ");
   };
 
   useEffect(() => {
@@ -2226,7 +2243,15 @@ const AdminPage = () => {
             <ArrowLeft className="h-4 w-4" />
           </button>
           <h1 className="text-base font-bold flex-1">Админ</h1>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="p-2 rounded-full bg-secondary shrink-0 disabled:opacity-50"
+              title="Мэдээлэл шинэчлэх"
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            </button>
             <span className="text-[10px] text-muted-foreground bg-secondary px-2 py-1 rounded-full">{SETTINGS_TABS.includes(tab) ? settingsSubItems.find(s => s.id === tab)?.label : sidebarItems.find(s => s.id === tab)?.label}</span>
           </div>
         </header>
@@ -2286,12 +2311,23 @@ const AdminPage = () => {
               {tab === "stocklog" && "Elle Sport нөөцөөс хасагдсан түүх"}
             </p>
           </div>
-          {tab === "products" && (
-            <button onClick={() => { resetForm(); setShowForm(true); }}
-              className="flex items-center gap-2 bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors">
-              <Plus className="h-4 w-4" /> Бараа нэмэх
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="flex items-center gap-2 bg-secondary text-foreground rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors disabled:opacity-50"
+              title="Мэдээлэл шинэчлэх"
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Шинэчлэх</span>
             </button>
-          )}
+            {tab === "products" && (
+              <button onClick={() => { resetForm(); setShowForm(true); }}
+                className="flex items-center gap-2 bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors">
+                <Plus className="h-4 w-4" /> Бараа нэмэх
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Settings sub-tab bar */}
@@ -3333,13 +3369,24 @@ const AdminPage = () => {
                 <p className="text-xs text-muted-foreground">
                   Facebook, утас гэх мэт сувгаар орж ирсэн борлуулалтыг "Захиалга оруулах" товчоор бүртгэнэ үү.
                 </p>
-                <button
-                  onClick={() => { resetManualForm(); setShowManualOrder(true); }}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow hover:opacity-90 transition-opacity"
-                >
-                  <Plus className="h-4 w-4" />
-                  Захиалга оруулах
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleRefresh}
+                    disabled={refreshing}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary text-sm font-medium hover:bg-secondary/80 transition-colors disabled:opacity-50"
+                    title="Захиалга шинэчлэх"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                    Шинэчлэх
+                  </button>
+                  <button
+                    onClick={() => { resetManualForm(); setShowManualOrder(true); }}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow hover:opacity-90 transition-opacity"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Захиалга оруулах
+                  </button>
+                </div>
               </div>
 
               {/* Phone search */}
