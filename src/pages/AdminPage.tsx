@@ -2243,7 +2243,15 @@ const AdminPage = () => {
             <ArrowLeft className="h-4 w-4" />
           </button>
           <h1 className="text-base font-bold flex-1">Админ</h1>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="p-2 rounded-full bg-secondary shrink-0 disabled:opacity-50"
+              title="Мэдээлэл шинэчлэх"
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            </button>
             <span className="text-[10px] text-muted-foreground bg-secondary px-2 py-1 rounded-full">{SETTINGS_TABS.includes(tab) ? settingsSubItems.find(s => s.id === tab)?.label : sidebarItems.find(s => s.id === tab)?.label}</span>
           </div>
         </header>
@@ -3361,13 +3369,24 @@ const AdminPage = () => {
                 <p className="text-xs text-muted-foreground">
                   Facebook, утас гэх мэт сувгаар орж ирсэн борлуулалтыг "Захиалга оруулах" товчоор бүртгэнэ үү.
                 </p>
-                <button
-                  onClick={() => { resetManualForm(); setShowManualOrder(true); }}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow hover:opacity-90 transition-opacity"
-                >
-                  <Plus className="h-4 w-4" />
-                  Захиалга оруулах
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleRefresh}
+                    disabled={refreshing}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary text-sm font-medium hover:bg-secondary/80 transition-colors disabled:opacity-50"
+                    title="Захиалга шинэчлэх"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                    Шинэчлэх
+                  </button>
+                  <button
+                    onClick={() => { resetManualForm(); setShowManualOrder(true); }}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow hover:opacity-90 transition-opacity"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Захиалга оруулах
+                  </button>
+                </div>
               </div>
 
               {/* Phone search */}
