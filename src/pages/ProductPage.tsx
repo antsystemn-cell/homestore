@@ -233,7 +233,12 @@ const ProductPage = () => {
           setActiveImg(0);
           userInteractedRef.current = false;
 
-          const rel = await fetchRelatedPublicProducts(data.category, data.id);
+          const rel = await fetchRelatedPublicProducts(data.category, data.id, {
+            brandId: data.brand_id ?? null,
+            price: data.price ?? null,
+            name: data.name ?? null,
+            limit: 8,
+          });
           setRelated((rel || []).map(mapDbProduct));
         } else {
           setProduct(null);
@@ -666,7 +671,7 @@ const ProductPage = () => {
           <div className="mt-10 md:mt-16 px-4 md:px-0 pb-4">
             <h2 className="text-lg font-bold text-foreground mb-4">Төстэй бараа</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-0 md:gap-5">
-              {related.map((p) => (
+              {related.slice(0, 8).map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
             </div>

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import Header from "@/components/store/Header";
 import BottomNav from "@/components/store/BottomNav";
 import GuestCheckoutModal from "@/components/store/GuestCheckoutModal";
+import CartRecommendations from "@/components/store/CartRecommendations";
 import { useBundleFreeDelivery } from "@/lib/bundleDelivery";
 
 const CartPage = () => {
@@ -160,6 +161,8 @@ const CartPage = () => {
             </div>
           </div>
         )}
+
+        {items.length > 0 && <CartRecommendations items={items} />}
       </div>
       <GuestCheckoutModal
         open={showGuestModal}
