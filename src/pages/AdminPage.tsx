@@ -1439,8 +1439,12 @@ const AdminPage = () => {
     ? allSidebarItems
     : allSidebarItems.filter(item => moderatorTabs.includes(item.id));
 
+  const netTotal = (o: any) => (Number(o.total) || 0) - (Number(o.delivery_fee) || 0);
+  const deliveryFeeOf = (o: any) => Number(o.delivery_fee) || 0;
+
   const paidOrders = orders.filter((o: any) => o.status === 'confirmed' || o.status === 'completed');
-  const totalRevenue = paidOrders.reduce((s: number, o: any) => s + o.total, 0);
+  const totalRevenue = paidOrders.reduce((s: number, o: any) => s + netTotal(o), 0);
+  const totalDeliveryRevenue = paidOrders.reduce((s: number, o: any) => s + deliveryFeeOf(o), 0);
 
   // Өнөөдрийн захиалга
   const todayOrders = useMemo(() => {
@@ -1450,14 +1454,15 @@ const AdminPage = () => {
 
   const isPaidStatus = (s: string) => s === 'confirmed' || s === 'preparing' || s === 'delivering' || s === 'completed';
   const todayPaidOrders = todayOrders.filter((o: any) => isPaidStatus(o.status));
-  const todayRevenue = todayPaidOrders.reduce((s: number, o: any) => s + o.total, 0);
+  const todayRevenue = todayPaidOrders.reduce((s: number, o: any) => s + netTotal(o), 0);
+  const todayDeliveryRevenue = todayPaidOrders.reduce((s: number, o: any) => s + deliveryFeeOf(o), 0);
 
   // Өнөөдрийн төлвөөр задаргаа
-  const todayPreparingRevenue = todayPaidOrders.filter((o: any) => o.status === 'preparing').reduce((s: number, o: any) => s + o.total, 0);
+  const todayPreparingRevenue = todayPaidOrders.filter((o: any) => o.status === 'preparing').reduce((s: number, o: any) => s + netTotal(o), 0);
   const todayPreparingCount = todayPaidOrders.filter((o: any) => o.status === 'preparing').length;
-  const todayDeliveringRevenue = todayPaidOrders.filter((o: any) => o.status === 'delivering').reduce((s: number, o: any) => s + o.total, 0);
+  const todayDeliveringRevenue = todayPaidOrders.filter((o: any) => o.status === 'delivering').reduce((s: number, o: any) => s + netTotal(o), 0);
   const todayDeliveringCount = todayPaidOrders.filter((o: any) => o.status === 'delivering').length;
-  const todayCompletedRevenue = todayPaidOrders.filter((o: any) => o.status === 'completed').reduce((s: number, o: any) => s + o.total, 0);
+  const todayCompletedRevenue = todayPaidOrders.filter((o: any) => o.status === 'completed').reduce((s: number, o: any) => s + netTotal(o), 0);
   const todayCompletedCount = todayPaidOrders.filter((o: any) => o.status === 'completed').length;
 
   // Энэ долоо хоногийн орлого
@@ -1466,7 +1471,7 @@ const AdminPage = () => {
     const weekAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
     return orders
       .filter((o: any) => isPaidStatus(o.status) && new Date(o.created_at) >= weekAgo)
-      .reduce((s: number, o: any) => s + o.total, 0);
+      .reduce((s: number, o: any) => s + netTotal(o), 0);
   }, [orders]);
 
   // Энэ сарын орлого
@@ -1475,8 +1480,9 @@ const AdminPage = () => {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     return orders
       .filter((o: any) => isPaidStatus(o.status) && new Date(o.created_at) >= monthStart)
-      .reduce((s: number, o: any) => s + o.total, 0);
+      .reduce((s: number, o: any) => s + netTotal(o), 0);
   }, [orders]);
+
 
   // Хамгийн их борлуулалттай бараа (top 5)
   const topProducts = useMemo(() => {
@@ -1501,7 +1507,7 @@ const AdminPage = () => {
     paidOrders.forEach((o: any) => {
       const d = new Date(o.created_at);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      months[key] = (months[key] || 0) + (o.total || 0);
+      months[key] = (months[key] || 0) + netTotal(o);
     });
     const result = [];
     const now = new Date();
@@ -2315,12 +2321,13 @@ const AdminPage = () => {
           {/* Stats */}
           {tab === "stats" && (
             <>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
                 {[
                   { label: "Нийт бараа", value: products.length, icon: Package, color: "bg-blue-500/10 text-blue-600", tab: "products" as Tab },
                   { label: "Нийт захиалга", value: orders.length, icon: ShoppingBag, color: "bg-green-500/10 text-green-600", tab: "orders" as Tab },
                   { label: "Нийт хэрэглэгч", value: users.length, icon: Users, color: "bg-purple-500/10 text-purple-600", tab: "users" as Tab },
                   { label: "Нийт орлого", value: formatPrice(totalRevenue), icon: BarChart3, color: "bg-amber-500/10 text-amber-600", tab: "orders" as Tab },
+                  { label: "Хүргэлтийн орлого", value: formatPrice(totalDeliveryRevenue), icon: BarChart3, color: "bg-cyan-500/10 text-cyan-600", tab: "orders" as Tab },
                 ].map((stat, i) => {
                   const Icon = stat.icon;
                   return (
@@ -2334,6 +2341,7 @@ const AdminPage = () => {
                   );
                 })}
               </div>
+
 
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
