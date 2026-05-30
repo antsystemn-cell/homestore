@@ -233,7 +233,12 @@ const ProductPage = () => {
           setActiveImg(0);
           userInteractedRef.current = false;
 
-          const rel = await fetchRelatedPublicProducts(data.category, data.id);
+          const rel = await fetchRelatedPublicProducts(data.category, data.id, {
+            brandId: data.brand_id ?? null,
+            price: data.price ?? null,
+            name: data.name ?? null,
+            limit: 8,
+          });
           setRelated((rel || []).map(mapDbProduct));
         } else {
           setProduct(null);

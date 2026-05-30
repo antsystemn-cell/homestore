@@ -185,18 +185,74 @@ export const fetchPublicProductImages = async (productId: string) => {
   }
 };
 
-export const fetchRelatedPublicProducts = async (category: string, excludeId: string) => {
+export const fetchRelatedPublicProducts = async (
+  category: string,
+  excludeId: string,
+  opts?: { brandId?: string | null; price?: number | null; name?: string | null; limit?: number },
+) => {
   try {
-    const rows = await fetchPublic<any[]>("products", {
+    const { rankCandidates } = await import("./recommendations");
+    const limit = opts?.limit ?? 8;
+
+    // Pull a wider candidate pool: same category OR same brand. Brand is a
+    // strong cross-category signal.
+    const orParts: string[] = [];
+    if (category) orParts.push(`category.eq.${category}`);
+    if (opts?.brandId) orParts.push(`brand_id.eq.${opts.brandId}`);
+    const params: Record<string, string | number> = {
       select: LIST_SELECT,
-      category: `eq.${category}`,
-      id: `neq.${excludeId}`,
       is_active: "eq.true",
-      limit: 4,
-    });
-    return stripColorImages(rows);
+      id: `neq.${excludeId}`,
+      limit: 40,
+    };
+    if (orParts.length > 0) {
+      params.or = `(${orParts.join(",")})`;
+    } else {
+      params.order = "sales.desc.nullslast";
+    }
+
+    const rows = (await fetchPublic<any[]>("products", params)) || [];
+    const ranked = rankCandidates(
+      rows,
+      [{ id: excludeId, category, brand_id: opts?.brandId ?? null, price: opts?.price ?? null, name: opts?.name ?? null }],
+      new Set([excludeId]),
+      limit,
+    );
+    return stripColorImages(ranked);
   } catch (error) {
     logError("relatedProducts", error);
+    return [];
+  }
+};
+
+// Smart recommendations for the cart page. Combines categories + brands from
+// all cart items, then ranks against the cart as a multi-seed signal.
+export const fetchCartRecommendations = async (
+  seeds: Array<{ id: string; category?: string | null; brand_id?: string | null; price?: number | null; name?: string | null }>,
+  limit = 8,
+) => {
+  try {
+    if (!seeds.length) return [];
+    const { rankCandidates } = await import("./recommendations");
+    const categories = Array.from(new Set(seeds.map((s) => s.category).filter(Boolean) as string[]));
+    const brands = Array.from(new Set(seeds.map((s) => s.brand_id).filter(Boolean) as string[]));
+    const orParts: string[] = [];
+    if (categories.length) orParts.push(`category.in.(${categories.map((c) => `"${c}"`).join(",")})`);
+    if (brands.length) orParts.push(`brand_id.in.(${brands.join(",")})`);
+    if (orParts.length === 0) return [];
+
+    const excludeIds = new Set(seeds.map((s) => s.id));
+    const params: Record<string, string | number> = {
+      select: LIST_SELECT,
+      is_active: "eq.true",
+      or: `(${orParts.join(",")})`,
+      limit: 60,
+    };
+    const rows = (await fetchPublic<any[]>("products", params)) || [];
+    const ranked = rankCandidates(rows, seeds, excludeIds, limit);
+    return stripColorImages(ranked);
+  } catch (error) {
+    logError("cartRecommendations", error);
     return [];
   }
 };
