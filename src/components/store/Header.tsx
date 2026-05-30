@@ -1,4 +1,4 @@
-import { Search, Bell, Clock, X } from "lucide-react";
+import { Search, Bell, Clock, X, ArrowUpRight } from "lucide-react";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Product, mapDbProduct } from "@/data/products";
@@ -96,7 +96,11 @@ const Header = () => {
   };
 
   const trimmed = query.trim();
-  const showHistory = showResults && !trimmed && history.length > 0;
+  const showFullHistory = showResults && !trimmed && history.length > 0;
+  const filteredHistory = trimmed
+    ? history.filter((item) => item.toLowerCase().includes(trimmed.toLowerCase()))
+    : [];
+  const showSuggestions = showResults && trimmed && filteredHistory.length > 0;
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
@@ -141,7 +145,7 @@ const Header = () => {
             }`}
           />
 
-          {showHistory && (
+          {showFullHistory && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-card rounded-xl border border-border shadow-lg max-h-72 overflow-y-auto z-50">
               <div className="flex items-center justify-between px-4 pt-3 pb-1">
                 <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Сүүлийн хайлтууд</span>
@@ -158,6 +162,38 @@ const Header = () => {
                   className="group flex items-center gap-3 px-4 py-2 hover:bg-secondary transition-colors"
                 >
                   <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  <button
+                    onMouseDown={() => pickHistory(item)}
+                    className="flex-1 text-left text-xs text-foreground truncate"
+                  >
+                    {item}
+                  </button>
+                  <button
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                      removeHistoryItem(item);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition-opacity"
+                    aria-label="Устгах"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {showSuggestions && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-card rounded-xl border border-border shadow-lg max-h-72 overflow-y-auto z-50">
+              <div className="px-4 pt-3 pb-1">
+                <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Сүүлийн хайлтуудаас</span>
+              </div>
+              {filteredHistory.map((item) => (
+                <div
+                  key={item}
+                  className="group flex items-center gap-3 px-4 py-2 hover:bg-secondary transition-colors"
+                >
+                  <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                   <button
                     onMouseDown={() => pickHistory(item)}
                     className="flex-1 text-left text-xs text-foreground truncate"
