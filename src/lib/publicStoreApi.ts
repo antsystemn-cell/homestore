@@ -253,7 +253,7 @@ export const fetchCartRecommendations = async (
       limit: 60,
     };
     const rows = (await fetchPublic<any[]>("products", params)) || [];
-    const ranked = rankCandidates(rows, seeds, excludeIds, limit);
+    const ranked = rankCandidates(rows, seeds, excludeIds, limit, weights);
     return stripColorImages(ranked);
   } catch (error) {
     logError("cartRecommendations", error);
