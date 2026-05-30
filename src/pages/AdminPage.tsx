@@ -12,6 +12,8 @@ import CollectionsManager from "@/components/admin/CollectionsManager";
 import ChatbotSettingsManager from "@/components/admin/ChatbotSettingsManager";
 import StockDeductionLog from "@/components/admin/StockDeductionLog";
 import TrackingDashboard from "@/components/admin/TrackingDashboard";
+import AdminSkeleton from "@/components/admin/AdminSkeleton";
+
 
 import { useRef } from "react";
 import { toast } from "sonner";
@@ -2353,7 +2355,12 @@ const AdminPage = () => {
           </div>
         )}
 
-        <div className="p-4 md:p-8 max-w-5xl">
+        <div className="p-4 md:p-8 max-w-5xl relative">
+          {refreshing && (
+            <div className="absolute inset-0 z-10 bg-background/80 backdrop-blur-sm p-4 md:p-8 animate-in fade-in duration-200">
+              <AdminSkeleton tab={tab} />
+            </div>
+          )}
           {/* Stats */}
           {tab === "stats" && (
             <>
