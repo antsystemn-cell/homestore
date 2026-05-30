@@ -6,8 +6,10 @@ import { searchPublicProducts } from "@/lib/publicStoreApi";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 
 const DEBOUNCE_MS = 300;
+const SUGGEST_DEBOUNCE_MS = 150;
 const HISTORY_KEY = "easyshop:searchHistory";
 const HISTORY_MAX = 8;
+const SUGGEST_MAX = 8;
 
 const loadHistory = (): string[] => {
   try {
@@ -29,15 +31,29 @@ const saveHistory = (items: string[]) => {
 
 const Header = () => {
   const [query, setQuery] = useState("");
+  const [suggestQuery, setSuggestQuery] = useState("");
   const [results, setResults] = useState<Product[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const suggestDebounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const searchBoxRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setHistory(loadHistory());
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target as Node)) {
+        setShowResults(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const pushHistory = useCallback((value: string) => {
@@ -85,22 +101,32 @@ const Header = () => {
 
   const handleSearch = (value: string) => {
     setQuery(value);
+
+    // Debounce product search
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => doSearch(value), DEBOUNCE_MS);
+
+    // Debounce autocomplete suggestions
+    if (suggestDebounceRef.current) clearTimeout(suggestDebounceRef.current);
+    suggestDebounceRef.current = setTimeout(() => setSuggestQuery(value.trim()), SUGGEST_DEBOUNCE_MS);
   };
 
   const pickHistory = (value: string) => {
     setQuery(value);
+    setSuggestQuery(value.trim());
     pushHistory(value);
     doSearch(value);
   };
 
   const trimmed = query.trim();
+  const suggestTrimmed = suggestQuery.trim();
   const showFullHistory = showResults && !trimmed && history.length > 0;
-  const filteredHistory = trimmed
-    ? history.filter((item) => item.toLowerCase().includes(trimmed.toLowerCase()))
+  const filteredHistory = suggestTrimmed
+    ? history
+      .filter((item) => item.toLowerCase().includes(suggestTrimmed.toLowerCase()))
+      .slice(0, SUGGEST_MAX)
     : [];
-  const showSuggestions = showResults && trimmed && filteredHistory.length > 0;
+  const showSuggestions = showResults && suggestTrimmed && filteredHistory.length > 0;
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
@@ -128,7 +154,7 @@ const Header = () => {
           <button onClick={() => navigate("/cart")} className="hover:text-foreground transition-colors">Сагс</button>
         </nav>
 
-        <div className="relative flex-1 max-w-md ml-auto transition-all duration-300 ease-out">
+        <div ref={searchBoxRef} className="relative flex-1 max-w-md ml-auto transition-all duration-300 ease-out">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
@@ -136,7 +162,6 @@ const Header = () => {
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
             onFocus={() => setShowResults(true)}
-            onBlur={() => setTimeout(() => setShowResults(false), 200)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && trimmed) pushHistory(trimmed);
             }}
