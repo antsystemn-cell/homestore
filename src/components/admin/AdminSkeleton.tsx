@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "settings";
+type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "settings";
 
 const AdminSkeleton = ({ tab }: { tab: Tab }) => {
   const renderStatsSkeleton = () => (
