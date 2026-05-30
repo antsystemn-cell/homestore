@@ -154,7 +154,7 @@ const Header = () => {
           <button onClick={() => navigate("/cart")} className="hover:text-foreground transition-colors">Сагс</button>
         </nav>
 
-        <div className="relative flex-1 max-w-md ml-auto transition-all duration-300 ease-out">
+        <div ref={searchBoxRef} className="relative flex-1 max-w-md ml-auto transition-all duration-300 ease-out">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
@@ -162,7 +162,6 @@ const Header = () => {
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
             onFocus={() => setShowResults(true)}
-            onBlur={() => setTimeout(() => setShowResults(false), 200)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && trimmed) pushHistory(trimmed);
             }}
