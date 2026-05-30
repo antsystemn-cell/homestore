@@ -65,6 +65,7 @@ const AdminPage = () => {
   const [adImages, setAdImages] = useState<any[]>([]);
   
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Promo banner form state
   const [bannerForm, setBannerForm] = useState({ title: "", subtitle: "", button_text: "Бүтээгдхүүн үзэх", button_link: "/shop", banner_image: "" });
