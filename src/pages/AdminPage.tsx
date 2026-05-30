@@ -4,12 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
-  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, Printer, FileSpreadsheet,
+  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, Printer, FileSpreadsheet, Sparkles,
   Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
 import ChatbotSettingsManager from "@/components/admin/ChatbotSettingsManager";
+import RecommendationSettingsManager from "@/components/admin/RecommendationSettingsManager";
 import StockDeductionLog from "@/components/admin/StockDeductionLog";
 import TrackingDashboard from "@/components/admin/TrackingDashboard";
 import AdminSkeleton from "@/components/admin/AdminSkeleton";
@@ -42,9 +43,9 @@ import { printOrdersTable, loadPrintFields, buildSelectedOrdersXlsxRows, type Pr
 import { PrintFieldsSettings } from "@/components/admin/PrintFieldsSettings";
 import * as XLSX from "xlsx";
 
-type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "settings";
+type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "categories" | "brands" | "delivery" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "settings";
 
-const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "collections", "analytics", "diagnostics", "stocklog"];
+const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "collections", "analytics", "diagnostics", "stocklog", "recommendations"];
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -1452,6 +1453,7 @@ const AdminPage = () => {
     { id: "analytics", label: "Хандалт", icon: Globe },
     { id: "diagnostics", label: "Оношлогоо", icon: AlertTriangle },
     { id: "stocklog", label: "Нөөцийн хасалт", icon: Package },
+    { id: "recommendations", label: "Зөвлөмжийн жинлүүр", icon: Sparkles },
   ];
 
   const sidebarItems = isAdmin
@@ -4298,6 +4300,9 @@ const AdminPage = () => {
 
           {/* Chatbot settings */}
           {tab === "chatbot" && <ChatbotSettingsManager />}
+
+          {/* Recommendation scoring weights */}
+          {tab === "recommendations" && <RecommendationSettingsManager />}
 
 
           {/* Diagnostics Tab */}

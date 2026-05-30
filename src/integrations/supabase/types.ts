@@ -911,6 +911,27 @@ export type Database = {
         }
         Relationships: []
       }
+      recommendation_settings: {
+        Row: {
+          cart_weights: Json
+          id: number
+          related_weights: Json
+          updated_at: string
+        }
+        Insert: {
+          cart_weights?: Json
+          id?: number
+          related_weights?: Json
+          updated_at?: string
+        }
+        Update: {
+          cart_weights?: Json
+          id?: number
+          related_weights?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       recovery_actions: {
         Row: {
           cart_snapshot: Json | null
