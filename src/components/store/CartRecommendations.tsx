@@ -12,7 +12,7 @@ interface Props {
   weights?: Partial<ScoreWeights>;
 }
 
-const CartRecommendations = ({ items }: Props) => {
+const CartRecommendations = ({ items, weights }: Props) => {
   const [recs, setRecs] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
 
