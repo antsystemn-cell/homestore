@@ -190,7 +190,7 @@ export const fetchPublicProductImages = async (productId: string) => {
 export const fetchRelatedPublicProducts = async (
   category: string,
   excludeId: string,
-  opts?: { brandId?: string | null; price?: number | null; name?: string | null; limit?: number },
+  opts?: { brandId?: string | null; price?: number | null; name?: string | null; limit?: number; weights?: Partial<ScoreWeights> },
 ) => {
   try {
     const { rankCandidates } = await import("./recommendations");
