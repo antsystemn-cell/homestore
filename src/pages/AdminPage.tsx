@@ -2303,12 +2303,23 @@ const AdminPage = () => {
               {tab === "stocklog" && "Elle Sport нөөцөөс хасагдсан түүх"}
             </p>
           </div>
-          {tab === "products" && (
-            <button onClick={() => { resetForm(); setShowForm(true); }}
-              className="flex items-center gap-2 bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors">
-              <Plus className="h-4 w-4" /> Бараа нэмэх
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="flex items-center gap-2 bg-secondary text-foreground rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors disabled:opacity-50"
+              title="Мэдээлэл шинэчлэх"
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Шинэчлэх</span>
             </button>
-          )}
+            {tab === "products" && (
+              <button onClick={() => { resetForm(); setShowForm(true); }}
+                className="flex items-center gap-2 bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors">
+                <Plus className="h-4 w-4" /> Бараа нэмэх
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Settings sub-tab bar */}
