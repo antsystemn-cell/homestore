@@ -1439,8 +1439,12 @@ const AdminPage = () => {
     ? allSidebarItems
     : allSidebarItems.filter(item => moderatorTabs.includes(item.id));
 
+  const netTotal = (o: any) => (Number(o.total) || 0) - (Number(o.delivery_fee) || 0);
+  const deliveryFeeOf = (o: any) => Number(o.delivery_fee) || 0;
+
   const paidOrders = orders.filter((o: any) => o.status === 'confirmed' || o.status === 'completed');
-  const totalRevenue = paidOrders.reduce((s: number, o: any) => s + o.total, 0);
+  const totalRevenue = paidOrders.reduce((s: number, o: any) => s + netTotal(o), 0);
+  const totalDeliveryRevenue = paidOrders.reduce((s: number, o: any) => s + deliveryFeeOf(o), 0);
 
   // Өнөөдрийн захиалга
   const todayOrders = useMemo(() => {
@@ -1450,14 +1454,15 @@ const AdminPage = () => {
 
   const isPaidStatus = (s: string) => s === 'confirmed' || s === 'preparing' || s === 'delivering' || s === 'completed';
   const todayPaidOrders = todayOrders.filter((o: any) => isPaidStatus(o.status));
-  const todayRevenue = todayPaidOrders.reduce((s: number, o: any) => s + o.total, 0);
+  const todayRevenue = todayPaidOrders.reduce((s: number, o: any) => s + netTotal(o), 0);
+  const todayDeliveryRevenue = todayPaidOrders.reduce((s: number, o: any) => s + deliveryFeeOf(o), 0);
 
   // Өнөөдрийн төлвөөр задаргаа
-  const todayPreparingRevenue = todayPaidOrders.filter((o: any) => o.status === 'preparing').reduce((s: number, o: any) => s + o.total, 0);
+  const todayPreparingRevenue = todayPaidOrders.filter((o: any) => o.status === 'preparing').reduce((s: number, o: any) => s + netTotal(o), 0);
   const todayPreparingCount = todayPaidOrders.filter((o: any) => o.status === 'preparing').length;
-  const todayDeliveringRevenue = todayPaidOrders.filter((o: any) => o.status === 'delivering').reduce((s: number, o: any) => s + o.total, 0);
+  const todayDeliveringRevenue = todayPaidOrders.filter((o: any) => o.status === 'delivering').reduce((s: number, o: any) => s + netTotal(o), 0);
   const todayDeliveringCount = todayPaidOrders.filter((o: any) => o.status === 'delivering').length;
-  const todayCompletedRevenue = todayPaidOrders.filter((o: any) => o.status === 'completed').reduce((s: number, o: any) => s + o.total, 0);
+  const todayCompletedRevenue = todayPaidOrders.filter((o: any) => o.status === 'completed').reduce((s: number, o: any) => s + netTotal(o), 0);
   const todayCompletedCount = todayPaidOrders.filter((o: any) => o.status === 'completed').length;
 
   // Энэ долоо хоногийн орлого
@@ -1466,7 +1471,7 @@ const AdminPage = () => {
     const weekAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
     return orders
       .filter((o: any) => isPaidStatus(o.status) && new Date(o.created_at) >= weekAgo)
-      .reduce((s: number, o: any) => s + o.total, 0);
+      .reduce((s: number, o: any) => s + netTotal(o), 0);
   }, [orders]);
 
   // Энэ сарын орлого
@@ -1475,8 +1480,9 @@ const AdminPage = () => {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     return orders
       .filter((o: any) => isPaidStatus(o.status) && new Date(o.created_at) >= monthStart)
-      .reduce((s: number, o: any) => s + o.total, 0);
+      .reduce((s: number, o: any) => s + netTotal(o), 0);
   }, [orders]);
+
 
   // Хамгийн их борлуулалттай бараа (top 5)
   const topProducts = useMemo(() => {
