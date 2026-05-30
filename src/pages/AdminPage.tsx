@@ -495,7 +495,23 @@ const AdminPage = () => {
     fetchPaymentProviders();
     fetchPromoBanners();
     fetchAdImages();
+  };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([
+      fetchProducts(),
+      fetchOrders(),
+      fetchUsers(),
+      fetchCategories(),
+      fetchBrands(),
+      fetchDeliveryOptions(),
+      fetchPaymentProviders(),
+      fetchPromoBanners(),
+      fetchAdImages(),
+    ]);
+    setRefreshing(false);
+    toast.success("Мэдээлэл шинэчлэгдлээ");
   };
 
   useEffect(() => {
