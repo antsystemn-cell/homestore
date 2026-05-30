@@ -94,11 +94,52 @@ export const fetchPublicBrands = async () => {
 
 export const searchPublicProducts = async (query: string) => {
   try {
-    return await fetchPublic<any[]>("products", {
-      select: "id,slug,name,price,original_price,image_url,category,product_code",
-      or: `name.ilike.%${query}%,product_code.ilike.%${query}%`,
-      limit: 8,
+    const { tokenize, tokenVariants, scoreCandidate } = await import("./searchNormalize");
+    const tokens = tokenize(query);
+    if (tokens.length === 0) return [];
+
+    // PostgREST `ilike` is case-insensitive; escape PostgREST-significant chars in tokens.
+    const esc = (s: string) => s.replace(/[(),*]/g, " ").trim();
+    const fields = ["name", "product_code", "category"];
+
+    // For each token, build an OR clause across fields × variants.
+    // Tokens are combined with AND so multi-word queries narrow the result set.
+    const andParts = tokens.map((tk) => {
+      const variants = tokenVariants(tk).map(esc).filter(Boolean);
+      const orInner = variants
+        .flatMap((v) => fields.map((f) => `${f}.ilike.*${v}*`))
+        .join(",");
+      return `or(${orInner})`;
     });
+
+    const params: Record<string, string | number> = {
+      select: "id,slug,name,price,original_price,image_url,category,product_code",
+      is_active: "eq.true",
+      limit: 40,
+    };
+    if (andParts.length === 1) {
+      // Strip the wrapping `or(...)` since PostgREST accepts `or=(...)` at top level.
+      params.or = andParts[0].slice(3, -1);
+    } else {
+      params.and = `(${andParts.join(",")})`;
+    }
+
+    const rows = await fetchPublic<any[]>("products", params);
+
+    // Client-side rerank by relevance, return top 8.
+    const ranked = (rows || [])
+      .map((r) => ({
+        row: r,
+        score:
+          scoreCandidate(r?.name || "", query) +
+          scoreCandidate(r?.product_code || "", query) * 0.6 +
+          scoreCandidate(r?.category || "", query) * 0.3,
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8)
+      .map((x) => x.row);
+
+    return ranked;
   } catch (error) {
     logError("search", error);
     return [];
