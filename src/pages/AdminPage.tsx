@@ -1507,7 +1507,7 @@ const AdminPage = () => {
     paidOrders.forEach((o: any) => {
       const d = new Date(o.created_at);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      months[key] = (months[key] || 0) + (o.total || 0);
+      months[key] = (months[key] || 0) + netTotal(o);
     });
     const result = [];
     const now = new Date();
