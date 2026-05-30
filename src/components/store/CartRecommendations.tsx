@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Product, mapDbProduct } from "@/data/products";
 import { fetchCartRecommendations } from "@/lib/publicStoreApi";
+import type { ScoreWeights } from "@/lib/recommendations";
 import ProductCard from "./ProductCard";
 import ErrorBoundary from "./ErrorBoundary";
 
@@ -8,9 +9,10 @@ interface Props {
   items: Array<{
     product: Pick<Product, "id" | "category" | "brand_id" | "price" | "name">;
   }>;
+  weights?: Partial<ScoreWeights>;
 }
 
-const CartRecommendations = ({ items }: Props) => {
+const CartRecommendations = ({ items, weights }: Props) => {
   const [recs, setRecs] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -33,7 +35,7 @@ const CartRecommendations = ({ items }: Props) => {
           price: i.product.price ?? null,
           name: i.product.name ?? null,
         }));
-        const rows = await fetchCartRecommendations(seeds, 8);
+        const rows = await fetchCartRecommendations(seeds, 8, weights);
         if (!cancelled) setRecs((rows || []).map(mapDbProduct));
       } catch {
         if (!cancelled) setRecs([]);

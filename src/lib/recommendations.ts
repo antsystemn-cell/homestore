@@ -33,6 +33,26 @@ export interface RecommendationSeed {
   price?: number | null;
 }
 
+export interface ScoreWeights {
+  category: number;
+  brand: number;
+  tokenOverlap: number;
+  maxTokenOverlapTokens: number;
+  priceProximity: number;
+  popularity: number;
+  saleBoost: number;
+}
+
+const DEFAULT_WEIGHTS: ScoreWeights = {
+  category: 40,
+  brand: 35,
+  tokenOverlap: 12,
+  maxTokenOverlapTokens: 4,
+  priceProximity: 25,
+  popularity: 10,
+  saleBoost: 5,
+};
+
 const STOP_TOKENS = new Set([
   "the", "and", "for", "with", "ml", "cm", "kg", "set",
   "ба", "болон", "ширхэг", "том", "жижиг",
@@ -58,8 +78,10 @@ const priceProximity = (a?: number | null, b?: number | null): number => {
 export const scoreCandidate = (
   candidate: CandidateRow,
   seeds: RecommendationSeed[],
+  weights?: Partial<ScoreWeights>,
 ): number => {
   if (!seeds.length) return 0;
+  const w = { ...DEFAULT_WEIGHTS, ...weights };
   let total = 0;
 
   // Aggregate seed signals
@@ -73,30 +95,30 @@ export const scoreCandidate = (
 
   // Category match
   if (candidate.category && seedCategories.has(candidate.category)) {
-    total += 40;
+    total += w.category;
   }
 
   // Brand match (strong signal)
   if (candidate.brand_id && seedBrands.has(candidate.brand_id)) {
-    total += 35;
+    total += w.brand;
   }
 
   // Token overlap
   const cTokens = nameTokens(candidate.name);
   let overlap = 0;
   cTokens.forEach((t) => { if (seedTokens.has(t)) overlap += 1; });
-  total += Math.min(overlap, 4) * 12;
+  total += Math.min(overlap, w.maxTokenOverlapTokens) * w.tokenOverlap;
 
   // Price proximity
-  total += priceProximity(candidate.price, avgPrice) * 25;
+  total += priceProximity(candidate.price, avgPrice) * w.priceProximity;
 
   // Popularity (bounded)
   const sales = Math.max(0, Number(candidate.sales) || 0);
-  total += Math.min(sales / 50, 1) * 10;
+  total += Math.min(sales / 50, 1) * w.popularity;
 
   // Sale boost (small) — shoppers respond to discounts
   if (candidate.is_on_sale || (candidate.discount && candidate.discount > 0)) {
-    total += 5;
+    total += w.saleBoost;
   }
 
   return total;
@@ -107,13 +129,14 @@ export const rankCandidates = <T extends CandidateRow>(
   seeds: RecommendationSeed[],
   excludeIds: Set<string>,
   limit: number,
+  weights?: Partial<ScoreWeights>,
 ): T[] => {
   const seen = new Set<string>();
   const scored: Array<{ row: T; score: number }> = [];
   for (const row of candidates || []) {
     if (!row?.id || excludeIds.has(row.id) || seen.has(row.id)) continue;
     seen.add(row.id);
-    scored.push({ row, score: scoreCandidate(row, seeds) });
+    scored.push({ row, score: scoreCandidate(row, seeds, weights) });
   }
   scored.sort((a, b) => b.score - a.score);
   return scored.slice(0, limit).map((s) => s.row);

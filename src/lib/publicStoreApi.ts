@@ -1,3 +1,5 @@
+import type { ScoreWeights } from "./recommendations";
+
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
@@ -188,7 +190,7 @@ export const fetchPublicProductImages = async (productId: string) => {
 export const fetchRelatedPublicProducts = async (
   category: string,
   excludeId: string,
-  opts?: { brandId?: string | null; price?: number | null; name?: string | null; limit?: number },
+  opts?: { brandId?: string | null; price?: number | null; name?: string | null; limit?: number; weights?: Partial<ScoreWeights> },
 ) => {
   try {
     const { rankCandidates } = await import("./recommendations");
@@ -217,6 +219,7 @@ export const fetchRelatedPublicProducts = async (
       [{ id: excludeId, category, brand_id: opts?.brandId ?? null, price: opts?.price ?? null, name: opts?.name ?? null }],
       new Set([excludeId]),
       limit,
+      opts?.weights,
     );
     return stripColorImages(ranked);
   } catch (error) {
@@ -230,6 +233,7 @@ export const fetchRelatedPublicProducts = async (
 export const fetchCartRecommendations = async (
   seeds: Array<{ id: string; category?: string | null; brand_id?: string | null; price?: number | null; name?: string | null }>,
   limit = 8,
+  weights?: Partial<ScoreWeights>,
 ) => {
   try {
     if (!seeds.length) return [];
@@ -249,7 +253,7 @@ export const fetchCartRecommendations = async (
       limit: 60,
     };
     const rows = (await fetchPublic<any[]>("products", params)) || [];
-    const ranked = rankCandidates(rows, seeds, excludeIds, limit);
+    const ranked = rankCandidates(rows, seeds, excludeIds, limit, weights);
     return stripColorImages(ranked);
   } catch (error) {
     logError("cartRecommendations", error);
