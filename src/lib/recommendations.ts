@@ -33,6 +33,26 @@ export interface RecommendationSeed {
   price?: number | null;
 }
 
+export interface ScoreWeights {
+  category: number;
+  brand: number;
+  tokenOverlap: number;
+  maxTokenOverlapTokens: number;
+  priceProximity: number;
+  popularity: number;
+  saleBoost: number;
+}
+
+const DEFAULT_WEIGHTS: ScoreWeights = {
+  category: 40,
+  brand: 35,
+  tokenOverlap: 12,
+  maxTokenOverlapTokens: 4,
+  priceProximity: 25,
+  popularity: 10,
+  saleBoost: 5,
+};
+
 const STOP_TOKENS = new Set([
   "the", "and", "for", "with", "ml", "cm", "kg", "set",
   "ба", "болон", "ширхэг", "том", "жижиг",
