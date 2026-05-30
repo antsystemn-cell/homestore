@@ -118,8 +118,8 @@ export const searchPublicProducts = async (query: string) => {
       limit: 40,
     };
     if (andParts.length === 1) {
-      // Strip the wrapping `or(...)` since PostgREST accepts `or=(...)` at top level.
-      params.or = andParts[0].slice(3, -1);
+      // PostgREST top-level `or` must be wrapped in parentheses: `or=(cond1,cond2)`.
+      params.or = `(${andParts[0].slice(3, -1)})`;
     } else {
       params.and = `(${andParts.join(",")})`;
     }
