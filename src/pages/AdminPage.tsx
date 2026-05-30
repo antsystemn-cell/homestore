@@ -12,6 +12,8 @@ import CollectionsManager from "@/components/admin/CollectionsManager";
 import ChatbotSettingsManager from "@/components/admin/ChatbotSettingsManager";
 import StockDeductionLog from "@/components/admin/StockDeductionLog";
 import TrackingDashboard from "@/components/admin/TrackingDashboard";
+import AdminSkeleton from "@/components/admin/AdminSkeleton";
+
 
 import { useRef } from "react";
 import { toast } from "sonner";
