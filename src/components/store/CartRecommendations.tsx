@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Product, mapDbProduct } from "@/data/products";
 import { fetchCartRecommendations } from "@/lib/publicStoreApi";
+import type { ScoreWeights } from "@/lib/recommendations";
 import ProductCard from "./ProductCard";
 import ErrorBoundary from "./ErrorBoundary";
 
@@ -8,6 +9,7 @@ interface Props {
   items: Array<{
     product: Pick<Product, "id" | "category" | "brand_id" | "price" | "name">;
   }>;
+  weights?: Partial<ScoreWeights>;
 }
 
 const CartRecommendations = ({ items }: Props) => {
