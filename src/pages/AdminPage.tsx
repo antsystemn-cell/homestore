@@ -1509,10 +1509,12 @@ const AdminPage = () => {
 
   const netTotal = (o: any) => (Number(o.total) || 0) - (Number(o.delivery_fee) || 0);
   const deliveryFeeOf = (o: any) => Number(o.delivery_fee) || 0;
+  const grandTotal = (o: any) => (Number(o.total) || 0);
 
   const paidOrders = orders.filter((o: any) => o.status === 'confirmed' || o.status === 'completed');
-  const totalRevenue = paidOrders.reduce((s: number, o: any) => s + netTotal(o), 0);
+  const productRevenue = paidOrders.reduce((s: number, o: any) => s + netTotal(o), 0);
   const totalDeliveryRevenue = paidOrders.reduce((s: number, o: any) => s + deliveryFeeOf(o), 0);
+  const totalRevenue = productRevenue + totalDeliveryRevenue;
 
   // Өнөөдрийн захиалга
   const todayOrders = useMemo(() => {
@@ -2294,7 +2296,7 @@ const AdminPage = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                   {[
                     { label: "Нийт орлого", value: formatPrice(totalRevenue), icon: BarChart3, color: "bg-amber-500/10 text-amber-600", tab: "orders" as Tab },
-                    { label: "Хүргэлтийн орлого", value: formatPrice(totalDeliveryRevenue), icon: BarChart3, color: "bg-cyan-500/10 text-cyan-600", tab: "orders" as Tab },
+                    { label: "Орлого", value: formatPrice(productRevenue), icon: BarChart3, color: "bg-emerald-500/10 text-emerald-600", tab: "orders" as Tab },
                   ].map((stat, i) => {
                     const Icon = stat.icon;
                     return (
