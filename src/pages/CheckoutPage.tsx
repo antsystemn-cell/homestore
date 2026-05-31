@@ -14,6 +14,7 @@ import QPayPayment from "@/components/store/QPayPayment";
 import PocketPayment from "@/components/store/PocketPayment";
 import { track, attachLeadContact } from "@/lib/tracking";
 import { useBundleFreeDelivery } from "@/lib/bundleDelivery";
+import { hasFreeDeliveryProduct } from "@/lib/freeDeliveryProducts";
 
 type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket";
 
