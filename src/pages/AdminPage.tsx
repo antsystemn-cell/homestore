@@ -66,9 +66,13 @@ const AdminPage = () => {
   const [paymentProviders, setPaymentProviders] = useState<any[]>([]);
   const [promoBanners, setPromoBanners] = useState<any[]>([]);
   const [adImages, setAdImages] = useState<any[]>([]);
+  const [drivers, setDrivers] = useState<{ user_id: string; full_name: string | null; phone: string | null; email: string | null }[]>([]);
+  const [deliveryDraft, setDeliveryDraft] = useState<Record<string, { driverId: string; courierName: string }>>({});
+  const [savingDelivery, setSavingDelivery] = useState<string | null>(null);
   
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
 
   // Promo banner form state
   const [bannerForm, setBannerForm] = useState({ title: "", subtitle: "", button_text: "Бүтээгдхүүн үзэх", button_link: "/shop", banner_image: "" });
