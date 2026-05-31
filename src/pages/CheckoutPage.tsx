@@ -95,7 +95,8 @@ const CheckoutPage = () => {
   // Extra 8,000₮ delivery surcharge: if cart total < 50,000₮ OR cart has any sale items
   const hasSaleItems = items.some(item => item.product.isOnSale || (item.product.discount && item.product.discount > 0));
   const { eligible: bundleFree } = useBundleFreeDelivery(cartTotal, items.length);
-  const surcharge = bundleFree ? 0 : ((cartTotal < 50000 || hasSaleItems) ? 8000 : 0);
+  const productFree = hasFreeDeliveryProduct(items);
+  const surcharge = (bundleFree || productFree) ? 0 : ((cartTotal < 50000 || hasSaleItems) ? 8000 : 0);
   const totalDeliveryFee = deliveryFee + surcharge;
   const grandTotal = cartTotal + totalDeliveryFee;
 
