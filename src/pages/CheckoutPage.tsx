@@ -587,9 +587,14 @@ const CheckoutPage = () => {
                         : "Хямдралтай бараа агуулсан захиалга"}
                   </p>
                 )}
-                {bundleFree && (
+                {bundleFree && !productFree && (
                   <p className="text-[10px] text-primary">
                     Багцаар авсан тул хүргэлт үнэгүй.
+                  </p>
+                )}
+                {productFree && (
+                  <p className="text-[10px] text-primary">
+                    Энэ бараанд хүргэлт үнэгүй.
                   </p>
                 )}
                 {selectedDeliveryOption && (
