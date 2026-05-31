@@ -4067,7 +4067,102 @@ const AdminPage = () => {
                           </select>
                         </div>
 
+                        {/* Local delivery / courier tracking */}
+                        {(() => {
+                          const isDelivered = o.delivery_status === "delivered" || !!o.delivered_at;
+                          const assignedDriver = drivers.find((d) => d.user_id === o.driver_id);
+                          const draft = deliveryDraft[o.id] || { driverId: o.driver_id || "", courierName: o.delivery_signature_name || "" };
+                          return (
+                            <div>
+                              <h4 className="text-xs font-bold text-muted-foreground mb-2">Хүргэлт бүртгэх</h4>
+                              {isDelivered ? (
+                                <div className="bg-emerald-500/5 border border-emerald-500/30 rounded-xl p-3 text-xs space-y-1">
+                                  <p className="flex items-center gap-1.5 text-emerald-600 font-bold">
+                                    <Truck className="h-3.5 w-3.5" /> Хүргэгдсэн
+                                  </p>
+                                  {(assignedDriver || o.delivery_signature_name) && (
+                                    <p>
+                                      <span className="text-muted-foreground">Авч явсан:</span>{" "}
+                                      <span className="font-medium">
+                                        {assignedDriver?.full_name || o.delivery_signature_name || "—"}
+                                        {assignedDriver?.phone ? ` · ${assignedDriver.phone}` : ""}
+                                      </span>
+                                    </p>
+                                  )}
+                                  {o.delivered_at && (
+                                    <p>
+                                      <span className="text-muted-foreground">Огноо:</span>{" "}
+                                      <span className="font-medium">
+                                        {new Date(o.delivered_at).toLocaleString("mn-MN", { dateStyle: "short", timeStyle: "short" })}
+                                      </span>
+                                    </p>
+                                  )}
+                                  {isAdmin && (
+                                    <button
+                                      type="button"
+                                      onClick={async () => {
+                                        const { error } = await supabase.from("orders").update({
+                                          delivery_status: null,
+                                          delivered_at: null,
+                                          updated_at: new Date().toISOString(),
+                                        }).eq("id", o.id);
+                                        if (error) { toast.error(error.message); return; }
+                                        toast.success("Хүргэлтийн төлөв буцаалаа");
+                                        setOrders((prev) => prev.map((x) => x.id === o.id ? { ...x, delivery_status: null, delivered_at: null } : x));
+                                      }}
+                                      className="mt-2 text-[10px] font-semibold text-muted-foreground hover:text-destructive underline"
+                                    >
+                                      Буцаах
+                                    </button>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="bg-secondary/40 rounded-xl p-3 space-y-2">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <div>
+                                      <label className="text-[10px] font-semibold text-muted-foreground">Жолооч (системд бүртгэлтэй)</label>
+                                      <select
+                                        value={draft.driverId}
+                                        onChange={(e) => setDeliveryDraft((p) => ({ ...p, [o.id]: { ...draft, driverId: e.target.value } }))}
+                                        className="w-full rounded-lg bg-card border border-border px-2 py-2 text-xs"
+                                      >
+                                        <option value="">— Сонгох —</option>
+                                        {drivers.map((d) => (
+                                          <option key={d.user_id} value={d.user_id}>
+                                            {d.full_name || d.email || d.user_id.slice(0, 8)}{d.phone ? ` · ${d.phone}` : ""}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                    <div>
+                                      <label className="text-[10px] font-semibold text-muted-foreground">Эсвэл авч явсан хүний нэр</label>
+                                      <input
+                                        type="text"
+                                        value={draft.courierName}
+                                        onChange={(e) => setDeliveryDraft((p) => ({ ...p, [o.id]: { ...draft, courierName: e.target.value } }))}
+                                        placeholder="Жнь: Болд / 99XXXXXX"
+                                        className="w-full rounded-lg bg-card border border-border px-2 py-2 text-xs"
+                                      />
+                                    </div>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => markOrderDelivered(o.id)}
+                                    disabled={savingDelivery === o.id}
+                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-lg disabled:opacity-50 transition-colors"
+                                  >
+                                    {savingDelivery === o.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Truck className="h-3.5 w-3.5" />}
+                                    Хүргэлт хийгдсэн гэж тэмдэглэх
+                                  </button>
+                                  <p className="text-[10px] text-muted-foreground">Жолооч сонгоогүй бол доорх талбарт авч явсан хүний нэр/утсыг бичнэ үү.</p>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+
                       </div>
+
                     )}
                   </div>
                 );
