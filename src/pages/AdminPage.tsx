@@ -502,7 +502,9 @@ const AdminPage = () => {
     fetchPaymentProviders();
     fetchPromoBanners();
     fetchAdImages();
+    fetchDrivers();
   };
+
 
   const handleRefresh = async () => {
     setRefreshing(true);
