@@ -68,6 +68,8 @@ const AdminPage = () => {
   const [adImages, setAdImages] = useState<any[]>([]);
   const [drivers, setDrivers] = useState<{ user_id: string; full_name: string | null; phone: string | null; email: string | null }[]>([]);
   const [deliveryDraft, setDeliveryDraft] = useState<Record<string, { driverId: string; courierName: string }>>({});
+  const [deliverDialog, setDeliverDialog] = useState<{ orderId: string; driverId: string; courierName: string; courierPhone: string } | null>(null);
+  const [savingDeliverDialog, setSavingDeliverDialog] = useState(false);
   const [savingDelivery, setSavingDelivery] = useState<string | null>(null);
   
   const [loading, setLoading] = useState(false);
