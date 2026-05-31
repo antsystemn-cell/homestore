@@ -68,6 +68,8 @@ const AdminPage = () => {
   const [adImages, setAdImages] = useState<any[]>([]);
   const [drivers, setDrivers] = useState<{ user_id: string; full_name: string | null; phone: string | null; email: string | null }[]>([]);
   const [deliveryDraft, setDeliveryDraft] = useState<Record<string, { driverId: string; courierName: string }>>({});
+  const [deliverDialog, setDeliverDialog] = useState<{ orderId: string; driverId: string; courierName: string; courierPhone: string } | null>(null);
+  const [savingDeliverDialog, setSavingDeliverDialog] = useState(false);
   const [savingDelivery, setSavingDelivery] = useState<string | null>(null);
   
   const [loading, setLoading] = useState(false);
@@ -774,6 +776,16 @@ const AdminPage = () => {
 
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    if (newStatus === "delivering") {
+      const order = orders.find((o) => o.id === orderId);
+      setDeliverDialog({
+        orderId,
+        driverId: order?.driver_id || "",
+        courierName: order?.delivery_signature_name || "",
+        courierPhone: "",
+      });
+      return;
+    }
     const { error } = await supabase.from("orders").update({ status: newStatus, updated_at: new Date().toISOString() }).eq("id", orderId);
     if (error) {
       console.error("Order status update error:", error);
@@ -802,6 +814,43 @@ const AdminPage = () => {
       }
     }
   };
+
+  const confirmDeliverDispatch = async () => {
+    if (!deliverDialog) return;
+    const { orderId, driverId, courierName, courierPhone } = deliverDialog;
+    const driver = drivers.find((d) => d.user_id === driverId);
+    const manualName = courierName.trim();
+    const manualPhone = courierPhone.trim();
+    const finalName = driver?.full_name || manualName;
+    if (!driver && !manualName) {
+      toast.error("Жолооч сонгох эсвэл шинэ жолоочийн нэр оруулна уу");
+      return;
+    }
+    setSavingDeliverDialog(true);
+    const nowIso = new Date().toISOString();
+    const signature = driver
+      ? (driver.full_name || "") + (driver.phone ? ` · ${driver.phone}` : "")
+      : manualPhone ? `${manualName} · ${manualPhone}` : manualName;
+    const patch: Record<string, any> = {
+      status: "delivering",
+      delivery_status: "out_for_delivery",
+      delivery_signature_name: signature,
+      picked_up_at: nowIso,
+      updated_at: nowIso,
+    };
+    if (driver) patch.driver_id = driver.user_id;
+    const { error } = await supabase.from("orders").update(patch).eq("id", orderId);
+    setSavingDeliverDialog(false);
+    if (error) {
+      toast.error("Хадгалахад алдаа: " + error.message);
+      return;
+    }
+    toast.success(`Хүргэлтэнд гарлаа${finalName ? ` · ${finalName}` : ""}`);
+    setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, ...patch } : o)));
+    setDeliverDialog(null);
+  };
+
+
 
   const [sendingDelivery, setSendingDelivery] = useState<string | null>(null);
 
@@ -5286,6 +5335,83 @@ const AdminPage = () => {
           printOrders(pendingPrintOrders);
         }}
       />
+      {deliverDialog && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => !savingDeliverDialog && setDeliverDialog(null)}>
+          <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-md p-5 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div>
+              <h3 className="text-base font-bold flex items-center gap-2">
+                <Truck className="h-4 w-4 text-violet-600" /> Хүргэлтэнд гаргах
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">Энэ захиалгыг авч явах жолоочийг сонгоно уу. Бүртгэлгүй бол шинээр оруулах боломжтой.</p>
+            </div>
+
+            <div>
+              <label className="text-[11px] font-semibold text-muted-foreground">Жолооч (системд бүртгэлтэй)</label>
+              <select
+                value={deliverDialog.driverId}
+                onChange={(e) => setDeliverDialog((p) => p ? { ...p, driverId: e.target.value, courierName: e.target.value ? "" : p.courierName, courierPhone: e.target.value ? "" : p.courierPhone } : p)}
+                className="w-full mt-1 rounded-lg bg-background border border-border px-3 py-2 text-sm"
+              >
+                <option value="">— Сонгох —</option>
+                {drivers.map((d) => (
+                  <option key={d.user_id} value={d.user_id}>
+                    {d.full_name || d.email || d.user_id.slice(0, 8)}{d.phone ? ` · ${d.phone}` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="relative flex items-center gap-2 text-[10px] text-muted-foreground">
+              <div className="flex-1 h-px bg-border" />
+              <span>ЭСВЭЛ ШИНЭ ЖОЛООЧ</span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div>
+                <label className="text-[11px] font-semibold text-muted-foreground">Нэр</label>
+                <input
+                  type="text"
+                  value={deliverDialog.courierName}
+                  onChange={(e) => setDeliverDialog((p) => p ? { ...p, courierName: e.target.value, driverId: e.target.value ? "" : p.driverId } : p)}
+                  placeholder="Жнь: Болд"
+                  className="w-full mt-1 rounded-lg bg-background border border-border px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] font-semibold text-muted-foreground">Утас</label>
+                <input
+                  type="text"
+                  value={deliverDialog.courierPhone}
+                  onChange={(e) => setDeliverDialog((p) => p ? { ...p, courierPhone: e.target.value, driverId: e.target.value ? "" : p.driverId } : p)}
+                  placeholder="99XXXXXX"
+                  className="w-full mt-1 rounded-lg bg-background border border-border px-3 py-2 text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeliverDialog(null)}
+                disabled={savingDeliverDialog}
+                className="px-4 py-2 rounded-lg text-sm font-semibold bg-secondary hover:bg-secondary/70 disabled:opacity-50"
+              >
+                Болих
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeliverDispatch}
+                disabled={savingDeliverDialog || (!deliverDialog.driverId && !deliverDialog.courierName.trim())}
+                className="px-4 py-2 rounded-lg text-sm font-bold bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-50 inline-flex items-center gap-2"
+              >
+                {savingDeliverDialog ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Truck className="h-3.5 w-3.5" />}
+                Баталгаажуулах
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
