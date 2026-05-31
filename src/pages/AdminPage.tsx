@@ -966,6 +966,10 @@ const AdminPage = () => {
     storepay: { label: "Storepay", color: "bg-purple-500/10 text-purple-600" },
     qpay: { label: "QPay", color: "bg-blue-500/10 text-blue-600" },
     cash: { label: "Бэлнээр", color: "bg-amber-500/10 text-amber-600" },
+    organization: { label: "Байгууллага", color: "bg-indigo-500/10 text-indigo-600" },
+    sono: { label: "Соно Туслах", color: "bg-rose-500/10 text-rose-600" },
+    transfer: { label: "Шилжүүлэг", color: "bg-cyan-500/10 text-cyan-600" },
+    pocket: { label: "Pocket", color: "bg-green-500/10 text-green-600" },
   };
 
   const handleDeliveryPhotoUpload = async (orderId: string, field: "delivery_pickup_photo" | "delivery_completed_photo", file: File) => {
@@ -2077,6 +2081,8 @@ const AdminPage = () => {
                       <option value="storepay">Storepay</option>
                       <option value="transfer">Шилжүүлэг</option>
                       <option value="pocket">Pocket</option>
+                      <option value="organization">Байгууллага</option>
+                      <option value="sono">Соно Туслах</option>
                     </select>
                   </div>
                   <div>
