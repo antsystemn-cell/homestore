@@ -732,6 +732,45 @@ const AdminPage = () => {
     }
   };
 
+  const fetchDrivers = async () => {
+    try {
+      const { data, error } = await (supabase as any).rpc("list_drivers");
+      if (error) throw error;
+      setDrivers(data || []);
+    } catch (e) {
+      console.error("Failed to load drivers", e);
+    }
+  };
+
+  const markOrderDelivered = async (orderId: string) => {
+    const draft = deliveryDraft[orderId] || { driverId: "", courierName: "" };
+    const driver = drivers.find((d) => d.user_id === draft.driverId);
+    const courierName = draft.courierName.trim() || driver?.full_name || "";
+    if (!driver && !courierName) {
+      toast.error("Жолооч сонгох эсвэл нэр оруулна уу");
+      return;
+    }
+    setSavingDelivery(orderId);
+    const nowIso = new Date().toISOString();
+    const patch: Record<string, any> = {
+      delivery_status: "delivered",
+      delivered_at: nowIso,
+      delivery_signature_name: courierName,
+      updated_at: nowIso,
+    };
+    if (driver) patch.driver_id = driver.user_id;
+    const { error } = await supabase.from("orders").update(patch).eq("id", orderId);
+    setSavingDelivery(null);
+    if (error) {
+      toast.error("Хадгалахад алдаа: " + error.message);
+      return;
+    }
+    toast.success("Хүргэлт бүртгэгдлээ");
+    setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, ...patch } : o)));
+    setDeliveryDraft((prev) => { const c = { ...prev }; delete c[orderId]; return c; });
+  };
+
+
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     const { error } = await supabase.from("orders").update({ status: newStatus, updated_at: new Date().toISOString() }).eq("id", orderId);
     if (error) {
