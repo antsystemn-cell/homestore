@@ -14,6 +14,7 @@ import QPayPayment from "@/components/store/QPayPayment";
 import PocketPayment from "@/components/store/PocketPayment";
 import { track, attachLeadContact } from "@/lib/tracking";
 import { useBundleFreeDelivery } from "@/lib/bundleDelivery";
+import { hasFreeDeliveryProduct } from "@/lib/freeDeliveryProducts";
 
 type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket";
 
@@ -94,7 +95,8 @@ const CheckoutPage = () => {
   // Extra 8,000₮ delivery surcharge: if cart total < 50,000₮ OR cart has any sale items
   const hasSaleItems = items.some(item => item.product.isOnSale || (item.product.discount && item.product.discount > 0));
   const { eligible: bundleFree } = useBundleFreeDelivery(cartTotal, items.length);
-  const surcharge = bundleFree ? 0 : ((cartTotal < 50000 || hasSaleItems) ? 8000 : 0);
+  const productFree = hasFreeDeliveryProduct(items);
+  const surcharge = (bundleFree || productFree) ? 0 : ((cartTotal < 50000 || hasSaleItems) ? 8000 : 0);
   const totalDeliveryFee = deliveryFee + surcharge;
   const grandTotal = cartTotal + totalDeliveryFee;
 
@@ -585,9 +587,14 @@ const CheckoutPage = () => {
                         : "Хямдралтай бараа агуулсан захиалга"}
                   </p>
                 )}
-                {bundleFree && (
+                {bundleFree && !productFree && (
                   <p className="text-[10px] text-primary">
                     Багцаар авсан тул хүргэлт үнэгүй.
+                  </p>
+                )}
+                {productFree && (
+                  <p className="text-[10px] text-primary">
+                    Энэ бараанд хүргэлт үнэгүй.
                   </p>
                 )}
                 {selectedDeliveryOption && (
