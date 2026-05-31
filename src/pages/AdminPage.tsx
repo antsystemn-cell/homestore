@@ -2313,31 +2313,60 @@ const AdminPage = () => {
           )}
           {/* Stats */}
           {tab === "stats" && (
-            <>
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
-                {[
-                  { label: "Нийт бараа", value: products.length, icon: Package, color: "bg-blue-500/10 text-blue-600", tab: "products" as Tab },
-                  { label: "Нийт захиалга", value: orders.length, icon: ShoppingBag, color: "bg-green-500/10 text-green-600", tab: "orders" as Tab },
-                  { label: "Нийт хэрэглэгч", value: users.length, icon: Users, color: "bg-purple-500/10 text-purple-600", tab: "users" as Tab },
-                  { label: "Нийт орлого", value: formatPrice(totalRevenue), icon: BarChart3, color: "bg-amber-500/10 text-amber-600", tab: "orders" as Tab },
-                  { label: "Хүргэлтийн орлого", value: formatPrice(totalDeliveryRevenue), icon: BarChart3, color: "bg-cyan-500/10 text-cyan-600", tab: "orders" as Tab },
-                ].map((stat, i) => {
-                  const Icon = stat.icon;
-                  return (
-                    <div key={i} onClick={() => setTab(stat.tab)} className="bg-card rounded-2xl p-4 md:p-6 border border-border cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all active:scale-[0.98]">
-                      <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl ${stat.color} flex items-center justify-center mb-3 md:mb-4`}>
-                        <Icon className="h-4 w-4 md:h-5 md:w-5" />
+            <div className="space-y-6">
+              {/* Орлого */}
+              <section>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-sm font-bold tracking-tight">Орлого</h2>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Баталгаажсан захиалга</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                  {[
+                    { label: "Нийт орлого", value: formatPrice(totalRevenue), icon: BarChart3, color: "bg-amber-500/10 text-amber-600", tab: "orders" as Tab },
+                    { label: "Хүргэлтийн орлого", value: formatPrice(totalDeliveryRevenue), icon: BarChart3, color: "bg-cyan-500/10 text-cyan-600", tab: "orders" as Tab },
+                  ].map((stat, i) => {
+                    const Icon = stat.icon;
+                    return (
+                      <div key={i} onClick={() => setTab(stat.tab)} className="bg-card rounded-2xl p-4 md:p-6 border border-border cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all active:scale-[0.98]">
+                        <div className={`h-9 w-9 md:h-10 md:w-10 rounded-xl ${stat.color} flex items-center justify-center mb-3 md:mb-4`}>
+                          <Icon className="h-4 w-4 md:h-5 md:w-5" />
+                        </div>
+                        <p className="text-[10px] md:text-xs text-muted-foreground mb-1">{stat.label}</p>
+                        <p className="text-xl md:text-2xl font-extrabold">{stat.value}</p>
                       </div>
-                      <p className="text-[10px] md:text-xs text-muted-foreground mb-0.5">{stat.label}</p>
-                      <p className="text-lg md:text-2xl font-extrabold">{stat.value}</p>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              </section>
 
-
-            </>
+              {/* Хэмжээ */}
+              <section>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-sm font-bold tracking-tight">Үйл ажиллагаа</h2>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Нийт тоо</span>
+                </div>
+                <div className="grid grid-cols-3 gap-3 md:gap-4">
+                  {[
+                    { label: "Бараа", value: products.length, icon: Package, color: "bg-blue-500/10 text-blue-600", tab: "products" as Tab },
+                    { label: "Захиалга", value: orders.length, icon: ShoppingBag, color: "bg-green-500/10 text-green-600", tab: "orders" as Tab },
+                    { label: "Хэрэглэгч", value: users.length, icon: Users, color: "bg-purple-500/10 text-purple-600", tab: "users" as Tab },
+                  ].map((stat, i) => {
+                    const Icon = stat.icon;
+                    return (
+                      <div key={i} onClick={() => setTab(stat.tab)} className="bg-card rounded-2xl p-3 md:p-5 border border-border cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all active:scale-[0.98]">
+                        <div className={`h-8 w-8 md:h-9 md:w-9 rounded-lg ${stat.color} flex items-center justify-center mb-2 md:mb-3`}>
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <p className="text-[10px] md:text-xs text-muted-foreground mb-0.5">{stat.label}</p>
+                        <p className="text-base md:text-xl font-extrabold">{stat.value}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            </div>
           )}
+
 
           {/* Products */}
           {tab === "products" && (
