@@ -1509,10 +1509,12 @@ const AdminPage = () => {
 
   const netTotal = (o: any) => (Number(o.total) || 0) - (Number(o.delivery_fee) || 0);
   const deliveryFeeOf = (o: any) => Number(o.delivery_fee) || 0;
+  const grandTotal = (o: any) => (Number(o.total) || 0);
 
   const paidOrders = orders.filter((o: any) => o.status === 'confirmed' || o.status === 'completed');
-  const totalRevenue = paidOrders.reduce((s: number, o: any) => s + netTotal(o), 0);
+  const productRevenue = paidOrders.reduce((s: number, o: any) => s + netTotal(o), 0);
   const totalDeliveryRevenue = paidOrders.reduce((s: number, o: any) => s + deliveryFeeOf(o), 0);
+  const totalRevenue = productRevenue + totalDeliveryRevenue;
 
   // Өнөөдрийн захиалга
   const todayOrders = useMemo(() => {
