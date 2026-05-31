@@ -776,6 +776,16 @@ const AdminPage = () => {
 
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    if (newStatus === "delivering") {
+      const order = orders.find((o) => o.id === orderId);
+      setDeliverDialog({
+        orderId,
+        driverId: order?.driver_id || "",
+        courierName: order?.delivery_signature_name || "",
+        courierPhone: "",
+      });
+      return;
+    }
     const { error } = await supabase.from("orders").update({ status: newStatus, updated_at: new Date().toISOString() }).eq("id", orderId);
     if (error) {
       console.error("Order status update error:", error);
