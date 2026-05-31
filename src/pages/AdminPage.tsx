@@ -2081,6 +2081,8 @@ const AdminPage = () => {
                       <option value="storepay">Storepay</option>
                       <option value="transfer">Шилжүүлэг</option>
                       <option value="pocket">Pocket</option>
+                      <option value="organization">Байгууллага</option>
+                      <option value="sono">Соно Туслах</option>
                     </select>
                   </div>
                   <div>
