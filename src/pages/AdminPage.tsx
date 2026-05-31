@@ -426,11 +426,9 @@ const AdminPage = () => {
     external_ref: "",
     branch: "Лавай",
   });
-  const [manualItems, setManualItems] = useState<{ product_id: string | null; name: string; price: number; quantity: number; product_code?: string; image?: string; is_custom?: boolean; color?: string; size?: string; sku?: string; variant_stock?: number; }[]>([]);
+  const [manualItems, setManualItems] = useState<{ product_id: string | null; name: string; price: number; quantity: number; product_code?: string; image?: string; color?: string; size?: string; sku?: string; variant_stock?: number; }[]>([]);
   const [manualProductSearch, setManualProductSearch] = useState("");
   const [editingItemIdx, setEditingItemIdx] = useState<number | null>(null);
-  const [showCustomItemForm, setShowCustomItemForm] = useState(false);
-  const [customItem, setCustomItem] = useState({ name: "", price: "", quantity: "1", product_code: "" });
 
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
