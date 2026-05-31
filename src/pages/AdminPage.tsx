@@ -815,6 +815,43 @@ const AdminPage = () => {
     }
   };
 
+  const confirmDeliverDispatch = async () => {
+    if (!deliverDialog) return;
+    const { orderId, driverId, courierName, courierPhone } = deliverDialog;
+    const driver = drivers.find((d) => d.user_id === driverId);
+    const manualName = courierName.trim();
+    const manualPhone = courierPhone.trim();
+    const finalName = driver?.full_name || manualName;
+    if (!driver && !manualName) {
+      toast.error("Жолооч сонгох эсвэл шинэ жолоочийн нэр оруулна уу");
+      return;
+    }
+    setSavingDeliverDialog(true);
+    const nowIso = new Date().toISOString();
+    const signature = driver
+      ? (driver.full_name || "") + (driver.phone ? ` · ${driver.phone}` : "")
+      : manualPhone ? `${manualName} · ${manualPhone}` : manualName;
+    const patch: Record<string, any> = {
+      status: "delivering",
+      delivery_status: "out_for_delivery",
+      delivery_signature_name: signature,
+      picked_up_at: nowIso,
+      updated_at: nowIso,
+    };
+    if (driver) patch.driver_id = driver.user_id;
+    const { error } = await supabase.from("orders").update(patch).eq("id", orderId);
+    setSavingDeliverDialog(false);
+    if (error) {
+      toast.error("Хадгалахад алдаа: " + error.message);
+      return;
+    }
+    toast.success(`Хүргэлтэнд гарлаа${finalName ? ` · ${finalName}` : ""}`);
+    setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, ...patch } : o)));
+    setDeliverDialog(null);
+  };
+
+
+
   const [sendingDelivery, setSendingDelivery] = useState<string | null>(null);
 
   const sendToDelivery = async (orderId: string) => {
