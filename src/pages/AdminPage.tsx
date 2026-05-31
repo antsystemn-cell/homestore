@@ -1678,8 +1678,9 @@ const AdminPage = () => {
                       className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     >
                       <option value="Лавай">Лавай</option>
+                      <option value="Онлайн">Онлайн</option>
                       <option value="Их наяд">Их наяд</option>
-                      <option value="Хонгор агуулах">Хонгор агуулах</option>
+                      <option value="АБТЕМА">АБТЕМА</option>
                     </select>
                   </div>
                 </div>
