@@ -518,7 +518,9 @@ const AdminPage = () => {
       fetchPaymentProviders(),
       fetchPromoBanners(),
       fetchAdImages(),
+      fetchDrivers(),
     ]);
+
     setRefreshing(false);
     toast.success("Мэдээлэл шинэчлэгдлээ");
   };
