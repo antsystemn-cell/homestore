@@ -426,11 +426,9 @@ const AdminPage = () => {
     external_ref: "",
     branch: "Лавай",
   });
-  const [manualItems, setManualItems] = useState<{ product_id: string | null; name: string; price: number; quantity: number; product_code?: string; image?: string; is_custom?: boolean; color?: string; size?: string; sku?: string; variant_stock?: number; }[]>([]);
+  const [manualItems, setManualItems] = useState<{ product_id: string | null; name: string; price: number; quantity: number; product_code?: string; image?: string; color?: string; size?: string; sku?: string; variant_stock?: number; }[]>([]);
   const [manualProductSearch, setManualProductSearch] = useState("");
   const [editingItemIdx, setEditingItemIdx] = useState<number | null>(null);
-  const [showCustomItemForm, setShowCustomItemForm] = useState(false);
-  const [customItem, setCustomItem] = useState({ name: "", price: "", quantity: "1", product_code: "" });
 
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
@@ -870,8 +868,7 @@ const AdminPage = () => {
     });
     setManualItems([]);
     setManualProductSearch("");
-    setShowCustomItemForm(false);
-    setCustomItem({ name: "", price: "", quantity: "1", product_code: "" });
+    setManualProductSearch("");
   };
 
   const manualSubtotal = manualItems.reduce((s, it) => s + (it.price * it.quantity), 0);
@@ -918,7 +915,6 @@ const AdminPage = () => {
         quantity: it.quantity,
         product_code: it.sku || it.product_code || null,
         image: it.image || null,
-        is_custom: it.is_custom || false,
         color: it.color || null,
         size: it.size || null,
       }));
@@ -1774,86 +1770,8 @@ const AdminPage = () => {
                         className="w-full rounded-xl bg-secondary pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setShowCustomItemForm((s) => !s)}
-                      className={`shrink-0 inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition ${showCustomItemForm ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-secondary/70"}`}
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                      Гараар
-                    </button>
                   </div>
 
-                  {showCustomItemForm && (
-                    <div className="border border-dashed border-primary/40 rounded-xl p-3 space-y-2 bg-primary/5">
-                      <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Бүртгэлд байхгүй бараа гараар оруулах</p>
-                      <input
-                        type="text"
-                        value={customItem.name}
-                        onChange={(e) => setCustomItem((c) => ({ ...c, name: e.target.value }))}
-                        placeholder="Барааны нэр *"
-                        className="w-full rounded-lg bg-card border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      />
-                      <div className="grid grid-cols-3 gap-2">
-                        <input
-                          type="number"
-                          min={0}
-                          value={customItem.price}
-                          onChange={(e) => setCustomItem((c) => ({ ...c, price: e.target.value }))}
-                          placeholder="Үнэ ₮ *"
-                          className="rounded-lg bg-card border border-border px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                        />
-                        <input
-                          type="number"
-                          min={1}
-                          value={customItem.quantity}
-                          onChange={(e) => setCustomItem((c) => ({ ...c, quantity: e.target.value }))}
-                          placeholder="Тоо"
-                          className="rounded-lg bg-card border border-border px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                        />
-                        <input
-                          type="text"
-                          value={customItem.product_code}
-                          onChange={(e) => setCustomItem((c) => ({ ...c, product_code: e.target.value }))}
-                          placeholder="SKU"
-                          className="rounded-lg bg-card border border-border px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                        />
-                      </div>
-                      <div className="flex items-center justify-end gap-2 pt-1">
-                        <button
-                          type="button"
-                          onClick={() => { setShowCustomItemForm(false); setCustomItem({ name: "", price: "", quantity: "1", product_code: "" }); }}
-                          className="px-3 py-1.5 text-xs rounded-lg hover:bg-secondary"
-                        >
-                          Болих
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const name = customItem.name.trim();
-                            const price = Number(customItem.price);
-                            const qty = Math.max(1, Number(customItem.quantity) || 1);
-                            if (!name) { toast.error("Барааны нэр шаардлагатай"); return; }
-                            if (!price || price < 0) { toast.error("Үнэ зөв оруулна уу"); return; }
-                            setManualItems((prev) => [...prev, {
-                              product_id: null,
-                              name,
-                              price,
-                              quantity: qty,
-                              product_code: customItem.product_code.trim() || undefined,
-                              is_custom: true,
-                            }]);
-                            setCustomItem({ name: "", price: "", quantity: "1", product_code: "" });
-                            setShowCustomItemForm(false);
-                            toast.success("Бараа нэмэгдлээ");
-                          }}
-                          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
-                        >
-                          Нэмэх
-                        </button>
-                      </div>
-                    </div>
-                  )}
                   {manualProductSearch.trim() && (() => {
                     const q = manualProductSearch.toLowerCase();
                     type Row = { key: string; product: any; color?: string; size?: string; sku?: string; image?: string; stock?: number; };
@@ -1952,7 +1870,6 @@ const AdminPage = () => {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5">
                               <p className="text-xs font-medium truncate">{it.name}</p>
-                              {it.is_custom && <span className="shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded bg-primary/15 text-primary uppercase">Гараар</span>}
                             </div>
                             <p className="text-[10px] text-muted-foreground">
                               {formatPrice(it.price)} × {it.quantity}
