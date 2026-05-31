@@ -251,8 +251,8 @@ const CollectionPage = () => {
 
       {/* Sticky bundle bar */}
       {bundleEnabled && !loading && products.length > 0 && (
-        <div className="fixed bottom-16 md:bottom-4 left-0 right-0 z-30 px-3">
-          <div className="max-w-6xl mx-auto bg-card border border-border shadow-lg rounded-2xl p-3 flex items-center gap-3">
+        <div className="fixed bottom-16 md:bottom-4 left-0 right-0 z-30 pl-3 pr-3 md:pr-3" style={{ paddingRight: 'max(0.75rem, env(safe-area-inset-right))' }}>
+          <div className="max-w-6xl mx-auto bg-card border border-border shadow-lg rounded-2xl p-3 pr-16 md:pr-3 flex items-center gap-3">
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground">
                 {selectedProducts.length} сонгосон
