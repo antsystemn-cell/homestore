@@ -1324,6 +1324,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      claim_driver_role: { Args: never; Returns: undefined }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean

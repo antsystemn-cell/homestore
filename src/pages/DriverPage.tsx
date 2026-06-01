@@ -160,9 +160,81 @@ export default function DriverPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [lightboxUrl]);
 
-  useEffect(() => {
-    if (!authLoading && !hasAccess) navigate("/");
-  }, [authLoading, hasAccess, navigate]);
+  // Auth form state (in-page login / signup)
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authFullName, setAuthFullName] = useState("");
+  const [authPhone, setAuthPhone] = useState("");
+  const [authBusy, setAuthBusy] = useState(false);
+  const [claimBusy, setClaimBusy] = useState(false);
+
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!authEmail || !authPassword) {
+      toast.error("И-мэйл болон нууц үгээ оруулна уу");
+      return;
+    }
+    setAuthBusy(true);
+    try {
+      if (authMode === "login") {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: authEmail.trim(),
+          password: authPassword,
+        });
+        if (error) throw error;
+        toast.success("Тавтай морил!");
+      } else {
+        const { data, error } = await supabase.auth.signUp({
+          email: authEmail.trim(),
+          password: authPassword,
+          options: {
+            emailRedirectTo: `${window.location.origin}/driver`,
+            data: { full_name: authFullName.trim() || null },
+          },
+        });
+        if (error) throw error;
+        if (data.session && data.user) {
+          // Save profile phone if provided
+          if (authPhone.trim() || authFullName.trim()) {
+            await supabase
+              .from("profiles")
+              .update({
+                full_name: authFullName.trim() || null,
+                phone: authPhone.trim() || null,
+              })
+              .eq("user_id", data.user.id);
+          }
+          // Auto-claim driver role
+          const { error: rpcErr } = await supabase.rpc("claim_driver_role");
+          if (rpcErr) console.error(rpcErr);
+          toast.success("Бүртгэл амжилттай! Жолоочийн эрх идэвхжлээ.");
+          // Reload so AuthContext refreshes roles
+          setTimeout(() => window.location.reload(), 400);
+        } else {
+          toast.success("Бүртгэл үүслээ. И-мэйлээ шалгаж баталгаажуулна уу.");
+        }
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Алдаа гарлаа");
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+
+  const handleClaimDriver = async () => {
+    setClaimBusy(true);
+    try {
+      const { error } = await supabase.rpc("claim_driver_role");
+      if (error) throw error;
+      toast.success("Жолоочийн эрх идэвхжлээ");
+      setTimeout(() => window.location.reload(), 400);
+    } catch (err: any) {
+      toast.error(err?.message || "Эрх авч чадсангүй");
+    } finally {
+      setClaimBusy(false);
+    }
+  };
 
   const fetchOrders = async (silent = false) => {
     if (!silent) setLoading(true);
@@ -462,10 +534,102 @@ export default function DriverPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-6">
-        <div className="text-center max-w-sm">
-          <p className="text-sm text-muted-foreground mb-4">Та эхлээд нэвтэрнэ үү</p>
-          <Button onClick={() => navigate("/auth")}>Нэвтрэх</Button>
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-sm p-6">
+          <div className="flex items-center justify-center mb-4">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Truck className="w-6 h-6 text-primary" />
+            </div>
+          </div>
+          <h1 className="text-xl font-semibold text-center">Жолоочийн булан</h1>
+          <p className="text-sm text-muted-foreground text-center mt-1 mb-5">
+            {authMode === "login"
+              ? "Бүртгэлтэй и-мэйлээрээ нэвтэрнэ үү"
+              : "Шинээр бүртгүүлж жолоочийн эрх авна уу"}
+          </p>
+
+          <div className="grid grid-cols-2 gap-1 p-1 bg-muted rounded-lg mb-4">
+            <button
+              type="button"
+              onClick={() => setAuthMode("login")}
+              className={`py-2 text-sm rounded-md transition ${
+                authMode === "login" ? "bg-background shadow-sm font-medium" : "text-muted-foreground"
+              }`}
+            >
+              Нэвтрэх
+            </button>
+            <button
+              type="button"
+              onClick={() => setAuthMode("signup")}
+              className={`py-2 text-sm rounded-md transition ${
+                authMode === "signup" ? "bg-background shadow-sm font-medium" : "text-muted-foreground"
+              }`}
+            >
+              Бүртгүүлэх
+            </button>
+          </div>
+
+          <form onSubmit={handleAuthSubmit} className="space-y-3">
+            {authMode === "signup" && (
+              <>
+                <div>
+                  <Label className="text-xs">Овог нэр</Label>
+                  <Input
+                    value={authFullName}
+                    onChange={(e) => setAuthFullName(e.target.value)}
+                    placeholder="Бат-Эрдэнэ"
+                    autoComplete="name"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Утас</Label>
+                  <Input
+                    value={authPhone}
+                    onChange={(e) => setAuthPhone(e.target.value)}
+                    placeholder="9911XXXX"
+                    inputMode="tel"
+                    autoComplete="tel"
+                  />
+                </div>
+              </>
+            )}
+            <div>
+              <Label className="text-xs">И-мэйл</Label>
+              <Input
+                type="email"
+                value={authEmail}
+                onChange={(e) => setAuthEmail(e.target.value)}
+                placeholder="driver@example.com"
+                autoComplete="email"
+                required
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Нууц үг</Label>
+              <Input
+                type="password"
+                value={authPassword}
+                onChange={(e) => setAuthPassword(e.target.value)}
+                placeholder="••••••••"
+                autoComplete={authMode === "login" ? "current-password" : "new-password"}
+                required
+                minLength={6}
+              />
+            </div>
+
+            <Button type="submit" className="w-full" disabled={authBusy}>
+              {authBusy && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {authMode === "login" ? "Нэвтрэх" : "Бүртгүүлэх"}
+            </Button>
+          </form>
+
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="block mx-auto mt-4 text-xs text-muted-foreground hover:text-foreground"
+          >
+            ← Нүүр хуудас руу
+          </button>
         </div>
       </div>
     );
@@ -473,10 +637,30 @@ export default function DriverPage() {
 
   if (!hasAccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-6">
-        <p className="text-sm text-muted-foreground">
-          Танд хүргэлтийн хандах эрх алга байна.
-        </p>
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-sm p-6 text-center">
+          <div className="w-12 h-12 mx-auto rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+            <Truck className="w-6 h-6 text-primary" />
+          </div>
+          <h1 className="text-lg font-semibold">Жолоочийн эрх авах</h1>
+          <p className="text-sm text-muted-foreground mt-1 mb-5">
+            Та нэвтэрсэн боловч жолоочийн эрхгүй байна. Доорх товчийг дарж жолоочийн булан руу нэвтрэх эрх аваарай.
+          </p>
+          <Button onClick={handleClaimDriver} disabled={claimBusy} className="w-full">
+            {claimBusy && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            Жолоочийн эрх авах
+          </Button>
+          <button
+            type="button"
+            onClick={async () => {
+              await supabase.auth.signOut();
+              window.location.reload();
+            }}
+            className="block mx-auto mt-4 text-xs text-muted-foreground hover:text-foreground"
+          >
+            Өөр хаягаар нэвтрэх
+          </button>
+        </div>
       </div>
     );
   }
