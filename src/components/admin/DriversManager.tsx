@@ -51,6 +51,8 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
   const [deliveries, setDeliveries] = useState<DeliveryRow[]>([]);
   const [loadingDeliveries, setLoadingDeliveries] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<"all" | "out_for_delivery" | "delivered">("all");
+  const [driverFilter, setDriverFilter] = useState<string>("all");
 
   const loadDeliveries = async () => {
     setLoadingDeliveries(true);
