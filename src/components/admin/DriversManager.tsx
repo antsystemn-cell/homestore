@@ -365,6 +365,131 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
     <div className="space-y-4">
       {isAdmin && (
         <div className="bg-card rounded-2xl p-4 md:p-6 border border-border space-y-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <h3 className="font-bold text-sm flex items-center gap-2">
+              <UserCheck className="h-4 w-4" /> Жолоочийн эрхийн хүсэлтүүд
+              {pendingCount > 0 && (
+                <span className="ml-1 inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-amber-500 text-white text-[10px] font-bold">
+                  {pendingCount}
+                </span>
+              )}
+            </h3>
+            <div className="flex items-center gap-1.5 text-xs">
+              {(["pending", "approved", "rejected", "all"] as const).map((s) => {
+                const labels = { pending: "Хянагдаж буй", approved: "Батлагдсан", rejected: "Татгалзсан", all: "Бүгд" } as const;
+                const isActive = requestFilter === s;
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setRequestFilter(s)}
+                    className={`px-2.5 py-1 rounded-full border transition ${
+                      isActive
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background text-muted-foreground border-border hover:text-foreground"
+                    }`}
+                  >
+                    {labels[s]}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {requestsLoading ? (
+            <div className="flex items-center justify-center py-6">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            </div>
+          ) : visibleRequests.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-4 text-center">Хүсэлт алга байна.</p>
+          ) : (
+            <div className="space-y-2">
+              {visibleRequests.map((req) => {
+                const isPending = req.status === "pending";
+                const isApproved = req.status === "approved";
+                const isRejected = req.status === "rejected";
+                const acting = actingRequestId === req.id;
+                return (
+                  <div
+                    key={req.id}
+                    className="border border-border rounded-xl p-3 bg-background flex flex-col md:flex-row md:items-center md:justify-between gap-3"
+                  >
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-semibold text-sm truncate">{req.full_name || "—"}</p>
+                        {isPending && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-medium">
+                            <Clock className="h-3 w-3" /> Хянагдаж буй
+                          </span>
+                        )}
+                        {isApproved && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-medium">
+                            <Check className="h-3 w-3" /> Батлагдсан
+                          </span>
+                        )}
+                        {isRejected && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 text-[10px] font-medium">
+                            <X className="h-3 w-3" /> Татгалзсан
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+                        {req.email && (
+                          <span className="inline-flex items-center gap-1">
+                            <Mail className="h-3 w-3" /> {req.email}
+                          </span>
+                        )}
+                        {req.phone && (
+                          <span className="inline-flex items-center gap-1">
+                            <Phone className="h-3 w-3" /> {req.phone}
+                          </span>
+                        )}
+                        <span>Илгээсэн: {formatDate(req.created_at)}</span>
+                        {req.reviewed_at && <span>Хянасан: {formatDate(req.reviewed_at)}</span>}
+                      </div>
+                      {req.note && (
+                        <p className="text-xs text-muted-foreground bg-muted/40 rounded p-2 mt-1">
+                          {req.note}
+                        </p>
+                      )}
+                      {isRejected && req.review_note && (
+                        <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded p-2 mt-1">
+                          Шалтгаан: {req.review_note}
+                        </p>
+                      )}
+                    </div>
+                    {isPending && (
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => approveRequest(req)}
+                          disabled={acting}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 disabled:opacity-60"
+                        >
+                          {acting ? <Loader2 className="h-3 w-3 animate-spin" /> : <UserCheck className="h-3 w-3" />}
+                          Батлах
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => rejectRequest(req)}
+                          disabled={acting}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-700 disabled:opacity-60"
+                        >
+                          <UserX className="h-3 w-3" />
+                          Татгалзах
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {isAdmin && (
+        <div className="bg-card rounded-2xl p-4 md:p-6 border border-border space-y-3">
           <h3 className="font-bold text-sm flex items-center gap-2">
             <Truck className="h-4 w-4" /> Шинэ жолооч бүртгэх
           </h3>
