@@ -134,6 +134,22 @@ export default function DriverPage() {
   const [returnReason, setReturnReason] = useState<string>(RETURN_REASONS[0]);
   const [returnNote, setReturnNote] = useState("");
   const [returnSubmitting, setReturnSubmitting] = useState(false);
+  const [returnPhotoFile, setReturnPhotoFile] = useState<File | null>(null);
+  const [returnPhotoPreview, setReturnPhotoPreview] = useState<string | null>(null);
+  const returnFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleReturnPhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Зурагны хэмжээ 8MB-аас бага байх ёстой");
+      return;
+    }
+    setReturnPhotoFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setReturnPhotoPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     if (!lightboxUrl) return;
@@ -379,10 +395,14 @@ export default function DriverPage() {
     setReturnOrderId(order.id);
     setReturnReason(RETURN_REASONS[0]);
     setReturnNote("");
+    setReturnPhotoFile(null);
+    setReturnPhotoPreview(null);
   };
   const closeReturnModal = () => {
     setReturnOrderId(null);
     setReturnNote("");
+    setReturnPhotoFile(null);
+    setReturnPhotoPreview(null);
   };
 
   const handleReturn = async () => {
@@ -392,13 +412,33 @@ export default function DriverPage() {
       : returnReason;
     setReturnSubmitting(true);
     try {
+      let photoUrl: string | null = null;
+      if (returnPhotoFile) {
+        const ext = returnPhotoFile.name.split(".").pop() || "jpg";
+        const path = `${user.id}/${returnOrderId}-return-${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("delivery-proofs")
+          .upload(path, returnPhotoFile, {
+            contentType: returnPhotoFile.type,
+            upsert: false,
+          });
+        if (upErr) throw upErr;
+        const { data: pub } = supabase.storage
+          .from("delivery-proofs")
+          .getPublicUrl(path);
+        photoUrl = pub.publicUrl;
+      }
+
+      const update: any = {
+        status: "cancelled",
+        delivery_failed_at: new Date().toISOString(),
+        delivery_return_reason: reasonText,
+      };
+      if (photoUrl) update.delivery_proof_photo = photoUrl;
+
       const { error } = await supabase
         .from("orders")
-        .update({
-          status: "cancelled",
-          delivery_failed_at: new Date().toISOString(),
-          delivery_return_reason: reasonText,
-        })
+        .update(update)
         .eq("id", returnOrderId);
       if (error) throw error;
       toast.success("Захиалгыг буцаасан/аваагүй гэж тэмдэглэлээ");
@@ -684,7 +724,7 @@ export default function DriverPage() {
       {/* Return / failed modal */}
       {returnOrderId && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4">
-          <div className="bg-card border border-border rounded-t-3xl md:rounded-2xl w-full max-w-md">
+          <div className="bg-card border border-border rounded-t-3xl md:rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
               <h3 className="font-bold text-sm flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
@@ -731,6 +771,44 @@ export default function DriverPage() {
                   placeholder="Жишээ: Хаалга нээгээгүй"
                   className="mt-1.5"
                 />
+              </div>
+              <div>
+                <Label className="text-xs">Нотолгооны зураг (заавал биш)</Label>
+                <input
+                  ref={returnFileInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleReturnPhotoSelect}
+                  className="hidden"
+                />
+                {returnPhotoPreview ? (
+                  <div className="mt-1.5 relative">
+                    <img
+                      src={returnPhotoPreview}
+                      alt="Preview"
+                      className="w-full h-44 object-cover rounded-xl border border-border"
+                    />
+                    <button
+                      onClick={() => {
+                        setReturnPhotoFile(null);
+                        setReturnPhotoPreview(null);
+                      }}
+                      className="absolute top-2 right-2 bg-background/90 px-2 py-1 rounded-md text-xs"
+                    >
+                      Солих
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => returnFileInputRef.current?.click()}
+                    className="mt-1.5 w-full h-28 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                  >
+                    <Camera className="h-6 w-6" />
+                    <span className="text-xs">Зураг авах / Сонгох</span>
+                  </button>
+                )}
               </div>
               <Button
                 onClick={handleReturn}
@@ -953,13 +1031,30 @@ function OrderCard({
         </div>
       )}
 
-      {/* Failed reason */}
-      {order.status === "cancelled" && order.delivery_return_reason && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/5 px-3 py-2 text-xs">
-          <p className="font-semibold text-red-700 dark:text-red-400 mb-0.5 flex items-center gap-1">
-            <AlertTriangle className="h-3.5 w-3.5" /> Шалтгаан
-          </p>
-          <p className="text-foreground">{order.delivery_return_reason}</p>
+      {/* Failed reason + evidence photo */}
+      {order.status === "cancelled" && (order.delivery_return_reason || order.delivery_proof_photo) && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/5 px-3 py-2.5 text-xs space-y-2">
+          {order.delivery_return_reason && (
+            <div>
+              <p className="font-semibold text-red-700 dark:text-red-400 mb-0.5 flex items-center gap-1">
+                <AlertTriangle className="h-3.5 w-3.5" /> Шалтгаан
+              </p>
+              <p className="text-foreground">{order.delivery_return_reason}</p>
+            </div>
+          )}
+          {order.delivery_proof_photo && (
+            <button
+              type="button"
+              onClick={() => onZoom(order.delivery_proof_photo!)}
+              className="block w-full group"
+            >
+              <img
+                src={order.delivery_proof_photo}
+                alt="Нотолгоо"
+                className="w-full h-32 object-cover rounded-lg cursor-zoom-in"
+              />
+            </button>
+          )}
         </div>
       )}
 
