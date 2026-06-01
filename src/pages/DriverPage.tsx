@@ -772,6 +772,44 @@ export default function DriverPage() {
                   className="mt-1.5"
                 />
               </div>
+              <div>
+                <Label className="text-xs">Нотолгооны зураг (заавал биш)</Label>
+                <input
+                  ref={returnFileInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleReturnPhotoSelect}
+                  className="hidden"
+                />
+                {returnPhotoPreview ? (
+                  <div className="mt-1.5 relative">
+                    <img
+                      src={returnPhotoPreview}
+                      alt="Preview"
+                      className="w-full h-44 object-cover rounded-xl border border-border"
+                    />
+                    <button
+                      onClick={() => {
+                        setReturnPhotoFile(null);
+                        setReturnPhotoPreview(null);
+                      }}
+                      className="absolute top-2 right-2 bg-background/90 px-2 py-1 rounded-md text-xs"
+                    >
+                      Солих
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => returnFileInputRef.current?.click()}
+                    className="mt-1.5 w-full h-28 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                  >
+                    <Camera className="h-6 w-6" />
+                    <span className="text-xs">Зураг авах / Сонгох</span>
+                  </button>
+                )}
+              </div>
               <Button
                 onClick={handleReturn}
                 disabled={returnSubmitting}
