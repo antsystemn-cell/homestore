@@ -426,6 +426,16 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
               <option value="__unknown__">Бүртгэлгүй жолоочид</option>
             )}
           </select>
+          <div className="relative flex-1 sm:max-w-xs">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Жолоочийн нэрээр хайх..."
+              value={driverSearch}
+              onChange={(e) => setDriverSearch(e.target.value)}
+              className="w-full rounded-xl bg-secondary pl-8 pr-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/60"
+            />
+          </div>
         </div>
 
         {loadingDeliveries ? (
