@@ -4555,6 +4555,15 @@ const AdminPage = () => {
           {/* Stock Deduction Log Tab */}
           {tab === "stocklog" && <StockDeductionLog />}
 
+          {/* Drivers Tab */}
+          {tab === "drivers" && (
+            <DriversManager
+              drivers={drivers}
+              isAdmin={isAdmin}
+              onChange={fetchDrivers}
+            />
+          )}
+
           {/* Categories Tab */}
           {tab === "categories" && (
             <div className="space-y-4">
