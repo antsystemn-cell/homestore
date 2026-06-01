@@ -3666,7 +3666,7 @@ const AdminPage = () => {
                           </div>
                         )}
                         {o.delivery_order_id && (
-                          <div className="flex items-center gap-1.5 mt-1">
+                          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                             <span className="text-[10px] font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded">{o.delivery_order_id}</span>
                             {o.delivery_status && (
                               <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
@@ -3683,6 +3683,16 @@ const AdminPage = () => {
                                  o.delivery_status === "processing" ? "Боловсруулж байна" : o.delivery_status}
                               </span>
                             )}
+                            {(() => {
+                              const d = drivers.find((drv) => drv.id === o.driver_id);
+                              if (!d && !o.delivery_signature_name) return null;
+                              return (
+                                <span className="text-[10px] text-muted-foreground">
+                                  👤 {d?.full_name || o.delivery_signature_name}
+                                  {d?.phone ? ` · ${d.phone}` : ""}
+                                </span>
+                              );
+                            })()}
                           </div>
                         )}
                       </div>
