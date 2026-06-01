@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Truck, Plus, Loader2, Trash2, Pencil, Check, X } from "lucide-react";
+import { Truck, Plus, Loader2, Trash2, Pencil, Check, X, ChevronDown, ChevronUp, History } from "lucide-react";
 
 type Driver = {
   id: string;
@@ -11,10 +11,36 @@ type Driver = {
   is_active: boolean;
 };
 
+type DeliveryRow = {
+  id: string;
+  order_ref: string | null;
+  driver_id: string | null;
+  delivery_signature_name: string | null;
+  status: string | null;
+  delivery_status: string | null;
+  picked_up_at: string | null;
+  delivered_at: string | null;
+  assigned_at: string | null;
+  total: number | null;
+  phone: string | null;
+  shipping_address: string | null;
+};
+
 type Props = {
   drivers: Driver[];
   isAdmin: boolean;
   onChange: () => void | Promise<void>;
+};
+
+const formatDate = (iso: string | null) => {
+  if (!iso) return "—";
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString("mn-MN", {
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit",
+    });
+  } catch { return iso; }
 };
 
 const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
@@ -22,6 +48,53 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ full_name: "", phone: "", note: "" });
+  const [deliveries, setDeliveries] = useState<DeliveryRow[]>([]);
+  const [loadingDeliveries, setLoadingDeliveries] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const loadDeliveries = async () => {
+    setLoadingDeliveries(true);
+    const { data, error } = await supabase
+      .from("orders")
+      .select("id, order_ref, driver_id, delivery_signature_name, status, delivery_status, picked_up_at, delivered_at, assigned_at, total, phone, shipping_address")
+      .or("driver_id.not.is.null,delivery_signature_name.not.is.null")
+      .order("picked_up_at", { ascending: false, nullsFirst: false })
+      .limit(500);
+    setLoadingDeliveries(false);
+    if (error) {
+      console.error("loadDeliveries", error);
+      return;
+    }
+    setDeliveries((data || []) as DeliveryRow[]);
+  };
+
+  useEffect(() => {
+    loadDeliveries();
+  }, []);
+
+  const statsByDriver = useMemo(() => {
+    const map = new Map<string, DeliveryRow[]>();
+    for (const row of deliveries) {
+      const key = row.driver_id || `name:${(row.delivery_signature_name || "").trim().toLowerCase()}`;
+      if (!key || key === "name:") continue;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(row);
+    }
+    return map;
+  }, [deliveries]);
+
+  const unknownDrivers = useMemo(() => {
+    const known = new Set(drivers.map((d) => d.id));
+    const out: { key: string; name: string; rows: DeliveryRow[] }[] = [];
+    statsByDriver.forEach((rows, key) => {
+      if (key.startsWith("name:")) {
+        out.push({ key, name: rows[0].delivery_signature_name || "—", rows });
+      } else if (!known.has(key)) {
+        out.push({ key, name: rows[0].delivery_signature_name || "Тодорхойгүй", rows });
+      }
+    });
+    return out;
+  }, [statsByDriver, drivers]);
 
   const addDriver = async () => {
     const name = form.full_name.trim();
@@ -100,6 +173,64 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
     }
     toast.success("Устгалаа");
     await onChange();
+  };
+
+  const renderDriverStats = (key: string, label: string, rows: DeliveryRow[]) => {
+    const total = rows.length;
+    const delivered = rows.filter((r) => r.status === "completed" || r.delivered_at).length;
+    const inProgress = rows.filter((r) => !r.delivered_at && (r.status === "delivering" || r.delivery_status === "out_for_delivery")).length;
+    const lastAt = rows[0]?.picked_up_at || rows[0]?.assigned_at || rows[0]?.delivered_at;
+    const expanded = expandedId === key;
+    return (
+      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setExpandedId(expanded ? null : key)}
+          className="w-full flex items-center justify-between gap-3 p-4 hover:bg-secondary/40 transition-colors text-left"
+        >
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-sm truncate">{label}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Сүүлд: {formatDate(lastAt)}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="bg-primary/10 text-primary font-bold px-2.5 py-1 rounded-full">
+              {total} хүргэлт
+            </span>
+            <span className="bg-emerald-100 text-emerald-700 font-bold px-2.5 py-1 rounded-full">
+              {delivered} ✓
+            </span>
+            {inProgress > 0 && (
+              <span className="bg-amber-100 text-amber-700 font-bold px-2.5 py-1 rounded-full">
+                {inProgress} яваа
+              </span>
+            )}
+            {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </div>
+        </button>
+        {expanded && (
+          <div className="border-t border-border divide-y divide-border max-h-96 overflow-y-auto">
+            {rows.map((r) => (
+              <div key={r.id} className="p-3 text-xs flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold">{r.order_ref || r.id.slice(0, 8)}</p>
+                  <p className="text-muted-foreground truncate">
+                    {r.phone || "—"} {r.shipping_address ? `· ${r.shipping_address}` : ""}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-muted-foreground">Авсан: {formatDate(r.picked_up_at)}</p>
+                  {r.delivered_at && (
+                    <p className="text-emerald-600 font-semibold">Хүргэсэн: {formatDate(r.delivered_at)}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -238,6 +369,44 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
                 </div>
               );
             })}
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-sm flex items-center gap-2">
+            <History className="h-4 w-4" /> Хүргэлтийн түүх
+          </h3>
+          <button
+            type="button"
+            onClick={loadDeliveries}
+            disabled={loadingDeliveries}
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-secondary hover:bg-secondary/80 disabled:opacity-50"
+          >
+            {loadingDeliveries ? "Ачаалж байна..." : "Шинэчлэх"}
+          </button>
+        </div>
+
+        {loadingDeliveries ? (
+          <div className="bg-card rounded-2xl border border-border p-8 flex items-center justify-center">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {drivers.map((d) => {
+              const rows = statsByDriver.get(d.id) || [];
+              if (rows.length === 0) return null;
+              return <div key={d.id}>{renderDriverStats(d.id, d.full_name, rows)}</div>;
+            })}
+            {unknownDrivers.map((u) => (
+              <div key={u.key}>{renderDriverStats(u.key, `${u.name} (бүртгэлгүй)`, u.rows)}</div>
+            ))}
+            {statsByDriver.size === 0 && (
+              <p className="text-center text-sm text-muted-foreground py-8 bg-card rounded-2xl border border-border">
+                Одоогоор хүргэлтийн бүртгэл алга
+              </p>
+            )}
           </div>
         )}
       </div>
