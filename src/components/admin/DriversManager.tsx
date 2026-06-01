@@ -74,16 +74,28 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
     loadDeliveries();
   }, []);
 
+  const filteredDeliveries = useMemo(() => {
+    return deliveries.filter((r) => {
+      if (statusFilter === "delivered") {
+        if (!(r.status === "completed" || r.delivered_at)) return false;
+      } else if (statusFilter === "out_for_delivery") {
+        if (r.delivered_at || r.status === "completed") return false;
+        if (!(r.status === "delivering" || r.delivery_status === "out_for_delivery")) return false;
+      }
+      return true;
+    });
+  }, [deliveries, statusFilter]);
+
   const statsByDriver = useMemo(() => {
     const map = new Map<string, DeliveryRow[]>();
-    for (const row of deliveries) {
+    for (const row of filteredDeliveries) {
       const key = row.driver_id || `name:${(row.delivery_signature_name || "").trim().toLowerCase()}`;
       if (!key || key === "name:") continue;
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(row);
     }
     return map;
-  }, [deliveries]);
+  }, [filteredDeliveries]);
 
   const unknownDrivers = useMemo(() => {
     const known = new Set(drivers.map((d) => d.id));
