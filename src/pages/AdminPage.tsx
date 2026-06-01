@@ -55,7 +55,7 @@ const AdminPage = () => {
   const hasAdminAccess = isAdmin || isModerator;
   const [tab, setTab] = useState<Tab>(() => {
     const t = searchParams.get("tab") as Tab | null;
-    const valid: Tab[] = ["stats","products","orders","users","categories","brands","delivery","payments","banner","collections","chatbot","analytics","diagnostics","settings"];
+    const valid: Tab[] = ["stats","products","orders","users","drivers","categories","brands","delivery","payments","banner","collections","chatbot","analytics","diagnostics","settings"];
     return t && valid.includes(t) ? t : "stats";
   });
   const [products, setProducts] = useState<any[]>([]);
