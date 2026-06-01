@@ -274,6 +274,48 @@ export type Database = {
         }
         Relationships: []
       }
+      driver_role_requests: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          note: string | null
+          phone: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          note?: string | null
+          phone?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          note?: string | null
+          phone?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       drivers: {
         Row: {
           created_at: string
@@ -1346,6 +1388,21 @@ export type Database = {
         Returns: undefined
       }
       increment_story_view: { Args: { _story_id: string }; Returns: undefined }
+      list_driver_requests: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          note: string
+          phone: string
+          review_note: string
+          reviewed_at: string
+          status: string
+          user_id: string
+        }[]
+      }
       list_drivers: {
         Args: never
         Returns: {
