@@ -4048,6 +4048,35 @@ const AdminPage = () => {
                           </select>
                         </div>
 
+                        {/* Out for delivery driver display */}
+                        {(o.status === "delivering" || o.delivery_status === "out_for_delivery") && (o.delivered_at == null && o.delivery_status !== "delivered") && (() => {
+                          const assignedDriver = drivers.find((d) => d.id === o.driver_id);
+                          if (!assignedDriver && !o.delivery_signature_name) return null;
+                          return (
+                            <div className="bg-amber-500/5 border border-amber-500/30 rounded-xl p-3 text-xs space-y-1">
+                              <p className="flex items-center gap-1.5 text-amber-600 font-bold">
+                                <Truck className="h-3.5 w-3.5" /> Хүргэлтэнд гарсан
+                              </p>
+                              <p>
+                                <span className="text-muted-foreground">Авч явсан:</span>{" "}
+                                <span className="font-medium">
+                                  {assignedDriver?.full_name || o.delivery_signature_name || "—"}
+                                  {assignedDriver?.phone ? ` · ${assignedDriver.phone}` : ""}
+                                </span>
+                              </p>
+                              {o.picked_up_at && (
+                                <p>
+                                  <span className="text-muted-foreground">Огноо:</span>{" "}
+                                  <span className="font-medium">
+                                    {new Date(o.picked_up_at).toLocaleString("mn-MN", { dateStyle: "short", timeStyle: "short" })}
+                                  </span>
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })()}
+
+
                         {/* Delivered status display */}
                         {(o.delivery_status === "delivered" || !!o.delivered_at) && (() => {
                           const assignedDriver = drivers.find((d) => d.id === o.driver_id);
