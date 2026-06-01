@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Truck, Plus, Loader2, Trash2, Pencil, Check, X, ChevronDown, ChevronUp, History, Search } from "lucide-react";
+import { Truck, Plus, Loader2, Trash2, Pencil, Check, X, ChevronDown, ChevronUp, History, Search, UserCheck, UserX, Clock, Mail, Phone } from "lucide-react";
 
 type Driver = {
   id: string;
