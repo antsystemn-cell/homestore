@@ -160,9 +160,81 @@ export default function DriverPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [lightboxUrl]);
 
-  useEffect(() => {
-    if (!authLoading && !hasAccess) navigate("/");
-  }, [authLoading, hasAccess, navigate]);
+  // Auth form state (in-page login / signup)
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authFullName, setAuthFullName] = useState("");
+  const [authPhone, setAuthPhone] = useState("");
+  const [authBusy, setAuthBusy] = useState(false);
+  const [claimBusy, setClaimBusy] = useState(false);
+
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!authEmail || !authPassword) {
+      toast.error("И-мэйл болон нууц үгээ оруулна уу");
+      return;
+    }
+    setAuthBusy(true);
+    try {
+      if (authMode === "login") {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: authEmail.trim(),
+          password: authPassword,
+        });
+        if (error) throw error;
+        toast.success("Тавтай морил!");
+      } else {
+        const { data, error } = await supabase.auth.signUp({
+          email: authEmail.trim(),
+          password: authPassword,
+          options: {
+            emailRedirectTo: `${window.location.origin}/driver`,
+            data: { full_name: authFullName.trim() || null },
+          },
+        });
+        if (error) throw error;
+        if (data.session && data.user) {
+          // Save profile phone if provided
+          if (authPhone.trim() || authFullName.trim()) {
+            await supabase
+              .from("profiles")
+              .update({
+                full_name: authFullName.trim() || null,
+                phone: authPhone.trim() || null,
+              })
+              .eq("user_id", data.user.id);
+          }
+          // Auto-claim driver role
+          const { error: rpcErr } = await supabase.rpc("claim_driver_role");
+          if (rpcErr) console.error(rpcErr);
+          toast.success("Бүртгэл амжилттай! Жолоочийн эрх идэвхжлээ.");
+          // Reload so AuthContext refreshes roles
+          setTimeout(() => window.location.reload(), 400);
+        } else {
+          toast.success("Бүртгэл үүслээ. И-мэйлээ шалгаж баталгаажуулна уу.");
+        }
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Алдаа гарлаа");
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+
+  const handleClaimDriver = async () => {
+    setClaimBusy(true);
+    try {
+      const { error } = await supabase.rpc("claim_driver_role");
+      if (error) throw error;
+      toast.success("Жолоочийн эрх идэвхжлээ");
+      setTimeout(() => window.location.reload(), 400);
+    } catch (err: any) {
+      toast.error(err?.message || "Эрх авч чадсангүй");
+    } finally {
+      setClaimBusy(false);
+    }
+  };
 
   const fetchOrders = async (silent = false) => {
     if (!silent) setLoading(true);
