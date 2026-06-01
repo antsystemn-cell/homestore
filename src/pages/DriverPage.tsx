@@ -395,10 +395,14 @@ export default function DriverPage() {
     setReturnOrderId(order.id);
     setReturnReason(RETURN_REASONS[0]);
     setReturnNote("");
+    setReturnPhotoFile(null);
+    setReturnPhotoPreview(null);
   };
   const closeReturnModal = () => {
     setReturnOrderId(null);
     setReturnNote("");
+    setReturnPhotoFile(null);
+    setReturnPhotoPreview(null);
   };
 
   const handleReturn = async () => {
@@ -408,13 +412,33 @@ export default function DriverPage() {
       : returnReason;
     setReturnSubmitting(true);
     try {
+      let photoUrl: string | null = null;
+      if (returnPhotoFile) {
+        const ext = returnPhotoFile.name.split(".").pop() || "jpg";
+        const path = `${user.id}/${returnOrderId}-return-${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("delivery-proofs")
+          .upload(path, returnPhotoFile, {
+            contentType: returnPhotoFile.type,
+            upsert: false,
+          });
+        if (upErr) throw upErr;
+        const { data: pub } = supabase.storage
+          .from("delivery-proofs")
+          .getPublicUrl(path);
+        photoUrl = pub.publicUrl;
+      }
+
+      const update: any = {
+        status: "cancelled",
+        delivery_failed_at: new Date().toISOString(),
+        delivery_return_reason: reasonText,
+      };
+      if (photoUrl) update.delivery_proof_photo = photoUrl;
+
       const { error } = await supabase
         .from("orders")
-        .update({
-          status: "cancelled",
-          delivery_failed_at: new Date().toISOString(),
-          delivery_return_reason: reasonText,
-        })
+        .update(update)
         .eq("id", returnOrderId);
       if (error) throw error;
       toast.success("Захиалгыг буцаасан/аваагүй гэж тэмдэглэлээ");
