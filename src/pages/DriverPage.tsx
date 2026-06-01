@@ -134,6 +134,22 @@ export default function DriverPage() {
   const [returnReason, setReturnReason] = useState<string>(RETURN_REASONS[0]);
   const [returnNote, setReturnNote] = useState("");
   const [returnSubmitting, setReturnSubmitting] = useState(false);
+  const [returnPhotoFile, setReturnPhotoFile] = useState<File | null>(null);
+  const [returnPhotoPreview, setReturnPhotoPreview] = useState<string | null>(null);
+  const returnFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleReturnPhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Зурагны хэмжээ 8MB-аас бага байх ёстой");
+      return;
+    }
+    setReturnPhotoFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setReturnPhotoPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     if (!lightboxUrl) return;
