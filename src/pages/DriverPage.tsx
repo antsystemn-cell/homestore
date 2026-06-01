@@ -1031,13 +1031,30 @@ function OrderCard({
         </div>
       )}
 
-      {/* Failed reason */}
-      {order.status === "cancelled" && order.delivery_return_reason && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/5 px-3 py-2 text-xs">
-          <p className="font-semibold text-red-700 dark:text-red-400 mb-0.5 flex items-center gap-1">
-            <AlertTriangle className="h-3.5 w-3.5" /> Шалтгаан
-          </p>
-          <p className="text-foreground">{order.delivery_return_reason}</p>
+      {/* Failed reason + evidence photo */}
+      {order.status === "cancelled" && (order.delivery_return_reason || order.delivery_proof_photo) && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/5 px-3 py-2.5 text-xs space-y-2">
+          {order.delivery_return_reason && (
+            <div>
+              <p className="font-semibold text-red-700 dark:text-red-400 mb-0.5 flex items-center gap-1">
+                <AlertTriangle className="h-3.5 w-3.5" /> Шалтгаан
+              </p>
+              <p className="text-foreground">{order.delivery_return_reason}</p>
+            </div>
+          )}
+          {order.delivery_proof_photo && (
+            <button
+              type="button"
+              onClick={() => onZoom(order.delivery_proof_photo!)}
+              className="block w-full group"
+            >
+              <img
+                src={order.delivery_proof_photo}
+                alt="Нотолгоо"
+                className="w-full h-32 object-cover rounded-lg cursor-zoom-in"
+              />
+            </button>
+          )}
         </div>
       )}
 
