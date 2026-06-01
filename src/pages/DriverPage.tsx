@@ -738,20 +738,106 @@ export default function DriverPage() {
   }
 
   if (!hasAccess) {
+    const status = driverRequest?.status;
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-sm p-6 text-center">
+        <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-sm p-6">
           <div className="w-12 h-12 mx-auto rounded-xl bg-primary/10 flex items-center justify-center mb-3">
             <Truck className="w-6 h-6 text-primary" />
           </div>
-          <h1 className="text-lg font-semibold">Жолоочийн эрх авах</h1>
-          <p className="text-sm text-muted-foreground mt-1 mb-5">
-            Та нэвтэрсэн боловч жолоочийн эрхгүй байна. Доорх товчийг дарж жолоочийн булан руу нэвтрэх эрх аваарай.
-          </p>
-          <Button onClick={handleClaimDriver} disabled={claimBusy} className="w-full">
-            {claimBusy && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            Жолоочийн эрх авах
-          </Button>
+
+          {driverRequestLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+            </div>
+          ) : status === "pending" ? (
+            <div className="text-center">
+              <h1 className="text-lg font-semibold">Хүсэлт хянагдаж байна</h1>
+              <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs font-medium">
+                <Clock className="w-3.5 h-3.5" />
+                Хянагдаж буй
+              </div>
+              <p className="text-sm text-muted-foreground mt-4">
+                Таны жолоочийн эрх хүсэх хүсэлтийг админ хянаж байна. Батлагдмагц энэ хуудас автоматаар идэвхжинэ.
+              </p>
+              <div className="mt-5 text-left text-xs text-muted-foreground bg-muted/40 rounded-lg p-3 space-y-1">
+                <div><span className="text-foreground font-medium">Нэр:</span> {driverRequest?.full_name || "—"}</div>
+                <div><span className="text-foreground font-medium">Утас:</span> {driverRequest?.phone || "—"}</div>
+                {driverRequest?.note && (
+                  <div><span className="text-foreground font-medium">Тэмдэглэл:</span> {driverRequest.note}</div>
+                )}
+                <div><span className="text-foreground font-medium">Илгээсэн:</span> {formatDateTime(driverRequest!.created_at)}</div>
+              </div>
+            </div>
+          ) : status === "approved" ? (
+            <div className="text-center">
+              <h1 className="text-lg font-semibold">Батлагдсан</h1>
+              <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-medium">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                Батлагдсан
+              </div>
+              <p className="text-sm text-muted-foreground mt-4">
+                Эрхээ ачаалж байна... Хэрэв автоматаар орохгүй бол хуудсыг сэргээнэ үү.
+              </p>
+              <Button onClick={() => window.location.reload()} className="w-full mt-4">
+                Үргэлжлүүлэх
+              </Button>
+            </div>
+          ) : (
+            <>
+              <h1 className="text-lg font-semibold text-center">Жолоочийн эрх хүсэх</h1>
+              <p className="text-sm text-muted-foreground text-center mt-1 mb-4">
+                Доорх маягтыг бөглөж илгээгээрэй. Админ хянаж баталгаажуулсны дараа таны эрх идэвхжинэ.
+              </p>
+
+              {status === "rejected" && (
+                <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700">
+                  <div className="flex items-center gap-1.5 font-medium mb-1">
+                    <XCircle className="w-3.5 h-3.5" /> Өмнөх хүсэлт татгалзсан
+                  </div>
+                  {driverRequest?.review_note && <div>{driverRequest.review_note}</div>}
+                  <div className="mt-1 opacity-80">Та дахин хүсэлт илгээж болно.</div>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmitDriverRequest} className="space-y-3">
+                <div>
+                  <Label className="text-xs">Овог нэр *</Label>
+                  <Input
+                    value={requestFullName}
+                    onChange={(e) => setRequestFullName(e.target.value)}
+                    placeholder="Бат-Эрдэнэ"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Утас *</Label>
+                  <Input
+                    value={requestPhone}
+                    onChange={(e) => setRequestPhone(e.target.value)}
+                    placeholder="9911XXXX"
+                    inputMode="tel"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Тэмдэглэл</Label>
+                  <textarea
+                    value={requestNote}
+                    onChange={(e) => setRequestNote(e.target.value)}
+                    placeholder="Туршлага, машины мэдээлэл г.м (заавал биш)"
+                    rows={3}
+                    className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={requestBusy}>
+                  {requestBusy && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  Хүсэлт илгээх
+                </Button>
+              </form>
+            </>
+          )}
+
           <button
             type="button"
             onClick={async () => {
@@ -760,7 +846,7 @@ export default function DriverPage() {
             }}
             className="block mx-auto mt-4 text-xs text-muted-foreground hover:text-foreground"
           >
-            Өөр хаягаар нэвтрэх
+            Гарах
           </button>
         </div>
       </div>
