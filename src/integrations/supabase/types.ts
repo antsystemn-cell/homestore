@@ -487,6 +487,7 @@ export type Database = {
           created_at: string
           delivered_at: string | null
           delivery_completed_photo: string | null
+          delivery_failed_at: string | null
           delivery_fee: number | null
           delivery_gps_lat: number | null
           delivery_gps_lng: number | null
@@ -494,6 +495,7 @@ export type Database = {
           delivery_order_id: string | null
           delivery_pickup_photo: string | null
           delivery_proof_photo: string | null
+          delivery_return_reason: string | null
           delivery_signature_name: string | null
           delivery_status: string | null
           driver_id: string | null
@@ -503,6 +505,7 @@ export type Database = {
           is_guest: boolean | null
           items: Json
           order_ref: string | null
+          payment_collected_at: string | null
           payment_intent_id: string | null
           payment_method: string | null
           payment_status: string | null
@@ -523,6 +526,7 @@ export type Database = {
           created_at?: string
           delivered_at?: string | null
           delivery_completed_photo?: string | null
+          delivery_failed_at?: string | null
           delivery_fee?: number | null
           delivery_gps_lat?: number | null
           delivery_gps_lng?: number | null
@@ -530,6 +534,7 @@ export type Database = {
           delivery_order_id?: string | null
           delivery_pickup_photo?: string | null
           delivery_proof_photo?: string | null
+          delivery_return_reason?: string | null
           delivery_signature_name?: string | null
           delivery_status?: string | null
           driver_id?: string | null
@@ -539,6 +544,7 @@ export type Database = {
           is_guest?: boolean | null
           items?: Json
           order_ref?: string | null
+          payment_collected_at?: string | null
           payment_intent_id?: string | null
           payment_method?: string | null
           payment_status?: string | null
@@ -559,6 +565,7 @@ export type Database = {
           created_at?: string
           delivered_at?: string | null
           delivery_completed_photo?: string | null
+          delivery_failed_at?: string | null
           delivery_fee?: number | null
           delivery_gps_lat?: number | null
           delivery_gps_lng?: number | null
@@ -566,6 +573,7 @@ export type Database = {
           delivery_order_id?: string | null
           delivery_pickup_photo?: string | null
           delivery_proof_photo?: string | null
+          delivery_return_reason?: string | null
           delivery_signature_name?: string | null
           delivery_status?: string | null
           driver_id?: string | null
@@ -575,6 +583,7 @@ export type Database = {
           is_guest?: boolean | null
           items?: Json
           order_ref?: string | null
+          payment_collected_at?: string | null
           payment_intent_id?: string | null
           payment_method?: string | null
           payment_status?: string | null
@@ -1262,6 +1271,7 @@ export type Database = {
           created_at: string
           delivered_at: string | null
           delivery_completed_photo: string | null
+          delivery_failed_at: string | null
           delivery_fee: number | null
           delivery_gps_lat: number | null
           delivery_gps_lng: number | null
@@ -1269,6 +1279,7 @@ export type Database = {
           delivery_order_id: string | null
           delivery_pickup_photo: string | null
           delivery_proof_photo: string | null
+          delivery_return_reason: string | null
           delivery_signature_name: string | null
           delivery_status: string | null
           driver_id: string | null
@@ -1278,6 +1289,7 @@ export type Database = {
           is_guest: boolean | null
           items: Json
           order_ref: string | null
+          payment_collected_at: string | null
           payment_intent_id: string | null
           payment_method: string | null
           payment_status: string | null

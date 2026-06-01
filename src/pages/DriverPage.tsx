@@ -23,11 +23,14 @@ import {
   History,
   ChevronDown,
   ChevronUp,
-  Circle,
   X,
+  XCircle,
+  Banknote,
+  Wallet,
+  AlertTriangle,
 } from "lucide-react";
 
-type Tab = "available" | "active" | "delivered";
+type Tab = "available" | "active" | "delivered" | "failed";
 
 interface Order {
   id: string;
@@ -47,6 +50,12 @@ interface Order {
   delivery_signature_name: string | null;
   delivery_gps_lat: number | null;
   delivery_gps_lng: number | null;
+  payment_method: string | null;
+  payment_status: string | null;
+  delivery_fee: number | null;
+  delivery_return_reason: string | null;
+  payment_collected_at: string | null;
+  delivery_failed_at: string | null;
 }
 
 interface StatusEvent {
@@ -63,71 +72,39 @@ interface StatusEvent {
 const formatPrice = (n: number) => `${(n ?? 0).toLocaleString("mn-MN")}₮`;
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: "Шинэ захиалга",
+  pending: "Шинэ",
   preparing: "Бэлдэж байна",
   phone_confirmed: "Утсаар баталгаажсан",
   ready: "Авах бэлэн",
   out_for_delivery: "Хүргэлтэнд",
   delivered: "Хүргэгдсэн",
   completed: "Дууссан",
-  cancelled: "Цуцалсан",
+  cancelled: "Цуцалсан / Буцаасан",
 };
 
-const STATUS_VARIANTS: Record<string, "default" | "secondary" | "outline"> = {
-  ready: "secondary",
-  out_for_delivery: "default",
-  delivered: "outline",
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  cash: "Бэлэн мөнгө",
+  qpay: "QPay",
+  storepay: "Storepay",
+  pocket: "Pocket",
 };
 
-// Timeline color coding per status
-const STATUS_DOT_CLS: Record<string, string> = {
-  pending: "bg-slate-400",
-  preparing: "bg-amber-500",
-  phone_confirmed: "bg-sky-500",
-  ready: "bg-blue-500",
-  out_for_delivery: "bg-violet-500",
-  delivered: "bg-emerald-500",
-  completed: "bg-emerald-600",
-  cancelled: "bg-red-500",
-};
-
-// Canonical order of pipeline steps for the visual timeline
-const PIPELINE: string[] = [
-  "pending",
-  "preparing",
-  "phone_confirmed",
-  "ready",
-  "out_for_delivery",
-  "delivered",
+const RETURN_REASONS = [
+  "Хүлээн авагч хариу өгөхгүй байна",
+  "Хаяг олдсонгүй",
+  "Худалдан авагч аваагүй",
+  "Барааг буцаасан",
+  "Худалдан авагч цуцалсан",
+  "Бусад",
 ];
 
-// Index map for quick "is step before/at current?" lookups
-const PIPELINE_INDEX: Record<string, number> = PIPELINE.reduce(
-  (acc, s, i) => ({ ...acc, [s]: i }),
-  {} as Record<string, number>
-);
-
-const formatDateTime = (iso: string) => {
-  const d = new Date(iso);
-  return d.toLocaleString("mn-MN", {
+const formatDateTime = (iso: string) =>
+  new Date(iso).toLocaleString("mn-MN", {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
   });
-};
-
-const relativeTime = (iso: string) => {
-  const diff = Date.now() - new Date(iso).getTime();
-  const sec = Math.floor(diff / 1000);
-  if (sec < 60) return `${sec}с өмнө`;
-  const min = Math.floor(sec / 60);
-  if (min < 60) return `${min}м өмнө`;
-  const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr}ц өмнө`;
-  const day = Math.floor(hr / 24);
-  return `${day}ө өмнө`;
-};
 
 export default function DriverPage() {
   const navigate = useNavigate();
@@ -141,17 +118,23 @@ export default function DriverPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Per-order interaction state
+  // Complete delivery modal
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
   const [signatureName, setSignatureName] = useState("");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [paymentCollected, setPaymentCollected] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [pickupSubmitting, setPickupSubmitting] = useState<string | null>(null);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Close lightbox on Esc
+  // Failed/return modal
+  const [returnOrderId, setReturnOrderId] = useState<string | null>(null);
+  const [returnReason, setReturnReason] = useState<string>(RETURN_REASONS[0]);
+  const [returnNote, setReturnNote] = useState("");
+  const [returnSubmitting, setReturnSubmitting] = useState(false);
+
   useEffect(() => {
     if (!lightboxUrl) return;
     const onKey = (e: KeyboardEvent) => {
@@ -162,37 +145,50 @@ export default function DriverPage() {
   }, [lightboxUrl]);
 
   useEffect(() => {
-    if (!authLoading && !hasAccess) {
-      navigate("/");
-    }
+    if (!authLoading && !hasAccess) navigate("/");
   }, [authLoading, hasAccess, navigate]);
 
   const fetchOrders = async (silent = false) => {
     if (!silent) setLoading(true);
     else setRefreshing(true);
     try {
-      const ordersRes = await supabase
-        .from("orders")
-        .select("*")
-        .in("status", ["ready", "out_for_delivery", "delivered"])
-        .order("created_at", { ascending: false })
-        .limit(200);
-      if (ordersRes.error) throw ordersRes.error;
-      const ordersData = (ordersRes.data || []) as Order[];
-      setOrders(ordersData);
+      // Get ready (available), and orders assigned to me in any of these states
+      const myId = user?.id;
+      const [readyRes, mineRes] = await Promise.all([
+        supabase
+          .from("orders")
+          .select("*")
+          .eq("status", "ready")
+          .order("created_at", { ascending: false })
+          .limit(200),
+        myId
+          ? supabase
+              .from("orders")
+              .select("*")
+              .eq("driver_id", myId)
+              .in("status", ["out_for_delivery", "delivered", "completed", "cancelled"])
+              .order("created_at", { ascending: false })
+              .limit(200)
+          : Promise.resolve({ data: [], error: null } as any),
+      ]);
+      if (readyRes.error) throw readyRes.error;
+      if (mineRes.error) throw mineRes.error;
 
-      const ids = ordersData.map((o) => o.id);
+      // Merge & dedupe
+      const map = new Map<string, Order>();
+      [...(readyRes.data || []), ...(mineRes.data || [])].forEach((o: any) => map.set(o.id, o));
+      const merged = Array.from(map.values()) as Order[];
+      setOrders(merged);
+
+      const ids = merged.map((o) => o.id);
       if (ids.length) {
-        const { data: hData, error: hErr } = await supabase
+        const { data: hData } = await supabase
           .from("order_status_history")
           .select("*")
           .in("order_id", ids)
           .order("created_at", { ascending: true });
-        if (hErr) console.warn("history fetch", hErr);
         setHistory((hData || []) as StatusEvent[]);
-      } else {
-        setHistory([]);
-      }
+      } else setHistory([]);
     } catch (e: any) {
       console.error(e);
       toast.error("Захиалга татаж чадсангүй: " + (e.message || ""));
@@ -203,28 +199,16 @@ export default function DriverPage() {
   };
 
   useEffect(() => {
-    if (hasAccess) void fetchOrders();
-  }, [hasAccess]);
+    if (hasAccess && user) void fetchOrders();
+  }, [hasAccess, user?.id]);
 
-  // Realtime — orders + status history
+  // Realtime
   useEffect(() => {
     if (!hasAccess) return;
     const channel = supabase
       .channel("driver-orders")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "orders" },
-        () => void fetchOrders(true)
-      )
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "order_status_history" },
-        (payload) => {
-          const ev = payload.new as StatusEvent;
-          setHistory((prev) =>
-            prev.some((e) => e.id === ev.id) ? prev : [...prev, ev]
-          );
-        }
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () =>
+        void fetchOrders(true)
       )
       .subscribe();
     return () => {
@@ -240,12 +224,44 @@ export default function DriverPage() {
       );
     }
     if (tab === "active") {
-      return orders.filter((o) => o.status === "out_for_delivery" && o.driver_id === user.id);
+      return orders.filter(
+        (o) => o.status === "out_for_delivery" && o.driver_id === user.id
+      );
     }
-    return orders.filter((o) => o.status === "delivered" && o.driver_id === user.id);
+    if (tab === "delivered") {
+      return orders.filter(
+        (o) =>
+          (o.status === "delivered" || o.status === "completed") &&
+          o.driver_id === user.id
+      );
+    }
+    // failed: cancelled by me, or with delivery_failed_at
+    return orders.filter(
+      (o) => o.status === "cancelled" && o.driver_id === user.id
+    );
   }, [orders, tab, user]);
 
-  // 1. Driver picks up an order from warehouse
+  const counts = useMemo(() => {
+    if (!user) return { available: 0, active: 0, delivered: 0, failed: 0 };
+    return {
+      available: orders.filter(
+        (o) => o.status === "ready" && (!o.driver_id || o.driver_id === user.id)
+      ).length,
+      active: orders.filter(
+        (o) => o.status === "out_for_delivery" && o.driver_id === user.id
+      ).length,
+      delivered: orders.filter(
+        (o) =>
+          (o.status === "delivered" || o.status === "completed") &&
+          o.driver_id === user.id
+      ).length,
+      failed: orders.filter(
+        (o) => o.status === "cancelled" && o.driver_id === user.id
+      ).length,
+    };
+  }, [orders, user]);
+
+  // Pickup from warehouse
   const handlePickup = async (order: Order) => {
     if (!user) return;
     setPickupSubmitting(order.id);
@@ -264,19 +280,19 @@ export default function DriverPage() {
       setTab("active");
       await fetchOrders(true);
     } catch (e: any) {
-      console.error(e);
-      toast.error("Алдаа гарлаа: " + (e.message || ""));
+      toast.error("Алдаа: " + (e.message || ""));
     } finally {
       setPickupSubmitting(null);
     }
   };
 
-  // Open delivery completion form
   const openCompleteForm = (order: Order) => {
     setActiveOrderId(order.id);
     setSignatureName(order.guest_name || "");
     setPhotoFile(null);
     setPhotoPreview(null);
+    // Default: if cash, need to collect; if already paid online, no need
+    setPaymentCollected(order.payment_status !== "paid");
   };
 
   const closeCompleteForm = () => {
@@ -299,8 +315,8 @@ export default function DriverPage() {
     reader.readAsDataURL(file);
   };
 
-  const getCurrentLocation = (): Promise<{ lat: number; lng: number } | null> => {
-    return new Promise((resolve) => {
+  const getCurrentLocation = (): Promise<{ lat: number; lng: number } | null> =>
+    new Promise((resolve) => {
       if (!("geolocation" in navigator)) return resolve(null);
       navigator.geolocation.getCurrentPosition(
         (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
@@ -308,20 +324,17 @@ export default function DriverPage() {
         { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
       );
     });
-  };
 
-  // 2. Driver completes delivery — uploads photo, captures GPS, name
   const handleComplete = async () => {
     if (!user || !activeOrderId) return;
     if (!signatureName.trim()) {
       toast.error("Хүлээн авагчийн нэр заавал хэрэгтэй");
       return;
     }
-
+    const order = orders.find((o) => o.id === activeOrderId);
     setSubmitting(true);
     try {
       let photoUrl: string | null = null;
-
       if (photoFile) {
         const ext = photoFile.name.split(".").pop() || "jpg";
         const path = `${user.id}/${activeOrderId}-${Date.now()}.${ext}`;
@@ -329,34 +342,73 @@ export default function DriverPage() {
           .from("delivery-proofs")
           .upload(path, photoFile, { contentType: photoFile.type, upsert: false });
         if (upErr) throw upErr;
-        const { data: pub } = supabase.storage.from("delivery-proofs").getPublicUrl(path);
+        const { data: pub } = supabase.storage
+          .from("delivery-proofs")
+          .getPublicUrl(path);
         photoUrl = pub.publicUrl;
       }
-
       const gps = await getCurrentLocation();
 
-      const { error } = await supabase
-        .from("orders")
-        .update({
-          status: "delivered",
-          delivered_at: new Date().toISOString(),
-          delivery_signature_name: signatureName.trim(),
-          delivery_proof_photo: photoUrl,
-          delivery_gps_lat: gps?.lat ?? null,
-          delivery_gps_lng: gps?.lng ?? null,
-        })
-        .eq("id", activeOrderId);
+      const update: any = {
+        status: "delivered",
+        delivered_at: new Date().toISOString(),
+        delivery_signature_name: signatureName.trim(),
+        delivery_proof_photo: photoUrl,
+        delivery_gps_lat: gps?.lat ?? null,
+        delivery_gps_lng: gps?.lng ?? null,
+      };
+      if (paymentCollected) {
+        update.payment_status = "paid";
+        update.payment_collected_at = new Date().toISOString();
+      }
 
+      const { error } = await supabase.from("orders").update(update).eq("id", activeOrderId);
       if (error) throw error;
       toast.success("Хүргэлт амжилттай дууслаа ✅");
       closeCompleteForm();
       setTab("delivered");
       await fetchOrders(true);
     } catch (e: any) {
-      console.error(e);
-      toast.error("Алдаа гарлаа: " + (e.message || ""));
+      toast.error("Алдаа: " + (e.message || ""));
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const openReturnModal = (order: Order) => {
+    setReturnOrderId(order.id);
+    setReturnReason(RETURN_REASONS[0]);
+    setReturnNote("");
+  };
+  const closeReturnModal = () => {
+    setReturnOrderId(null);
+    setReturnNote("");
+  };
+
+  const handleReturn = async () => {
+    if (!user || !returnOrderId) return;
+    const reasonText = returnNote.trim()
+      ? `${returnReason} — ${returnNote.trim()}`
+      : returnReason;
+    setReturnSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from("orders")
+        .update({
+          status: "cancelled",
+          delivery_failed_at: new Date().toISOString(),
+          delivery_return_reason: reasonText,
+        })
+        .eq("id", returnOrderId);
+      if (error) throw error;
+      toast.success("Захиалгыг буцаасан/аваагүй гэж тэмдэглэлээ");
+      closeReturnModal();
+      setTab("failed");
+      await fetchOrders(true);
+    } catch (e: any) {
+      toast.error("Алдаа: " + (e.message || ""));
+    } finally {
+      setReturnSubmitting(false);
     }
   };
 
@@ -382,16 +434,12 @@ export default function DriverPage() {
   if (!hasAccess) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-6">
-        <p className="text-sm text-muted-foreground">Танд хүргэлтийн хандах эрх алга байна.</p>
+        <p className="text-sm text-muted-foreground">
+          Танд хүргэлтийн хандах эрх алга байна.
+        </p>
       </div>
     );
   }
-
-  const counts = {
-    available: orders.filter((o) => o.status === "ready" && (!o.driver_id || o.driver_id === user.id)).length,
-    active: orders.filter((o) => o.status === "out_for_delivery" && o.driver_id === user.id).length,
-    delivered: orders.filter((o) => o.status === "delivered" && o.driver_id === user.id).length,
-  };
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -407,7 +455,7 @@ export default function DriverPage() {
           </button>
           <div className="flex items-center gap-2">
             <Truck className="h-5 w-5 text-primary" />
-            <h1 className="text-base font-bold">Хүргэлт</h1>
+            <h1 className="text-base font-bold">Жолоочийн самбар</h1>
           </div>
           <button
             onClick={() => fetchOrders(true)}
@@ -422,11 +470,14 @@ export default function DriverPage() {
         {/* Tabs */}
         <div className="max-w-3xl mx-auto px-2">
           <div className="flex gap-1 overflow-x-auto pb-2">
-            {([
-              { id: "available", label: "Авах бэлэн", count: counts.available, icon: Package },
-              { id: "active", label: "Хүргэлтэнд", count: counts.active, icon: Truck },
-              { id: "delivered", label: "Хүргэсэн", count: counts.delivered, icon: PackageCheck },
-            ] as const).map((t) => {
+            {(
+              [
+                { id: "available", label: "Авах бэлэн", count: counts.available, icon: Package },
+                { id: "active", label: "Хүргэлтэнд", count: counts.active, icon: Truck },
+                { id: "delivered", label: "Хүргэсэн", count: counts.delivered, icon: PackageCheck },
+                { id: "failed", label: "Буцаасан/Аваагүй", count: counts.failed, icon: XCircle },
+              ] as const
+            ).map((t) => {
               const Icon = t.icon;
               const active = tab === t.id;
               return (
@@ -440,7 +491,7 @@ export default function DriverPage() {
                   }`}
                 >
                   <Icon className="h-3.5 w-3.5" />
-                  <span>{t.label}</span>
+                  <span className="whitespace-nowrap">{t.label}</span>
                   <span
                     className={`text-[10px] px-1.5 py-0.5 rounded-full ${
                       active ? "bg-primary-foreground/20" : "bg-background"
@@ -465,6 +516,7 @@ export default function DriverPage() {
             {tab === "available" && "Авах бэлэн захиалга алга"}
             {tab === "active" && "Хүргэлтэнд яваа захиалга алга"}
             {tab === "delivered" && "Хүргэсэн захиалга алга"}
+            {tab === "failed" && "Буцаасан / аваагүй захиалга алга"}
           </div>
         ) : (
           <div className="space-y-3">
@@ -475,10 +527,10 @@ export default function DriverPage() {
                 tab={tab}
                 onPickup={handlePickup}
                 onOpenComplete={openCompleteForm}
+                onOpenReturn={openReturnModal}
                 pickupSubmitting={pickupSubmitting === o.id}
-                events={history.filter((h) => h.order_id === o.id)}
                 expanded={expandedOrderId === o.id}
-                onToggleTimeline={() =>
+                onToggleExpand={() =>
                   setExpandedOrderId((prev) => (prev === o.id ? null : o.id))
                 }
                 onZoom={setLightboxUrl}
@@ -489,91 +541,209 @@ export default function DriverPage() {
       </main>
 
       {/* Complete delivery modal */}
-      {activeOrderId && (
+      {activeOrderId &&
+        (() => {
+          const o = orders.find((x) => x.id === activeOrderId);
+          const isCash = (o?.payment_method || "cash") === "cash";
+          const alreadyPaid = o?.payment_status === "paid";
+          const amount = (o?.total ?? 0) + Number(o?.delivery_fee ?? 0);
+          return (
+            <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4">
+              <div className="bg-card border border-border rounded-t-3xl md:rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
+                  <h3 className="font-bold text-sm">Хүргэлт дуусгах</h3>
+                  <button
+                    onClick={closeCompleteForm}
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Хаах
+                  </button>
+                </div>
+
+                <div className="p-4 space-y-4">
+                  {/* Payment summary */}
+                  <div
+                    className={`rounded-xl border p-3 ${
+                      alreadyPaid
+                        ? "border-emerald-500/30 bg-emerald-500/5"
+                        : "border-amber-500/30 bg-amber-500/5"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        {alreadyPaid ? (
+                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                        ) : (
+                          <Banknote className="h-4 w-4 text-amber-600" />
+                        )}
+                        <div>
+                          <p className="text-xs font-semibold">
+                            {alreadyPaid
+                              ? "Төлбөр төлөгдсөн"
+                              : `Төлбөр авах: ${formatPrice(amount)}`}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {PAYMENT_METHOD_LABELS[o?.payment_method || "cash"] ||
+                              o?.payment_method}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {!alreadyPaid && (
+                      <label className="mt-2 flex items-center gap-2 text-xs cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={paymentCollected}
+                          onChange={(e) => setPaymentCollected(e.target.checked)}
+                          className="h-4 w-4 accent-primary"
+                        />
+                        <span>Төлбөрийг бүрэн авлаа</span>
+                      </label>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label className="text-xs">Хүлээн авагчийн нэр / гарын үсэг *</Label>
+                    <Input
+                      value={signatureName}
+                      onChange={(e) => setSignatureName(e.target.value)}
+                      placeholder="Овог нэр"
+                      className="mt-1.5"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-xs">Хүлээлгэж өгсөн зураг</Label>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handlePhotoSelect}
+                      className="hidden"
+                    />
+                    {photoPreview ? (
+                      <div className="mt-1.5 relative">
+                        <img
+                          src={photoPreview}
+                          alt="Preview"
+                          className="w-full h-48 object-cover rounded-xl border border-border"
+                        />
+                        <button
+                          onClick={() => {
+                            setPhotoFile(null);
+                            setPhotoPreview(null);
+                          }}
+                          className="absolute top-2 right-2 bg-background/90 px-2 py-1 rounded-md text-xs"
+                        >
+                          Солих
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="mt-1.5 w-full h-32 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                      >
+                        <Camera className="h-6 w-6" />
+                        <span className="text-xs">Зураг авах / Сонгох</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="bg-secondary/50 rounded-xl px-3 py-2.5 flex items-start gap-2">
+                    <Navigation className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <p className="text-xs text-muted-foreground">
+                      Хүргэлт дуусгахад GPS байршил автоматаар хадгалагдана.
+                    </p>
+                  </div>
+
+                  <Button
+                    onClick={handleComplete}
+                    disabled={submitting || !signatureName.trim()}
+                    className="w-full h-11"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Илгээж байна...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                        Хүргэлт дуусгах
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+      {/* Return / failed modal */}
+      {returnOrderId && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4">
-          <div className="bg-card border border-border rounded-t-3xl md:rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="bg-card border border-border rounded-t-3xl md:rounded-2xl w-full max-w-md">
             <div className="sticky top-0 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
-              <h3 className="font-bold text-sm">Хүргэлт дуусгах</h3>
+              <h3 className="font-bold text-sm flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-600" />
+                Буцаасан / Аваагүй
+              </h3>
               <button
-                onClick={closeCompleteForm}
+                onClick={closeReturnModal}
                 className="text-xs text-muted-foreground hover:text-foreground"
               >
                 Хаах
               </button>
             </div>
-
             <div className="p-4 space-y-4">
               <div>
-                <Label className="text-xs">Хүлээн авагчийн нэр / гарын үсэг *</Label>
+                <Label className="text-xs">Шалтгаан *</Label>
+                <div className="mt-1.5 space-y-1.5">
+                  {RETURN_REASONS.map((r) => (
+                    <label
+                      key={r}
+                      className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs cursor-pointer transition-colors ${
+                        returnReason === r
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="reason"
+                        value={r}
+                        checked={returnReason === r}
+                        onChange={() => setReturnReason(r)}
+                        className="accent-primary"
+                      />
+                      {r}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs">Нэмэлт тайлбар</Label>
                 <Input
-                  value={signatureName}
-                  onChange={(e) => setSignatureName(e.target.value)}
-                  placeholder="Овог нэр"
+                  value={returnNote}
+                  onChange={(e) => setReturnNote(e.target.value)}
+                  placeholder="Жишээ: Хаалга нээгээгүй"
                   className="mt-1.5"
                 />
               </div>
-
-              <div>
-                <Label className="text-xs">Хүлээлгэж өгсөн зураг</Label>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={handlePhotoSelect}
-                  className="hidden"
-                />
-                {photoPreview ? (
-                  <div className="mt-1.5 relative">
-                    <img
-                      src={photoPreview}
-                      alt="Preview"
-                      className="w-full h-48 object-cover rounded-xl border border-border"
-                    />
-                    <button
-                      onClick={() => {
-                        setPhotoFile(null);
-                        setPhotoPreview(null);
-                      }}
-                      className="absolute top-2 right-2 bg-background/90 px-2 py-1 rounded-md text-xs"
-                    >
-                      Солих
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="mt-1.5 w-full h-32 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
-                  >
-                    <Camera className="h-6 w-6" />
-                    <span className="text-xs">Зураг авах / Сонгох</span>
-                  </button>
-                )}
-              </div>
-
-              <div className="bg-secondary/50 rounded-xl px-3 py-2.5 flex items-start gap-2">
-                <Navigation className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                <p className="text-xs text-muted-foreground">
-                  Хүргэлт дуусгахад GPS байршил автоматаар хадгалагдана.
-                </p>
-              </div>
-
               <Button
-                onClick={handleComplete}
-                disabled={submitting || !signatureName.trim()}
+                onClick={handleReturn}
+                disabled={returnSubmitting}
+                variant="destructive"
                 className="w-full h-11"
               >
-                {submitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Илгээж байна...
-                  </>
+                {returnSubmitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : (
-                  <>
-                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                    Хүргэлт дуусгах
-                  </>
+                  <XCircle className="h-4 w-4 mr-2" />
                 )}
+                Буцаасан/Аваагүй гэж тэмдэглэх
               </Button>
             </div>
           </div>
@@ -611,43 +781,81 @@ export default function DriverPage() {
   );
 }
 
+function PaymentChip({ order }: { order: Order }) {
+  const paid = order.payment_status === "paid";
+  const method = order.payment_method || "cash";
+  const isCash = method === "cash";
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+        paid
+          ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
+          : isCash
+            ? "bg-amber-500/15 text-amber-700 dark:text-amber-400"
+            : "bg-sky-500/15 text-sky-700 dark:text-sky-400"
+      }`}
+    >
+      {paid ? <CheckCircle2 className="h-3 w-3" /> : <Wallet className="h-3 w-3" />}
+      {PAYMENT_METHOD_LABELS[method] || method} · {paid ? "Төлсөн" : "Төлөөгүй"}
+    </span>
+  );
+}
+
 function OrderCard({
   order,
   tab,
   onPickup,
   onOpenComplete,
+  onOpenReturn,
   pickupSubmitting,
-  events,
   expanded,
-  onToggleTimeline,
+  onToggleExpand,
   onZoom,
 }: {
   order: Order;
   tab: Tab;
   onPickup: (o: Order) => void;
   onOpenComplete: (o: Order) => void;
+  onOpenReturn: (o: Order) => void;
   pickupSubmitting: boolean;
-  events: StatusEvent[];
   expanded: boolean;
-  onToggleTimeline: () => void;
+  onToggleExpand: () => void;
   onZoom: (url: string) => void;
 }) {
-  const itemCount = Array.isArray(order.items)
-    ? order.items.reduce((s, it: any) => s + (it.quantity || 1), 0)
-    : 0;
+  const items = Array.isArray(order.items) ? order.items : [];
+  const itemCount = items.reduce((s, it: any) => s + (it.quantity || 1), 0);
+  const amount = (order.total ?? 0) + Number(order.delivery_fee ?? 0);
 
   return (
     <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+      {/* Header row */}
       <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="text-xs text-muted-foreground">#{order.order_ref || order.id.slice(0, 8)}</p>
-          <p className="font-semibold text-sm mt-0.5">{order.guest_name || "Захиалагч"}</p>
+        <div className="min-w-0">
+          <p className="text-xs text-muted-foreground">
+            #{order.order_ref || order.id.slice(0, 8)}
+          </p>
+          <p className="font-semibold text-sm mt-0.5 truncate">
+            {order.guest_name || "Захиалагч"}
+          </p>
         </div>
-        <Badge variant={STATUS_VARIANTS[order.status] || "secondary"} className="text-[10px]">
+        <Badge
+          variant={order.status === "cancelled" ? "destructive" : "secondary"}
+          className="text-[10px] shrink-0"
+        >
           {STATUS_LABELS[order.status] || order.status}
         </Badge>
       </div>
 
+      {/* Payment chip + total */}
+      <div className="flex items-center justify-between gap-2">
+        <PaymentChip order={order} />
+        <div className="text-right">
+          <p className="text-[10px] text-muted-foreground">Дүн</p>
+          <p className="font-bold text-sm">{formatPrice(amount)}</p>
+        </div>
+      </div>
+
+      {/* Contact */}
       {order.phone && (
         <a
           href={`tel:${order.phone}`}
@@ -670,30 +878,100 @@ function OrderCard({
             rel="noopener noreferrer"
             className="text-xs text-primary hover:underline shrink-0"
           >
-            Газрын зураг →
+            Газар →
           </a>
         </div>
       )}
 
-      <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border pt-3">
-        <span className="flex items-center gap-1">
+      {/* Items toggle */}
+      <button
+        onClick={onToggleExpand}
+        className="w-full flex items-center justify-between text-xs text-muted-foreground hover:text-foreground border-t border-border pt-3"
+      >
+        <span className="flex items-center gap-1.5">
           <Package className="h-3.5 w-3.5" />
-          {itemCount} ширхэг
+          {itemCount} ширхэг бараа
         </span>
-        <span className="font-bold text-foreground">{formatPrice(order.total)}</span>
-      </div>
+        {expanded ? (
+          <ChevronUp className="h-3.5 w-3.5" />
+        ) : (
+          <ChevronDown className="h-3.5 w-3.5" />
+        )}
+      </button>
 
-      {tab === "delivered" && (
-        <div className="space-y-2 pt-2 border-t border-border">
-          {order.delivery_signature_name && (
-            <p className="text-xs text-muted-foreground">
-              Хүлээн авсан: <span className="text-foreground">{order.delivery_signature_name}</span>
+      {expanded && items.length > 0 && (
+        <ul className="space-y-1.5 text-xs">
+          {items.map((it: any, idx: number) => (
+            <li
+              key={idx}
+              className="flex items-start justify-between gap-2 rounded-lg bg-secondary/40 px-2.5 py-2"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="font-medium truncate">{it.name || it.product_name || "Бараа"}</p>
+                <p className="text-[10px] text-muted-foreground">
+                  {[it.color, it.size].filter(Boolean).join(" · ") || "—"}
+                </p>
+              </div>
+              <div className="text-right shrink-0">
+                <p className="font-semibold">×{it.quantity || 1}</p>
+                {it.price != null && (
+                  <p className="text-[10px] text-muted-foreground">
+                    {formatPrice(Number(it.price))}
+                  </p>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Timestamps */}
+      {(order.assigned_at || order.picked_up_at || order.delivered_at || order.delivery_failed_at) && (
+        <div className="text-[11px] text-muted-foreground space-y-0.5 border-t border-border pt-2">
+          {order.picked_up_at && (
+            <p className="flex items-center gap-1.5">
+              <Truck className="h-3 w-3" /> Авсан: {formatDateTime(order.picked_up_at)}
             </p>
           )}
           {order.delivered_at && (
-            <p className="text-xs text-muted-foreground flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {new Date(order.delivered_at).toLocaleString("mn-MN")}
+            <p className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
+              <CheckCircle2 className="h-3 w-3" /> Хүргэсэн:{" "}
+              {formatDateTime(order.delivered_at)}
+            </p>
+          )}
+          {order.delivery_failed_at && (
+            <p className="flex items-center gap-1.5 text-red-600 dark:text-red-400">
+              <XCircle className="h-3 w-3" /> Аваагүй: {formatDateTime(order.delivery_failed_at)}
+            </p>
+          )}
+          {order.payment_collected_at && (
+            <p className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
+              <Banknote className="h-3 w-3" /> Төлбөр авсан:{" "}
+              {formatDateTime(order.payment_collected_at)}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Failed reason */}
+      {order.status === "cancelled" && order.delivery_return_reason && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/5 px-3 py-2 text-xs">
+          <p className="font-semibold text-red-700 dark:text-red-400 mb-0.5 flex items-center gap-1">
+            <AlertTriangle className="h-3.5 w-3.5" /> Шалтгаан
+          </p>
+          <p className="text-foreground">{order.delivery_return_reason}</p>
+        </div>
+      )}
+
+      {/* Delivered proof */}
+      {(order.status === "delivered" || order.status === "completed") && (
+        <div className="space-y-2 pt-2 border-t border-border">
+          {order.delivery_signature_name && (
+            <p className="text-xs text-muted-foreground">
+              Хүлээн авсан:{" "}
+              <span className="text-foreground font-medium">
+                {order.delivery_signature_name}
+              </span>
             </p>
           )}
           {order.delivery_proof_photo && (
@@ -701,12 +979,11 @@ function OrderCard({
               type="button"
               onClick={() => onZoom(order.delivery_proof_photo!)}
               className="block w-full group"
-              aria-label="Зургийг томруулж үзэх"
             >
               <img
                 src={order.delivery_proof_photo}
                 alt="Хүргэлтийн нотолгоо"
-                className="w-full h-32 object-cover rounded-lg transition-opacity group-hover:opacity-90 cursor-zoom-in"
+                className="w-full h-32 object-cover rounded-lg cursor-zoom-in"
               />
             </button>
           )}
@@ -718,12 +995,13 @@ function OrderCard({
               className="text-xs text-primary hover:underline flex items-center gap-1"
             >
               <Navigation className="h-3 w-3" />
-              GPS байршил харах
+              GPS байршил
             </a>
           )}
         </div>
       )}
 
+      {/* Action buttons */}
       {tab === "available" && (
         <Button
           onClick={() => onPickup(order)}
@@ -736,213 +1014,25 @@ function OrderCard({
           ) : (
             <Truck className="h-4 w-4 mr-2" />
           )}
-          Авч явах
+          Барааг авч явах
         </Button>
       )}
 
       {tab === "active" && (
-        <Button
-          onClick={() => onOpenComplete(order)}
-          className="w-full h-10"
-          size="sm"
-        >
-          <CheckCircle2 className="h-4 w-4 mr-2" />
-          Хүргэлт дуусгах
-        </Button>
-      )}
-
-      {/* Timeline toggle */}
-      <button
-        onClick={onToggleTimeline}
-        className="w-full flex items-center justify-between text-xs text-muted-foreground hover:text-foreground border-t border-border pt-3 -mb-1"
-      >
-        <span className="flex items-center gap-1.5">
-          <History className="h-3.5 w-3.5" />
-          Хөдөлгөөний түүх
-          <span className="text-[10px] bg-secondary px-1.5 py-0.5 rounded-full">{events.length}</span>
-        </span>
-        {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-      </button>
-
-      {expanded && <Timeline events={events} currentStatus={order.status} order={order} onZoom={onZoom} />}
-    </div>
-  );
-}
-
-function Timeline({ events, currentStatus, order, onZoom }: { events: StatusEvent[]; currentStatus: string; order: Order; onZoom: (url: string) => void }) {
-  // Sort events ascending by time
-  const sorted = [...events].sort(
-    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-  );
-
-  // Determine which pipeline steps were reached.
-  // 1) Any status that ever appeared in history (from_status or to_status).
-  // 2) Current status itself.
-  // 3) All earlier PIPELINE steps before the highest reached index — so the
-  //    bar stays continuous even when intermediate transitions are missing.
-  const reachedSteps = new Set<string>();
-  sorted.forEach((e) => {
-    if (e.from_status) reachedSteps.add(e.from_status);
-    reachedSteps.add(e.to_status);
-  });
-  reachedSteps.add(currentStatus);
-
-  let maxIdx = -1;
-  reachedSteps.forEach((s) => {
-    const i = PIPELINE_INDEX[s];
-    if (i !== undefined && i > maxIdx) maxIdx = i;
-  });
-  if (maxIdx >= 0) {
-    for (let i = 0; i <= maxIdx; i++) reachedSteps.add(PIPELINE[i]);
-  }
-
-  // Map: status -> latest event for it (for actor info & timestamp)
-  const latestByStatus: Record<string, StatusEvent> = {};
-  sorted.forEach((e) => {
-    latestByStatus[e.to_status] = e;
-  });
-
-  // Off-pipeline terminal states (completed / cancelled) — show a trailing chip
-  const offPipelineCurrent =
-    PIPELINE_INDEX[currentStatus] === undefined ? currentStatus : null;
-
-  if (sorted.length === 0) {
-    return (
-      <p className="text-xs text-muted-foreground italic pt-2">Түүх байхгүй</p>
-    );
-  }
-
-  return (
-    <div className="pt-3 space-y-3">
-      {/* Pipeline progress strip */}
-      <div className="flex items-center gap-1">
-        {PIPELINE.map((step, idx) => {
-          const reached = reachedSteps.has(step);
-          const isCurrent = step === currentStatus;
-          return (
-            <div key={step} className="flex-1 flex items-center gap-1">
-              <div
-                className={`flex-1 h-1.5 rounded-full transition-colors ${
-                  reached ? STATUS_DOT_CLS[step] || "bg-primary" : "bg-secondary"
-                } ${isCurrent ? "ring-2 ring-offset-1 ring-offset-card ring-primary/40" : ""}`}
-                title={STATUS_LABELS[step] || step}
-              />
-              {idx < PIPELINE.length - 1 && (
-                <div className="h-1 w-1 rounded-full bg-border shrink-0" />
-              )}
-            </div>
-          );
-        })}
-        {offPipelineCurrent && (
-          <div
-            className={`ml-1 h-1.5 px-2 rounded-full ring-2 ring-offset-1 ring-offset-card ring-primary/40 ${
-              STATUS_DOT_CLS[offPipelineCurrent] || "bg-primary"
-            }`}
-            title={STATUS_LABELS[offPipelineCurrent] || offPipelineCurrent}
-          />
-        )}
-      </div>
-
-      {/* Detailed event list (newest first) */}
-      <ol className="relative space-y-2.5 pl-5">
-        <span className="absolute left-[7px] top-1 bottom-1 w-px bg-border" />
-        {[...sorted].reverse().map((e, idx) => {
-          const dotCls = STATUS_DOT_CLS[e.to_status] || "bg-primary";
-          const isLatest = idx === 0;
-          const actor = e.changed_by_email || (e.changed_by ? "Систем" : "Автомат");
-          return (
-            <li key={e.id} className="relative">
-              <span
-                className={`absolute -left-5 top-1 h-3 w-3 rounded-full ${dotCls} ${
-                  isLatest ? "ring-2 ring-offset-1 ring-offset-card ring-primary/40" : ""
-                }`}
-              />
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium text-foreground">
-                    {e.from_status ? (
-                      <>
-                        <span className="text-muted-foreground">{STATUS_LABELS[e.from_status] || e.from_status}</span>
-                        <span className="text-muted-foreground mx-1">→</span>
-                      </>
-                    ) : (
-                      <span className="text-muted-foreground">Үүссэн → </span>
-                    )}
-                    <span>{STATUS_LABELS[e.to_status] || e.to_status}</span>
-                  </p>
-                  <p className="text-[10px] text-muted-foreground truncate" title={actor}>
-                    {actor}
-                  </p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-[10px] text-muted-foreground">{relativeTime(e.created_at)}</p>
-                  <p className="text-[10px] text-muted-foreground/70">{formatDateTime(e.created_at)}</p>
-                </div>
-              </div>
-            </li>
-          );
-        })}
-      </ol>
-
-      {/* Delivery proof block — only for delivered orders */}
-      {currentStatus === "delivered" && (
-        <div className="mt-1 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3 space-y-2.5">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-            <CheckCircle2 className="h-3.5 w-3.5" />
-            Хүргэлтийн нотолгоо
-          </div>
-
-          {order.delivery_proof_photo ? (
-            <button
-              type="button"
-              onClick={() => onZoom(order.delivery_proof_photo!)}
-              className="block w-full group"
-              aria-label="Зургийг томруулж үзэх"
-            >
-              <img
-                src={order.delivery_proof_photo}
-                alt="Хүргэлтийн нотолгоо"
-                loading="lazy"
-                className="w-full max-h-56 object-cover rounded-lg border border-border transition-opacity group-hover:opacity-90 cursor-zoom-in"
-              />
-            </button>
-          ) : (
-            <p className="text-[11px] text-muted-foreground italic">Зураг ороогүй</p>
-          )}
-
-          <div className="grid grid-cols-1 gap-1.5 text-xs">
-            {order.delivery_signature_name && (
-              <div className="flex items-start gap-1.5">
-                <span className="text-muted-foreground shrink-0">Хүлээн авсан:</span>
-                <span className="font-medium text-foreground">{order.delivery_signature_name}</span>
-              </div>
-            )}
-            {order.delivered_at && (
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <Clock className="h-3 w-3" />
-                <span>{new Date(order.delivered_at).toLocaleString("mn-MN")}</span>
-              </div>
-            )}
-            {order.delivery_gps_lat != null && order.delivery_gps_lng != null ? (
-              <a
-                href={`https://www.google.com/maps?q=${order.delivery_gps_lat},${order.delivery_gps_lng}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-primary hover:underline"
-              >
-                <Navigation className="h-3 w-3" />
-                <span className="font-mono text-[11px]">
-                  {order.delivery_gps_lat.toFixed(5)}, {order.delivery_gps_lng.toFixed(5)}
-                </span>
-                <span className="text-[10px]">— газрын зураг харах</span>
-              </a>
-            ) : (
-              <p className="text-[11px] text-muted-foreground italic flex items-center gap-1.5">
-                <Navigation className="h-3 w-3" />
-                GPS байршил байхгүй
-              </p>
-            )}
-          </div>
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            variant="outline"
+            onClick={() => onOpenReturn(order)}
+            className="h-10"
+            size="sm"
+          >
+            <XCircle className="h-4 w-4 mr-1.5" />
+            Аваагүй
+          </Button>
+          <Button onClick={() => onOpenComplete(order)} className="h-10" size="sm">
+            <CheckCircle2 className="h-4 w-4 mr-1.5" />
+            Хүргэсэн
+          </Button>
         </div>
       )}
     </div>
