@@ -55,6 +55,119 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
   const [driverFilter, setDriverFilter] = useState<string>("all");
   const [driverSearch, setDriverSearch] = useState("");
 
+  // ===== Driver role requests =====
+  type DriverRequest = {
+    id: string;
+    user_id: string;
+    full_name: string | null;
+    phone: string | null;
+    note: string | null;
+    status: "pending" | "approved" | "rejected";
+    email: string | null;
+    created_at: string;
+    reviewed_at: string | null;
+    review_note: string | null;
+  };
+  const [requests, setRequests] = useState<DriverRequest[]>([]);
+  const [requestsLoading, setRequestsLoading] = useState(false);
+  const [requestFilter, setRequestFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
+  const [actingRequestId, setActingRequestId] = useState<string | null>(null);
+
+  const loadRequests = async () => {
+    if (!isAdmin) return;
+    setRequestsLoading(true);
+    const { data, error } = await supabase.rpc("list_driver_requests");
+    setRequestsLoading(false);
+    if (error) {
+      console.error("loadRequests", error);
+      return;
+    }
+    setRequests((data || []) as DriverRequest[]);
+  };
+
+  useEffect(() => {
+    void loadRequests();
+  }, [isAdmin]);
+
+  // Realtime updates for driver_role_requests
+  useEffect(() => {
+    if (!isAdmin) return;
+    const channel = supabase
+      .channel("admin-driver-requests")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "driver_role_requests" },
+        () => void loadRequests()
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isAdmin]);
+
+  const approveRequest = async (req: DriverRequest) => {
+    setActingRequestId(req.id);
+    const { error } = await supabase
+      .from("driver_role_requests" as any)
+      .update({
+        status: "approved",
+        reviewed_at: new Date().toISOString(),
+        review_note: null,
+      } as any)
+      .eq("id", req.id);
+    setActingRequestId(null);
+    if (error) {
+      toast.error("Батлахад алдаа: " + error.message);
+      return;
+    }
+    toast.success(`${req.full_name || "Хэрэглэгч"}-д жолоочийн эрх олголоо`);
+
+    // Auto-add to drivers table for assignment workflow if not already present
+    if (req.full_name) {
+      const exists = drivers.some(
+        (d) =>
+          d.full_name.trim().toLowerCase() === req.full_name!.trim().toLowerCase() &&
+          (d.phone || "") === (req.phone || "")
+      );
+      if (!exists) {
+        await supabase.from("drivers" as any).insert({
+          full_name: req.full_name,
+          phone: req.phone || null,
+          note: req.note || null,
+        } as any);
+        await onChange();
+      }
+    }
+    void loadRequests();
+  };
+
+  const rejectRequest = async (req: DriverRequest) => {
+    const reason = window.prompt("Татгалзах шалтгаан (заавал биш):", "") ?? "";
+    setActingRequestId(req.id);
+    const { error } = await supabase
+      .from("driver_role_requests" as any)
+      .update({
+        status: "rejected",
+        reviewed_at: new Date().toISOString(),
+        review_note: reason.trim() || null,
+      } as any)
+      .eq("id", req.id);
+    setActingRequestId(null);
+    if (error) {
+      toast.error("Татгалзахад алдаа: " + error.message);
+      return;
+    }
+    toast.success("Хүсэлтийг татгалзлаа");
+    void loadRequests();
+  };
+
+  const visibleRequests = useMemo(
+    () => (requestFilter === "all" ? requests : requests.filter((r) => r.status === requestFilter)),
+    [requests, requestFilter]
+  );
+  const pendingCount = useMemo(() => requests.filter((r) => r.status === "pending").length, [requests]);
+
+
   const loadDeliveries = async () => {
     setLoadingDeliveries(true);
     const { data, error } = await supabase
