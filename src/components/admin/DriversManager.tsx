@@ -51,6 +51,8 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
   const [deliveries, setDeliveries] = useState<DeliveryRow[]>([]);
   const [loadingDeliveries, setLoadingDeliveries] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<"all" | "out_for_delivery" | "delivered">("all");
+  const [driverFilter, setDriverFilter] = useState<string>("all");
 
   const loadDeliveries = async () => {
     setLoadingDeliveries(true);
@@ -72,16 +74,28 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
     loadDeliveries();
   }, []);
 
+  const filteredDeliveries = useMemo(() => {
+    return deliveries.filter((r) => {
+      if (statusFilter === "delivered") {
+        if (!(r.status === "completed" || r.delivered_at)) return false;
+      } else if (statusFilter === "out_for_delivery") {
+        if (r.delivered_at || r.status === "completed") return false;
+        if (!(r.status === "delivering" || r.delivery_status === "out_for_delivery")) return false;
+      }
+      return true;
+    });
+  }, [deliveries, statusFilter]);
+
   const statsByDriver = useMemo(() => {
     const map = new Map<string, DeliveryRow[]>();
-    for (const row of deliveries) {
+    for (const row of filteredDeliveries) {
       const key = row.driver_id || `name:${(row.delivery_signature_name || "").trim().toLowerCase()}`;
       if (!key || key === "name:") continue;
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(row);
     }
     return map;
-  }, [deliveries]);
+  }, [filteredDeliveries]);
 
   const unknownDrivers = useMemo(() => {
     const known = new Set(drivers.map((d) => d.id));
@@ -374,7 +388,7 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
       </div>
 
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <h3 className="font-bold text-sm flex items-center gap-2">
             <History className="h-4 w-4" /> Хүргэлтийн түүх
           </h3>
@@ -388,23 +402,51 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
           </button>
         </div>
 
+        <div className="flex flex-col sm:flex-row gap-2">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+            className="rounded-xl bg-secondary px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
+          >
+            <option value="all">Бүх төлөв</option>
+            <option value="out_for_delivery">Хүргэлтэнд гарсан</option>
+            <option value="delivered">Хүргэгдсэн</option>
+          </select>
+          <select
+            value={driverFilter}
+            onChange={(e) => setDriverFilter(e.target.value)}
+            className="rounded-xl bg-secondary px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
+          >
+            <option value="all">Бүх жолооч</option>
+            {drivers.map((d) => (
+              <option key={d.id} value={d.id}>{d.full_name}</option>
+            ))}
+            {unknownDrivers.length > 0 && (
+              <option value="__unknown__">Бүртгэлгүй жолоочид</option>
+            )}
+          </select>
+        </div>
+
         {loadingDeliveries ? (
           <div className="bg-card rounded-2xl border border-border p-8 flex items-center justify-center">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         ) : (
           <div className="space-y-2">
-            {drivers.map((d) => {
-              const rows = statsByDriver.get(d.id) || [];
-              if (rows.length === 0) return null;
-              return <div key={d.id}>{renderDriverStats(d.id, d.full_name, rows)}</div>;
-            })}
-            {unknownDrivers.map((u) => (
-              <div key={u.key}>{renderDriverStats(u.key, `${u.name} (бүртгэлгүй)`, u.rows)}</div>
-            ))}
+            {drivers
+              .filter((d) => driverFilter === "all" || driverFilter === d.id)
+              .map((d) => {
+                const rows = statsByDriver.get(d.id) || [];
+                if (rows.length === 0) return null;
+                return <div key={d.id}>{renderDriverStats(d.id, d.full_name, rows)}</div>;
+              })}
+            {(driverFilter === "all" || driverFilter === "__unknown__") &&
+              unknownDrivers.map((u) => (
+                <div key={u.key}>{renderDriverStats(u.key, `${u.name} (бүртгэлгүй)`, u.rows)}</div>
+              ))}
             {statsByDriver.size === 0 && (
               <p className="text-center text-sm text-muted-foreground py-8 bg-card rounded-2xl border border-border">
-                Одоогоор хүргэлтийн бүртгэл алга
+                Тохирох хүргэлт олдсонгүй
               </p>
             )}
           </div>
