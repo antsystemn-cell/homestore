@@ -167,7 +167,24 @@ export default function DriverPage() {
   const [authFullName, setAuthFullName] = useState("");
   const [authPhone, setAuthPhone] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
-  const [claimBusy, setClaimBusy] = useState(false);
+
+  // Driver role request
+  type DriverRequest = {
+    id: string;
+    status: "pending" | "approved" | "rejected";
+    full_name: string | null;
+    phone: string | null;
+    note: string | null;
+    review_note: string | null;
+    created_at: string;
+    reviewed_at: string | null;
+  };
+  const [driverRequest, setDriverRequest] = useState<DriverRequest | null>(null);
+  const [driverRequestLoading, setDriverRequestLoading] = useState(false);
+  const [requestFullName, setRequestFullName] = useState("");
+  const [requestPhone, setRequestPhone] = useState("");
+  const [requestNote, setRequestNote] = useState("");
+  const [requestBusy, setRequestBusy] = useState(false);
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -195,7 +212,6 @@ export default function DriverPage() {
         });
         if (error) throw error;
         if (data.session && data.user) {
-          // Save profile phone if provided
           if (authPhone.trim() || authFullName.trim()) {
             await supabase
               .from("profiles")
@@ -205,12 +221,10 @@ export default function DriverPage() {
               })
               .eq("user_id", data.user.id);
           }
-          // Auto-claim driver role
-          const { error: rpcErr } = await supabase.rpc("claim_driver_role");
-          if (rpcErr) console.error(rpcErr);
-          toast.success("Бүртгэл амжилттай! Жолоочийн эрх идэвхжлээ.");
-          // Reload so AuthContext refreshes roles
-          setTimeout(() => window.location.reload(), 400);
+          // Pre-fill request form values
+          setRequestFullName(authFullName.trim());
+          setRequestPhone(authPhone.trim());
+          toast.success("Бүртгэл амжилттай! Жолоочийн эрх хүсэх маягтыг бөглөнө үү.");
         } else {
           toast.success("Бүртгэл үүслээ. И-мэйлээ шалгаж баталгаажуулна уу.");
         }
@@ -222,19 +236,107 @@ export default function DriverPage() {
     }
   };
 
-  const handleClaimDriver = async () => {
-    setClaimBusy(true);
+  // Load latest driver-role request when authenticated but not yet a driver
+  useEffect(() => {
+    if (!user || isDriver || isAdmin) {
+      setDriverRequest(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      setDriverRequestLoading(true);
+      try {
+        const { data: req } = await supabase
+          .from("driver_role_requests")
+          .select("id,status,full_name,phone,note,review_note,created_at,reviewed_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (cancelled) return;
+        setDriverRequest((req as DriverRequest) || null);
+
+        if (!req) {
+          // Prefill from profile if empty
+          const { data: prof } = await supabase
+            .from("profiles")
+            .select("full_name,phone")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          if (cancelled) return;
+          setRequestFullName((prev) => prev || prof?.full_name || "");
+          setRequestPhone((prev) => prev || prof?.phone || "");
+        }
+      } finally {
+        if (!cancelled) setDriverRequestLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, isDriver, isAdmin]);
+
+  // Realtime updates for this user's request (status changes)
+  useEffect(() => {
+    if (!user || isDriver || isAdmin) return;
+    const channel = supabase
+      .channel(`driver-request-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "driver_role_requests",
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload: any) => {
+          const row = payload.new as DriverRequest | undefined;
+          if (row) {
+            setDriverRequest(row);
+            if (row.status === "approved") {
+              toast.success("Жолоочийн эрх батлагдлаа!");
+              setTimeout(() => window.location.reload(), 800);
+            }
+          }
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, isDriver, isAdmin]);
+
+  const handleSubmitDriverRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    if (!requestFullName.trim() || !requestPhone.trim()) {
+      toast.error("Нэр, утсаа бөглөнө үү");
+      return;
+    }
+    setRequestBusy(true);
     try {
-      const { error } = await supabase.rpc("claim_driver_role");
+      const { data, error } = await supabase
+        .from("driver_role_requests")
+        .insert({
+          user_id: user.id,
+          full_name: requestFullName.trim(),
+          phone: requestPhone.trim(),
+          note: requestNote.trim() || null,
+          status: "pending",
+        })
+        .select("id,status,full_name,phone,note,review_note,created_at,reviewed_at")
+        .single();
       if (error) throw error;
-      toast.success("Жолоочийн эрх идэвхжлээ");
-      setTimeout(() => window.location.reload(), 400);
+      setDriverRequest(data as DriverRequest);
+      toast.success("Хүсэлт амжилттай илгээгдлээ");
     } catch (err: any) {
-      toast.error(err?.message || "Эрх авч чадсангүй");
+      toast.error(err?.message || "Хүсэлт илгээж чадсангүй");
     } finally {
-      setClaimBusy(false);
+      setRequestBusy(false);
     }
   };
+
+
 
   const fetchOrders = async (silent = false) => {
     if (!silent) setLoading(true);
