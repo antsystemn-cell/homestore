@@ -445,16 +445,25 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
         ) : (
           <div className="space-y-2">
             {drivers
-              .filter((d) => driverFilter === "all" || driverFilter === d.id)
+              .filter((d) => {
+                if (driverFilter !== "all" && driverFilter !== d.id) return false;
+                if (!driverSearch.trim()) return true;
+                return d.full_name.toLowerCase().includes(driverSearch.trim().toLowerCase());
+              })
               .map((d) => {
                 const rows = statsByDriver.get(d.id) || [];
                 if (rows.length === 0) return null;
                 return <div key={d.id}>{renderDriverStats(d.id, d.full_name, rows)}</div>;
               })}
             {(driverFilter === "all" || driverFilter === "__unknown__") &&
-              unknownDrivers.map((u) => (
-                <div key={u.key}>{renderDriverStats(u.key, `${u.name} (бүртгэлгүй)`, u.rows)}</div>
-              ))}
+              unknownDrivers
+                .filter((u) => {
+                  if (!driverSearch.trim()) return true;
+                  return u.name.toLowerCase().includes(driverSearch.trim().toLowerCase());
+                })
+                .map((u) => (
+                  <div key={u.key}>{renderDriverStats(u.key, `${u.name} (бүртгэлгүй)`, u.rows)}</div>
+                ))}
             {statsByDriver.size === 0 && (
               <p className="text-center text-sm text-muted-foreground py-8 bg-card rounded-2xl border border-border">
                 Тохирох хүргэлт олдсонгүй
