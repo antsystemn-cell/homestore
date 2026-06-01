@@ -12,6 +12,7 @@ import CollectionsManager from "@/components/admin/CollectionsManager";
 import ChatbotSettingsManager from "@/components/admin/ChatbotSettingsManager";
 import RecommendationSettingsManager from "@/components/admin/RecommendationSettingsManager";
 import StockDeductionLog from "@/components/admin/StockDeductionLog";
+import DriversManager from "@/components/admin/DriversManager";
 import TrackingDashboard from "@/components/admin/TrackingDashboard";
 import AdminSkeleton from "@/components/admin/AdminSkeleton";
 
