@@ -724,7 +724,7 @@ export default function DriverPage() {
       {/* Return / failed modal */}
       {returnOrderId && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4">
-          <div className="bg-card border border-border rounded-t-3xl md:rounded-2xl w-full max-w-md">
+          <div className="bg-card border border-border rounded-t-3xl md:rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
               <h3 className="font-bold text-sm flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
