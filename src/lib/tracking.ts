@@ -156,11 +156,12 @@ export async function attachLeadContact(opts: { phone?: string; name?: string })
   try {
     const session = await ensureSession();
     if (!session) return;
-    const update: Record<string, unknown> = {};
-    if (opts.phone) update.phone = opts.phone;
-    if (opts.name) update.name = opts.name;
-    if (!Object.keys(update).length) return;
-    await supabase.from("lead_scores").update(update).eq("session_id", session.id);
+    if (!opts.phone && !opts.name) return;
+    await supabase.rpc("attach_lead_contact", {
+      _token: session.token,
+      _phone: opts.phone ?? null,
+      _name: opts.name ?? null,
+    });
   } catch {
     // silent
   }
