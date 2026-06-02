@@ -139,14 +139,14 @@ export async function track(eventType: string, payload: TrackPayload = {}) {
       metadata: (payload.metadata ?? {}) as never,
     });
 
-    // update last_seen_at
-    await supabase
-      .from("analytics_sessions")
-      .update({ last_seen_at: new Date().toISOString(), user_id: userData?.user?.id ?? undefined })
-      .eq("id", session.id);
+    // update last_seen_at via security-definer RPC
+    await supabase.rpc("touch_analytics_session", {
+      _token: session.token,
+      _user_id: userData?.user?.id ?? null,
+    });
 
     const delta = SCORE_RULES[eventType] ?? 0;
-    if (delta !== 0) await bumpLead(session.id, delta, eventType, payload.product_id ?? undefined);
+    if (delta !== 0) await bumpLead(session.token, delta, eventType, payload.product_id ?? undefined);
   } catch {
     // silent
   }
