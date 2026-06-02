@@ -1826,6 +1826,31 @@ const AdminPage = () => {
                         className="w-full rounded-xl bg-secondary pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setManualItems((prev) => {
+                          const next = [...prev, {
+                            product_id: "",
+                            name: "",
+                            price: 0,
+                            quantity: 1,
+                            product_code: "",
+                            sku: "",
+                            image: "",
+                            color: "",
+                            size: "",
+                          }];
+                          setEditingItemIdx(next.length - 1);
+                          return next;
+                        });
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shrink-0"
+                      title="Гараар бараа нэмэх"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Гараар
+                    </button>
                   </div>
 
                   {manualProductSearch.trim() && (() => {
