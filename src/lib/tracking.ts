@@ -100,24 +100,14 @@ async function ensureSession(): Promise<{ id: string; token: string } | null> {
   return sessionInitPromise;
 }
 
-async function bumpLead(sessionId: string, delta: number, lastEvent: string, productId?: string | null) {
+async function bumpLead(token: string, delta: number, lastEvent: string, productId?: string | null) {
   try {
-    const { data: existing } = await supabase
-      .from("lead_scores")
-      .select("score")
-      .eq("session_id", sessionId)
-      .maybeSingle();
-    const newScore = (existing?.score ?? 0) + delta;
-    await supabase
-      .from("lead_scores")
-      .update({
-        score: newScore,
-        status: statusFromScore(newScore),
-        last_activity: new Date().toISOString(),
-        last_event_type: lastEvent,
-        last_product_id: productId ?? undefined,
-      })
-      .eq("session_id", sessionId);
+    await supabase.rpc("bump_lead_score", {
+      _token: token,
+      _delta: delta,
+      _event: lastEvent,
+      _product_id: productId ?? null,
+    });
   } catch {
     // ignore
   }
@@ -149,14 +139,14 @@ export async function track(eventType: string, payload: TrackPayload = {}) {
       metadata: (payload.metadata ?? {}) as never,
     });
 
-    // update last_seen_at
-    await supabase
-      .from("analytics_sessions")
-      .update({ last_seen_at: new Date().toISOString(), user_id: userData?.user?.id ?? undefined })
-      .eq("id", session.id);
+    // update last_seen_at via security-definer RPC
+    await supabase.rpc("touch_analytics_session", {
+      _token: session.token,
+      _user_id: userData?.user?.id ?? null,
+    });
 
     const delta = SCORE_RULES[eventType] ?? 0;
-    if (delta !== 0) await bumpLead(session.id, delta, eventType, payload.product_id ?? undefined);
+    if (delta !== 0) await bumpLead(session.token, delta, eventType, payload.product_id ?? undefined);
   } catch {
     // silent
   }
@@ -166,11 +156,12 @@ export async function attachLeadContact(opts: { phone?: string; name?: string })
   try {
     const session = await ensureSession();
     if (!session) return;
-    const update: Record<string, unknown> = {};
-    if (opts.phone) update.phone = opts.phone;
-    if (opts.name) update.name = opts.name;
-    if (!Object.keys(update).length) return;
-    await supabase.from("lead_scores").update(update).eq("session_id", session.id);
+    if (!opts.phone && !opts.name) return;
+    await supabase.rpc("attach_lead_contact", {
+      _token: session.token,
+      _phone: opts.phone ?? null,
+      _name: opts.name ?? null,
+    });
   } catch {
     // silent
   }
