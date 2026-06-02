@@ -1366,7 +1366,27 @@ export type Database = {
           user_id: string
         }[]
       }
+      attach_lead_contact: {
+        Args: { _name?: string; _phone?: string; _token: string }
+        Returns: undefined
+      }
+      bump_lead_score: {
+        Args: {
+          _delta: number
+          _event: string
+          _product_id?: string
+          _token: string
+        }
+        Returns: undefined
+      }
       claim_driver_role: { Args: never; Returns: undefined }
+      create_guest_order: {
+        Args: { payload: Json }
+        Returns: {
+          id: string
+          order_ref: string
+        }[]
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1428,6 +1448,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      touch_analytics_session: {
+        Args: { _token: string; _user_id?: string }
+        Returns: undefined
       }
     }
     Enums: {
