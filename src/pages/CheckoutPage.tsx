@@ -138,16 +138,29 @@ const CheckoutPage = () => {
       orderData.user_id = user!.id;
     }
 
-    const { data, error } = await supabase
-      .from("orders")
-      .insert(orderData)
-      .select("id, order_ref")
-      .single();
-
-    if (error) {
-      console.error("Order error:", error);
-      toast.error("Захиалга өгөхөд алдаа гарлаа");
-      return null;
+    let data: { id: string; order_ref: string | null } | null = null;
+    if (isGuestCheckout) {
+      const { data: rpcData, error } = await supabase
+        .rpc("create_guest_order", { payload: orderData })
+        .single();
+      if (error || !rpcData) {
+        console.error("Order error:", error);
+        toast.error("Захиалга өгөхөд алдаа гарлаа");
+        return null;
+      }
+      data = { id: (rpcData as any).id, order_ref: (rpcData as any).order_ref };
+    } else {
+      const { data: insData, error } = await supabase
+        .from("orders")
+        .insert(orderData)
+        .select("id, order_ref")
+        .single();
+      if (error || !insData) {
+        console.error("Order error:", error);
+        toast.error("Захиалга өгөхөд алдаа гарлаа");
+        return null;
+      }
+      data = insData;
     }
     setOrderRef(data.order_ref);
 
