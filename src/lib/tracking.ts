@@ -100,24 +100,14 @@ async function ensureSession(): Promise<{ id: string; token: string } | null> {
   return sessionInitPromise;
 }
 
-async function bumpLead(sessionId: string, delta: number, lastEvent: string, productId?: string | null) {
+async function bumpLead(token: string, delta: number, lastEvent: string, productId?: string | null) {
   try {
-    const { data: existing } = await supabase
-      .from("lead_scores")
-      .select("score")
-      .eq("session_id", sessionId)
-      .maybeSingle();
-    const newScore = (existing?.score ?? 0) + delta;
-    await supabase
-      .from("lead_scores")
-      .update({
-        score: newScore,
-        status: statusFromScore(newScore),
-        last_activity: new Date().toISOString(),
-        last_event_type: lastEvent,
-        last_product_id: productId ?? undefined,
-      })
-      .eq("session_id", sessionId);
+    await supabase.rpc("bump_lead_score", {
+      _token: token,
+      _delta: delta,
+      _event: lastEvent,
+      _product_id: productId ?? null,
+    });
   } catch {
     // ignore
   }
