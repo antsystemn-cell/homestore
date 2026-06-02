@@ -151,10 +151,9 @@ const CheckoutPage = () => {
     }
     setOrderRef(data.order_ref);
 
-    // Auto-send to delivery system (fire-and-forget)
-    supabase.functions.invoke("send-to-delivery", {
-      body: { order_id: data.id },
-    }).catch((e) => console.error("Failed to send to delivery:", e));
+    // NOTE: Delivery dispatch is handled automatically by the DB trigger
+    // `auto_send_order_to_delivery` once payment_status='paid' (online)
+    // or admin marks the order 'confirmed' (cash). No client-side call needed.
 
     // Track: invoice for online payments, purchase for cash
     const eventName = pm === "cash" ? "purchase" : "invoice_create";
