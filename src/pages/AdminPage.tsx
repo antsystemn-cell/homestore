@@ -14,6 +14,7 @@ import RecommendationSettingsManager from "@/components/admin/RecommendationSett
 import StockDeductionLog from "@/components/admin/StockDeductionLog";
 import DriversManager from "@/components/admin/DriversManager";
 import TrackingDashboard from "@/components/admin/TrackingDashboard";
+import DeliveryPortal from "@/components/admin/DeliveryPortal";
 import AdminSkeleton from "@/components/admin/AdminSkeleton";
 
 
@@ -44,7 +45,7 @@ import { printOrdersTable, loadPrintFields, buildSelectedOrdersXlsxRows, type Pr
 import { PrintFieldsSettings } from "@/components/admin/PrintFieldsSettings";
 import * as XLSX from "xlsx";
 
-type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "settings";
+type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "settings";
 
 const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "drivers"];
 
@@ -55,7 +56,7 @@ const AdminPage = () => {
   const hasAdminAccess = isAdmin || isModerator;
   const [tab, setTab] = useState<Tab>(() => {
     const t = searchParams.get("tab") as Tab | null;
-    const valid: Tab[] = ["stats","products","orders","users","drivers","categories","brands","delivery","payments","banner","collections","chatbot","analytics","diagnostics","settings"];
+    const valid: Tab[] = ["stats","tracking","products","orders","users","drivers","categories","brands","delivery","delivery-portal","payments","banner","collections","chatbot","analytics","diagnostics","stocklog","recommendations","settings"];
     return t && valid.includes(t) ? t : "stats";
   });
   const [products, setProducts] = useState<any[]>([]);
@@ -1538,6 +1539,7 @@ const AdminPage = () => {
     { id: "tracking", label: "Хяналт", icon: Activity },
     { id: "products", label: "Бараа", icon: Package },
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
+    { id: "delivery-portal", label: "Хүргэлт удирдах", icon: Truck },
     { id: "users", label: "Хэрэглэгч", icon: Users },
     { id: "chatbot", label: "AI Чатбот", icon: MessageCircle },
     { id: "settings", label: "Ерөнхий тохиргоо", icon: Settings },
@@ -4342,6 +4344,8 @@ const AdminPage = () => {
 
           {/* Visitor & Lead Tracking */}
           {tab === "tracking" && <TrackingDashboard />}
+
+          {tab === "delivery-portal" && <DeliveryPortal />}
 
           {/* Web Analytics */}
           {tab === "analytics" && <WebAnalytics />}
