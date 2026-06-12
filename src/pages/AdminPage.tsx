@@ -384,6 +384,7 @@ const AdminPage = () => {
   const [userSearch, setUserSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [orderSearchPhone, setOrderSearchPhone] = useState("");
+  const [ordersSubTab, setOrdersSubTab] = useState<"active" | "delivered">("active");
   const [showCancelledRecent, setShowCancelledRecent] = useState(false);
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
   const [productSelected, setProductSelected] = useState<Set<string>>(new Set());
@@ -3430,9 +3431,16 @@ const AdminPage = () => {
               })()}
 
               {(() => {
+                const isDeliveredOrder = (o: any) =>
+                  o.delivery_status === "delivered" || !!o.delivered_at || o.status === "completed";
+                const deliveredCount = orders.filter(isDeliveredOrder).length;
+                const activeCount = orders.length - deliveredCount;
+                const baseList = ordersSubTab === "delivered"
+                  ? orders.filter(isDeliveredOrder)
+                  : orders.filter((o) => !isDeliveredOrder(o));
                 const filteredOrders = orderSearchPhone
-                  ? orders.filter(o => o.phone?.includes(orderSearchPhone) || o.order_ref?.toLowerCase().includes(orderSearchPhone.toLowerCase()))
-                  : orders;
+                  ? baseList.filter(o => o.phone?.includes(orderSearchPhone) || o.order_ref?.toLowerCase().includes(orderSearchPhone.toLowerCase()))
+                  : baseList;
                 const filteredIds = filteredOrders.map((o: any) => o.id);
                 const allChecked = filteredIds.length > 0 && filteredIds.every((id: string) => bulkSelected.has(id));
                 const someChecked = filteredIds.some((id: string) => bulkSelected.has(id));
@@ -3452,8 +3460,27 @@ const AdminPage = () => {
 
                 return (
                   <>
+                    {/* Sub-tabs: Идэвхтэй / Хүргэгдсэн */}
+                    <div className="bg-card rounded-xl border border-border p-2 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => { setOrdersSubTab("active"); setBulkSelected(new Set()); }}
+                        className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-colors ${ordersSubTab === "active" ? "bg-primary text-primary-foreground" : "hover:bg-secondary/50 text-muted-foreground"}`}
+                      >
+                        Идэвхтэй захиалга <span className="ml-1 opacity-80">({activeCount})</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setOrdersSubTab("delivered"); setBulkSelected(new Set()); }}
+                        className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 ${ordersSubTab === "delivered" ? "bg-emerald-500 text-white" : "hover:bg-secondary/50 text-muted-foreground"}`}
+                      >
+                        <Truck className="h-3.5 w-3.5" />
+                        Хүргэгдсэн <span className="ml-1 opacity-80">({deliveredCount})</span>
+                      </button>
+                    </div>
                     {/* Bulk action bar */}
                     <div className="bg-card rounded-xl border border-border p-3 md:p-4 space-y-2">
+
                       <div className="flex items-center justify-between gap-3 flex-wrap">
                         <div className="flex items-center gap-3">
                           <Checkbox
@@ -3617,27 +3644,7 @@ const AdminPage = () => {
                           </div>
                         )}
                       </div>
-                      {/* Хүргэлт дууссан багана */}
-                      {(o.delivery_status === "delivered" || !!o.delivered_at || o.status === "completed") && (
-                        <div className="flex flex-col items-end justify-center min-w-[140px] px-3 border-l border-border/60 shrink-0">
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center gap-1 whitespace-nowrap">
-                            <Truck className="h-3 w-3" /> Хүргэлт дууссан
-                          </span>
-                          {o.delivered_at && (
-                            <span className="text-[10px] text-muted-foreground mt-1 text-right leading-tight whitespace-nowrap">
-                              {new Date(o.delivered_at).toLocaleDateString("mn-MN", { year: "numeric", month: "2-digit", day: "2-digit" })}
-                              {" · "}
-                              {new Date(o.delivered_at).toLocaleTimeString("mn-MN", { hour: "2-digit", minute: "2-digit" })}
-                            </span>
-                          )}
-                          {(() => {
-                            const d = drivers.find((drv) => drv.id === o.driver_id);
-                            const name = d?.full_name || o.delivery_signature_name;
-                            if (!name) return null;
-                            return <span className="text-[10px] text-muted-foreground mt-0.5 whitespace-nowrap">👤 {name}</span>;
-                          })()}
-                        </div>
-                      )}
+                      {/* Хүргэлт дууссан мэдээллийг 'Хүргэгдсэн' дэд таб руу шилжүүлсэн */}
                       <div className="flex items-center gap-2">
                         <button
                           onClick={(e) => {
