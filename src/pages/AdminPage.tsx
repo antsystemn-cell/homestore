@@ -4348,7 +4348,7 @@ const AdminPage = () => {
           {tab === "tracking" && <TrackingDashboard />}
 
           {tab === "delivery-portal" && <DeliveryPortal />}
-          {tab === "branches" && <BranchesManager />
+          {tab === "branches" && <BranchesManager />}
 
           {/* Web Analytics */}
           {tab === "analytics" && <WebAnalytics />}
