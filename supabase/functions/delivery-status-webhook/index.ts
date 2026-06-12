@@ -110,7 +110,11 @@ Deno.serve(async (req: Request) => {
     if (fulfillment_status) {
       const mapped = mapFulfillmentToEasyshop(fulfillment_status);
       updates.status = mapped;
-      updates.delivery_status = fulfillment_status;
+      // Normalize delivery_status so admin UI badges (which check "out_for_delivery"/"delivered") work
+      updates.delivery_status =
+        mapped === "delivering" ? "out_for_delivery" :
+        mapped === "completed"  ? "delivered" :
+        fulfillment_status;
     }
 
     if (payment_status) {
