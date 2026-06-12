@@ -6,14 +6,27 @@ const corsHeaders = {
 };
 
 function mapFulfillmentToEasyshop(status: string): string {
+  const s = (status || "").toLowerCase();
   const map: Record<string, string> = {
     confirmed: "confirmed",
     phone_confirmed: "phone_confirmed",
+    preparing: "confirmed",
+    ready_for_pickup: "confirmed",
+    // Driver assigned / dispatched / in transit → "delivering" (Хүргэлтэнд гарсан)
+    assigned: "delivering",
+    driver_assigned: "delivering",
+    dispatched: "delivering",
+    picked_up: "delivering",
+    in_transit: "delivering",
+    on_the_way: "delivering",
     out_for_delivery: "delivering",
+    delivering: "delivering",
     delivered: "completed",
+    completed: "completed",
     cancelled: "cancelled",
+    canceled: "cancelled",
   };
-  return map[status] || status;
+  return map[s] || s;
 }
 
 function mapPaymentToEasyshop(status: string): string {
@@ -97,7 +110,11 @@ Deno.serve(async (req: Request) => {
     if (fulfillment_status) {
       const mapped = mapFulfillmentToEasyshop(fulfillment_status);
       updates.status = mapped;
-      updates.delivery_status = fulfillment_status;
+      // Normalize delivery_status so admin UI badges (which check "out_for_delivery"/"delivered") work
+      updates.delivery_status =
+        mapped === "delivering" ? "out_for_delivery" :
+        mapped === "completed"  ? "delivered" :
+        fulfillment_status;
     }
 
     if (payment_status) {
