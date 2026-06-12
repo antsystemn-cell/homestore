@@ -3588,7 +3588,7 @@ const AdminPage = () => {
                         )}
                         {o.delivery_order_id && (
                           <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                            <span className="text-[10px] font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded">{o.delivery_order_id}</span>
+                            {/* DLV code hidden by request */}
                             {o.delivery_status && (
                               <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                                 o.delivery_status === "delivered" ? "bg-green-500/10 text-green-600" :
