@@ -3542,7 +3542,7 @@ const AdminPage = () => {
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-bold">#{o.id.slice(0, 8)}</span>
+                          {/* Order ID hidden by request */}
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusColors[o.status] || "bg-secondary text-muted-foreground"}`}>
                             {statusLabels[o.status] || o.status}
                           </span>
