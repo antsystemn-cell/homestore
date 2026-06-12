@@ -3939,23 +3939,6 @@ const AdminPage = () => {
                             </div>
                           </div>
                         )}
-                        {/* ON Shop Delivery info */}
-                        {o.delivery_order_id && (
-                          <div>
-                            <h4 className="text-xs font-bold text-muted-foreground mb-2">ON Shop Delivery</h4>
-                            <div className="bg-secondary/50 rounded-lg p-3 text-xs space-y-1">
-                              <p><span className="text-muted-foreground">Дугаар:</span> <span className="font-mono font-medium">{o.delivery_order_id}</span></p>
-                              {o.delivery_status && <p><span className="text-muted-foreground">Төлөв:</span> <span className="font-medium">{
-                                o.delivery_status === "confirmed" ? "Баталгаажсан" :
-                                o.delivery_status === "phone_confirmed" ? "Утсаар баталгаажсан" :
-                                o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд гарсан" :
-                                o.delivery_status === "delivered" ? "Хүргэгдсэн" :
-                                o.delivery_status === "cancelled" ? "Цуцлагдсан" :
-                                o.delivery_status === "processing" ? "Боловсруулж байна" : o.delivery_status
-                              }</span></p>}
-                            </div>
-                          </div>
-                        )}
 
                         {/* Shipping address */}
                         {o.shipping_address && (
