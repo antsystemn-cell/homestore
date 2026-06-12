@@ -3542,7 +3542,7 @@ const AdminPage = () => {
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-bold">#{o.id.slice(0, 8)}</span>
+                          {/* Order ID hidden by request */}
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusColors[o.status] || "bg-secondary text-muted-foreground"}`}>
                             {statusLabels[o.status] || o.status}
                           </span>
@@ -3588,7 +3588,7 @@ const AdminPage = () => {
                         )}
                         {o.delivery_order_id && (
                           <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                            <span className="text-[10px] font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded">{o.delivery_order_id}</span>
+                            {/* DLV code hidden by request */}
                             {o.delivery_status && (
                               <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                                 o.delivery_status === "delivered" ? "bg-green-500/10 text-green-600" :
