@@ -154,6 +154,33 @@ export type Database = {
         }
         Relationships: []
       }
+      branches: {
+        Row: {
+          code: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       brands: {
         Row: {
           created_at: string
@@ -924,6 +951,7 @@ export type Database = {
         Row: {
           address: string | null
           avatar_url: string | null
+          branch_id: string | null
           created_at: string
           full_name: string | null
           id: string
@@ -934,6 +962,7 @@ export type Database = {
         Insert: {
           address?: string | null
           avatar_url?: string | null
+          branch_id?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
@@ -944,6 +973,7 @@ export type Database = {
         Update: {
           address?: string | null
           avatar_url?: string | null
+          branch_id?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
@@ -951,7 +981,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       promo_banners: {
         Row: {
@@ -1387,9 +1425,70 @@ export type Database = {
           order_ref: string
         }[]
       }
+      current_user_branch: {
+        Args: never
+        Returns: {
+          code: string
+          id: string
+          name: string
+        }[]
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
+      }
+      delivery_entry_submit: {
+        Args: {
+          _note?: string
+          _order_id: string
+          _phone: string
+          _shipping_address: string
+        }
+        Returns: {
+          assigned_at: string | null
+          branch: string | null
+          created_at: string
+          delivered_at: string | null
+          delivery_completed_photo: string | null
+          delivery_failed_at: string | null
+          delivery_fee: number | null
+          delivery_gps_lat: number | null
+          delivery_gps_lng: number | null
+          delivery_option_id: string | null
+          delivery_order_id: string | null
+          delivery_pickup_photo: string | null
+          delivery_proof_photo: string | null
+          delivery_return_reason: string | null
+          delivery_signature_name: string | null
+          delivery_status: string | null
+          driver_id: string | null
+          external_ref: string | null
+          guest_name: string | null
+          id: string
+          is_guest: boolean | null
+          items: Json
+          order_ref: string | null
+          payment_collected_at: string | null
+          payment_intent_id: string | null
+          payment_method: string | null
+          payment_status: string | null
+          phone: string | null
+          picked_up_at: string | null
+          sale_date: string | null
+          shipping_address: string | null
+          source: string
+          source_note: string | null
+          status: string
+          total: number
+          updated_at: string
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
