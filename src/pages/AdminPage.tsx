@@ -3617,6 +3617,31 @@ const AdminPage = () => {
                           </div>
                         )}
                       </div>
+                      {/* Хүргэлт дууссан багана */}
+                      <div className="hidden md:flex flex-col items-end justify-center min-w-[160px] px-3 border-l border-border/60">
+                        {(o.delivery_status === "delivered" || !!o.delivered_at) ? (
+                          <>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center gap-1">
+                              <Truck className="h-3 w-3" /> Хүргэлт дууссан
+                            </span>
+                            {o.delivered_at && (
+                              <span className="text-[10px] text-muted-foreground mt-1 text-right leading-tight">
+                                {new Date(o.delivered_at).toLocaleDateString("mn-MN", { year: "numeric", month: "2-digit", day: "2-digit" })}
+                                <br />
+                                {new Date(o.delivered_at).toLocaleTimeString("mn-MN", { hour: "2-digit", minute: "2-digit" })}
+                              </span>
+                            )}
+                            {(() => {
+                              const d = drivers.find((drv) => drv.id === o.driver_id);
+                              const name = d?.full_name || o.delivery_signature_name;
+                              if (!name) return null;
+                              return <span className="text-[10px] text-muted-foreground mt-0.5">👤 {name}</span>;
+                            })()}
+                          </>
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground/60">—</span>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={(e) => {
