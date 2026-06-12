@@ -21,10 +21,21 @@ function mapFulfillmentToEasyshop(status: string): string {
     on_the_way: "delivering",
     out_for_delivery: "delivering",
     delivering: "delivering",
+    // Driver finished delivery → "completed" (Хүргэлт дууссан)
     delivered: "completed",
     completed: "completed",
+    complete: "completed",
+    finished: "completed",
+    done: "completed",
+    success: "completed",
+    successful: "completed",
+    fulfilled: "completed",
+    handed_over: "completed",
+    delivery_completed: "completed",
     cancelled: "cancelled",
     canceled: "cancelled",
+    failed: "cancelled",
+    returned: "cancelled",
   };
   return map[s] || s;
 }
