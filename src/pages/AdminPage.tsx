@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
-  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, Printer, FileSpreadsheet, Sparkles,
+  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, FileSpreadsheet, Sparkles,
   Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
@@ -36,15 +36,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { NiimbotBulkXlsxButton } from "@/components/niimbot/NiimbotBulkXlsxButton";
-import { NiimbotInstructionsModal } from "@/components/niimbot/NiimbotInstructionsModal";
 import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
-import { mapOrderToLabelData } from "@/lib/niimbot/mapOrder";
-import { generateNiimbotXlsx, buildXlsxFilename } from "@/lib/niimbot/xlsx";
-import { downloadBlob } from "@/lib/niimbot/transfer";
-import { printOrdersTable, loadPrintFields, buildSelectedOrdersXlsxRows, type PrintFieldConfig } from "@/lib/printOrdersTable";
-import { PrintFieldsSettings } from "@/components/admin/PrintFieldsSettings";
-import * as XLSX from "xlsx";
 
 type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "settings" | "branches";
 
@@ -399,9 +391,9 @@ const AdminPage = () => {
   const [bulkDiscountAmt, setBulkDiscountAmt] = useState<number>(0);
   const [bulkDiscountMode, setBulkDiscountMode] = useState<"pct" | "amt">("pct");
   const [bulkDiscountLoading, setBulkDiscountLoading] = useState(false);
-  const [showXlsxHelp, setShowXlsxHelp] = useState(false);
+  
   const [showPrintChecklist, setShowPrintChecklist] = useState(false);
-  const [showPrintSettings, setShowPrintSettings] = useState(false);
+  
   const [pendingPrintOrders, setPendingPrintOrders] = useState<any[]>([]);
 
   // Manual (external) order modal
@@ -3457,69 +3449,6 @@ const AdminPage = () => {
                   });
                 };
 
-                const handleBulkXlsx = async () => {
-                  const chosen = orders.filter((o: any) => bulkSelected.has(o.id));
-                  if (chosen.length === 0) {
-                    toast.error("Захиалга сонгоно уу");
-                    return;
-                  }
-                  try {
-                    const rows = chosen.map(mapOrderToLabelData);
-                    const blob = generateNiimbotXlsx(rows);
-                    downloadBlob(blob, buildXlsxFilename(rows.length));
-                    toast.success("Excel файл татагдлаа");
-                    setShowXlsxHelp(true);
-                  } catch (e) {
-                    console.error(e);
-                    toast.error("Excel үүсгэхэд алдаа гарлаа");
-                  }
-                };
-
-                const handleSelectedXlsx = () => {
-                  const chosen = orders.filter((o: any) => bulkSelected.has(o.id));
-                  if (chosen.length === 0) {
-                    toast.error("Захиалга сонгоно уу");
-                    return;
-                  }
-                  try {
-                    const fields = loadPrintFields();
-                    const rows = buildSelectedOrdersXlsxRows(chosen, fields);
-                    const ws = XLSX.utils.json_to_sheet(rows);
-                    const wb = XLSX.utils.book_new();
-                    XLSX.utils.book_append_sheet(wb, ws, "Orders");
-                    const buf = XLSX.write(wb, { type: "array", bookType: "xlsx" }) as ArrayBuffer;
-                    const blob = new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-                    const d = new Date();
-                    const pad = (n: number) => String(n).padStart(2, "0");
-                    const stamp = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}${pad(d.getHours())}${pad(d.getMinutes())}`;
-                    downloadBlob(blob, `orders-selected-${chosen.length}-${stamp}.xlsx`);
-                    toast.success(`${chosen.length} захиалгыг Excel-д татлаа`);
-                  } catch (e) {
-                    console.error(e);
-                    toast.error("Excel үүсгэхэд алдаа гарлаа");
-                  }
-                };
-
-                const handlePrintSelected = async () => {
-                  const chosen = orders.filter((o: any) => bulkSelected.has(o.id));
-                  if (chosen.length === 0) {
-                    toast.error("Захиалга сонгоно уу");
-                    return;
-                  }
-                  const fields = loadPrintFields();
-                  if (!fields.some((f) => f.enabled)) {
-                    toast.error("Хэвлэх багана сонгогдоогүй байна. Тохиргоо хэсгээс идэвхжүүлнэ үү.");
-                    return;
-                  }
-                  const t = toast.loading("Хэвлэх хуудас бэлдэж байна…");
-                  try {
-                    await printOrdersTable(chosen, fields);
-                    toast.success("Бэлэн боллоо", { id: t });
-                  } catch (e) {
-                    console.error(e);
-                    toast.error("Хэвлэхэд алдаа гарлаа", { id: t });
-                  }
-                };
 
                 return (
                   <>
@@ -3540,17 +3469,6 @@ const AdminPage = () => {
                           </span>
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={handleSelectedXlsx}
-                            disabled={bulkSelected.size === 0}
-                            className="gap-1.5"
-                          >
-                            <FileSpreadsheet className="h-4 w-4" />
-                            Excel татах ({bulkSelected.size})
-                          </Button>
                           <Button
                             type="button"
                             size="sm"
@@ -3590,35 +3508,9 @@ const AdminPage = () => {
                             <FileSpreadsheet className="h-4 w-4" />
                             PDF татах ({bulkSelected.size})
                           </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            onClick={handlePrintSelected}
-                            disabled={bulkSelected.size === 0}
-                            className="gap-1.5"
-                          >
-                            <Printer className="h-4 w-4" />
-                            Сонгосноо хэвлэх ({bulkSelected.size})
-                          </Button>
-                          <NiimbotBulkXlsxButton onExport={handleBulkXlsx} count={bulkSelected.size} />
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setShowPrintSettings((v) => !v)}
-                            className="gap-1.5"
-                            title="Хэвлэх тохиргоо"
-                          >
-                            <Settings className="h-4 w-4" />
-                            Тохиргоо
-                          </Button>
+                          
                         </div>
                       </div>
-                      {showPrintSettings && (
-                        <div className="pt-2 border-t border-border">
-                          <PrintFieldsSettings />
-                        </div>
-                      )}
                     </div>
 
                     {filteredOrders.map((o: any) => {
@@ -5375,7 +5267,7 @@ const AdminPage = () => {
           )}
         </div>
       </main>
-      <NiimbotInstructionsModal open={showXlsxHelp} onOpenChange={setShowXlsxHelp} mode="xlsx" />
+      
       <PrintChecklistModal
         open={showPrintChecklist}
         onOpenChange={setShowPrintChecklist}
