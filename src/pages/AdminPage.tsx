@@ -3431,9 +3431,16 @@ const AdminPage = () => {
               })()}
 
               {(() => {
+                const isDeliveredOrder = (o: any) =>
+                  o.delivery_status === "delivered" || !!o.delivered_at || o.status === "completed";
+                const deliveredCount = orders.filter(isDeliveredOrder).length;
+                const activeCount = orders.length - deliveredCount;
+                const baseList = ordersSubTab === "delivered"
+                  ? orders.filter(isDeliveredOrder)
+                  : orders.filter((o) => !isDeliveredOrder(o));
                 const filteredOrders = orderSearchPhone
-                  ? orders.filter(o => o.phone?.includes(orderSearchPhone) || o.order_ref?.toLowerCase().includes(orderSearchPhone.toLowerCase()))
-                  : orders;
+                  ? baseList.filter(o => o.phone?.includes(orderSearchPhone) || o.order_ref?.toLowerCase().includes(orderSearchPhone.toLowerCase()))
+                  : baseList;
                 const filteredIds = filteredOrders.map((o: any) => o.id);
                 const allChecked = filteredIds.length > 0 && filteredIds.every((id: string) => bulkSelected.has(id));
                 const someChecked = filteredIds.some((id: string) => bulkSelected.has(id));
