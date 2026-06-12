@@ -44,6 +44,7 @@ const ResetPasswordPage = lazy(() => lazyRetry(() => import("./pages/ResetPasswo
 const AdminPage = lazy(() => lazyRetry(() => import("./pages/AdminPage")));
 const WarehousePage = lazy(() => lazyRetry(() => import("./pages/WarehousePage")));
 const DriverPage = lazy(() => lazyRetry(() => import("./pages/DriverPage")));
+const DeliveryEntryPage = lazy(() => lazyRetry(() => import("./pages/DeliveryEntryPage")));
 const NotFound = lazy(() => lazyRetry(() => import("./pages/NotFound")));
 const CollectionPage = lazy(() => lazyRetry(() => import("./pages/CollectionPage")));
 
@@ -96,6 +97,7 @@ const App = () => (
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="/warehouse" element={<WarehousePage />} />
                     <Route path="/driver" element={<DriverPage />} />
+                    <Route path="/delivery-entry" element={<DeliveryEntryPage />} />
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route path="*" element={<MaintenancePage />} />
@@ -117,6 +119,7 @@ const App = () => (
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="/warehouse" element={<WarehousePage />} />
                     <Route path="/driver" element={<DriverPage />} />
+                    <Route path="/delivery-entry" element={<DeliveryEntryPage />} />
                     <Route path="*" element={<NotFound />} />
                   </>
                 )}
