@@ -3460,8 +3460,27 @@ const AdminPage = () => {
 
                 return (
                   <>
+                    {/* Sub-tabs: Идэвхтэй / Хүргэгдсэн */}
+                    <div className="bg-card rounded-xl border border-border p-2 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => { setOrdersSubTab("active"); setBulkSelected(new Set()); }}
+                        className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-colors ${ordersSubTab === "active" ? "bg-primary text-primary-foreground" : "hover:bg-secondary/50 text-muted-foreground"}`}
+                      >
+                        Идэвхтэй захиалга <span className="ml-1 opacity-80">({activeCount})</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setOrdersSubTab("delivered"); setBulkSelected(new Set()); }}
+                        className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 ${ordersSubTab === "delivered" ? "bg-emerald-500 text-white" : "hover:bg-secondary/50 text-muted-foreground"}`}
+                      >
+                        <Truck className="h-3.5 w-3.5" />
+                        Хүргэгдсэн <span className="ml-1 opacity-80">({deliveredCount})</span>
+                      </button>
+                    </div>
                     {/* Bulk action bar */}
                     <div className="bg-card rounded-xl border border-border p-3 md:p-4 space-y-2">
+
                       <div className="flex items-center justify-between gap-3 flex-wrap">
                         <div className="flex items-center gap-3">
                           <Checkbox
