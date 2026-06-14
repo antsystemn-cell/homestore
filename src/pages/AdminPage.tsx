@@ -45,8 +45,8 @@ const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "b
 const AdminPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { isAdmin, isModerator, loading: authLoading, authError } = useAuth();
-  const hasAdminAccess = isAdmin || isModerator;
+  const { isAdmin, isModerator, isSeller, loading: authLoading, authError } = useAuth();
+  const hasAdminAccess = isAdmin || isModerator || isSeller;
   const [tab, setTab] = useState<Tab>(() => {
     const t = searchParams.get("tab") as Tab | null;
     const valid: Tab[] = ["stats","tracking","products","orders","users","drivers","categories","brands","delivery","delivery-portal","payments","banner","collections","chatbot","analytics","diagnostics","stocklog","recommendations","settings","branches"];
