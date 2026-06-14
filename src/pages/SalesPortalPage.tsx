@@ -72,9 +72,30 @@ const SalesPortalPage = () => {
     setFetching(false);
   }, [user]);
 
+  const loadOrders = useCallback(async () => {
+    setOrdersLoading(true);
+    const { data, error } = await supabase
+      .from("orders")
+      .select("id,order_ref,phone,shipping_address,total,status,payment_status,payment_method,guest_name,is_guest,created_at,items")
+      .order("created_at", { ascending: false })
+      .limit(300);
+    if (error) {
+      toast.error("Захиалга ачаалж чадсангүй");
+    } else {
+      setOrders((data as OrderRow[]) || []);
+    }
+    setOrdersLoading(false);
+  }, []);
+
   useEffect(() => {
     if (!loading && user && allowed) void loadSales();
   }, [loading, user, allowed, loadSales]);
+
+  useEffect(() => {
+    if (!loading && user && allowed && tab === "orders" && orders.length === 0) {
+      void loadOrders();
+    }
+  }, [loading, user, allowed, tab, orders.length, loadOrders]);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Уншиж байна...</div>;
