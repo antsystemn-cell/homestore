@@ -205,8 +205,8 @@ const SalesPortalPage = () => {
             Борлуулалт
           </button>
           <button
-            onClick={() => setTab("orders")}
-            className={`px-4 py-2 text-xs font-bold rounded-lg ${tab === "orders" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+            onClick={() => navigate("/admin?tab=orders")}
+            className="px-4 py-2 text-xs font-bold rounded-lg text-muted-foreground"
           >
             Захиалга
           </button>
