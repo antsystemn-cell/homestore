@@ -3431,7 +3431,7 @@ const AdminPage = () => {
               })()}
 
               {(() => {
-                const UNPAID_TRACKING_START = new Date("2026-06-12T00:00:00+08:00").getTime();
+                const UNPAID_TRACKING_START = new Date("2026-06-14T00:00:00+08:00").getTime();
                 const isDeliveredOrder = (o: any) =>
                   o.delivery_status === "delivered" || !!o.delivered_at || o.status === "completed";
                 const isUnpaidDelivery = (o: any) =>
