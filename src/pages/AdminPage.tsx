@@ -4085,6 +4085,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                         )}
 
                         {/* Status change */}
+                        {(isAdmin || isModerator) && (
                         <div>
                           <h4 className="text-xs font-bold text-muted-foreground mb-2">Төлөв өөрчлөх</h4>
                           <select
@@ -4097,6 +4098,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                             ))}
                           </select>
                         </div>
+                        )}
 
                         {/* Out for delivery driver display */}
                         {(o.status === "delivering" || o.delivery_status === "out_for_delivery") && (o.delivered_at == null && o.delivery_status !== "delivered") && (() => {
