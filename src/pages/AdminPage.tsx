@@ -1560,7 +1560,9 @@ const AdminPage = () => {
 
   const sidebarItems = isAdmin
     ? allSidebarItems
-    : allSidebarItems.filter(item => moderatorTabs.includes(item.id));
+    : isModerator
+      ? allSidebarItems.filter(item => moderatorTabs.includes(item.id))
+      : allSidebarItems.filter(item => sellerTabs.includes(item.id));
 
   const netTotal = (o: any) => (Number(o.total) || 0) - (Number(o.delivery_fee) || 0);
   const deliveryFeeOf = (o: any) => Number(o.delivery_fee) || 0;
