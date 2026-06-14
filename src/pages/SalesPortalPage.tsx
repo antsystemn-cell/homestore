@@ -77,6 +77,7 @@ const SalesPortalPage = () => {
     const { data, error } = await supabase
       .from("orders")
       .select("id,order_ref,phone,shipping_address,total,status,payment_status,payment_method,guest_name,is_guest,created_at,items")
+      .in("status", ["pending", "confirmed"])
       .order("created_at", { ascending: false })
       .limit(300);
     if (error) {
