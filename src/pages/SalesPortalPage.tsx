@@ -70,7 +70,7 @@ const SalesPortalPage = () => {
         <h1 className="text-lg font-bold mb-2">Борлуулагчийн портал</h1>
         <p className="text-xs text-muted-foreground mb-5">Үргэлжлүүлэхийн тулд нэвтэрнэ үү.</p>
         <button
-          onClick={() => navigate("/auth?redirect=/sales-portal")}
+          onClick={() => navigate("/auth?redirect=/sellers")}
           className="bg-primary text-primary-foreground rounded-xl px-8 py-3 text-sm font-bold"
         >
           Нэвтрэх
