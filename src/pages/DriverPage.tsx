@@ -74,7 +74,6 @@ const formatPrice = (n: number) => `${(n ?? 0).toLocaleString("mn-MN")}₮`;
 const STATUS_LABELS: Record<string, string> = {
   pending: "Шинэ",
   preparing: "Бэлдэж байна",
-  phone_confirmed: "Утсаар баталгаажсан",
   ready: "Авах бэлэн",
   out_for_delivery: "Хүргэлтэнд",
   delivered: "Хүргэгдсэн",
