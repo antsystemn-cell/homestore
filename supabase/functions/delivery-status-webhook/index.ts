@@ -97,28 +97,37 @@ Deno.serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Find order by order_ref or id
+    // Find order by order_ref, id, or delivery_order_id
     let order: any = null;
-    const { data: byRef } = await supabase
-      .from("orders")
-      .select("id, status, payment_status")
-      .eq("order_ref", orderRef)
-      .single();
-
-    if (byRef) {
-      order = byRef;
-    } else {
-      // Try by id
-      const { data: byId } = await supabase
+    if (orderRef) {
+      const { data: byRef } = await supabase
         .from("orders")
         .select("id, status, payment_status")
-        .eq("id", orderRef)
-        .single();
-      order = byId;
+        .eq("order_ref", orderRef)
+        .maybeSingle();
+      if (byRef) order = byRef;
+
+      if (!order) {
+        const { data: byId } = await supabase
+          .from("orders")
+          .select("id, status, payment_status")
+          .eq("id", orderRef)
+          .maybeSingle();
+        if (byId) order = byId;
+      }
+    }
+
+    if (!order && delivery_order_id) {
+      const { data: byDelivery } = await supabase
+        .from("orders")
+        .select("id, status, payment_status")
+        .eq("delivery_order_id", delivery_order_id)
+        .maybeSingle();
+      if (byDelivery) order = byDelivery;
     }
 
     if (!order) {
-      console.log("Order not found for ref:", orderRef);
+      console.log("Order not found for ref:", orderRef, "delivery_id:", delivery_order_id);
       return new Response(JSON.stringify({ error: "Order not found" }), {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
