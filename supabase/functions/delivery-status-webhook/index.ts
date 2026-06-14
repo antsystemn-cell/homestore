@@ -58,7 +58,10 @@ Deno.serve(async (req: Request) => {
   try {
     // Verify webhook secret
     const webhookSecret = Deno.env.get("DELIVERY_WEBHOOK_SECRET");
-    const providedSecret = req.headers.get("X-Webhook-Secret");
+    const providedSecret =
+      req.headers.get("X-Webhook-Secret") ||
+      req.headers.get("x-webhook-secret") ||
+      req.headers.get("x-api-key");
 
     if (!webhookSecret || providedSecret !== webhookSecret) {
       console.error("Webhook auth failed");
@@ -69,11 +72,17 @@ Deno.serve(async (req: Request) => {
     }
 
     const body = await req.json();
-    const { external_order_id, fulfillment_status, payment_status } = body;
-
     console.log("Delivery webhook received:", JSON.stringify(body));
 
-    if (!external_order_id) {
+    // Accept multiple field name variants from partner
+    const external_order_id =
+      body.external_order_id || body.externalOrderId || body.order_ref || body.orderRef || body.ref;
+    const fulfillment_status =
+      body.fulfillment_status || body.status || body.delivery_status || body.deliveryStatus;
+    const payment_status = body.payment_status || body.paymentStatus;
+    const delivery_order_id = body.delivery_order_id || body.internal_order_number;
+
+    if (!external_order_id && !delivery_order_id) {
       return new Response(JSON.stringify({ error: "Missing external_order_id" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -81,7 +90,7 @@ Deno.serve(async (req: Request) => {
     }
 
     // Extract order ref from EASY-{order_ref}
-    const orderRef = external_order_id.replace("EASY-", "");
+    const orderRef = (external_order_id || "").replace(/^EASY-/i, "");
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
