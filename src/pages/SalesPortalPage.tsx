@@ -35,6 +35,16 @@ interface OrderRow {
 const formatMNT = (n: number) =>
   new Intl.NumberFormat("mn-MN").format(Math.round(n || 0)) + "₮";
 
+const STATUS_LABELS: Record<string, string> = {
+  pending: "Хүлээгдэж буй",
+  confirmed: "Төлбөр орсон",
+};
+
+const STATUS_BADGE_CLASS: Record<string, string> = {
+  pending: "bg-amber-500/10 text-amber-600",
+  confirmed: "bg-emerald-500/10 text-emerald-600",
+};
+
 const SalesPortalPage = () => {
   const navigate = useNavigate();
   const { user, loading, isSeller, isAdmin, signOut } = useAuth();
