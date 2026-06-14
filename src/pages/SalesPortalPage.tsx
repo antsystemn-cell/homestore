@@ -17,6 +17,21 @@ interface Sale {
   created_at: string;
 }
 
+interface OrderRow {
+  id: string;
+  order_ref: string | null;
+  phone: string | null;
+  shipping_address: string | null;
+  total: number;
+  status: string;
+  payment_status: string | null;
+  payment_method: string | null;
+  guest_name: string | null;
+  is_guest: boolean | null;
+  created_at: string;
+  items: any;
+}
+
 const formatMNT = (n: number) =>
   new Intl.NumberFormat("mn-MN").format(Math.round(n || 0)) + "₮";
 
