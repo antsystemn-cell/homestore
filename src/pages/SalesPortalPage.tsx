@@ -40,6 +40,10 @@ const SalesPortalPage = () => {
   const { user, loading, isSeller, isAdmin, signOut } = useAuth();
   const [sales, setSales] = useState<Sale[]>([]);
   const [fetching, setFetching] = useState(true);
+  const [tab, setTab] = useState<"sales" | "orders">("sales");
+  const [orders, setOrders] = useState<OrderRow[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [orderSearch, setOrderSearch] = useState("");
 
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
