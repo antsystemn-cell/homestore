@@ -9,6 +9,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isModerator: boolean;
   isDriver: boolean;
+  isSeller: boolean;
   authError: boolean;
   signOut: () => Promise<void>;
 }
