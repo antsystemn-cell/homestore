@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
-  BarChart3, LayoutDashboard, Search, X, AlertTriangle, AlertCircle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, FileSpreadsheet, Sparkles,
+  BarChart3, LayoutDashboard, Search, X, AlertTriangle, AlertCircle, BadgeCheck, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, FileSpreadsheet, Sparkles,
   Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
@@ -3431,10 +3431,13 @@ const AdminPage = () => {
               })()}
 
               {(() => {
+                const UNPAID_TRACKING_START = new Date("2026-06-12T00:00:00+08:00").getTime();
                 const isDeliveredOrder = (o: any) =>
                   o.delivery_status === "delivered" || !!o.delivered_at || o.status === "completed";
                 const isUnpaidDelivery = (o: any) =>
-                  isDeliveredOrder(o) && o.payment_status !== "confirmed";
+                  isDeliveredOrder(o)
+                  && o.payment_status !== "confirmed"
+                  && new Date(o.created_at).getTime() >= UNPAID_TRACKING_START;
                 const deliveredCount = orders.filter((o) => isDeliveredOrder(o) && !isUnpaidDelivery(o)).length;
                 const unpaidDeliveryCount = orders.filter(isUnpaidDelivery).length;
                 const activeCount = orders.length - deliveredCount - unpaidDeliveryCount;
@@ -3691,6 +3694,32 @@ const AdminPage = () => {
                             title="Хүргэлтэнд илгээх"
                           >
                             {sendingDelivery === o.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Truck className="h-4 w-4" />}
+                          </button>
+                        )}
+                        {o.payment_status !== "confirmed" && (isDeliveredOrder(o) || ordersSubTab === "unpaid_delivery") && (
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              const { error } = await supabase
+                                .from("orders")
+                                .update({ payment_status: "confirmed" })
+                                .eq("id", o.id);
+                              if (error) {
+                                toast.error("Төлбөр баталгаажуулахад алдаа: " + error.message);
+                                return;
+                              }
+                              setOrders((prev) => prev.map((x) => x.id === o.id ? { ...x, payment_status: "confirmed" } : x));
+                              toast.success("Төлбөр орсон гэж тэмдэглэлээ");
+                              if (o.delivery_order_id) {
+                                supabase.functions.invoke("notify-delivery-status", {
+                                  body: { order_id: o.id, payment_status: "paid" },
+                                }).catch(console.error);
+                              }
+                            }}
+                            className="p-2 rounded-lg hover:bg-emerald-500/10 text-emerald-600 transition-colors"
+                            title="Төлбөр орсон гэж тэмдэглэх"
+                          >
+                            <BadgeCheck className="h-4 w-4" />
                           </button>
                         )}
                         {o.status === "cancelled" && isAdmin && (
