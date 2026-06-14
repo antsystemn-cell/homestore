@@ -37,7 +37,14 @@ function mapFulfillmentToEasyshop(status: string): string {
     failed: "cancelled",
     returned: "cancelled",
   };
-  return map[s] || s;
+  if (map[s]) return map[s];
+  // Fallback: any string containing "deliver" + "ed"/"complete"/"done" → completed
+  if (/deliver(ed|y[_-]?complete)/i.test(s) || /complete|finish|done|success/i.test(s)) {
+    return "completed";
+  }
+  if (/cancel|fail|return/i.test(s)) return "cancelled";
+  if (/transit|dispatch|pickup|picked|on[_-]?the[_-]?way|out[_-]?for/i.test(s)) return "delivering";
+  return s;
 }
 
 function mapPaymentToEasyshop(status: string): string {
@@ -58,7 +65,10 @@ Deno.serve(async (req: Request) => {
   try {
     // Verify webhook secret
     const webhookSecret = Deno.env.get("DELIVERY_WEBHOOK_SECRET");
-    const providedSecret = req.headers.get("X-Webhook-Secret");
+    const providedSecret =
+      req.headers.get("X-Webhook-Secret") ||
+      req.headers.get("x-webhook-secret") ||
+      req.headers.get("x-api-key");
 
     if (!webhookSecret || providedSecret !== webhookSecret) {
       console.error("Webhook auth failed");
@@ -69,11 +79,17 @@ Deno.serve(async (req: Request) => {
     }
 
     const body = await req.json();
-    const { external_order_id, fulfillment_status, payment_status } = body;
-
     console.log("Delivery webhook received:", JSON.stringify(body));
 
-    if (!external_order_id) {
+    // Accept multiple field name variants from partner
+    const external_order_id =
+      body.external_order_id || body.externalOrderId || body.order_ref || body.orderRef || body.ref;
+    const fulfillment_status =
+      body.fulfillment_status || body.status || body.delivery_status || body.deliveryStatus;
+    const payment_status = body.payment_status || body.paymentStatus;
+    const delivery_order_id = body.delivery_order_id || body.internal_order_number;
+
+    if (!external_order_id && !delivery_order_id) {
       return new Response(JSON.stringify({ error: "Missing external_order_id" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -81,35 +97,44 @@ Deno.serve(async (req: Request) => {
     }
 
     // Extract order ref from EASY-{order_ref}
-    const orderRef = external_order_id.replace("EASY-", "");
+    const orderRef = (external_order_id || "").replace(/^EASY-/i, "");
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Find order by order_ref or id
+    // Find order by order_ref, id, or delivery_order_id
     let order: any = null;
-    const { data: byRef } = await supabase
-      .from("orders")
-      .select("id, status, payment_status")
-      .eq("order_ref", orderRef)
-      .single();
-
-    if (byRef) {
-      order = byRef;
-    } else {
-      // Try by id
-      const { data: byId } = await supabase
+    if (orderRef) {
+      const { data: byRef } = await supabase
         .from("orders")
         .select("id, status, payment_status")
-        .eq("id", orderRef)
-        .single();
-      order = byId;
+        .eq("order_ref", orderRef)
+        .maybeSingle();
+      if (byRef) order = byRef;
+
+      if (!order) {
+        const { data: byId } = await supabase
+          .from("orders")
+          .select("id, status, payment_status")
+          .eq("id", orderRef)
+          .maybeSingle();
+        if (byId) order = byId;
+      }
+    }
+
+    if (!order && delivery_order_id) {
+      const { data: byDelivery } = await supabase
+        .from("orders")
+        .select("id, status, payment_status")
+        .eq("delivery_order_id", delivery_order_id)
+        .maybeSingle();
+      if (byDelivery) order = byDelivery;
     }
 
     if (!order) {
-      console.log("Order not found for ref:", orderRef);
+      console.log("Order not found for ref:", orderRef, "delivery_id:", delivery_order_id);
       return new Response(JSON.stringify({ error: "Order not found" }), {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
