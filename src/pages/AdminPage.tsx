@@ -1827,6 +1827,7 @@ const AdminPage = () => {
                         className="w-full rounded-xl bg-secondary pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
+                    {(isAdmin || isModerator) && (
                     <button
                       type="button"
                       onClick={() => {
@@ -1852,6 +1853,7 @@ const AdminPage = () => {
                       <Plus className="h-3.5 w-3.5" />
                       Гараар
                     </button>
+                    )}
                   </div>
 
                   {manualProductSearch.trim() && (() => {
