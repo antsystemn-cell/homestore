@@ -105,6 +105,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsAdmin(false);
         setIsModerator(false);
         setIsDriver(false);
+        setIsSeller(false);
       }
 
       if (mounted) setLoading(false);
