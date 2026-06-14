@@ -384,7 +384,7 @@ const AdminPage = () => {
   const [userSearch, setUserSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [orderSearchPhone, setOrderSearchPhone] = useState("");
-  const [ordersSubTab, setOrdersSubTab] = useState<"active" | "delivered">("active");
+  const [ordersSubTab, setOrdersSubTab] = useState<"active" | "delivered" | "unpaid_delivery">("active");
   const [showCancelledRecent, setShowCancelledRecent] = useState(false);
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
   const [productSelected, setProductSelected] = useState<Set<string>>(new Set());
