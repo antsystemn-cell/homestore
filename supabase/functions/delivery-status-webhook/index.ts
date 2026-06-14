@@ -37,7 +37,14 @@ function mapFulfillmentToEasyshop(status: string): string {
     failed: "cancelled",
     returned: "cancelled",
   };
-  return map[s] || s;
+  if (map[s]) return map[s];
+  // Fallback: any string containing "deliver" + "ed"/"complete"/"done" → completed
+  if (/deliver(ed|y[_-]?complete)/i.test(s) || /complete|finish|done|success/i.test(s)) {
+    return "completed";
+  }
+  if (/cancel|fail|return/i.test(s)) return "cancelled";
+  if (/transit|dispatch|pickup|picked|on[_-]?the[_-]?way|out[_-]?for/i.test(s)) return "delivering";
+  return s;
 }
 
 function mapPaymentToEasyshop(status: string): string {
