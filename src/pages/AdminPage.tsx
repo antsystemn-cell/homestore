@@ -3476,30 +3476,33 @@ const AdminPage = () => {
                 return (
                   <>
                     {/* Sub-tabs: Идэвхтэй / Хүргэлтэнд өгсөн, төлбөр ороогүй / Хүргэгдсэн */}
-                    <div className="bg-card rounded-xl border border-border p-2 flex items-center gap-2 flex-wrap">
-                      <button
-                        type="button"
-                        onClick={() => { setOrdersSubTab("active"); setBulkSelected(new Set()); }}
-                        className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-colors ${ordersSubTab === "active" ? "bg-primary text-primary-foreground" : "hover:bg-secondary/50 text-muted-foreground"}`}
-                      >
-                        Идэвхтэй захиалга <span className="ml-1 opacity-80">({activeCount})</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { setOrdersSubTab("unpaid_delivery"); setBulkSelected(new Set()); }}
-                        className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 ${ordersSubTab === "unpaid_delivery" ? "bg-amber-500 text-white" : "hover:bg-secondary/50 text-muted-foreground"}`}
-                      >
-                        <AlertCircle className="h-3.5 w-3.5" />
-                        Хүргэлтэнд өгсөн, төлбөр ороогүй <span className="ml-1 opacity-80">({unpaidDeliveryCount})</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { setOrdersSubTab("delivered"); setBulkSelected(new Set()); }}
-                        className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 ${ordersSubTab === "delivered" ? "bg-emerald-500 text-white" : "hover:bg-secondary/50 text-muted-foreground"}`}
-                      >
-                        <Truck className="h-3.5 w-3.5" />
-                        Хүргэгдсэн <span className="ml-1 opacity-80">({deliveredCount})</span>
-                      </button>
+                    <div className="bg-card rounded-xl border border-border p-2 overflow-x-auto no-scrollbar">
+                      <div className="flex items-center gap-2 min-w-max">
+                        <button
+                          type="button"
+                          onClick={() => { setOrdersSubTab("active"); setBulkSelected(new Set()); }}
+                          className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${ordersSubTab === "active" ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}
+                        >
+                          <Package className="h-3.5 w-3.5" />
+                          Идэвхтэй захиалга <span className="ml-0.5 opacity-80">({activeCount})</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { setOrdersSubTab("unpaid_delivery"); setBulkSelected(new Set()); }}
+                          className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${ordersSubTab === "unpaid_delivery" ? "bg-amber-500 text-white shadow-md shadow-amber-500/25" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}
+                        >
+                          <AlertCircle className="h-3.5 w-3.5" />
+                          Хүргэлтэнд өгсөн, төлбөр ороогүй <span className="ml-0.5 opacity-80">({unpaidDeliveryCount})</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { setOrdersSubTab("delivered"); setBulkSelected(new Set()); }}
+                          className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${ordersSubTab === "delivered" ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/25" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}
+                        >
+                          <Truck className="h-3.5 w-3.5" />
+                          Хүргэгдсэн <span className="ml-0.5 opacity-80">({deliveredCount})</span>
+                        </button>
+                      </div>
                     </div>
                     {/* Bulk action bar */}
                     <div className="bg-card rounded-xl border border-border p-3 md:p-4 space-y-2">
