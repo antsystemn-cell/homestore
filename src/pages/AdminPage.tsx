@@ -3988,13 +3988,74 @@ const AdminPage = () => {
                           )}
                         </div>
 
-                        {/* Payment method info */}
-                        <div>
-                          <h4 className="text-xs font-bold text-muted-foreground mb-2">Төлбөрийн мэдээлэл</h4>
-                          <div className="bg-secondary/50 rounded-lg p-3 text-xs space-y-1">
-                            <p><span className="text-muted-foreground">Төлбөрийн суваг:</span> <span className="font-medium">{paymentMethodLabels[(o.payment_method || "cash").toLowerCase()]?.label || o.payment_method || "Бэлнээр"}</span></p>
-                            <p><span className="text-muted-foreground">Төлбөрийн төлөв:</span> <span className={`font-medium ${o.payment_status === "confirmed" ? "text-emerald-600" : "text-amber-600"}`}>{o.payment_status === "confirmed" ? "Төлбөр орсон" : o.payment_status === "unpaid" ? "Төлөгдөөгүй" : o.payment_status}</span></p>
-                            {o.order_ref && <p><span className="text-muted-foreground">Лавлах дугаар:</span> <span className="font-medium">{o.order_ref}</span></p>}
+                        {/* Payment editor */}
+                        <div className="bg-card rounded-2xl border border-border overflow-hidden">
+                          <header className="flex items-center gap-2 px-4 py-2.5 bg-secondary/40 border-b border-border">
+                            <Wallet className="h-4 w-4 text-primary" />
+                            <h3 className="text-sm font-bold">Төлбөр</h3>
+                          </header>
+                          <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-xs font-bold text-muted-foreground mb-1 block">Төлбөрийн суваг</label>
+                              <select
+                                value={(o.payment_method || "cash").toLowerCase()}
+                                onChange={async (e) => {
+                                  const newMethod = e.target.value;
+                                  const { error } = await supabase.from("orders").update({ payment_method: newMethod }).eq("id", o.id);
+                                  if (error) { toast.error("Алдаа: " + error.message); return; }
+                                  setOrders((prev) => prev.map((x) => x.id === o.id ? { ...x, payment_method: newMethod } : x));
+                                  toast.success("Төлбөрийн суваг шинэчлэгдлээ");
+                                }}
+                                className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                              >
+                                <option value="cash">Бэлнээр</option>
+                                <option value="qpay">QPay</option>
+                                <option value="storepay">Storepay</option>
+                                <option value="transfer">Шилжүүлэг</option>
+                                <option value="pocket">Pocket</option>
+                                <option value="organization">Байгууллага</option>
+                                <option value="sono">Соно Туслах</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="text-xs font-bold text-muted-foreground mb-1 block">
+                                Төлөв <span className="font-normal text-muted-foreground/60">(төлбөр төлөгдсөн эсэх)</span>
+                              </label>
+                              <div className="grid grid-cols-2 gap-2">
+                                {[
+                                  { value: "confirmed", title: "Төлбөр авсан", desc: "Бэлэн / шилжүүлэг хүлээн авсан", active: o.payment_status === "confirmed", accent: "text-emerald-600 border-emerald-500/40 bg-emerald-500/5" },
+                                  { value: "unpaid", title: "Төлбөр аваагүй", desc: "Хүргэлт дээр төлнө", active: o.payment_status !== "confirmed", accent: "text-amber-600 border-amber-500/40 bg-amber-500/5" },
+                                ].map((opt) => (
+                                  <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+                                      const newStatus = opt.value;
+                                      if ((o.payment_status === "confirmed") === (newStatus === "confirmed")) return;
+                                      const { error } = await supabase.from("orders").update({ payment_status: newStatus }).eq("id", o.id);
+                                      if (error) { toast.error("Алдаа: " + error.message); return; }
+                                      setOrders((prev) => prev.map((x) => x.id === o.id ? { ...x, payment_status: newStatus } : x));
+                                      toast.success(newStatus === "confirmed" ? "Төлбөр орсон гэж тэмдэглэлээ" : "Төлөгдөөгүй гэж тэмдэглэлээ");
+                                      if (o.delivery_order_id) {
+                                        supabase.functions.invoke("notify-delivery-status", {
+                                          body: { order_id: o.id, payment_status: newStatus === "confirmed" ? "paid" : "unpaid" },
+                                        }).catch(console.error);
+                                      }
+                                    }}
+                                    className={`text-left rounded-xl border-2 px-3 py-2 transition-all ${opt.active ? `${opt.accent} font-semibold shadow-sm` : "border-transparent bg-secondary text-foreground/70 hover:bg-secondary/70"}`}
+                                  >
+                                    <div className="text-sm font-bold leading-tight">{opt.title}</div>
+                                    <div className="text-[11px] opacity-80 mt-0.5 leading-tight">{opt.desc}</div>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                            {o.order_ref && (
+                              <div className="md:col-span-2 text-xs text-muted-foreground">
+                                Лавлах дугаар: <span className="font-medium text-foreground">{o.order_ref}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                         {delOpt && (
