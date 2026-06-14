@@ -35,6 +35,16 @@ interface OrderRow {
 const formatMNT = (n: number) =>
   new Intl.NumberFormat("mn-MN").format(Math.round(n || 0)) + "₮";
 
+const STATUS_LABELS: Record<string, string> = {
+  pending: "Хүлээгдэж буй",
+  confirmed: "Төлбөр орсон",
+};
+
+const STATUS_BADGE_CLASS: Record<string, string> = {
+  pending: "bg-amber-500/10 text-amber-600",
+  confirmed: "bg-emerald-500/10 text-emerald-600",
+};
+
 const SalesPortalPage = () => {
   const navigate = useNavigate();
   const { user, loading, isSeller, isAdmin, signOut } = useAuth();
@@ -77,6 +87,7 @@ const SalesPortalPage = () => {
     const { data, error } = await supabase
       .from("orders")
       .select("id,order_ref,phone,shipping_address,total,status,payment_status,payment_method,guest_name,is_guest,created_at,items")
+      .in("status", ["pending", "confirmed"])
       .order("created_at", { ascending: false })
       .limit(300);
     if (error) {
@@ -211,8 +222,8 @@ const SalesPortalPage = () => {
             Борлуулалт
           </button>
           <button
-            onClick={() => navigate("/admin?tab=orders")}
-            className="px-4 py-2 text-xs font-bold rounded-lg text-muted-foreground"
+            onClick={() => setTab("orders")}
+            className={`px-4 py-2 text-xs font-bold rounded-lg ${tab === "orders" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
           >
             Захиалга
           </button>
@@ -340,7 +351,7 @@ const SalesPortalPage = () => {
       ) : (
         <div className="max-w-5xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
-            <h2 className="text-sm font-bold">Бүх захиалга ({orders.length})</h2>
+            <h2 className="text-sm font-bold">Хүлээгдэж буй & Төлбөр орсон ({orders.length})</h2>
             <div className="flex items-center gap-2">
               <input
                 value={orderSearch}
@@ -384,14 +395,9 @@ const SalesPortalPage = () => {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-bold text-sm">{o.order_ref || o.id.slice(0, 8)}</p>
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
-                              {o.status}
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${STATUS_BADGE_CLASS[o.status] || "bg-secondary text-secondary-foreground"}`}>
+                              {STATUS_LABELS[o.status] || o.status}
                             </span>
-                            {o.payment_status && (
-                              <span className="text-[10px] px-2 py-0.5 rounded-full border border-border">
-                                {o.payment_method || "—"} · {o.payment_status}
-                              </span>
-                            )}
                             {o.is_guest && (
                               <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted">Зочин</span>
                             )}
