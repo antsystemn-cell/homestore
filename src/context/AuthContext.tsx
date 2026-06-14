@@ -61,6 +61,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsAdmin(false);
         setIsModerator(false);
         setIsDriver(false);
+        setIsSeller(false);
         return;
       }
 
@@ -70,6 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsAdmin(false);
         setIsModerator(false);
         setIsDriver(false);
+        setIsSeller(false);
         return;
       }
 
@@ -78,12 +80,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsAdmin(roles.includes("admin"));
       setIsModerator(roles.includes("moderator"));
       setIsDriver(roles.includes("driver"));
+      setIsSeller(roles.includes("seller"));
     } catch (error) {
       console.error("Failed to check roles", error);
       setAuthError(true);
       setIsAdmin(false);
       setIsModerator(false);
       setIsDriver(false);
+      setIsSeller(false);
     }
   };
 
