@@ -102,11 +102,6 @@ const SalesPortalPage = () => {
     if (!loading && user && allowed) void loadSales();
   }, [loading, user, allowed, loadSales]);
 
-  useEffect(() => {
-    if (!loading && user && allowed && user.email === "odnoo20101207@gmail.com") {
-      navigate("/admin?tab=orders", { replace: true });
-    }
-  }, [loading, user, allowed, navigate]);
 
   useEffect(() => {
     if (!loading && user && allowed && tab === "orders" && orders.length === 0) {
