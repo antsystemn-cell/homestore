@@ -1,0 +1,1 @@
+CREATE POLICY "Sellers can view all orders" ON public.orders FOR SELECT USING (has_role(auth.uid(), 'seller'::app_role));

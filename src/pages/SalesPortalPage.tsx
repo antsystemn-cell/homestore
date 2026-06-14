@@ -17,6 +17,21 @@ interface Sale {
   created_at: string;
 }
 
+interface OrderRow {
+  id: string;
+  order_ref: string | null;
+  phone: string | null;
+  shipping_address: string | null;
+  total: number;
+  status: string;
+  payment_status: string | null;
+  payment_method: string | null;
+  guest_name: string | null;
+  is_guest: boolean | null;
+  created_at: string;
+  items: any;
+}
+
 const formatMNT = (n: number) =>
   new Intl.NumberFormat("mn-MN").format(Math.round(n || 0)) + "₮";
 
@@ -25,6 +40,10 @@ const SalesPortalPage = () => {
   const { user, loading, isSeller, isAdmin, signOut } = useAuth();
   const [sales, setSales] = useState<Sale[]>([]);
   const [fetching, setFetching] = useState(true);
+  const [tab, setTab] = useState<"sales" | "orders">("sales");
+  const [orders, setOrders] = useState<OrderRow[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [orderSearch, setOrderSearch] = useState("");
 
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -53,9 +72,30 @@ const SalesPortalPage = () => {
     setFetching(false);
   }, [user]);
 
+  const loadOrders = useCallback(async () => {
+    setOrdersLoading(true);
+    const { data, error } = await supabase
+      .from("orders")
+      .select("id,order_ref,phone,shipping_address,total,status,payment_status,payment_method,guest_name,is_guest,created_at,items")
+      .order("created_at", { ascending: false })
+      .limit(300);
+    if (error) {
+      toast.error("Захиалга ачаалж чадсангүй");
+    } else {
+      setOrders((data as OrderRow[]) || []);
+    }
+    setOrdersLoading(false);
+  }, []);
+
   useEffect(() => {
     if (!loading && user && allowed) void loadSales();
   }, [loading, user, allowed, loadSales]);
+
+  useEffect(() => {
+    if (!loading && user && allowed && tab === "orders" && orders.length === 0) {
+      void loadOrders();
+    }
+  }, [loading, user, allowed, tab, orders.length, loadOrders]);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Уншиж байна...</div>;
@@ -156,6 +196,24 @@ const SalesPortalPage = () => {
         </div>
       </header>
 
+      <div className="max-w-5xl mx-auto px-4 pt-4">
+        <div className="inline-flex rounded-xl border border-border bg-card p-1">
+          <button
+            onClick={() => setTab("sales")}
+            className={`px-4 py-2 text-xs font-bold rounded-lg ${tab === "sales" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+          >
+            Борлуулалт
+          </button>
+          <button
+            onClick={() => setTab("orders")}
+            className={`px-4 py-2 text-xs font-bold rounded-lg ${tab === "orders" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+          >
+            Захиалга
+          </button>
+        </div>
+      </div>
+
+      {tab === "sales" ? (
       <div className="max-w-5xl mx-auto px-4 py-6 grid md:grid-cols-2 gap-6">
         {/* Form */}
         <div className="bg-card rounded-2xl border border-border p-5">
@@ -273,6 +331,93 @@ const SalesPortalPage = () => {
           )}
         </div>
       </div>
+      ) : (
+        <div className="max-w-5xl mx-auto px-4 py-6">
+          <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+            <h2 className="text-sm font-bold">Бүх захиалга ({orders.length})</h2>
+            <div className="flex items-center gap-2">
+              <input
+                value={orderSearch}
+                onChange={(e) => setOrderSearch(e.target.value)}
+                placeholder="Хайх (код, утас, нэр)..."
+                className="rounded-xl border border-border bg-background px-3 py-2 text-xs w-56"
+              />
+              <button
+                onClick={() => void loadOrders()}
+                className="text-xs rounded-lg border border-border px-3 py-2 hover:bg-secondary"
+              >
+                Шинэчлэх
+              </button>
+            </div>
+          </div>
+
+          {ordersLoading ? (
+            <p className="text-xs text-muted-foreground">Уншиж байна...</p>
+          ) : orders.length === 0 ? (
+            <div className="bg-card rounded-2xl border border-border p-8 text-center text-xs text-muted-foreground">
+              Захиалга алга.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {orders
+                .filter((o) => {
+                  const q = orderSearch.trim().toLowerCase();
+                  if (!q) return true;
+                  return (
+                    (o.order_ref || "").toLowerCase().includes(q) ||
+                    (o.phone || "").toLowerCase().includes(q) ||
+                    (o.guest_name || "").toLowerCase().includes(q) ||
+                    (o.shipping_address || "").toLowerCase().includes(q)
+                  );
+                })
+                .map((o) => {
+                  const itemCount = Array.isArray(o.items) ? o.items.length : 0;
+                  return (
+                    <div key={o.id} className="bg-card rounded-xl border border-border p-4">
+                      <div className="flex items-start justify-between gap-3 flex-wrap">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-bold text-sm">{o.order_ref || o.id.slice(0, 8)}</p>
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
+                              {o.status}
+                            </span>
+                            {o.payment_status && (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full border border-border">
+                                {o.payment_method || "—"} · {o.payment_status}
+                              </span>
+                            )}
+                            {o.is_guest && (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted">Зочин</span>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground mt-1.5">
+                            {o.guest_name && (
+                              <span className="flex items-center gap-1"><User className="h-3 w-3" />{o.guest_name}</span>
+                            )}
+                            {o.phone && (
+                              <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{o.phone}</span>
+                            )}
+                            <span className="flex items-center gap-1">
+                              <Package className="h-3 w-3" />{itemCount} бараа
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {new Date(o.created_at).toLocaleString("mn-MN")}
+                            </span>
+                          </div>
+                          {o.shipping_address && (
+                            <p className="text-[11px] text-muted-foreground mt-1 truncate">{o.shipping_address}</p>
+                          )}
+                        </div>
+                        <p className="font-bold text-sm whitespace-nowrap">{formatMNT(Number(o.total))}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
