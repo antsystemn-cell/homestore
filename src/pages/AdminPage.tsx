@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
-  BarChart3, LayoutDashboard, Search, X, AlertTriangle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, FileSpreadsheet, Sparkles,
+  BarChart3, LayoutDashboard, Search, X, AlertTriangle, AlertCircle, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, FileSpreadsheet, Sparkles,
   Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
@@ -384,7 +384,7 @@ const AdminPage = () => {
   const [userSearch, setUserSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [orderSearchPhone, setOrderSearchPhone] = useState("");
-  const [ordersSubTab, setOrdersSubTab] = useState<"active" | "delivered">("active");
+  const [ordersSubTab, setOrdersSubTab] = useState<"active" | "delivered" | "unpaid_delivery">("active");
   const [showCancelledRecent, setShowCancelledRecent] = useState(false);
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
   const [productSelected, setProductSelected] = useState<Set<string>>(new Set());
@@ -3433,11 +3433,17 @@ const AdminPage = () => {
               {(() => {
                 const isDeliveredOrder = (o: any) =>
                   o.delivery_status === "delivered" || !!o.delivered_at || o.status === "completed";
-                const deliveredCount = orders.filter(isDeliveredOrder).length;
-                const activeCount = orders.length - deliveredCount;
+                const isUnpaidDelivery = (o: any) =>
+                  o.payment_status !== "confirmed" &&
+                  (o.delivery_order_id || o.delivery_status === "out_for_delivery" || o.delivery_status === "delivered");
+                const deliveredCount = orders.filter((o) => isDeliveredOrder(o) && !isUnpaidDelivery(o)).length;
+                const unpaidDeliveryCount = orders.filter(isUnpaidDelivery).length;
+                const activeCount = orders.length - deliveredCount - unpaidDeliveryCount;
                 const baseList = ordersSubTab === "delivered"
-                  ? orders.filter(isDeliveredOrder)
-                  : orders.filter((o) => !isDeliveredOrder(o));
+                  ? orders.filter((o) => isDeliveredOrder(o) && !isUnpaidDelivery(o))
+                  : ordersSubTab === "unpaid_delivery"
+                    ? orders.filter(isUnpaidDelivery)
+                    : orders.filter((o) => !isDeliveredOrder(o) && !isUnpaidDelivery(o));
                 const filteredOrders = orderSearchPhone
                   ? baseList.filter(o => o.phone?.includes(orderSearchPhone) || o.order_ref?.toLowerCase().includes(orderSearchPhone.toLowerCase()))
                   : baseList;
@@ -3460,14 +3466,22 @@ const AdminPage = () => {
 
                 return (
                   <>
-                    {/* Sub-tabs: Идэвхтэй / Хүргэгдсэн */}
-                    <div className="bg-card rounded-xl border border-border p-2 flex items-center gap-2">
+                    {/* Sub-tabs: Идэвхтэй / Хүргэлтэнд өгсөн, төлбөр ороогүй / Хүргэгдсэн */}
+                    <div className="bg-card rounded-xl border border-border p-2 flex items-center gap-2 flex-wrap">
                       <button
                         type="button"
                         onClick={() => { setOrdersSubTab("active"); setBulkSelected(new Set()); }}
                         className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-colors ${ordersSubTab === "active" ? "bg-primary text-primary-foreground" : "hover:bg-secondary/50 text-muted-foreground"}`}
                       >
                         Идэвхтэй захиалга <span className="ml-1 opacity-80">({activeCount})</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setOrdersSubTab("unpaid_delivery"); setBulkSelected(new Set()); }}
+                        className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 ${ordersSubTab === "unpaid_delivery" ? "bg-amber-500 text-white" : "hover:bg-secondary/50 text-muted-foreground"}`}
+                      >
+                        <AlertCircle className="h-3.5 w-3.5" />
+                        Хүргэлтэнд өгсөн, төлбөр ороогүй <span className="ml-1 opacity-80">({unpaidDeliveryCount})</span>
                       </button>
                       <button
                         type="button"
