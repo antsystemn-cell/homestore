@@ -3434,8 +3434,7 @@ const AdminPage = () => {
                 const isDeliveredOrder = (o: any) =>
                   o.delivery_status === "delivered" || !!o.delivered_at || o.status === "completed";
                 const isUnpaidDelivery = (o: any) =>
-                  o.payment_status !== "confirmed" &&
-                  o.delivery_status === "delivered";
+                  isDeliveredOrder(o) && o.payment_status !== "confirmed";
                 const deliveredCount = orders.filter((o) => isDeliveredOrder(o) && !isUnpaidDelivery(o)).length;
                 const unpaidDeliveryCount = orders.filter(isUnpaidDelivery).length;
                 const activeCount = orders.length - deliveredCount - unpaidDeliveryCount;
