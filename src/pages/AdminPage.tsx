@@ -1519,14 +1519,18 @@ const AdminPage = () => {
   const categories = [...new Set(products.map((p) => p.category))];
 
   const moderatorTabs: Tab[] = ["orders"];
+  const sellerTabs: Tab[] = ["orders"];
 
-  // Moderator only sees orders — auto-switch if they land on a non-allowed tab
+  // Moderator/Seller only see orders — auto-switch if they land on a non-allowed tab
   useEffect(() => {
     if (!isAdmin && isModerator && !moderatorTabs.includes(tab)) {
       setTab("orders");
     }
+    if (!isAdmin && !isModerator && isSeller && !sellerTabs.includes(tab)) {
+      setTab("orders");
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAdmin, isModerator]);
+  }, [isAdmin, isModerator, isSeller]);
 
   const allSidebarItems: { id: Tab; label: string; icon: any }[] = [
     { id: "stats", label: "Статистик", icon: BarChart3 },
