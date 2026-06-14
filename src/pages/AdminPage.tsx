@@ -3705,15 +3705,19 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                             onClick={async (e) => {
                               e.stopPropagation();
                               const newStatus = o.payment_status === "confirmed" ? "unpaid" : "confirmed";
+                              const updates: any = { payment_status: newStatus };
+                              if (newStatus === "confirmed" && o.status !== "confirmed" && o.status !== "completed" && o.status !== "cancelled") {
+                                updates.status = "confirmed";
+                              }
                               const { error } = await supabase
                                 .from("orders")
-                                .update({ payment_status: newStatus })
+                                .update(updates)
                                 .eq("id", o.id);
                               if (error) {
                                 toast.error("Төлбөрийн төлөв шинэчлэхэд алдаа: " + error.message);
                                 return;
                               }
-                              setOrders((prev) => prev.map((x) => x.id === o.id ? { ...x, payment_status: newStatus } : x));
+                              setOrders((prev) => prev.map((x) => x.id === o.id ? { ...x, ...updates } : x));
                               toast.success(newStatus === "confirmed" ? "Төлбөр орсон гэж тэмдэглэлээ" : "Төлөгдөөгүй гэж тэмдэглэлээ");
                               if (o.delivery_order_id) {
                                 supabase.functions.invoke("notify-delivery-status", {
@@ -4037,9 +4041,13 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                                       e.stopPropagation();
                                       const newStatus = opt.value;
                                       if ((o.payment_status === "confirmed") === (newStatus === "confirmed")) return;
-                                      const { error } = await supabase.from("orders").update({ payment_status: newStatus }).eq("id", o.id);
+                                      const updates: any = { payment_status: newStatus };
+                                      if (newStatus === "confirmed" && o.status !== "confirmed" && o.status !== "completed" && o.status !== "cancelled") {
+                                        updates.status = "confirmed";
+                                      }
+                                      const { error } = await supabase.from("orders").update(updates).eq("id", o.id);
                                       if (error) { toast.error("Алдаа: " + error.message); return; }
-                                      setOrders((prev) => prev.map((x) => x.id === o.id ? { ...x, payment_status: newStatus } : x));
+                                      setOrders((prev) => prev.map((x) => x.id === o.id ? { ...x, ...updates } : x));
                                       toast.success(newStatus === "confirmed" ? "Төлбөр орсон гэж тэмдэглэлээ" : "Төлөгдөөгүй гэж тэмдэглэлээ");
                                       if (o.delivery_order_id) {
                                         supabase.functions.invoke("notify-delivery-status", {
