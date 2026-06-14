@@ -45,8 +45,8 @@ const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "b
 const AdminPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { isAdmin, isModerator, loading: authLoading, authError } = useAuth();
-  const hasAdminAccess = isAdmin || isModerator;
+  const { isAdmin, isModerator, isSeller, loading: authLoading, authError } = useAuth();
+  const hasAdminAccess = isAdmin || isModerator || isSeller;
   const [tab, setTab] = useState<Tab>(() => {
     const t = searchParams.get("tab") as Tab | null;
     const valid: Tab[] = ["stats","tracking","products","orders","users","drivers","categories","brands","delivery","delivery-portal","payments","banner","collections","chatbot","analytics","diagnostics","stocklog","recommendations","settings","branches"];
@@ -1519,14 +1519,18 @@ const AdminPage = () => {
   const categories = [...new Set(products.map((p) => p.category))];
 
   const moderatorTabs: Tab[] = ["orders"];
+  const sellerTabs: Tab[] = ["orders"];
 
-  // Moderator only sees orders — auto-switch if they land on a non-allowed tab
+  // Moderator/Seller only see orders — auto-switch if they land on a non-allowed tab
   useEffect(() => {
     if (!isAdmin && isModerator && !moderatorTabs.includes(tab)) {
       setTab("orders");
     }
+    if (!isAdmin && !isModerator && isSeller && !sellerTabs.includes(tab)) {
+      setTab("orders");
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAdmin, isModerator]);
+  }, [isAdmin, isModerator, isSeller]);
 
   const allSidebarItems: { id: Tab; label: string; icon: any }[] = [
     { id: "stats", label: "Статистик", icon: BarChart3 },
@@ -1556,7 +1560,9 @@ const AdminPage = () => {
 
   const sidebarItems = isAdmin
     ? allSidebarItems
-    : allSidebarItems.filter(item => moderatorTabs.includes(item.id));
+    : isModerator
+      ? allSidebarItems.filter(item => moderatorTabs.includes(item.id))
+      : allSidebarItems.filter(item => sellerTabs.includes(item.id));
 
   const netTotal = (o: any) => (Number(o.total) || 0) - (Number(o.delivery_fee) || 0);
   const deliveryFeeOf = (o: any) => Number(o.delivery_fee) || 0;
