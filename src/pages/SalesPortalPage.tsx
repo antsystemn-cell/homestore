@@ -395,14 +395,9 @@ const SalesPortalPage = () => {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-bold text-sm">{o.order_ref || o.id.slice(0, 8)}</p>
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">
-                              {o.status}
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${STATUS_BADGE_CLASS[o.status] || "bg-secondary text-secondary-foreground"}`}>
+                              {STATUS_LABELS[o.status] || o.status}
                             </span>
-                            {o.payment_status && (
-                              <span className="text-[10px] px-2 py-0.5 rounded-full border border-border">
-                                {o.payment_method || "—"} · {o.payment_status}
-                              </span>
-                            )}
                             {o.is_guest && (
                               <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted">Зочин</span>
                             )}
