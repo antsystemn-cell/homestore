@@ -3431,10 +3431,13 @@ const AdminPage = () => {
               })()}
 
               {(() => {
+                const UNPAID_TRACKING_START = new Date("2026-06-12T00:00:00+08:00").getTime();
                 const isDeliveredOrder = (o: any) =>
                   o.delivery_status === "delivered" || !!o.delivered_at || o.status === "completed";
                 const isUnpaidDelivery = (o: any) =>
-                  isDeliveredOrder(o) && o.payment_status !== "confirmed";
+                  isDeliveredOrder(o)
+                  && o.payment_status !== "confirmed"
+                  && new Date(o.created_at).getTime() >= UNPAID_TRACKING_START;
                 const deliveredCount = orders.filter((o) => isDeliveredOrder(o) && !isUnpaidDelivery(o)).length;
                 const unpaidDeliveryCount = orders.filter(isUnpaidDelivery).length;
                 const activeCount = orders.length - deliveredCount - unpaidDeliveryCount;
