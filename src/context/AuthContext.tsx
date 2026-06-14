@@ -43,6 +43,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isModerator, setIsModerator] = useState(false);
   const [isDriver, setIsDriver] = useState(false);
+  const [isSeller, setIsSeller] = useState(false);
   const [authError, setAuthError] = useState(false);
 
   const checkRoles = async (userId: string) => {
