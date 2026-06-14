@@ -3696,6 +3696,32 @@ const AdminPage = () => {
                             {sendingDelivery === o.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Truck className="h-4 w-4" />}
                           </button>
                         )}
+                        {o.payment_status !== "confirmed" && (isDeliveredOrder(o) || ordersSubTab === "unpaid_delivery") && (
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              const { error } = await supabase
+                                .from("orders")
+                                .update({ payment_status: "confirmed" })
+                                .eq("id", o.id);
+                              if (error) {
+                                toast.error("Төлбөр баталгаажуулахад алдаа: " + error.message);
+                                return;
+                              }
+                              setOrders((prev) => prev.map((x) => x.id === o.id ? { ...x, payment_status: "confirmed" } : x));
+                              toast.success("Төлбөр орсон гэж тэмдэглэлээ");
+                              if (o.delivery_order_id) {
+                                supabase.functions.invoke("notify-delivery-status", {
+                                  body: { order_id: o.id, payment_status: "paid" },
+                                }).catch(console.error);
+                              }
+                            }}
+                            className="p-2 rounded-lg hover:bg-emerald-500/10 text-emerald-600 transition-colors"
+                            title="Төлбөр орсон гэж тэмдэглэх"
+                          >
+                            <BadgeCheck className="h-4 w-4" />
+                          </button>
+                        )}
                         {o.status === "cancelled" && isAdmin && (
                           <button
                             onClick={(e) => { e.stopPropagation(); setDeleteOrderTarget({ id: o.id }); }}
