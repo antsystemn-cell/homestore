@@ -5426,28 +5426,17 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
               <div className="flex-1 h-px bg-border" />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <div>
-                <label className="text-[11px] font-semibold text-muted-foreground">Нэр</label>
-                <input
-                  type="text"
-                  value={deliverDialog.courierName}
-                  onChange={(e) => setDeliverDialog((p) => p ? { ...p, courierName: e.target.value, driverId: e.target.value ? "" : p.driverId } : p)}
-                  placeholder="Жнь: Болд"
-                  className="w-full mt-1 rounded-lg bg-background border border-border px-3 py-2 text-sm"
-                />
-              </div>
-              <div>
-                <label className="text-[11px] font-semibold text-muted-foreground">Утас</label>
-                <input
-                  type="text"
-                  value={deliverDialog.courierPhone}
-                  onChange={(e) => setDeliverDialog((p) => p ? { ...p, courierPhone: e.target.value, driverId: e.target.value ? "" : p.driverId } : p)}
-                  placeholder="99XXXXXX"
-                  className="w-full mt-1 rounded-lg bg-background border border-border px-3 py-2 text-sm"
-                />
-              </div>
+            <div>
+              <label className="text-[11px] font-semibold text-muted-foreground">Нэр</label>
+              <input
+                type="text"
+                value={deliverDialog.courierName}
+                onChange={(e) => setDeliverDialog((p) => p ? { ...p, courierName: e.target.value, driverId: e.target.value ? "" : p.driverId } : p)}
+                placeholder="Жнь: Болд"
+                className="w-full mt-1 rounded-lg bg-background border border-border px-3 py-2 text-sm"
+              />
             </div>
+
 
             <div className="flex justify-end gap-2 pt-2">
               <button
