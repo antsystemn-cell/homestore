@@ -2128,6 +2128,7 @@ const AdminPage = () => {
                       ))}
                     </div>
                   </div>
+                  {(isAdmin || isModerator) && (
                   <div className="md:col-span-2">
                     <label className="text-xs font-bold text-muted-foreground mb-1 block">Захиалгын төлөв</label>
                     <select
@@ -2143,6 +2144,7 @@ const AdminPage = () => {
                       <option value="cancelled">Цуцлагдсан</option>
                     </select>
                   </div>
+                  )}
                 </div>
               </section>
 
@@ -4083,6 +4085,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                         )}
 
                         {/* Status change */}
+                        {(isAdmin || isModerator) && (
                         <div>
                           <h4 className="text-xs font-bold text-muted-foreground mb-2">Төлөв өөрчлөх</h4>
                           <select
@@ -4095,6 +4098,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                             ))}
                           </select>
                         </div>
+                        )}
 
                         {/* Out for delivery driver display */}
                         {(o.status === "delivering" || o.delivery_status === "out_for_delivery") && (o.delivered_at == null && o.delivery_status !== "delivered") && (() => {
