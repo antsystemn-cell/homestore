@@ -341,7 +341,7 @@ const SalesPortalPage = () => {
       ) : (
         <div className="max-w-5xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
-            <h2 className="text-sm font-bold">Бүх захиалга ({orders.length})</h2>
+            <h2 className="text-sm font-bold">Хүлээгдэж буй & Төлбөр орсон ({orders.length})</h2>
             <div className="flex items-center gap-2">
               <input
                 value={orderSearch}
