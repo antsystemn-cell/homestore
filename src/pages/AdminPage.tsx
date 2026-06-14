@@ -418,7 +418,7 @@ const AdminPage = () => {
     delivery_fee: 0,
     payment_method: "cash",
     payment_status: "confirmed" as "unpaid" | "confirmed",
-    status: "confirmed" as "pending" | "phone_confirmed" | "confirmed" | "preparing" | "delivering" | "completed" | "cancelled",
+    status: "confirmed" as "pending" | "confirmed" | "preparing" | "delivering" | "completed" | "cancelled",
     note: "",
     sale_date: (() => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); })(),
     external_ref: "",
@@ -1034,7 +1034,6 @@ const AdminPage = () => {
   const statusLabels: Record<string, string> = {
     pending: "Хүлээгдэж буй",
     confirmed: "Төлбөр орсон",
-    phone_confirmed: "Утсаар баталгаажуулсан",
     preparing: "Бэлдэж байна",
     delivering: "Хүргэлтэнд гарсан",
     completed: "Дууссан",
@@ -1044,7 +1043,6 @@ const AdminPage = () => {
   const statusColors: Record<string, string> = {
     pending: "bg-amber-500/10 text-amber-600",
     confirmed: "bg-emerald-500/10 text-emerald-600",
-    phone_confirmed: "bg-teal-500/10 text-teal-600",
     preparing: "bg-blue-500/10 text-blue-600",
     delivering: "bg-violet-500/10 text-violet-600",
     completed: "bg-green-500/10 text-green-600",
@@ -2138,7 +2136,6 @@ const AdminPage = () => {
                       className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     >
                       <option value="pending">Хүлээгдэж буй</option>
-                      <option value="phone_confirmed">Утсаар баталгаажуулсан</option>
                       <option value="confirmed">Төлбөр орсон</option>
                       <option value="preparing">Бэлдэж байна</option>
                       <option value="delivering">Хүргэлтэнд гарсан</option>
@@ -3646,8 +3643,7 @@ const AdminPage = () => {
                                 "bg-blue-500/10 text-blue-600"
                               }`}>
                                 {o.delivery_status === "confirmed" ? "Баталгаажсан" :
-                                 o.delivery_status === "phone_confirmed" ? "Утсаар баталгаажсан" :
-                                 o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
+o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                                  o.delivery_status === "delivered" ? "Хүргэгдсэн" :
                                  o.delivery_status === "cancelled" ? "Цуцлагдсан" :
                                  o.delivery_status === "processing" ? "Боловсруулж байна" : o.delivery_status}
