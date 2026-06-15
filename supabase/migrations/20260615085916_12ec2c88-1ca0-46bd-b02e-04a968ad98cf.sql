@@ -1,0 +1,2 @@
+CREATE POLICY "Sellers can create manual orders" ON public.orders FOR INSERT TO authenticated WITH CHECK (has_role(auth.uid(), 'seller'::app_role));
+CREATE POLICY "Sellers can update orders" ON public.orders FOR UPDATE TO authenticated USING (has_role(auth.uid(), 'seller'::app_role)) WITH CHECK (has_role(auth.uid(), 'seller'::app_role));
