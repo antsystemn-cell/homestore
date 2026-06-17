@@ -22,6 +22,20 @@ function sonoHeaders() {
   };
 }
 
+function getClientIp(req: Request): string {
+  const fwd = req.headers.get("x-forwarded-for") || "";
+  // x-forwarded-for can be a comma-separated list; first entry = original client
+  const first = fwd.split(",")[0]?.trim();
+  return first || req.headers.get("x-real-ip") || "";
+}
+
+function isIpAllowed(ip: string): boolean {
+  const allowed = (Deno.env.get("SONO_WEBHOOK_ALLOWED_IPS") || "").trim();
+  if (!allowed) return true; // no whitelist configured → allow all
+  const list = allowed.split(",").map((s) => s.trim()).filter(Boolean);
+  return list.includes(ip);
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -32,6 +46,13 @@ Deno.serve(async (req: Request) => {
     const orderId = url.searchParams.get("order_id");
     const invoiceIdFromQuery = url.searchParams.get("invoice_id");
 
+    // IP whitelist enforcement
+    const clientIp = getClientIp(req);
+    if (!isIpAllowed(clientIp)) {
+      console.warn("Sono webhook: blocked IP", clientIp);
+      return new Response("Forbidden", { status: 403 });
+    }
+
     let rawBody: any = null;
     try {
       rawBody = await req.json();
@@ -39,7 +60,7 @@ Deno.serve(async (req: Request) => {
       /* Sono may POST empty body or form */
     }
 
-    console.log("Sono webhook hit. order_id:", orderId, "invoice_id:", invoiceIdFromQuery, "body:", JSON.stringify(rawBody));
+    console.log("Sono webhook hit. ip:", clientIp, "order_id:", orderId, "invoice_id:", invoiceIdFromQuery, "body:", JSON.stringify(rawBody));
 
     if (!orderId) {
       return new Response("Missing order_id", { status: 400 });
