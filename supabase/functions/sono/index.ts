@@ -244,8 +244,8 @@ async function handleCheckPayment(body: any, req: Request) {
 
   const status = data?.response?.payment_status;
 
-  // Expired/failed invoice
-  if (data?.code && data.code !== 0 && data.code !== 6083 ? false : data?.code === 6083) {
+  // Expired invoice (Sono code 6083)
+  if (data?.code === 6083) {
     await sb
       .from("payment_intents")
       .update({
