@@ -12,11 +12,12 @@ import BottomNav from "@/components/store/BottomNav";
 import StorepayPayment from "@/components/store/StorepayPayment";
 import QPayPayment from "@/components/store/QPayPayment";
 import PocketPayment from "@/components/store/PocketPayment";
+import SonoPayment from "@/components/store/SonoPayment";
 import { track, attachLeadContact } from "@/lib/tracking";
 import { useBundleFreeDelivery } from "@/lib/bundleDelivery";
 import { hasFreeDeliveryProduct } from "@/lib/freeDeliveryProducts";
 
-type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket";
+type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket" | "sono";
 
 const CheckoutPage = () => {
   const { items, cartTotal, clearCart } = useCart();
@@ -257,6 +258,29 @@ const CheckoutPage = () => {
   };
 
   const handlePocketCancel = () => {
+    setOrderId(null);
+    setPaymentMethod("cash");
+  };
+
+  const handleSonoStart = async () => {
+    if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return; }
+    if (isGuestCheckout && !name.trim()) { toast.error("Нэр заавал бөглөнө үү"); return; }
+    if (deliveryOptions.length > 0 && !selectedDelivery) { toast.error("Хүргэлтийн сонголт хийнэ үү"); return; }
+    if (grandTotal < 10000) { toast.error("Sono-р төлөх боломжтой хамгийн бага дүн 10,000₮"); return; }
+    if (!/^\d{8}$/.test(phone.trim())) { toast.error("Утасны дугаар 8 оронтой байх ёстой"); return; }
+
+    setSubmitting(true);
+    const id = await createOrder("processing", "sono");
+    setSubmitting(false);
+    if (id) setOrderId(id);
+  };
+
+  const handleSonoSuccess = () => {
+    clearCart();
+    setOrdered(true);
+  };
+
+  const handleSonoCancel = () => {
     setOrderId(null);
     setPaymentMethod("cash");
   };
@@ -514,6 +538,35 @@ const CheckoutPage = () => {
                   </div>
                 </label>
 
+                {/* Sono */}
+                <label
+                  className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    paymentMethod === "sono"
+                      ? "border-[#F25C2A] bg-[#F25C2A]/5 shadow-sm"
+                      : "border-border hover:border-muted-foreground/30"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="sono"
+                    checked={paymentMethod === "sono"}
+                    onChange={() => setPaymentMethod("sono")}
+                    className="w-4 h-4 accent-[#F25C2A]"
+                  />
+                  {providerLogos["sono"] ? (
+                    <img src={providerLogos["sono"]} alt="Sono" className="w-9 h-9 rounded-lg object-contain" />
+                  ) : (
+                    <div className="w-9 h-9 rounded-lg bg-[#F25C2A] flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">S</span>
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-foreground">Sono</p>
+                    <p className="text-xs text-muted-foreground">Sono апп-аар хуваан төлөх</p>
+                  </div>
+                </label>
+
               </div>
             </div>
 
@@ -546,6 +599,16 @@ const CheckoutPage = () => {
                 amount={grandTotal}
                 onSuccess={handlePocketSuccess}
                 onCancel={handlePocketCancel}
+              />
+            )}
+
+            {/* Sono Payment Flow */}
+            {paymentMethod === "sono" && orderId && (
+              <SonoPayment
+                orderId={orderId}
+                amount={grandTotal}
+                onSuccess={handleSonoSuccess}
+                onCancel={handleSonoCancel}
               />
             )}
           </div>
@@ -662,6 +725,17 @@ const CheckoutPage = () => {
                 >
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
                   {submitting ? "Үүсгэж байна..." : `Pocket-ээр төлөх — ${formatPrice(grandTotal)}`}
+                </Button>
+              )}
+
+              {paymentMethod === "sono" && !orderId && (
+                <Button
+                  className="w-full h-12 text-base rounded-xl mt-2 gap-2 bg-[#F25C2A] hover:bg-[#D94A1C] text-white"
+                  disabled={submitting}
+                  onClick={handleSonoStart}
+                >
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <QrCode className="h-4 w-4" />}
+                  {submitting ? "Үүсгэж байна..." : `Sono-р төлөх — ${formatPrice(grandTotal)}`}
                 </Button>
               )}
 
