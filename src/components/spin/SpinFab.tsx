@@ -46,15 +46,22 @@ export default function SpinFab() {
   return (
     <Link
       to="/spin"
-      className="fixed bottom-24 left-4 md:bottom-6 md:left-6 z-40 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-xl flex items-center justify-center hover:scale-105 transition-transform"
+      className="fixed bottom-28 left-4 md:bottom-10 md:left-10 z-40 flex flex-col items-center gap-1.5 group"
       aria-label="Азаа үзэж хож"
     >
-      <Gift className="h-6 w-6" />
-      {count > 0 && (
-        <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-destructive text-destructive-foreground text-[11px] font-bold flex items-center justify-center">
-          {count}
-        </span>
-      )}
+      <span className="relative h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-2xl flex items-center justify-center hover:scale-110 transition-transform duration-300">
+        <span className="absolute -inset-1 rounded-full bg-destructive/20 animate-pulse" />
+        <span className="absolute -inset-0.5 rounded-full ring-2 ring-destructive ring-offset-2 animate-pulse" />
+        <Gift className="h-6 w-6 relative z-10" />
+        {count > 0 && (
+          <span className="absolute -top-1 -right-1 z-20 min-w-5 h-5 px-1 rounded-full bg-destructive text-destructive-foreground text-[11px] font-bold flex items-center justify-center shadow-sm">
+            {count}
+          </span>
+        )}
+      </span>
+      <span className="px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold shadow-md">
+        Ёндоогоо үзэх
+      </span>
     </Link>
   );
 }
