@@ -69,13 +69,14 @@ export default function SpinRewardModal({ open, onClose, result }: Props) {
             <>
               <div className="border-2 border-dashed border-primary rounded-xl p-4 text-center bg-primary/5">
                 <p className="text-xs text-muted-foreground mb-1">Купон код</p>
-                <p className="font-mono text-2xl font-bold tracking-wider text-primary">{result.coupon_code}</p>
-                <Button
-                  variant="ghost" size="sm" className="mt-2"
+                <button
+                  className="font-mono text-2xl font-bold tracking-wider text-primary cursor-pointer select-all active:opacity-70 transition-opacity inline-flex items-center gap-2"
                   onClick={() => { navigator.clipboard.writeText(result.coupon_code!); toast.success("Хуулагдлаа"); }}
                 >
-                  <Copy className="h-3 w-3 mr-1" /> Хуулах
-                </Button>
+                  {result.coupon_code}
+                  <Copy className="h-4 w-4 opacity-60" />
+                </button>
+                <p className="text-[10px] text-muted-foreground mt-1.5">Дээр дарж хуулна уу</p>
               </div>
               <Instructions
                 steps={[
@@ -92,13 +93,14 @@ export default function SpinRewardModal({ open, onClose, result }: Props) {
             <>
               <div className="border-2 border-dashed border-pink-500 rounded-xl p-4 text-center bg-pink-50 dark:bg-pink-950/20">
                 <p className="text-xs text-muted-foreground mb-1">Бэлгийн код</p>
-                <p className="font-mono text-2xl font-bold tracking-wider text-pink-600">{result.coupon_code}</p>
-                <Button
-                  variant="ghost" size="sm" className="mt-2"
+                <button
+                  className="font-mono text-2xl font-bold tracking-wider text-pink-600 cursor-pointer select-all active:opacity-70 transition-opacity inline-flex items-center gap-2"
                   onClick={() => { navigator.clipboard.writeText(result.coupon_code!); toast.success("Хуулагдлаа"); }}
                 >
-                  <Copy className="h-3 w-3 mr-1" /> Хуулах
-                </Button>
+                  {result.coupon_code}
+                  <Copy className="h-4 w-4 opacity-60" />
+                </button>
+                <p className="text-[10px] text-muted-foreground mt-1.5">Дээр дарж хуулна уу</p>
               </div>
               <Instructions
                 steps={[
