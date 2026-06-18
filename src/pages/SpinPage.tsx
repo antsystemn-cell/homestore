@@ -242,17 +242,17 @@ export default function SpinWheelPage() {
 
 
         <Button
-          className="w-full h-12 text-base font-semibold"
+          className="w-full h-14 text-base font-bold rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-[#1a0b2e] hover:opacity-95 shadow-[0_10px_30px_-10px_rgba(251,191,36,0.7)] disabled:opacity-40"
           onClick={handleSpin}
           disabled={spinning || balance < 1}
         >
-          {spinning ? "Азаа үзэж байна..." : balance > 0 ? "Азаа үзэх" : "Эрх дууссан"}
+          {spinning ? "Эргэлдэж байна..." : balance > 0 ? "🎯 Азаа үзэх" : "Эрх дууссан"}
         </Button>
 
-        <div className="mt-4 text-center">
-          <Button variant="link" asChild className="text-sm">
-            <Link to="/my-rewards">Миний шагналуудыг харах →</Link>
-          </Button>
+        <div className="mt-3 text-center">
+          <Link to="/my-rewards" className="text-xs text-amber-200/80 hover:text-amber-200 underline-offset-2 hover:underline">
+            Миний шагналуудыг харах →
+          </Link>
         </div>
 
         {user ? (
