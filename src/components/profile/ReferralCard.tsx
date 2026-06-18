@@ -84,7 +84,7 @@ export default function ReferralCard({ userId }: { userId: string }) {
         <div className="flex-1">
           <h2 className="font-bold text-base">Найзаа урих</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Найз тань уг холбоосоор бүртгүүлэхэд та <span className="font-semibold text-primary">{referralSpins} эрх</span> авна
+            Найз тань холбоосоор бүртгүүлэхэд та <span className="font-semibold text-primary">{referralSpins} эрх</span>, найз тань <span className="font-semibold text-primary">{inviteeSpins} эрх</span> авна
           </p>
         </div>
       </div>
