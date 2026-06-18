@@ -53,14 +53,14 @@ export default function SpinFab() {
         <span className="absolute -inset-1 rounded-full bg-destructive/20 animate-pulse" />
         <span className="absolute -inset-0.5 rounded-full ring-2 ring-destructive ring-offset-2 animate-pulse" />
         <Gift className="h-6 w-6 relative z-10" />
+      </span>
+      <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold shadow-md">
+        Ёндоогоо үзэх
         {count > 0 && (
-          <span className="absolute -top-1 -right-1 z-20 min-w-5 h-5 px-1 rounded-full bg-destructive text-destructive-foreground text-[11px] font-bold flex items-center justify-center shadow-sm">
+          <span className="inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold">
             {count}
           </span>
         )}
-      </span>
-      <span className="px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold shadow-md">
-        Ёндоогоо үзэх
       </span>
     </Link>
   );
