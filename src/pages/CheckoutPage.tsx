@@ -717,6 +717,52 @@ const CheckoutPage = () => {
                     {selectedDeliveryOption.name} · {selectedDeliveryOption.estimated_days_min}-{selectedDeliveryOption.estimated_days_max} хоног
                   </p>
                 )}
+
+                {availableCoupons.length > 0 && (
+                  <div className="border-t border-border pt-2">
+                    <p className="text-xs font-semibold text-foreground mb-1.5">
+                      🎁 Сүүлийн 5 цагт авсан купон ({availableCoupons.length})
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mb-2">Олон купоныг давхарлаж ашиглаж болно</p>
+                    <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                      {availableCoupons.map((c) => {
+                        const minOk = !c.minimum_order_amount || cartTotal >= Number(c.minimum_order_amount);
+                        const checked = selectedCouponIds.includes(c.id);
+                        return (
+                          <label key={c.id} className={`flex items-center gap-2 text-xs p-1.5 rounded border ${minOk ? "border-border cursor-pointer hover:bg-accent/30" : "border-border opacity-50"}`}>
+                            <input
+                              type="checkbox"
+                              disabled={!minOk}
+                              checked={checked && minOk}
+                              onChange={(e) => {
+                                setSelectedCouponIds((prev) =>
+                                  e.target.checked ? [...prev, c.id] : prev.filter((x) => x !== c.id)
+                                );
+                              }}
+                            />
+                            <span className="flex-1 truncate">
+                              <span className="font-mono text-[10px] text-muted-foreground">{c.code}</span>
+                              {c.minimum_order_amount ? (
+                                <span className="block text-[10px] text-muted-foreground">
+                                  Мин: {formatPrice(Number(c.minimum_order_amount))}
+                                </span>
+                              ) : null}
+                            </span>
+                            <span className="font-semibold text-primary">-{formatPrice(Number(c.reward_value))}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {couponDiscount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Купон хямдрал</span>
+                    <span className="text-primary font-semibold">-{formatPrice(couponDiscount)}</span>
+                  </div>
+                )}
+
                 <div className="flex justify-between border-t border-border pt-2">
                   <span className="font-bold text-foreground">Нийт</span>
                   <span className="font-extrabold text-foreground text-lg">{formatPrice(grandTotal)}</span>
