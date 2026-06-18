@@ -196,6 +196,15 @@ const CheckoutPage = () => {
     }
     setOrderRef(data.order_ref);
 
+    // Mark stacked coupons as used
+    if (!isGuestCheckout && validSelectedCoupons.length > 0) {
+      const ids = validSelectedCoupons.map((c) => c.id);
+      await supabase
+        .from("spin_coupons")
+        .update({ is_used: true, used_order_id: data.id, used_at: new Date().toISOString() })
+        .in("id", ids);
+    }
+
     // NOTE: Delivery dispatch is handled automatically by the DB trigger
     // `auto_send_order_to_delivery` once payment_status='paid' (online)
     // or admin marks the order 'confirmed' (cash). No client-side call needed.
