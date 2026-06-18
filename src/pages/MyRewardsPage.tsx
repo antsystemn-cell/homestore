@@ -33,7 +33,7 @@ const TYPE_LABEL: Record<string, string> = {
   coupon_10k: "10,000₮ купон",
   coupon_50k: "50,000₮ купон",
   gift_select: "Бэлэг сонгох эрх",
-  free_gift: "Үнэгүй бэлэг",
+  free_gift: "Бэлэг сонгож авах",
 };
 
 function groupCoupons(list: Coupon[]): CouponGroup[] {

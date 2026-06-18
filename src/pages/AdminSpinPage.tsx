@@ -29,7 +29,7 @@ type GiftRow = {
 const REWARD_KEYS = ["coupon_5k", "coupon_10k", "extra_spin", "gift_select", "coupon_50k", "free_gift"] as const;
 const REWARD_LABEL: Record<string, string> = {
   coupon_5k: "5,000₮ купон", coupon_10k: "10,000₮ купон", extra_spin: "Нэмэлт эрх",
-  gift_select: "Бэлэг сонгох", coupon_50k: "50,000₮ купон", free_gift: "Үнэгүй бэлэг",
+  gift_select: "Бэлэг сонгох", coupon_50k: "50,000₮ купон", free_gift: "Бэлэг сонгож авах",
 };
 
 export default function AdminSpinPage() {
@@ -205,7 +205,7 @@ export default function AdminSpinPage() {
               <select className="border rounded px-2 py-1 text-xs" value={g.reward_tier}
                 onChange={(e) => updateGift(g.id, { reward_tier: e.target.value as GiftRow["reward_tier"] })}>
                 <option value="gift_select">Сонголт</option>
-                <option value="free_gift">Үнэгүй</option>
+                <option value="free_gift">Бэлэг сонгож авах</option>
               </select>
               <Input className="w-20" type="number" value={g.inventory}
                 onChange={(e) => updateGift(g.id, { inventory: Number(e.target.value) })} />
