@@ -255,9 +255,11 @@ export default function SpinWheelPage() {
                         transform={`rotate(${rot} ${lx} ${ly})`}
                         textAnchor="middle"
                         dominantBaseline="middle"
-                        fontSize="10"
+                        fontSize={s.label === "Сүүүүүүпэр бэлэг" ? "7" : "10"}
                         fontWeight="800"
                         fill="white"
+                        textLength={s.label === "Сүүүүүүпэр бэлэг" ? "52" : undefined}
+                        lengthAdjust={s.label === "Сүүүүүүпэр бэлэг" ? "spacingAndGlyphs" : undefined}
                         style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))" }}
                       >
                         {s.label}
