@@ -50,5 +50,5 @@ export const REWARD_LABEL: Record<SpinResult["reward_type"], string> = {
   extra_spin: "Дахин эргүүлэх эрх",
   gift_select: "Бэлэг сонгох эрх",
   coupon_50k: "50,000₮ купон",
-  free_gift: "Үнэгүй бэлэг",
+  free_gift: "Бэлэг сонгож авах",
 };
