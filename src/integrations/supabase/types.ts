@@ -547,6 +547,66 @@ export type Database = {
           },
         ]
       }
+      guest_spin_balances: {
+        Row: {
+          available_spins: number
+          created_at: string
+          expires_at: string
+          fingerprint: string
+          last_ip: string | null
+          updated_at: string
+        }
+        Insert: {
+          available_spins: number
+          created_at?: string
+          expires_at: string
+          fingerprint: string
+          last_ip?: string | null
+          updated_at?: string
+        }
+        Update: {
+          available_spins?: number
+          created_at?: string
+          expires_at?: string
+          fingerprint?: string
+          last_ip?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      guest_spin_history: {
+        Row: {
+          coupon_id: string | null
+          created_at: string
+          fingerprint: string
+          gift_product_id: string | null
+          id: string
+          ip: string | null
+          reward_type: string
+          reward_value: number
+        }
+        Insert: {
+          coupon_id?: string | null
+          created_at?: string
+          fingerprint: string
+          gift_product_id?: string | null
+          id?: string
+          ip?: string | null
+          reward_type: string
+          reward_value?: number
+        }
+        Update: {
+          coupon_id?: string | null
+          created_at?: string
+          fingerprint?: string
+          gift_product_id?: string | null
+          id?: string
+          ip?: string | null
+          reward_type?: string
+          reward_value?: number
+        }
+        Relationships: []
+      }
       lead_scores: {
         Row: {
           created_at: string
@@ -1446,6 +1506,7 @@ export type Database = {
           code: string
           created_at: string
           expires_at: string
+          guest_fingerprint: string | null
           id: string
           invalidated_at: string | null
           is_used: boolean
@@ -1454,12 +1515,13 @@ export type Database = {
           reward_value: number
           used_at: string | null
           used_order_id: string | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           code: string
           created_at?: string
           expires_at: string
+          guest_fingerprint?: string | null
           id?: string
           invalidated_at?: string | null
           is_used?: boolean
@@ -1468,12 +1530,13 @@ export type Database = {
           reward_value?: number
           used_at?: string | null
           used_order_id?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           code?: string
           created_at?: string
           expires_at?: string
+          guest_fingerprint?: string | null
           id?: string
           invalidated_at?: string | null
           is_used?: boolean
@@ -1482,7 +1545,7 @@ export type Database = {
           reward_value?: number
           used_at?: string | null
           used_order_id?: string | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
