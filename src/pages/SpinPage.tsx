@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ const SEGMENTS: { key: SpinResult["reward_type"]; label: string; from: string; t
 const SEG = 360 / SEGMENTS.length;
 
 export default function SpinWheelPage() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
@@ -154,6 +156,14 @@ export default function SpinWheelPage() {
       {/* Ambient glow */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[420px] h-[420px] rounded-full bg-primary/20 blur-[120px] pointer-events-none" />
       <div className="absolute top-10 right-10 w-32 h-32 rounded-full bg-fuchsia-500/20 blur-3xl pointer-events-none" />
+
+      <button
+        onClick={() => navigate(-1)}
+        className="absolute top-4 right-4 z-50 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/80 hover:text-white hover:bg-white/20 transition-colors"
+        aria-label="Хаах"
+      >
+        <X className="w-5 h-5" />
+      </button>
 
       <div className="max-w-md mx-auto relative">
         <h1 className="text-3xl font-extrabold text-center mt-4 mb-1 bg-gradient-to-r from-amber-200 via-pink-200 to-amber-200 bg-clip-text text-transparent tracking-tight">
