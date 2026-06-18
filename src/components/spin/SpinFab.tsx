@@ -33,8 +33,8 @@ export default function SpinFab() {
         if (data && new Date(data.expires_at).getTime() > Date.now()) {
           setCount(data.available_spins as number);
         } else {
-          // First-time guests still get 3 free spins server-side
-          setCount(3);
+          // First-time guests still get 2 free spins server-side
+          setCount(2);
         }
       }
     };

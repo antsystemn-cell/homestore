@@ -65,8 +65,8 @@ export default function SpinWheelPage() {
         setBalance(data.available_spins as number);
         setNextExpiry(data.expires_at);
       } else {
-        // No record yet — show 3 free spins as available; server will grant on first spin
-        setBalance(3);
+        // No record yet — show 2 free spins as available; server will grant on first spin
+        setBalance(2);
         setNextExpiry(null);
       }
       setReferralCode("");
@@ -202,7 +202,7 @@ export default function SpinWheelPage() {
           </div>
         ) : (
           <div className="mt-8 p-4 border rounded-xl bg-card text-center">
-            <p className="text-sm font-medium">Бүртгүүлбэл нэмэлт 3 эрх + найзаа урих боломж</p>
+            <p className="text-sm font-medium">Бүртгүүлбэл нэмэлт 2 эрх + найзаа урих боломж</p>
             <Button asChild className="mt-3" size="sm">
               <Link to="/auth?redirect=/spin">Бүртгүүлэх</Link>
             </Button>
