@@ -164,7 +164,8 @@ export default function SpinWheelPage() {
         <X className="w-5 h-5" />
       </button>
 
-      <div className="max-w-
+      <div className="max-w-md mx-auto relative">
+        <h1 className="text-3xl font-extrabold text-center mt-4 mb-1 bg-gradient-to-r from-amber-200 via-pink-200 to-amber-200 bg-clip-text text-transparent tracking-tight">
           ✨ Ёндоогоо үзэж хож
         </h1>
         <p className="text-center text-xs text-white/60 mb-6">
