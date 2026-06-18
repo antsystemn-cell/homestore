@@ -47,7 +47,7 @@ export default function SpinFab() {
     <Link
       to="/spin"
       className="fixed bottom-28 left-4 md:bottom-10 md:left-10 z-40 flex flex-col items-center gap-1.5 group"
-      aria-label="Азаа үзэж хож"
+      aria-label="Ёндоогоо үзэж хож"
     >
       <span className="relative h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-2xl flex items-center justify-center hover:scale-110 transition-transform duration-300">
         <span className="absolute -inset-1 rounded-full bg-destructive/20 animate-pulse" />
