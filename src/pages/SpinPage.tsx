@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { executeSpin, REWARD_LABEL, type SpinResult } from "@/lib/spinApi";
+import SpinRewardModal from "@/components/spin/SpinRewardModal";
 
 const SEGMENTS: { key: SpinResult["reward_type"]; label: string; color: string }[] = [
   { key: "coupon_5k", label: "5,000₮", color: "#FBBF24" },
@@ -23,6 +24,7 @@ export default function SpinWheelPage() {
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState<SpinResult | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const [balance, setBalance] = useState<number>(0);
   const [nextExpiry, setNextExpiry] = useState<string | null>(null);
   const [referralCode, setReferralCode] = useState<string>("");
@@ -80,11 +82,9 @@ export default function SpinWheelPage() {
       setRotation((prev) => prev + targetAngle);
       setTimeout(() => {
         setResult(r);
+        setModalOpen(true);
         setSpinning(false);
         refresh();
-        toast.success(`Хожлоо: ${REWARD_LABEL[r.reward_type]}`, {
-          description: r.coupon_code ? `Купон код: ${r.coupon_code}` : undefined,
-        });
       }, 4200);
     } catch (e: unknown) {
       setSpinning(false);
@@ -154,21 +154,11 @@ export default function SpinWheelPage() {
           {spinning ? "Эргэлдэж байна..." : balance > 0 ? "Эргүүлэх" : "Эрх дууссан"}
         </Button>
 
-        {result && (
-          <div className="mt-6 p-4 border rounded-xl bg-card text-center">
-            <p className="text-sm text-muted-foreground">Танай шагнал</p>
-            <p className="text-xl font-bold mt-1">{REWARD_LABEL[result.reward_type]}</p>
-            {result.coupon_code && (
-              <>
-                <p className="text-sm mt-2">Купон код:</p>
-                <p className="font-mono font-bold text-primary">{result.coupon_code}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Доод дүн: {result.minimum_order_amount.toLocaleString()}₮ · 5 цагт хүчинтэй
-                </p>
-              </>
-            )}
-          </div>
-        )}
+        <div className="mt-4 text-center">
+          <Button variant="link" asChild className="text-sm">
+            <Link to="/my-rewards">Миний шагналуудыг харах →</Link>
+          </Button>
+        </div>
 
         <div className="mt-8 p-4 border rounded-xl bg-card">
           <h2 className="font-semibold mb-2">Найзаа урих → +2 эрх</h2>
@@ -194,6 +184,7 @@ export default function SpinWheelPage() {
           </div>
         </div>
       </div>
+      <SpinRewardModal open={modalOpen} onClose={() => setModalOpen(false)} result={result} />
     </div>
   );
 }
