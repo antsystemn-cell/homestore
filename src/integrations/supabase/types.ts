@@ -1467,6 +1467,7 @@ export type Database = {
           daily_referral_cap: number
           extra_spin_lifetime_cap: number
           id: number
+          invitee_referral_spins: number
           max_active_spins: number
           probabilities: Json
           referral_spins: number
@@ -1479,6 +1480,7 @@ export type Database = {
           daily_referral_cap?: number
           extra_spin_lifetime_cap?: number
           id?: number
+          invitee_referral_spins?: number
           max_active_spins?: number
           probabilities?: Json
           referral_spins?: number
@@ -1491,6 +1493,7 @@ export type Database = {
           daily_referral_cap?: number
           extra_spin_lifetime_cap?: number
           id?: number
+          invitee_referral_spins?: number
           max_active_spins?: number
           probabilities?: Json
           referral_spins?: number
