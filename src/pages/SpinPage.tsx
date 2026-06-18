@@ -283,7 +283,7 @@ export default function SpinWheelPage() {
 
 
         <Button
-          className="w-full h-14 text-base font-bold rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-[#1a0b2e] hover:opacity-95 shadow-[0_10px_30px_-10px_rgba(251,191,36,0.7)] disabled:opacity-40"
+          className="w-full h-10 text-sm font-bold rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-[#1a0b2e] hover:opacity-95 shadow-[0_10px_30px_-10px_rgba(251,191,36,0.7)] disabled:opacity-40"
           onClick={handleSpin}
           disabled={spinning || balance < 1}
         >
