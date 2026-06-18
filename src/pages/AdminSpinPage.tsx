@@ -205,7 +205,7 @@ export default function AdminSpinPage() {
               <select className="border rounded px-2 py-1 text-xs" value={g.reward_tier}
                 onChange={(e) => updateGift(g.id, { reward_tier: e.target.value as GiftRow["reward_tier"] })}>
                 <option value="gift_select">Сонголт</option>
-                <option value="free_gift">Үнэгүй</option>
+                <option value="free_gift">Бэлэг сонгож авах</option>
               </select>
               <Input className="w-20" type="number" value={g.inventory}
                 onChange={(e) => updateGift(g.id, { inventory: Number(e.target.value) })} />
