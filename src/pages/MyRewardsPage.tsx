@@ -82,7 +82,7 @@ export default function MyRewardsPage() {
           <div className="text-center py-16">
             <Gift className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
             <p className="text-muted-foreground mb-4">Танд шагнал алга байна</p>
-            <Button asChild><Link to="/spin">Эргүүлэх</Link></Button>
+            <Button asChild><Link to="/spin">Азаа үзэх</Link></Button>
           </div>
         )}
 

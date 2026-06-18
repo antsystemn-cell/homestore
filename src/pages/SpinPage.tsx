@@ -10,7 +10,7 @@ import SpinRewardModal from "@/components/spin/SpinRewardModal";
 const SEGMENTS: { key: SpinResult["reward_type"]; label: string; color: string }[] = [
   { key: "coupon_5k", label: "5,000₮", color: "#FBBF24" },
   { key: "coupon_10k", label: "10,000₮", color: "#34D399" },
-  { key: "extra_spin", label: "+1 Эрг.", color: "#60A5FA" },
+  { key: "extra_spin", label: "+1 Эрх", color: "#60A5FA" },
   { key: "gift_select", label: "Бэлэг", color: "#F472B6" },
   { key: "coupon_50k", label: "50,000₮", color: "#A78BFA" },
   { key: "free_gift", label: "Үнэгүй", color: "#F87171" },
@@ -105,7 +105,7 @@ export default function SpinWheelPage() {
     } catch (e: unknown) {
       setSpinning(false);
       const code = (e as { code?: string }).code;
-      if (code === "no_spins") toast.error("Эргүүлэлтийн эрх дууссан байна");
+      if (code === "no_spins") toast.error("Азаа үзэх эрх дууссан байна");
       else if (code === "verification_required") toast.error("Эхлээд имэйл/утсаа баталгаажуулна уу");
       else toast.error("Алдаа гарлаа. Дахин оролдоно уу.");
     }
@@ -116,7 +116,7 @@ export default function SpinWheelPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-4 pb-24">
       <div className="max-w-md mx-auto">
-        <h1 className="text-2xl font-bold text-center mb-2 mt-4">🎁 Эргүүлж хож!</h1>
+        <h1 className="text-2xl font-bold text-center mb-2 mt-4">🎁 Азаа үзэж хож!</h1>
         <p className="text-center text-sm text-muted-foreground mb-6">
           Эрх: <span className="font-semibold text-foreground">{balance}</span>
           {nextExpiry && balance > 0 && <span className="ml-2">· Дуусах: {expiryText}</span>}
@@ -158,7 +158,7 @@ export default function SpinWheelPage() {
             ))}
           </div>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-background border-4 border-primary flex items-center justify-center font-bold">
-            SPIN
+            АЗ
           </div>
         </div>
 
@@ -167,7 +167,7 @@ export default function SpinWheelPage() {
           onClick={handleSpin}
           disabled={spinning || balance < 1}
         >
-          {spinning ? "Эргэлдэж байна..." : balance > 0 ? "Эргүүлэх" : "Эрх дууссан"}
+          {spinning ? "Азаа үзэж байна..." : balance > 0 ? "Азаа үзэх" : "Эрх дууссан"}
         </Button>
 
         <div className="mt-4 text-center">
