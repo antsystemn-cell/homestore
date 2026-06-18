@@ -229,6 +229,53 @@ export default function AdminSpinPage() {
           {gifts.length === 0 && <p className="text-sm text-muted-foreground">Бэлэг бараа алга</p>}
         </div>
       </section>
+
+      <section className="border rounded-xl p-4 bg-card">
+        <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+          <h2 className="font-semibold">Азаа үзсэн бүртгэл ({history.length})</h2>
+          <div className="flex gap-1 text-xs">
+            {(["all", "user", "guest"] as const).map((k) => (
+              <Button key={k} size="sm" variant={historyFilter === k ? "default" : "outline"}
+                onClick={() => setHistoryFilter(k)}>
+                {k === "all" ? "Бүгд" : k === "user" ? "Гишүүн" : "Зочин"}
+              </Button>
+            ))}
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead className="text-muted-foreground border-b">
+              <tr>
+                <th className="text-left p-2">Огноо</th>
+                <th className="text-left p-2">Төрөл</th>
+                <th className="text-left p-2">Хэрэглэгч</th>
+                <th className="text-left p-2">Шагнал</th>
+                <th className="text-right p-2">Дүн</th>
+                <th className="text-left p-2">IP</th>
+              </tr>
+            </thead>
+            <tbody>
+              {history.filter((h) => historyFilter === "all" || h.kind === historyFilter).map((h) => (
+                <tr key={`${h.kind}-${h.id}`} className="border-b hover:bg-muted/30">
+                  <td className="p-2 whitespace-nowrap">{new Date(h.created_at).toLocaleString("mn-MN")}</td>
+                  <td className="p-2">
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] ${h.kind === "user" ? "bg-primary/10 text-primary" : "bg-muted"}`}>
+                      {h.kind === "user" ? "Гишүүн" : "Зочин"}
+                    </span>
+                  </td>
+                  <td className="p-2 truncate max-w-[180px]">{h.who}</td>
+                  <td className="p-2">{REWARD_LABEL[h.reward_type] || h.reward_type}</td>
+                  <td className="p-2 text-right">{h.reward_value ? `${Number(h.reward_value).toLocaleString()}₮` : "—"}</td>
+                  <td className="p-2 text-muted-foreground">{h.ip || "—"}</td>
+                </tr>
+              ))}
+              {history.length === 0 && (
+                <tr><td colSpan={6} className="text-center text-muted-foreground p-6">Бүртгэл алга</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 }
