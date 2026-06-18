@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { executeSpin, REWARD_LABEL, type SpinResult } from "@/lib/spinApi";
+import SpinRewardModal from "@/components/spin/SpinRewardModal";
 
 const SEGMENTS: { key: SpinResult["reward_type"]; label: string; color: string }[] = [
   { key: "coupon_5k", label: "5,000₮", color: "#FBBF24" },
