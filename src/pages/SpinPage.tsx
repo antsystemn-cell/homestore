@@ -7,13 +7,13 @@ import { toast } from "sonner";
 import { executeSpin, REWARD_LABEL, type SpinResult } from "@/lib/spinApi";
 import SpinRewardModal from "@/components/spin/SpinRewardModal";
 
-const SEGMENTS: { key: SpinResult["reward_type"]; label: string; color: string }[] = [
-  { key: "coupon_5k", label: "5,000₮", color: "#FBBF24" },
-  { key: "coupon_10k", label: "10,000₮", color: "#34D399" },
-  { key: "extra_spin", label: "+1 Эрх", color: "#60A5FA" },
-  { key: "gift_select", label: "Бэлэг", color: "#F472B6" },
-  { key: "coupon_50k", label: "50,000₮", color: "#A78BFA" },
-  { key: "free_gift", label: "Үнэгүй", color: "#F87171" },
+const SEGMENTS: { key: SpinResult["reward_type"]; label: string; from: string; to: string }[] = [
+  { key: "coupon_5k",  label: "5,000₮",  from: "#FFB547", to: "#F97316" },
+  { key: "coupon_10k", label: "10,000₮", from: "#34D399", to: "#059669" },
+  { key: "extra_spin", label: "+1 Эрх",  from: "#60A5FA", to: "#2563EB" },
+  { key: "gift_select",label: "Бэлэг",   from: "#F472B6", to: "#DB2777" },
+  { key: "coupon_50k", label: "50,000₮", from: "#C084FC", to: "#7C3AED" },
+  { key: "free_gift",  label: "Үнэгүй",  from: "#FB7185", to: "#E11D48" },
 ];
 
 const SEG = 360 / SEGMENTS.length;
