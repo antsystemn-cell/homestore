@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
@@ -28,6 +28,7 @@ export default function SpinWheelPage() {
   const [nextExpiry, setNextExpiry] = useState<string | null>(null);
   const [referralCode, setReferralCode] = useState<string>("");
   const [now, setNow] = useState(Date.now());
+  const spinningRef = useRef(false);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -87,6 +88,14 @@ export default function SpinWheelPage() {
     return `${h}ц ${m}м ${s}с`;
   }, [nextExpiry, now]);
 
+  function vibrate(pattern: number | number[]) {
+    try {
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate(pattern);
+      }
+    } catch { /* ignore */ }
+  }
+
   async function handleSpin() {
     if (spinning || balance < 1) return;
     setSpinning(true);
@@ -94,14 +103,41 @@ export default function SpinWheelPage() {
     try {
       const r = await executeSpin();
       const idx = SEGMENTS.findIndex((s) => s.key === r.reward_type);
-      const targetAngle = 360 * 6 + (360 - (idx * SEG + SEG / 2));
+      const fullTurns = 8;
+      const targetAngle = 360 * fullTurns + (360 - (idx * SEG + SEG / 2));
       setRotation((prev) => prev + targetAngle);
+
+      // Schedule "tick" haptics following the same ease-out curve as the wheel,
+      // so vibrations slow down as the wheel decelerates.
+      const duration = 4600;
+      const startAngle = rotation;
+      const endAngle = rotation + targetAngle;
+      // ease: cubic-bezier(0.1, 0.9, 0.2, 1) approximated by easeOutQuint
+      const easeOut = (t: number) => 1 - Math.pow(1 - t, 5);
+      let lastSegment = -1;
+      const start = performance.now();
+      const tick = () => {
+        const elapsed = performance.now() - start;
+        const t = Math.min(1, elapsed / duration);
+        const angle = startAngle + (endAngle - startAngle) * easeOut(t);
+        const seg = Math.floor((angle % 360) / SEG);
+        if (seg !== lastSegment) {
+          lastSegment = seg;
+          vibrate(8); // tiny click each segment
+        }
+        if (t < 1 && spinningRef.current) requestAnimationFrame(tick);
+      };
+      spinningRef.current = true;
+      requestAnimationFrame(tick);
+
       setTimeout(() => {
+        spinningRef.current = false;
+        vibrate([40, 30, 80]); // landing pulse
         setResult(r);
         setModalOpen(true);
         setSpinning(false);
         refresh();
-      }, 4200);
+      }, duration + 100);
     } catch (e: unknown) {
       setSpinning(false);
       const code = (e as { code?: string }).code;
@@ -174,8 +210,9 @@ export default function SpinWheelPage() {
                 style={{
                   transform: `rotate(${rotation}deg)`,
                   transition: spinning
-                    ? "transform 4s cubic-bezier(0.17, 0.67, 0.32, 1)"
+                    ? "transform 4.6s cubic-bezier(0.08, 0.82, 0.17, 1)"
                     : "none",
+                  willChange: "transform",
                 }}
               >
                 <defs>
