@@ -44,6 +44,11 @@ const CheckoutPage = () => {
   // Payment provider logos from DB
   const [providerLogos, setProviderLogos] = useState<Record<string, string>>({});
 
+  // Stacked coupons earned within the last 5 hours
+  type SpinCoupon = { id: string; code: string; reward_value: number; minimum_order_amount: number | null; expires_at: string; created_at: string };
+  const [availableCoupons, setAvailableCoupons] = useState<SpinCoupon[]>([]);
+  const [selectedCouponIds, setSelectedCouponIds] = useState<string[]>([]);
+
   // Redirect unauthenticated non-guest users
   useEffect(() => {
     if (!user && !isGuestCheckout) {
