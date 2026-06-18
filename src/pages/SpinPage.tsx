@@ -202,7 +202,7 @@ export default function SpinWheelPage() {
           </div>
         ) : (
           <div className="mt-8 p-4 border rounded-xl bg-card text-center">
-            <p className="text-sm font-medium">Бүртгүүлбэл нэмэлт 2 эрх + найзаа урих боломж</p>
+            <p className="text-sm font-medium">Бүртгүүлбэл 2 эрх + найз бүрийн төлөө 3 эрх</p>
             <Button asChild className="mt-3" size="sm">
               <Link to="/auth?redirect=/spin">Бүртгүүлэх</Link>
             </Button>
