@@ -184,6 +184,7 @@ export default function SpinWheelPage() {
           </div>
         </div>
       </div>
+      <SpinRewardModal open={modalOpen} onClose={() => setModalOpen(false)} result={result} />
     </div>
   );
 }
