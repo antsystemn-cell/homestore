@@ -48,6 +48,9 @@ const DriverPage = lazy(() => lazyRetry(() => import("./pages/DriverPage")));
 const DeliveryEntryPage = lazy(() => lazyRetry(() => import("./pages/DeliveryEntryPage")));
 const NotFound = lazy(() => lazyRetry(() => import("./pages/NotFound")));
 const CollectionPage = lazy(() => lazyRetry(() => import("./pages/CollectionPage")));
+const SpinPage = lazy(() => lazyRetry(() => import("./pages/SpinPage")));
+const SpinFabLazy = lazy(() => lazyRetry(() => import("./components/spin/SpinFab")));
+const AdminSpinPage = lazy(() => lazyRetry(() => import("./pages/AdminSpinPage")));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -116,9 +119,11 @@ const App = () => (
                     <Route path="/checkout" element={<CheckoutPage />} />
                     <Route path="/product/:slug" element={<ProductPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/spin" element={<SpinPage />} />
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route path="/admin" element={<AdminPage />} />
+                    <Route path="/admin/spin" element={<AdminSpinPage />} />
                     <Route path="/warehouse" element={<WarehousePage />} />
                     <Route path="/driver" element={<DriverPage />} />
                     <Route path="/delivery-entry" element={<DeliveryEntryPage />} />
@@ -128,6 +133,7 @@ const App = () => (
               </Routes>
             </Suspense>
             {!MAINTENANCE_MODE && <ChatbotWidget />}
+            {!MAINTENANCE_MODE && <SpinFabLazy />}
           </CartProvider>
         </AuthProvider>
       </BrowserRouter>

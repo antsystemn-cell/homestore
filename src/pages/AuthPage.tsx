@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -25,6 +25,15 @@ const AuthPage = () => {
   const [resetLoading, setResetLoading] = useState(false);
   const navigate = useNavigate();
   const { authError } = useAuth();
+
+  // Capture ?ref=CODE referral code on landing
+  useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get("ref");
+    if (ref) {
+      try { localStorage.setItem("es_referral_code", ref.toUpperCase()); } catch { /* ignore */ }
+      setIsLogin(false);
+    }
+  }, []);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
