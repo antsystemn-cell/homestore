@@ -26,14 +26,6 @@ const AuthPage = () => {
   const navigate = useNavigate();
   const { authError } = useAuth();
 
-  // Capture ?ref=CODE referral code on landing
-  useEffect(() => {
-    const ref = new URLSearchParams(window.location.search).get("ref");
-    if (ref) {
-      try { localStorage.setItem("es_referral_code", ref.toUpperCase()); } catch { /* ignore */ }
-      setIsLogin(false);
-    }
-  }, []);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
