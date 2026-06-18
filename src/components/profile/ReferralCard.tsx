@@ -13,10 +13,11 @@ export default function ReferralCard({ userId }: { userId: string }) {
 
   useEffect(() => {
     (async () => {
+      const client = supabase as any;
       const [profRes, refsRes, cfgRes] = await Promise.all([
-        supabase.from("profiles").select("referral_code").eq("user_id", userId).maybeSingle(),
-        supabase.from("referrals").select("status").eq("referrer_id", userId),
-        supabase.from("spin_config").select("referral_spins").eq("id", 1).maybeSingle(),
+        client.from("profiles").select("referral_code").eq("user_id", userId).maybeSingle(),
+        client.from("referrals").select("status").eq("referrer_id", userId),
+        client.from("spin_config").select("referral_spins").eq("id", 1).maybeSingle(),
       ]);
       const prof = profRes.data as { referral_code: string | null } | null;
       const refs = (refsRes.data as Array<{ status: string }> | null) || [];
