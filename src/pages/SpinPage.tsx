@@ -146,7 +146,7 @@ export default function SpinWheelPage() {
   
 
   return (
-    <div className="h-[33vh] bg-gradient-to-br from-[#1a0b2e] via-[#0f0a1f] to-[#1a0b2e] flex items-center justify-center p-3 sm:p-4 relative overflow-hidden rounded-2xl mx-auto max-w-lg">
+    <div className="min-h-[50vh] bg-gradient-to-br from-[#1a0b2e] via-[#0f0a1f] to-[#1a0b2e] flex items-center justify-center p-4 sm:p-6 relative overflow-hidden rounded-2xl mx-auto max-w-lg my-4">
       {/* Ambient glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] rounded-full bg-primary/20 blur-[120px] pointer-events-none" />
       <div className="absolute top-10 right-10 w-32 h-32 rounded-full bg-fuchsia-500/20 blur-3xl pointer-events-none" />
