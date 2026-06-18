@@ -146,7 +146,7 @@ export default function SpinRewardModal({ open, onClose, result }: Props) {
 
           <div className="flex gap-2">
             <Button variant="outline" className="flex-1" onClick={onClose}>Хаах</Button>
-            {!isExtra && !expired && (
+            {!isExtra && !isCoupon && !expired && (
               <Button className="flex-1" asChild>
                 <Link to="/cart">Сагс руу</Link>
               </Button>
