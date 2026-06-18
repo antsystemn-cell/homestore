@@ -460,6 +460,93 @@ export type Database = {
         }
         Relationships: []
       }
+      gift_redemptions: {
+        Row: {
+          claimed_at: string
+          coupon_id: string | null
+          id: string
+          order_id: string | null
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          claimed_at?: string
+          coupon_id?: string | null
+          id?: string
+          order_id?: string | null
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          claimed_at?: string
+          coupon_id?: string | null
+          id?: string
+          order_id?: string | null
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_redemptions_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "spin_coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_redemptions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_redemptions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gift_rewards: {
+        Row: {
+          created_at: string
+          id: string
+          inventory: number
+          is_active: boolean
+          product_id: string
+          reward_tier: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inventory?: number
+          is_active?: boolean
+          product_id: string
+          reward_tier?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inventory?: number
+          is_active?: boolean
+          product_id?: string
+          reward_tier?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_rewards_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_scores: {
         Row: {
           created_at: string
@@ -551,8 +638,10 @@ export type Database = {
       }
       orders: {
         Row: {
+          applied_coupon_id: string | null
           assigned_at: string | null
           branch: string | null
+          coupon_discount: number
           created_at: string
           delivered_at: string | null
           delivery_completed_photo: string | null
@@ -569,6 +658,7 @@ export type Database = {
           delivery_status: string | null
           driver_id: string | null
           external_ref: string | null
+          gift_redemption_id: string | null
           guest_name: string | null
           id: string
           is_guest: boolean | null
@@ -590,8 +680,10 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          applied_coupon_id?: string | null
           assigned_at?: string | null
           branch?: string | null
+          coupon_discount?: number
           created_at?: string
           delivered_at?: string | null
           delivery_completed_photo?: string | null
@@ -608,6 +700,7 @@ export type Database = {
           delivery_status?: string | null
           driver_id?: string | null
           external_ref?: string | null
+          gift_redemption_id?: string | null
           guest_name?: string | null
           id?: string
           is_guest?: boolean | null
@@ -629,8 +722,10 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          applied_coupon_id?: string | null
           assigned_at?: string | null
           branch?: string | null
+          coupon_discount?: number
           created_at?: string
           delivered_at?: string | null
           delivery_completed_photo?: string | null
@@ -647,6 +742,7 @@ export type Database = {
           delivery_status?: string | null
           driver_id?: string | null
           external_ref?: string | null
+          gift_redemption_id?: string | null
           guest_name?: string | null
           id?: string
           is_guest?: boolean | null
@@ -669,10 +765,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "orders_applied_coupon_id_fkey"
+            columns: ["applied_coupon_id"]
+            isOneToOne: false
+            referencedRelation: "spin_coupons"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "orders_delivery_option_id_fkey"
             columns: ["delivery_option_id"]
             isOneToOne: false
             referencedRelation: "delivery_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_gift_redemption_id_fkey"
+            columns: ["gift_redemption_id"]
+            isOneToOne: false
+            referencedRelation: "gift_redemptions"
             referencedColumns: ["id"]
           },
         ]
@@ -953,9 +1063,15 @@ export type Database = {
           avatar_url: string | null
           branch_id: string | null
           created_at: string
+          device_fingerprint: string | null
+          email_verified: boolean
           full_name: string | null
           id: string
+          last_ip: string | null
           phone: string | null
+          phone_verified: boolean
+          referral_code: string | null
+          referred_by: string | null
           updated_at: string
           user_id: string
         }
@@ -964,9 +1080,15 @@ export type Database = {
           avatar_url?: string | null
           branch_id?: string | null
           created_at?: string
+          device_fingerprint?: string | null
+          email_verified?: boolean
           full_name?: string | null
           id?: string
+          last_ip?: string | null
           phone?: string | null
+          phone_verified?: boolean
+          referral_code?: string | null
+          referred_by?: string | null
           updated_at?: string
           user_id: string
         }
@@ -975,9 +1097,15 @@ export type Database = {
           avatar_url?: string | null
           branch_id?: string | null
           created_at?: string
+          device_fingerprint?: string | null
+          email_verified?: boolean
           full_name?: string | null
           id?: string
+          last_ip?: string | null
           phone?: string | null
+          phone_verified?: boolean
+          referral_code?: string | null
+          referred_by?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1119,6 +1247,51 @@ export type Database = {
           },
         ]
       }
+      referrals: {
+        Row: {
+          created_at: string
+          id: string
+          invited_email: string | null
+          invited_fingerprint: string | null
+          invited_ip: string | null
+          invited_phone: string | null
+          invited_user_id: string
+          inviter_user_id: string
+          rejection_reason: string | null
+          rewarded_at: string | null
+          rewarded_spins: number
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_email?: string | null
+          invited_fingerprint?: string | null
+          invited_ip?: string | null
+          invited_phone?: string | null
+          invited_user_id: string
+          inviter_user_id: string
+          rejection_reason?: string | null
+          rewarded_at?: string | null
+          rewarded_spins?: number
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_email?: string | null
+          invited_fingerprint?: string | null
+          invited_ip?: string | null
+          invited_phone?: string | null
+          invited_user_id?: string
+          inviter_user_id?: string
+          rejection_reason?: string | null
+          rewarded_at?: string | null
+          rewarded_spins?: number
+          status?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           comment: string | null
@@ -1195,6 +1368,164 @@ export type Database = {
           quantity?: number
           sale_date?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      spin_balances: {
+        Row: {
+          available_spins: number
+          created_at: string
+          expires_at: string
+          id: string
+          source: string
+          source_ref: string | null
+          user_id: string
+        }
+        Insert: {
+          available_spins: number
+          created_at?: string
+          expires_at: string
+          id?: string
+          source: string
+          source_ref?: string | null
+          user_id: string
+        }
+        Update: {
+          available_spins?: number
+          created_at?: string
+          expires_at?: string
+          id?: string
+          source?: string
+          source_ref?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      spin_config: {
+        Row: {
+          daily_referral_cap: number
+          extra_spin_lifetime_cap: number
+          id: number
+          max_active_spins: number
+          probabilities: Json
+          referral_spins: number
+          reward_expiry_hours: number
+          signup_spins: number
+          spin_expiry_hours: number
+          updated_at: string
+        }
+        Insert: {
+          daily_referral_cap?: number
+          extra_spin_lifetime_cap?: number
+          id?: number
+          max_active_spins?: number
+          probabilities?: Json
+          referral_spins?: number
+          reward_expiry_hours?: number
+          signup_spins?: number
+          spin_expiry_hours?: number
+          updated_at?: string
+        }
+        Update: {
+          daily_referral_cap?: number
+          extra_spin_lifetime_cap?: number
+          id?: number
+          max_active_spins?: number
+          probabilities?: Json
+          referral_spins?: number
+          reward_expiry_hours?: number
+          signup_spins?: number
+          spin_expiry_hours?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      spin_coupons: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          invalidated_at: string | null
+          is_used: boolean
+          minimum_order_amount: number
+          reward_type: string
+          reward_value: number
+          used_at: string | null
+          used_order_id: string | null
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          invalidated_at?: string | null
+          is_used?: boolean
+          minimum_order_amount?: number
+          reward_type: string
+          reward_value?: number
+          used_at?: string | null
+          used_order_id?: string | null
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invalidated_at?: string | null
+          is_used?: boolean
+          minimum_order_amount?: number
+          reward_type?: string
+          reward_value?: number
+          used_at?: string | null
+          used_order_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spin_coupons_used_order_id_fkey"
+            columns: ["used_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spin_history: {
+        Row: {
+          coupon_id: string | null
+          created_at: string
+          device_fingerprint: string | null
+          gift_product_id: string | null
+          id: string
+          ip: string | null
+          reward_type: string
+          reward_value: number
+          user_id: string
+        }
+        Insert: {
+          coupon_id?: string | null
+          created_at?: string
+          device_fingerprint?: string | null
+          gift_product_id?: string | null
+          id?: string
+          ip?: string | null
+          reward_type: string
+          reward_value?: number
+          user_id: string
+        }
+        Update: {
+          coupon_id?: string | null
+          created_at?: string
+          device_fingerprint?: string | null
+          gift_product_id?: string | null
+          id?: string
+          ip?: string | null
+          reward_type?: string
+          reward_value?: number
           user_id?: string
         }
         Relationships: []
@@ -1388,8 +1719,10 @@ export type Database = {
       admin_list_orders_light: {
         Args: never
         Returns: {
+          applied_coupon_id: string | null
           assigned_at: string | null
           branch: string | null
+          coupon_discount: number
           created_at: string
           delivered_at: string | null
           delivery_completed_photo: string | null
@@ -1406,6 +1739,7 @@ export type Database = {
           delivery_status: string | null
           driver_id: string | null
           external_ref: string | null
+          gift_redemption_id: string | null
           guest_name: string | null
           id: string
           is_guest: boolean | null
@@ -1487,8 +1821,10 @@ export type Database = {
           _shipping_address: string
         }
         Returns: {
+          applied_coupon_id: string | null
           assigned_at: string | null
           branch: string | null
+          coupon_discount: number
           created_at: string
           delivered_at: string | null
           delivery_completed_photo: string | null
@@ -1505,6 +1841,7 @@ export type Database = {
           delivery_status: string | null
           driver_id: string | null
           external_ref: string | null
+          gift_redemption_id: string | null
           guest_name: string | null
           id: string
           is_guest: boolean | null
@@ -1536,6 +1873,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      generate_referral_code: { Args: never; Returns: string }
       generate_slug: { Args: { name: string }; Returns: string }
       has_role: {
         Args: {
@@ -1594,6 +1932,7 @@ export type Database = {
         Args: { _token: string; _user_id?: string }
         Returns: undefined
       }
+      user_active_spins: { Args: { _user_id: string }; Returns: number }
     }
     Enums: {
       app_role:
