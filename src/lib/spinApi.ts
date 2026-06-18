@@ -34,14 +34,6 @@ export async function executeSpin(): Promise<SpinResult> {
   return json as SpinResult;
 }
 
-export async function verifyAndReferral(referralCode?: string | null) {
-  const res = await fetch(`${BASE}/referral-verify`, {
-    method: "POST",
-    headers: await authHeaders(),
-    body: JSON.stringify({ referral_code: referralCode || null }),
-  });
-  return res.json();
-}
 
 export async function applyCoupon(code: string, orderTotal: number) {
   const res = await fetch(`${BASE}/coupon-apply`, {

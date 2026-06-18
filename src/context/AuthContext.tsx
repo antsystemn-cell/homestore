@@ -101,20 +101,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (nextSession?.user) {
         await checkRoles(nextSession.user.id);
-        // Verify referral once user is verified (idempotent server-side)
-        const u = nextSession.user;
-        if (u.email_confirmed_at || u.phone_confirmed_at) {
-          const ref = (() => { try { return localStorage.getItem("es_referral_code"); } catch { return null; } })();
-          const key = `es_ref_synced_${u.id}`;
-          if (!localStorage.getItem(key)) {
-            try {
-              const { verifyAndReferral } = await import("@/lib/spinApi");
-              await verifyAndReferral(ref);
-              localStorage.setItem(key, "1");
-              try { localStorage.removeItem("es_referral_code"); } catch { /* ignore */ }
-            } catch (e) { console.warn("referral-verify failed", e); }
-          }
-        }
       } else {
         setIsAdmin(false);
         setIsModerator(false);

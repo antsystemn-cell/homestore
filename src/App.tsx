@@ -51,7 +51,7 @@ const SpinPage = lazy(() => lazyRetry(() => import("./pages/SpinPage")));
 const SpinFabLazy = lazy(() => lazyRetry(() => import("./components/spin/SpinFab")));
 const AdminSpinPage = lazy(() => lazyRetry(() => import("./pages/AdminSpinPage")));
 const MyRewardsPage = lazy(() => lazyRetry(() => import("./pages/MyRewardsPage")));
-const InvitePage = lazy(() => lazyRetry(() => import("./pages/InvitePage")));
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -122,7 +122,7 @@ const App = () => (
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/spin" element={<SpinPage />} />
                     <Route path="/my-rewards" element={<MyRewardsPage />} />
-                    <Route path="/invite" element={<InvitePage />} />
+                    
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route path="/admin" element={<AdminPage />} />

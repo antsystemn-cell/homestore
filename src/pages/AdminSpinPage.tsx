@@ -13,10 +13,7 @@ type Cfg = {
   reward_expiry_hours: number;
   spin_expiry_hours: number;
   signup_spins: number;
-  referral_spins: number;
-  invitee_referral_spins: number;
   max_active_spins: number;
-  daily_referral_cap: number;
   extra_spin_lifetime_cap: number;
 };
 
@@ -40,8 +37,8 @@ export default function AdminSpinPage() {
   const navigate = useNavigate();
   const [cfg, setCfg] = useState<Cfg | null>(null);
   const [gifts, setGifts] = useState<GiftRow[]>([]);
-  const [stats, setStats] = useState<{ total: number; byReward: Record<string, number>; coupons: number; couponsUsed: number; refs: number; }>({
-    total: 0, byReward: {}, coupons: 0, couponsUsed: 0, refs: 0,
+  const [stats, setStats] = useState<{ total: number; byReward: Record<string, number>; coupons: number; couponsUsed: number; }>({
+    total: 0, byReward: {}, coupons: 0, couponsUsed: 0,
   });
   const [newProductId, setNewProductId] = useState("");
   const [history, setHistory] = useState<Array<{
@@ -55,12 +52,11 @@ export default function AdminSpinPage() {
   }, [loading, user, isAdmin, navigate]);
 
   async function load() {
-    const [c, g, hist, coup, refs, userHist, guestHist] = await Promise.all([
+    const [c, g, hist, coup, userHist, guestHist] = await Promise.all([
       supabase.from("spin_config").select("*").eq("id", 1).maybeSingle(),
       supabase.from("gift_rewards").select("*, product:products(name)").order("created_at", { ascending: false }),
       supabase.from("spin_history").select("reward_type"),
       supabase.from("spin_coupons").select("is_used"),
-      supabase.from("referrals").select("status"),
       supabase.from("spin_history").select("id, created_at, reward_type, reward_value, user_id, ip").order("created_at", { ascending: false }).limit(500),
       supabase.from("guest_spin_history").select("id, created_at, reward_type, reward_value, fingerprint, ip").order("created_at", { ascending: false }).limit(500),
     ]);
@@ -73,7 +69,6 @@ export default function AdminSpinPage() {
       byReward,
       coupons: (coup.data || []).length,
       couponsUsed: (coup.data || []).filter((c) => c.is_used).length,
-      refs: (refs.data || []).filter((r) => r.status === "rewarded").length,
     });
 
     const userIds = Array.from(new Set((userHist.data || []).map((r: any) => r.user_id).filter(Boolean)));
@@ -109,10 +104,7 @@ export default function AdminSpinPage() {
       reward_expiry_hours: cfg.reward_expiry_hours,
       spin_expiry_hours: cfg.spin_expiry_hours,
       signup_spins: cfg.signup_spins,
-      referral_spins: cfg.referral_spins,
-      invitee_referral_spins: cfg.invitee_referral_spins,
       max_active_spins: cfg.max_active_spins,
-      daily_referral_cap: cfg.daily_referral_cap,
       extra_spin_lifetime_cap: cfg.extra_spin_lifetime_cap,
       updated_at: new Date().toISOString(),
     }).eq("id", 1);
@@ -146,11 +138,10 @@ export default function AdminSpinPage() {
 
       <section className="border rounded-xl p-4 bg-card">
         <h2 className="font-semibold mb-3">Статистик</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+        <div className="grid grid-cols-3 gap-3 text-sm">
           <Stat label="Нийт эргүүлсэн" value={stats.total} />
           <Stat label="Гарсан купон" value={stats.coupons} />
           <Stat label="Ашигласан купон" value={stats.couponsUsed} />
-          <Stat label="Урилгаар шагнагдсан" value={stats.refs} />
         </div>
         <div className="mt-4 text-sm">
           <p className="font-medium mb-2">Шагналын тархалт</p>
@@ -192,12 +183,9 @@ export default function AdminSpinPage() {
 
       <section className="border rounded-xl p-4 bg-card grid grid-cols-2 md:grid-cols-4 gap-3">
         <NumField label="Бүртгүүлэх эрх" v={cfg.signup_spins} on={(v) => setCfg({ ...cfg, signup_spins: v })} />
-        <NumField label="Найз урих (урьсан хүн)" v={cfg.referral_spins} on={(v) => setCfg({ ...cfg, referral_spins: v })} />
-        <NumField label="Найз урих (уригдсан хүн)" v={cfg.invitee_referral_spins} on={(v) => setCfg({ ...cfg, invitee_referral_spins: v })} />
         <NumField label="Эрхийн дуусах (ц)" v={cfg.spin_expiry_hours} on={(v) => setCfg({ ...cfg, spin_expiry_hours: v })} />
         <NumField label="Шагналын дуусах (ц)" v={cfg.reward_expiry_hours} on={(v) => setCfg({ ...cfg, reward_expiry_hours: v })} />
         <NumField label="Идэвхтэй эрхийн дээд" v={cfg.max_active_spins} on={(v) => setCfg({ ...cfg, max_active_spins: v })} />
-        <NumField label="Хоногт урилгын дээд" v={cfg.daily_referral_cap} on={(v) => setCfg({ ...cfg, daily_referral_cap: v })} />
         <NumField label="Нэмэлт эрхийн насан туршийн дээд" v={cfg.extra_spin_lifetime_cap} on={(v) => setCfg({ ...cfg, extra_spin_lifetime_cap: v })} />
         <div className="col-span-2 md:col-span-4">
           <Button onClick={saveCfg} className="w-full md:w-auto">Хадгалах</Button>

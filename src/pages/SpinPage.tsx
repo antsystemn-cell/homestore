@@ -28,7 +28,7 @@ export default function SpinWheelPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [balance, setBalance] = useState<number>(0);
   const [nextExpiry, setNextExpiry] = useState<string | null>(null);
-  const [referralCode, setReferralCode] = useState<string>("");
+  
   const [now, setNow] = useState(Date.now());
   const spinningRef = useRef(false);
 
@@ -41,20 +41,16 @@ export default function SpinWheelPage() {
 
   async function refresh() {
     if (user) {
-      const [bal, prof] = await Promise.all([
-        supabase
-          .from("spin_balances")
-          .select("available_spins, expires_at")
-          .eq("user_id", user.id)
-          .gt("available_spins", 0)
-          .gt("expires_at", new Date().toISOString())
-          .order("expires_at", { ascending: true }),
-        supabase.from("profiles").select("referral_code").eq("user_id", user.id).maybeSingle(),
-      ]);
-      const total = (bal.data || []).reduce((s, r) => s + (r.available_spins as number), 0);
+      const { data } = await supabase
+        .from("spin_balances")
+        .select("available_spins, expires_at")
+        .eq("user_id", user.id)
+        .gt("available_spins", 0)
+        .gt("expires_at", new Date().toISOString())
+        .order("expires_at", { ascending: true });
+      const total = (data || []).reduce((s, r) => s + (r.available_spins as number), 0);
       setBalance(total);
-      setNextExpiry((bal.data && bal.data[0]?.expires_at) || null);
-      setReferralCode(prof.data?.referral_code || "");
+      setNextExpiry((data && data[0]?.expires_at) || null);
     } else {
       // Guest: lookup by device fingerprint
       const { getDeviceFingerprint } = await import("@/lib/deviceFingerprint");
@@ -68,11 +64,9 @@ export default function SpinWheelPage() {
         setBalance(data.available_spins as number);
         setNextExpiry(data.expires_at);
       } else {
-        // No record yet — show 2 free spins as available; server will grant on first spin
         setBalance(2);
         setNextExpiry(null);
       }
-      setReferralCode("");
     }
   }
 
@@ -149,7 +143,7 @@ export default function SpinWheelPage() {
     }
   }
 
-  const refLink = referralCode ? `${window.location.origin}/auth?ref=${referralCode}` : "";
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a0b2e] via-[#0f0a1f] to-[#1a0b2e] p-4 pb-24 relative overflow-hidden">
@@ -302,38 +296,6 @@ export default function SpinWheelPage() {
           </Link>
         </div>
 
-        {user ? (
-          <div className="mt-8 p-5 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10">
-            <h2 className="font-bold text-amber-200 mb-1">🎁 Найзаа урих → +3 эрх</h2>
-            <p className="text-xs text-white/60 mb-3">
-              Найз бүртгүүлээд баталгаажуулахад танд нэмэлт 3 эрх. Хоногт 3 хүртэл.
-            </p>
-            <div className="flex gap-2">
-              <input
-                readOnly
-                value={refLink}
-                className="flex-1 px-3 py-2 text-xs rounded-lg bg-black/30 border border-white/10 text-white/80"
-              />
-              <Button
-                size="sm"
-                className="bg-amber-400 text-[#1a0b2e] hover:bg-amber-300 font-semibold"
-                onClick={() => {
-                  navigator.clipboard.writeText(refLink);
-                  toast.success("Холбоос хуулагдлаа");
-                }}
-              >
-                Хуулах
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="mt-8 p-5 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 text-center">
-            <p className="text-sm font-medium text-white/90">Бүртгүүлбэл 2 эрх + найз бүрийн төлөө 3 эрх</p>
-            <Button asChild className="mt-3 bg-amber-400 text-[#1a0b2e] hover:bg-amber-300 font-semibold" size="sm">
-              <Link to="/auth?redirect=/spin">Бүртгүүлэх</Link>
-            </Button>
-          </div>
-        )}
       </div>
       <SpinRewardModal open={modalOpen} onClose={() => setModalOpen(false)} result={result} />
     </div>
