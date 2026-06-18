@@ -132,7 +132,7 @@ export default function AdminSpinPage() {
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-8 pb-24">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Ёндоогоо үзэж хож — Удирдах</h1>
+        <h1 className="text-2xl font-bold">Ёндоогоо үз... хож — Удирдах</h1>
         <Button variant="outline" onClick={() => navigate("/admin")}>Буцах</Button>
       </div>
 

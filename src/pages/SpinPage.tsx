@@ -161,7 +161,7 @@ export default function SpinWheelPage() {
 
       <div className="max-w-md w-full flex flex-col items-center justify-center flex-1 gap-y-5 sm:gap-y-6">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-center bg-gradient-to-r from-amber-200 via-pink-200 to-amber-200 bg-clip-text text-transparent tracking-tight">
-          ✨ Ёндоогоо үзэж хож
+          ✨ Ёндоогоо үз... хож
         </h1>
         <p className="text-center text-xs text-white/60 -mt-2">
           Эрх: <span className="font-semibold text-amber-200">{balance}</span>
