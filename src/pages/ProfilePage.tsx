@@ -87,7 +87,8 @@ const ProfilePage = () => {
           </div>
 
           {/* Menu Items */}
-          <div className="px-4 md:px-0 md:col-span-2">
+          <div className="px-4 md:px-0 md:col-span-2 space-y-4">
+            <ReferralCard userId={user.id} />
             <div className="md:bg-card md:rounded-2xl md:border md:border-border md:overflow-hidden">
               {menuItems.map((item, i) => {
                 const Icon = item.icon;
