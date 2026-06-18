@@ -48,6 +48,7 @@ const DriverPage = lazy(() => lazyRetry(() => import("./pages/DriverPage")));
 const DeliveryEntryPage = lazy(() => lazyRetry(() => import("./pages/DeliveryEntryPage")));
 const NotFound = lazy(() => lazyRetry(() => import("./pages/NotFound")));
 const CollectionPage = lazy(() => lazyRetry(() => import("./pages/CollectionPage")));
+const SpinPage = lazy(() => lazyRetry(() => import("./pages/SpinPage")));
 
 const queryClient = new QueryClient({
   defaultOptions: {
