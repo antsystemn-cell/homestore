@@ -40,6 +40,7 @@ const ProfilePage = () => {
   }
 
   const menuItems = [
+    { label: "Найзаа урих", desc: "Найзаа уриад нэмэлт эрх ав", icon: Gift, onClick: () => navigate("/invite") },
     { label: "Захиалгууд", desc: "Миний бүх захиалгууд", icon: ShoppingBag, onClick: () => {} },
     { label: "Таалагдсан", desc: "Хадгалсан бараанууд", icon: Heart, onClick: () => navigate("/wishlist") },
     { label: "Хаяг", desc: "Хүргэлтийн хаяг", icon: MapPin, onClick: () => {} },
