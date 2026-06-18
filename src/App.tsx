@@ -122,6 +122,7 @@ const App = () => (
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/spin" element={<SpinPage />} />
                     <Route path="/my-rewards" element={<MyRewardsPage />} />
+                    <Route path="/invite" element={<InvitePage />} />
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route path="/admin" element={<AdminPage />} />
