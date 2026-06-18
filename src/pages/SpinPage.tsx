@@ -181,7 +181,7 @@ export default function SpinWheelPage() {
                   key={i}
                   className="absolute top-1/2 left-1/2 w-2 h-2 rounded-full bg-amber-300 shadow-[0_0_8px_2px_rgba(252,211,77,0.7)]"
                   style={{
-                    transform: `rotate(${angle}deg) translate(0, -158px) translate(-50%, -50%)`,
+                    transform: `rotate(${angle}deg) translate(0, -148px) translate(-50%, -50%)`,
                     opacity: spinning ? (i % 2 ? 1 : 0.35) : (i % 2 ? 0.9 : 0.5),
                     transition: "opacity 200ms",
                   }}
