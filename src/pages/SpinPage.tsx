@@ -24,6 +24,7 @@ export default function SpinWheelPage() {
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState<SpinResult | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const [balance, setBalance] = useState<number>(0);
   const [nextExpiry, setNextExpiry] = useState<string | null>(null);
   const [referralCode, setReferralCode] = useState<string>("");
