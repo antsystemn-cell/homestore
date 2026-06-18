@@ -29,7 +29,7 @@ type GiftRow = {
 const REWARD_KEYS = ["coupon_5k", "coupon_10k", "extra_spin", "gift_select", "coupon_50k", "free_gift"] as const;
 const REWARD_LABEL: Record<string, string> = {
   coupon_5k: "5,000₮ купон", coupon_10k: "10,000₮ купон", extra_spin: "Нэмэлт эрх",
-  gift_select: "Бэлэг сонгох", coupon_50k: "50,000₮ купон", free_gift: "Бэлэг сонгож авах",
+  gift_select: "Бэлэг сонгох", coupon_50k: "50,000₮ купон", free_gift: "Сүүүүүүпэр бэлэг",
 };
 
 export default function AdminSpinPage() {
