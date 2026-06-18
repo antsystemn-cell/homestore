@@ -10,6 +10,7 @@ export default function ReferralCard({ userId }: { userId: string }) {
   const [count, setCount] = useState<number>(0);
   const [rewardedCount, setRewardedCount] = useState<number>(0);
   const [referralSpins, setReferralSpins] = useState<number>(3);
+  const [inviteeSpins, setInviteeSpins] = useState<number>(2);
 
   useEffect(() => {
     (async () => {
@@ -17,15 +18,16 @@ export default function ReferralCard({ userId }: { userId: string }) {
       const [profRes, refsRes, cfgRes] = await Promise.all([
         client.from("profiles").select("referral_code").eq("user_id", userId).maybeSingle(),
         client.from("referrals").select("status").eq("referrer_id", userId),
-        client.from("spin_config").select("referral_spins").eq("id", 1).maybeSingle(),
+        client.from("spin_config").select("referral_spins, invitee_referral_spins").eq("id", 1).maybeSingle(),
       ]);
       const prof = profRes.data as { referral_code: string | null } | null;
       const refs = (refsRes.data as Array<{ status: string }> | null) || [];
-      const cfg = cfgRes.data as { referral_spins: number } | null;
+      const cfg = cfgRes.data as { referral_spins: number; invitee_referral_spins: number } | null;
       setCode(prof?.referral_code || "");
       setCount(refs.length);
       setRewardedCount(refs.filter((r) => r.status === "rewarded").length);
       if (cfg?.referral_spins) setReferralSpins(cfg.referral_spins);
+      if (cfg?.invitee_referral_spins) setInviteeSpins(cfg.invitee_referral_spins);
     })();
   }, [userId]);
 
@@ -82,7 +84,7 @@ export default function ReferralCard({ userId }: { userId: string }) {
         <div className="flex-1">
           <h2 className="font-bold text-base">Найзаа урих</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Найз тань уг холбоосоор бүртгүүлэхэд та <span className="font-semibold text-primary">{referralSpins} эрх</span> авна
+            Найз тань холбоосоор бүртгүүлэхэд та <span className="font-semibold text-primary">{referralSpins} эрх</span>, найз тань <span className="font-semibold text-primary">{inviteeSpins} эрх</span> авна
           </p>
         </div>
       </div>

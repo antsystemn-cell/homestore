@@ -14,6 +14,7 @@ type Cfg = {
   spin_expiry_hours: number;
   signup_spins: number;
   referral_spins: number;
+  invitee_referral_spins: number;
   max_active_spins: number;
   daily_referral_cap: number;
   extra_spin_lifetime_cap: number;
@@ -109,6 +110,7 @@ export default function AdminSpinPage() {
       spin_expiry_hours: cfg.spin_expiry_hours,
       signup_spins: cfg.signup_spins,
       referral_spins: cfg.referral_spins,
+      invitee_referral_spins: cfg.invitee_referral_spins,
       max_active_spins: cfg.max_active_spins,
       daily_referral_cap: cfg.daily_referral_cap,
       extra_spin_lifetime_cap: cfg.extra_spin_lifetime_cap,
@@ -190,7 +192,8 @@ export default function AdminSpinPage() {
 
       <section className="border rounded-xl p-4 bg-card grid grid-cols-2 md:grid-cols-4 gap-3">
         <NumField label="Бүртгүүлэх эрх" v={cfg.signup_spins} on={(v) => setCfg({ ...cfg, signup_spins: v })} />
-        <NumField label="Урилгын эрх" v={cfg.referral_spins} on={(v) => setCfg({ ...cfg, referral_spins: v })} />
+        <NumField label="Найз урих (урьсан хүн)" v={cfg.referral_spins} on={(v) => setCfg({ ...cfg, referral_spins: v })} />
+        <NumField label="Найз урих (уригдсан хүн)" v={cfg.invitee_referral_spins} on={(v) => setCfg({ ...cfg, invitee_referral_spins: v })} />
         <NumField label="Эрхийн дуусах (ц)" v={cfg.spin_expiry_hours} on={(v) => setCfg({ ...cfg, spin_expiry_hours: v })} />
         <NumField label="Шагналын дуусах (ц)" v={cfg.reward_expiry_hours} on={(v) => setCfg({ ...cfg, reward_expiry_hours: v })} />
         <NumField label="Идэвхтэй эрхийн дээд" v={cfg.max_active_spins} on={(v) => setCfg({ ...cfg, max_active_spins: v })} />

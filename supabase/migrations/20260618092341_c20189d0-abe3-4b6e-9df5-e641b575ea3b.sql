@@ -1,0 +1,1 @@
+ALTER TABLE public.spin_config ADD COLUMN IF NOT EXISTS invitee_referral_spins int NOT NULL DEFAULT 2;
