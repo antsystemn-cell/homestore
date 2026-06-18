@@ -46,7 +46,7 @@ export default function SpinFab() {
   return (
     <Link
       to="/spin"
-      className="fixed bottom-24 right-4 md:bottom-6 md:right-6 z-40 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-xl flex items-center justify-center hover:scale-105 transition-transform"
+      className="fixed bottom-24 left-4 md:bottom-6 md:left-6 z-40 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-xl flex items-center justify-center hover:scale-105 transition-transform"
       aria-label="Эргүүлж хож"
     >
       <Gift className="h-6 w-6" />
