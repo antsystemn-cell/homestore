@@ -141,7 +141,7 @@ export default function SpinWheelPage() {
     } catch (e: unknown) {
       setSpinning(false);
       const code = (e as { code?: string }).code;
-      if (code === "no_spins") toast.error("Азаа үзэх эрх дууссан байна");
+      if (code === "no_spins") toast.error("Ёндоогоо үзэх эрх дууссан байна");
       else if (code === "verification_required") toast.error("Эхлээд имэйл/утсаа баталгаажуулна уу");
       else toast.error("Алдаа гарлаа. Дахин оролдоно уу.");
     }
@@ -157,7 +157,7 @@ export default function SpinWheelPage() {
 
       <div className="max-w-md mx-auto relative">
         <h1 className="text-3xl font-extrabold text-center mt-4 mb-1 bg-gradient-to-r from-amber-200 via-pink-200 to-amber-200 bg-clip-text text-transparent tracking-tight">
-          ✨ Азаа үзэж хож
+          ✨ Ёндоогоо үзэж хож
         </h1>
         <p className="text-center text-xs text-white/60 mb-6">
           Эрх: <span className="font-semibold text-amber-200">{balance}</span>
@@ -271,7 +271,7 @@ export default function SpinWheelPage() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600 p-[3px] shadow-[0_0_30px_rgba(251,191,36,0.6)]">
               <div className="w-full h-full rounded-full bg-gradient-to-br from-[#1a0b2e] to-[#0f0a1f] border-2 border-amber-300/60 flex items-center justify-center">
-                <span className="text-amber-200 font-extrabold text-xs tracking-widest">SPIN</span>
+                <span className="text-amber-200 font-extrabold text-[10px] tracking-widest">ЁНДОО</span>
               </div>
             </div>
           </div>
@@ -283,7 +283,7 @@ export default function SpinWheelPage() {
           onClick={handleSpin}
           disabled={spinning || balance < 1}
         >
-          {spinning ? "Эргэлдэж байна..." : balance > 0 ? "🎯 Азаа үзэх" : "Эрх дууссан"}
+          {spinning ? "Эргэлдэж байна..." : balance > 0 ? "🎯 Ёндоогоо үзэх" : "Эрх дууссан"}
         </Button>
 
         <div className="mt-3 text-center">
