@@ -116,7 +116,7 @@ export default function SpinRewardModal({ open, onClose, result }: Props) {
           {isFreeGift && (
             <>
               <div className="border-2 border-dashed border-red-500 rounded-xl p-4 text-center bg-red-50 dark:bg-red-950/20">
-                <p className="text-xs text-muted-foreground mb-1">Үнэгүй бэлэг</p>
+                <p className="text-xs text-muted-foreground mb-1">Бэлэг сонгож авах</p>
                 {result.coupon_code && (
                   <p className="font-mono text-2xl font-bold tracking-wider text-red-600">{result.coupon_code}</p>
                 )}
