@@ -140,14 +140,14 @@ export default function AdminSpinPage() {
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-8 pb-24">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Азаа үзэж хож — Удирдах</h1>
+        <h1 className="text-2xl font-bold">Ёндоогоо үзэж хож — Удирдах</h1>
         <Button variant="outline" onClick={() => navigate("/admin")}>Буцах</Button>
       </div>
 
       <section className="border rounded-xl p-4 bg-card">
         <h2 className="font-semibold mb-3">Статистик</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-          <Stat label="Нийт азаа үзэх" value={stats.total} />
+          <Stat label="Нийт эргүүлсэн" value={stats.total} />
           <Stat label="Гарсан купон" value={stats.coupons} />
           <Stat label="Ашигласан купон" value={stats.couponsUsed} />
           <Stat label="Урилгаар шагнагдсан" value={stats.refs} />
@@ -235,7 +235,7 @@ export default function AdminSpinPage() {
 
       <section className="border rounded-xl p-4 bg-card">
         <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
-          <h2 className="font-semibold">Азаа үзсэн бүртгэл ({history.length})</h2>
+          <h2 className="font-semibold">Ёндоогийн бүртгэл ({history.length})</h2>
           <div className="flex gap-1 text-xs">
             {(["all", "user", "guest"] as const).map((k) => (
               <Button key={k} size="sm" variant={historyFilter === k ? "default" : "outline"}
