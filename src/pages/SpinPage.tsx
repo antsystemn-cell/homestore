@@ -290,7 +290,7 @@ export default function SpinWheelPage() {
           {spinning ? "Эргэлдэж байна..." : balance > 0 ? "🎯 Ёндоогоо үзэх" : "Эрх дууссан"}
         </Button>
 
-        <div className="mt-3 text-center">
+        <div className="text-center">
           <Link to="/my-rewards" className="text-xs text-amber-200/80 hover:text-amber-200 underline-offset-2 hover:underline">
             Миний шагналуудыг харах →
           </Link>
