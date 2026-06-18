@@ -20,6 +20,7 @@ const SEGMENTS: { key: SpinResult["reward_type"]; label: string; from: string; t
 const SEG = 360 / SEGMENTS.length;
 
 export default function SpinWheelPage() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
