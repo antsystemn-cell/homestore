@@ -51,6 +51,7 @@ const CollectionPage = lazy(() => lazyRetry(() => import("./pages/CollectionPage
 const SpinPage = lazy(() => lazyRetry(() => import("./pages/SpinPage")));
 const SpinFabLazy = lazy(() => lazyRetry(() => import("./components/spin/SpinFab")));
 const AdminSpinPage = lazy(() => lazyRetry(() => import("./pages/AdminSpinPage")));
+const MyRewardsPage = lazy(() => lazyRetry(() => import("./pages/MyRewardsPage")));
 
 const queryClient = new QueryClient({
   defaultOptions: {
