@@ -19,8 +19,7 @@ const SEGMENTS: { key: SpinResult["reward_type"]; label: string; color: string }
 const SEG = 360 / SEGMENTS.length;
 
 export default function SpinWheelPage() {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState<SpinResult | null>(null);
@@ -35,26 +34,43 @@ export default function SpinWheelPage() {
     return () => clearInterval(t);
   }, []);
 
-  useEffect(() => {
-    if (!loading && !user) navigate("/auth?redirect=/spin");
-  }, [loading, user, navigate]);
+  // Guests are allowed — no auth redirect.
 
   async function refresh() {
-    if (!user) return;
-    const [bal, prof] = await Promise.all([
-      supabase
-        .from("spin_balances")
+    if (user) {
+      const [bal, prof] = await Promise.all([
+        supabase
+          .from("spin_balances")
+          .select("available_spins, expires_at")
+          .eq("user_id", user.id)
+          .gt("available_spins", 0)
+          .gt("expires_at", new Date().toISOString())
+          .order("expires_at", { ascending: true }),
+        supabase.from("profiles").select("referral_code").eq("user_id", user.id).maybeSingle(),
+      ]);
+      const total = (bal.data || []).reduce((s, r) => s + (r.available_spins as number), 0);
+      setBalance(total);
+      setNextExpiry((bal.data && bal.data[0]?.expires_at) || null);
+      setReferralCode(prof.data?.referral_code || "");
+    } else {
+      // Guest: lookup by device fingerprint
+      const { getDeviceFingerprint } = await import("@/lib/deviceFingerprint");
+      const fp = getDeviceFingerprint();
+      const { data } = await supabase
+        .from("guest_spin_balances")
         .select("available_spins, expires_at")
-        .eq("user_id", user.id)
-        .gt("available_spins", 0)
-        .gt("expires_at", new Date().toISOString())
-        .order("expires_at", { ascending: true }),
-      supabase.from("profiles").select("referral_code").eq("user_id", user.id).maybeSingle(),
-    ]);
-    const total = (bal.data || []).reduce((s, r) => s + (r.available_spins as number), 0);
-    setBalance(total);
-    setNextExpiry((bal.data && bal.data[0]?.expires_at) || null);
-    setReferralCode(prof.data?.referral_code || "");
+        .eq("fingerprint", fp)
+        .maybeSingle();
+      if (data && new Date(data.expires_at).getTime() > Date.now()) {
+        setBalance(data.available_spins as number);
+        setNextExpiry(data.expires_at);
+      } else {
+        // No record yet — show 3 free spins as available; server will grant on first spin
+        setBalance(3);
+        setNextExpiry(null);
+      }
+      setReferralCode("");
+    }
   }
 
   useEffect(() => {
@@ -160,29 +176,38 @@ export default function SpinWheelPage() {
           </Button>
         </div>
 
-        <div className="mt-8 p-4 border rounded-xl bg-card">
-          <h2 className="font-semibold mb-2">Найзаа урих → +2 эрх</h2>
-          <p className="text-xs text-muted-foreground mb-3">
-            Найз бүртгүүлээд баталгаажуулахад танд 2 нэмэлт эрх. Хоногт 3 хүртэл.
-          </p>
-          <div className="flex gap-2">
-            <input
-              readOnly
-              value={refLink}
-              className="flex-1 px-3 py-2 text-xs border rounded bg-muted"
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                navigator.clipboard.writeText(refLink);
-                toast.success("Холбоос хуулагдлаа");
-              }}
-            >
-              Хуулах
+        {user ? (
+          <div className="mt-8 p-4 border rounded-xl bg-card">
+            <h2 className="font-semibold mb-2">Найзаа урих → +2 эрх</h2>
+            <p className="text-xs text-muted-foreground mb-3">
+              Найз бүртгүүлээд баталгаажуулахад танд 2 нэмэлт эрх. Хоногт 3 хүртэл.
+            </p>
+            <div className="flex gap-2">
+              <input
+                readOnly
+                value={refLink}
+                className="flex-1 px-3 py-2 text-xs border rounded bg-muted"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  navigator.clipboard.writeText(refLink);
+                  toast.success("Холбоос хуулагдлаа");
+                }}
+              >
+                Хуулах
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-8 p-4 border rounded-xl bg-card text-center">
+            <p className="text-sm font-medium">Бүртгүүлбэл нэмэлт 3 эрх + найзаа урих боломж</p>
+            <Button asChild className="mt-3" size="sm">
+              <Link to="/auth?redirect=/spin">Бүртгүүлэх</Link>
             </Button>
           </div>
-        </div>
+        )}
       </div>
       <SpinRewardModal open={modalOpen} onClose={() => setModalOpen(false)} result={result} />
     </div>
