@@ -210,8 +210,9 @@ export default function SpinWheelPage() {
                 style={{
                   transform: `rotate(${rotation}deg)`,
                   transition: spinning
-                    ? "transform 4s cubic-bezier(0.17, 0.67, 0.32, 1)"
+                    ? "transform 4.6s cubic-bezier(0.08, 0.82, 0.17, 1)"
                     : "none",
+                  willChange: "transform",
                 }}
               >
                 <defs>
