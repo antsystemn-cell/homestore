@@ -114,53 +114,132 @@ export default function SpinWheelPage() {
   const refLink = referralCode ? `${window.location.origin}/auth?ref=${referralCode}` : "";
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-4 pb-24">
-      <div className="max-w-md mx-auto">
-        <h1 className="text-2xl font-bold text-center mb-2 mt-4">🎁 Азаа үзэж хож!</h1>
-        <p className="text-center text-sm text-muted-foreground mb-6">
-          Эрх: <span className="font-semibold text-foreground">{balance}</span>
+    <div className="min-h-screen bg-gradient-to-br from-[#1a0b2e] via-[#0f0a1f] to-[#1a0b2e] p-4 pb-24 relative overflow-hidden">
+      {/* Ambient glow */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[420px] h-[420px] rounded-full bg-primary/20 blur-[120px] pointer-events-none" />
+      <div className="absolute top-10 right-10 w-32 h-32 rounded-full bg-fuchsia-500/20 blur-3xl pointer-events-none" />
+
+      <div className="max-w-md mx-auto relative">
+        <h1 className="text-3xl font-extrabold text-center mt-4 mb-1 bg-gradient-to-r from-amber-200 via-pink-200 to-amber-200 bg-clip-text text-transparent tracking-tight">
+          ✨ Азаа үзэж хож
+        </h1>
+        <p className="text-center text-xs text-white/60 mb-6">
+          Эрх: <span className="font-semibold text-amber-200">{balance}</span>
           {nextExpiry && balance > 0 && <span className="ml-2">· Дуусах: {expiryText}</span>}
         </p>
 
-        <div className="relative w-72 h-72 mx-auto mb-6">
-          <div
-            className="absolute top-0 left-1/2 -translate-x-1/2 z-10"
-            style={{
-              width: 0,
-              height: 0,
-              borderLeft: "12px solid transparent",
-              borderRight: "12px solid transparent",
-              borderTop: "20px solid hsl(var(--primary))",
-            }}
-          />
-          <div
-            className="w-full h-full rounded-full border-4 border-primary shadow-xl overflow-hidden transition-transform"
-            style={{
-              transform: `rotate(${rotation}deg)`,
-              transitionDuration: spinning ? "4s" : "0s",
-              transitionTimingFunction: "cubic-bezier(0.17, 0.67, 0.32, 1)",
-              background: `conic-gradient(${SEGMENTS.map(
-                (s, i) => `${s.color} ${i * SEG}deg ${(i + 1) * SEG}deg`,
-              ).join(", ")})`,
-            }}
-          >
-            {SEGMENTS.map((s, i) => (
+        <div className="relative w-[320px] h-[320px] mx-auto mb-8">
+          {/* Outer halo */}
+          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-300/40 via-pink-400/30 to-violet-500/40 blur-2xl scale-110" />
+
+          {/* Bulb ring (decorative dots) */}
+          <div className="absolute inset-0 rounded-full">
+            {Array.from({ length: 24 }).map((_, i) => {
+              const angle = (i / 24) * 360;
+              return (
+                <div
+                  key={i}
+                  className="absolute top-1/2 left-1/2 w-2 h-2 rounded-full bg-amber-300 shadow-[0_0_8px_2px_rgba(252,211,77,0.7)]"
+                  style={{
+                    transform: `rotate(${angle}deg) translate(0, -158px) translate(-50%, -50%)`,
+                    opacity: spinning ? (i % 2 ? 1 : 0.35) : (i % 2 ? 0.9 : 0.5),
+                    transition: "opacity 200ms",
+                  }}
+                />
+              );
+            })}
+          </div>
+
+          {/* Pointer */}
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-20">
+            <div className="relative">
               <div
-                key={s.key}
-                className="absolute left-1/2 top-1/2 origin-top-left text-[11px] font-bold text-white drop-shadow"
+                className="w-0 h-0 drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]"
                 style={{
-                  transform: `rotate(${i * SEG + SEG / 2}deg) translate(-50%, -120px)`,
-                  textShadow: "0 1px 2px rgba(0,0,0,0.5)",
+                  borderLeft: "14px solid transparent",
+                  borderRight: "14px solid transparent",
+                  borderTop: "26px solid #fbbf24",
+                }}
+              />
+              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-gradient-to-br from-amber-200 to-amber-500 border-2 border-white/70 shadow-lg" />
+            </div>
+          </div>
+
+          {/* Wheel */}
+          <div className="absolute inset-3 rounded-full p-[6px] bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 shadow-[0_20px_60px_-15px_rgba(251,191,36,0.5)]">
+            <div className="w-full h-full rounded-full bg-[#0f0a1f] p-[3px]">
+              <svg
+                viewBox="-100 -100 200 200"
+                className="w-full h-full rounded-full"
+                style={{
+                  transform: `rotate(${rotation}deg)`,
+                  transition: spinning
+                    ? "transform 4s cubic-bezier(0.17, 0.67, 0.32, 1)"
+                    : "none",
                 }}
               >
-                {s.label}
-              </div>
-            ))}
+                <defs>
+                  {SEGMENTS.map((s, i) => (
+                    <linearGradient key={s.key} id={`seg-${i}`} x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor={s.from} />
+                      <stop offset="100%" stopColor={s.to} />
+                    </linearGradient>
+                  ))}
+                  <radialGradient id="gloss" cx="50%" cy="30%" r="60%">
+                    <stop offset="0%" stopColor="white" stopOpacity="0.35" />
+                    <stop offset="60%" stopColor="white" stopOpacity="0" />
+                  </radialGradient>
+                </defs>
+                {SEGMENTS.map((s, i) => {
+                  const a1 = (i * SEG - 90) * (Math.PI / 180);
+                  const a2 = ((i + 1) * SEG - 90) * (Math.PI / 180);
+                  const r = 98;
+                  const x1 = Math.cos(a1) * r;
+                  const y1 = Math.sin(a1) * r;
+                  const x2 = Math.cos(a2) * r;
+                  const y2 = Math.sin(a2) * r;
+                  const large = SEG > 180 ? 1 : 0;
+                  const path = `M 0 0 L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z`;
+                  // label position
+                  const am = ((i + 0.5) * SEG - 90) * (Math.PI / 180);
+                  const lx = Math.cos(am) * (r * 0.68);
+                  const ly = Math.sin(am) * (r * 0.68);
+                  const rot = i * SEG + SEG / 2;
+                  return (
+                    <g key={s.key}>
+                      <path d={path} fill={`url(#seg-${i})`} stroke="rgba(255,255,255,0.85)" strokeWidth="1.5" />
+                      <text
+                        x={lx}
+                        y={ly}
+                        transform={`rotate(${rot} ${lx} ${ly})`}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fontSize="10"
+                        fontWeight="800"
+                        fill="white"
+                        style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))" }}
+                      >
+                        {s.label}
+                      </text>
+                    </g>
+                  );
+                })}
+                {/* Glossy highlight */}
+                <circle cx="0" cy="0" r="98" fill="url(#gloss)" pointerEvents="none" />
+              </svg>
+            </div>
           </div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-background border-4 border-primary flex items-center justify-center font-bold">
-            АЗ
+
+          {/* Center hub */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600 p-[3px] shadow-[0_0_30px_rgba(251,191,36,0.6)]">
+              <div className="w-full h-full rounded-full bg-gradient-to-br from-[#1a0b2e] to-[#0f0a1f] border-2 border-amber-300/60 flex items-center justify-center">
+                <span className="text-amber-200 font-extrabold text-xs tracking-widest">SPIN</span>
+              </div>
+            </div>
           </div>
         </div>
+
 
         <Button
           className="w-full h-12 text-base font-semibold"
