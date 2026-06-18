@@ -13,14 +13,17 @@ export default function ReferralCard({ userId }: { userId: string }) {
 
   useEffect(() => {
     (async () => {
-      const [{ data: prof }, { data: refs }, { data: cfg }] = await Promise.all([
+      const [profRes, refsRes, cfgRes] = await Promise.all([
         supabase.from("profiles").select("referral_code").eq("user_id", userId).maybeSingle(),
         supabase.from("referrals").select("status").eq("referrer_id", userId),
         supabase.from("spin_config").select("referral_spins").eq("id", 1).maybeSingle(),
       ]);
+      const prof = profRes.data as { referral_code: string | null } | null;
+      const refs = (refsRes.data as Array<{ status: string }> | null) || [];
+      const cfg = cfgRes.data as { referral_spins: number } | null;
       setCode(prof?.referral_code || "");
-      setCount((refs || []).length);
-      setRewardedCount((refs || []).filter((r: any) => r.status === "rewarded").length);
+      setCount(refs.length);
+      setRewardedCount(refs.filter((r) => r.status === "rewarded").length);
       if (cfg?.referral_spins) setReferralSpins(cfg.referral_spins);
     })();
   }, [userId]);
