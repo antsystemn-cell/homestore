@@ -1,9 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { ChevronRight, LogOut, Shield, User, MapPin, Phone, ShoppingBag, Heart, Settings } from "lucide-react";
+import { ChevronRight, LogOut, Shield, User, MapPin, Phone, ShoppingBag, Heart, Settings, Gift } from "lucide-react";
 import BottomNav from "@/components/store/BottomNav";
 import Header from "@/components/store/Header";
-import ReferralCard from "@/components/profile/ReferralCard";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
