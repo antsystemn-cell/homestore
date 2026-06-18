@@ -14,6 +14,7 @@ type Cfg = {
   spin_expiry_hours: number;
   signup_spins: number;
   referral_spins: number;
+  invitee_referral_spins: number;
   max_active_spins: number;
   daily_referral_cap: number;
   extra_spin_lifetime_cap: number;
