@@ -14,7 +14,7 @@ const SEGMENTS: { key: SpinResult["reward_type"]; label: string; from: string; t
   { key: "extra_spin", label: "Дахин эрх",  from: "#60A5FA", to: "#2563EB" },
   { key: "gift_select",label: "Бэлэг",   from: "#F472B6", to: "#DB2777" },
   { key: "coupon_50k", label: "50,000₮", from: "#C084FC", to: "#7C3AED" },
-  { key: "free_gift",  label: "Бэлэг",  from: "#FB7185", to: "#E11D48" },
+  { key: "free_gift",  label: "Сүүүүүүпэр бэлэг",  from: "#FB7185", to: "#E11D48" },
 ];
 
 const SEG = 360 / SEGMENTS.length;
