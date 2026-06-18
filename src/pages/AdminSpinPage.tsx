@@ -43,18 +43,25 @@ export default function AdminSpinPage() {
     total: 0, byReward: {}, coupons: 0, couponsUsed: 0, refs: 0,
   });
   const [newProductId, setNewProductId] = useState("");
+  const [history, setHistory] = useState<Array<{
+    id: string; created_at: string; reward_type: string; reward_value: number | null;
+    kind: "user" | "guest"; who: string; ip?: string | null;
+  }>>([]);
+  const [historyFilter, setHistoryFilter] = useState<"all" | "user" | "guest">("all");
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) navigate("/");
   }, [loading, user, isAdmin, navigate]);
 
   async function load() {
-    const [c, g, hist, coup, refs] = await Promise.all([
+    const [c, g, hist, coup, refs, userHist, guestHist] = await Promise.all([
       supabase.from("spin_config").select("*").eq("id", 1).maybeSingle(),
       supabase.from("gift_rewards").select("*, product:products(name)").order("created_at", { ascending: false }),
       supabase.from("spin_history").select("reward_type"),
       supabase.from("spin_coupons").select("is_used"),
       supabase.from("referrals").select("status"),
+      supabase.from("spin_history").select("id, created_at, reward_type, reward_value, user_id, ip").order("created_at", { ascending: false }).limit(500),
+      supabase.from("guest_spin_history").select("id, created_at, reward_type, reward_value, fingerprint, ip").order("created_at", { ascending: false }).limit(500),
     ]);
     if (c.data) setCfg(c.data as Cfg);
     setGifts((g.data as GiftRow[]) || []);
@@ -67,6 +74,28 @@ export default function AdminSpinPage() {
       couponsUsed: (coup.data || []).filter((c) => c.is_used).length,
       refs: (refs.data || []).filter((r) => r.status === "rewarded").length,
     });
+
+    const userIds = Array.from(new Set((userHist.data || []).map((r: any) => r.user_id).filter(Boolean)));
+    const profMap: Record<string, { full_name?: string; phone?: string }> = {};
+    if (userIds.length) {
+      const { data: profs } = await supabase.from("profiles").select("user_id, full_name, phone").in("user_id", userIds);
+      (profs || []).forEach((p: any) => { profMap[p.user_id] = { full_name: p.full_name, phone: p.phone }; });
+    }
+    const merged = [
+      ...((userHist.data || []) as any[]).map((r) => ({
+        id: r.id, created_at: r.created_at, reward_type: r.reward_type, reward_value: r.reward_value,
+        kind: "user" as const,
+        who: profMap[r.user_id]?.full_name || profMap[r.user_id]?.phone || (r.user_id ? r.user_id.slice(0, 8) : "—"),
+        ip: r.ip,
+      })),
+      ...((guestHist.data || []) as any[]).map((r) => ({
+        id: r.id, created_at: r.created_at, reward_type: r.reward_type, reward_value: r.reward_value,
+        kind: "guest" as const,
+        who: r.fingerprint ? `Guest ${String(r.fingerprint).slice(0, 8)}` : "Guest",
+        ip: r.ip,
+      })),
+    ].sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
+    setHistory(merged);
   }
   useEffect(() => { if (isAdmin) load(); }, [isAdmin]);
 
