@@ -168,7 +168,7 @@ export default function SpinWheelPage() {
           {nextExpiry && balance > 0 && <span className="ml-2">· Дуусах: {expiryText}</span>}
         </p>
 
-        <div className="relative w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] mx-auto">
+        <div className="relative w-[300px] h-[300px] sm:w-[320px] sm:h-[320px] mx-auto">
           {/* Outer halo */}
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-300/40 via-pink-400/30 to-violet-500/40 blur-2xl scale-110" />
 
