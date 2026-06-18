@@ -44,6 +44,11 @@ const CheckoutPage = () => {
   // Payment provider logos from DB
   const [providerLogos, setProviderLogos] = useState<Record<string, string>>({});
 
+  // Stacked coupons earned within the last 5 hours
+  type SpinCoupon = { id: string; code: string; reward_value: number; minimum_order_amount: number | null; expires_at: string; created_at: string };
+  const [availableCoupons, setAvailableCoupons] = useState<SpinCoupon[]>([]);
+  const [selectedCouponIds, setSelectedCouponIds] = useState<string[]>([]);
+
   // Redirect unauthenticated non-guest users
   useEffect(() => {
     if (!user && !isGuestCheckout) {
@@ -90,6 +95,26 @@ const CheckoutPage = () => {
     fetchProviderLogos();
   }, []);
 
+  // Fetch coupons earned within the last 5 hours (active, unused, not expired)
+  useEffect(() => {
+    if (!user) { setAvailableCoupons([]); return; }
+    (async () => {
+      const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString();
+      const nowIso = new Date().toISOString();
+      const { data } = await supabase
+        .from("spin_coupons")
+        .select("id, code, reward_value, minimum_order_amount, expires_at, created_at")
+        .eq("user_id", user.id)
+        .eq("is_used", false)
+        .is("invalidated_at", null)
+        .gte("created_at", fiveHoursAgo)
+        .gt("expires_at", nowIso)
+        .order("created_at", { ascending: false });
+      setAvailableCoupons((data as SpinCoupon[]) || []);
+      setSelectedCouponIds(((data as SpinCoupon[]) || []).map((c) => c.id));
+    })();
+  }, [user]);
+
   const selectedDeliveryOption = deliveryOptions.find(d => d.id === selectedDelivery);
   const deliveryFee = selectedDeliveryOption?.price || 0;
 
@@ -99,7 +124,13 @@ const CheckoutPage = () => {
   const productFree = hasFreeDeliveryProduct(items);
   const surcharge = (bundleFree || productFree) ? 0 : ((cartTotal < 50000 || hasSaleItems) ? 8000 : 0);
   const totalDeliveryFee = deliveryFee + surcharge;
-  const grandTotal = cartTotal + totalDeliveryFee;
+
+  // Sum discount of selected coupons (only those whose min_order ≤ cartTotal)
+  const validSelectedCoupons = availableCoupons.filter(
+    (c) => selectedCouponIds.includes(c.id) && (!c.minimum_order_amount || cartTotal >= Number(c.minimum_order_amount))
+  );
+  const couponDiscount = validSelectedCoupons.reduce((s, c) => s + Number(c.reward_value || 0), 0);
+  const grandTotal = Math.max(0, cartTotal + totalDeliveryFee - couponDiscount);
 
   const createOrder = async (paymentStatus = "unpaid", pm: PaymentMethod = "cash") => {
     if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return null; }
@@ -164,6 +195,15 @@ const CheckoutPage = () => {
       data = insData;
     }
     setOrderRef(data.order_ref);
+
+    // Mark stacked coupons as used
+    if (!isGuestCheckout && validSelectedCoupons.length > 0) {
+      const ids = validSelectedCoupons.map((c) => c.id);
+      await supabase
+        .from("spin_coupons")
+        .update({ is_used: true, used_order_id: data.id, used_at: new Date().toISOString() })
+        .in("id", ids);
+    }
 
     // NOTE: Delivery dispatch is handled automatically by the DB trigger
     // `auto_send_order_to_delivery` once payment_status='paid' (online)
@@ -677,6 +717,52 @@ const CheckoutPage = () => {
                     {selectedDeliveryOption.name} · {selectedDeliveryOption.estimated_days_min}-{selectedDeliveryOption.estimated_days_max} хоног
                   </p>
                 )}
+
+                {availableCoupons.length > 0 && (
+                  <div className="border-t border-border pt-2">
+                    <p className="text-xs font-semibold text-foreground mb-1.5">
+                      🎁 Сүүлийн 5 цагт авсан купон ({availableCoupons.length})
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mb-2">Олон купоныг давхарлаж ашиглаж болно</p>
+                    <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                      {availableCoupons.map((c) => {
+                        const minOk = !c.minimum_order_amount || cartTotal >= Number(c.minimum_order_amount);
+                        const checked = selectedCouponIds.includes(c.id);
+                        return (
+                          <label key={c.id} className={`flex items-center gap-2 text-xs p-1.5 rounded border ${minOk ? "border-border cursor-pointer hover:bg-accent/30" : "border-border opacity-50"}`}>
+                            <input
+                              type="checkbox"
+                              disabled={!minOk}
+                              checked={checked && minOk}
+                              onChange={(e) => {
+                                setSelectedCouponIds((prev) =>
+                                  e.target.checked ? [...prev, c.id] : prev.filter((x) => x !== c.id)
+                                );
+                              }}
+                            />
+                            <span className="flex-1 truncate">
+                              <span className="font-mono text-[10px] text-muted-foreground">{c.code}</span>
+                              {c.minimum_order_amount ? (
+                                <span className="block text-[10px] text-muted-foreground">
+                                  Мин: {formatPrice(Number(c.minimum_order_amount))}
+                                </span>
+                              ) : null}
+                            </span>
+                            <span className="font-semibold text-primary">-{formatPrice(Number(c.reward_value))}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {couponDiscount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Купон хямдрал</span>
+                    <span className="text-primary font-semibold">-{formatPrice(couponDiscount)}</span>
+                  </div>
+                )}
+
                 <div className="flex justify-between border-t border-border pt-2">
                   <span className="font-bold text-foreground">Нийт</span>
                   <span className="font-extrabold text-foreground text-lg">{formatPrice(grandTotal)}</span>
