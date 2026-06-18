@@ -144,14 +144,15 @@ function CouponCard({ c, now, active = false }: { c: Coupon; now: number; active
         </div>
       </div>
       <div className="px-4 py-2 border-t flex items-center justify-between gap-2">
-        <code className="font-mono text-sm font-bold flex-1 truncate">{c.code}</code>
+        <button
+          className={`font-mono text-sm font-bold flex-1 truncate text-left cursor-pointer select-all active:opacity-70 transition-opacity inline-flex items-center gap-1.5 ${active ? "text-foreground" : "text-muted-foreground"}`}
+          onClick={() => { navigator.clipboard.writeText(c.code); toast.success("Хуулагдлаа"); }}
+        >
+          {c.code}
+          {active && <Copy className="h-3 w-3 opacity-50 flex-shrink-0" />}
+        </button>
         {active ? (
-          <>
-            <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(c.code); toast.success("Хуулагдлаа"); }}>
-              <Copy className="h-3 w-3" />
-            </Button>
-            <Button size="sm" asChild><Link to="/cart">Ашиглах</Link></Button>
-          </>
+          <Button size="sm" asChild><Link to="/cart">Ашиглах</Link></Button>
         ) : (
           <span className="text-xs text-muted-foreground">
             {c.is_used ? "Ашигласан" : c.invalidated_at ? "Цуцалсан" : "Хугацаа дууссан"}
