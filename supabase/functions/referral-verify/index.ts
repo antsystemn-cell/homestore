@@ -108,6 +108,7 @@ Deno.serve(async (req) => {
     const { data: cfg } = await supa.from("spin_config").select("*").eq("id", 1).maybeSingle();
     const dailyCap = cfg?.daily_referral_cap ?? 3;
     const refSpins = cfg?.referral_spins ?? 2;
+    const inviteeSpins = cfg?.invitee_referral_spins ?? 2;
     const expiryHours = cfg?.spin_expiry_hours ?? 5;
     const maxSpins = cfg?.max_active_spins ?? 6;
 
@@ -123,7 +124,7 @@ Deno.serve(async (req) => {
       return json({ ok: true, referral_rewarded: false, reason: "daily_cap" });
     }
 
-    // Check inviter active spins for cap
+    // Grant spins to inviter (capped by max_active_spins)
     const { data: activeNow } = await supa.rpc("user_active_spins", { _user_id: inviter.user_id });
     const remaining = Math.max(0, maxSpins - (activeNow as number));
     const grant = Math.min(refSpins, remaining);
@@ -133,6 +134,20 @@ Deno.serve(async (req) => {
         available_spins: grant,
         source: "referral",
         source_ref: user.id,
+        expires_at: new Date(Date.now() + expiryHours * 3600 * 1000).toISOString(),
+      });
+    }
+
+    // Grant spins to invitee (capped by max_active_spins)
+    const { data: inviteeActive } = await supa.rpc("user_active_spins", { _user_id: user.id });
+    const inviteeRemaining = Math.max(0, maxSpins - (inviteeActive as number));
+    const inviteeGrant = Math.min(inviteeSpins, inviteeRemaining);
+    if (inviteeGrant > 0) {
+      await supa.from("spin_balances").insert({
+        user_id: user.id,
+        available_spins: inviteeGrant,
+        source: "referral",
+        source_ref: `invited_by_${inviter.user_id}`,
         expires_at: new Date(Date.now() + expiryHours * 3600 * 1000).toISOString(),
       });
     }
