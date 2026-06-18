@@ -3,6 +3,7 @@ import { useAuth } from "@/context/AuthContext";
 import { ChevronRight, LogOut, Shield, User, MapPin, Phone, ShoppingBag, Heart, Settings } from "lucide-react";
 import BottomNav from "@/components/store/BottomNav";
 import Header from "@/components/store/Header";
+import ReferralCard from "@/components/profile/ReferralCard";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -86,7 +87,8 @@ const ProfilePage = () => {
           </div>
 
           {/* Menu Items */}
-          <div className="px-4 md:px-0 md:col-span-2">
+          <div className="px-4 md:px-0 md:col-span-2 space-y-4">
+            <ReferralCard userId={user.id} />
             <div className="md:bg-card md:rounded-2xl md:border md:border-border md:overflow-hidden">
               {menuItems.map((item, i) => {
                 const Icon = item.icon;
