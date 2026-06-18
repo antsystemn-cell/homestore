@@ -132,7 +132,7 @@ export default function SpinRewardModal({ open, onClose, result }: Props) {
 
           {isExtra && (
             <div className="text-center py-2">
-              <p className="text-base">Танай эргүүлэх эрх <span className="font-bold text-primary">+1</span> нэмэгдлээ.</p>
+              <p className="text-base">Таны азаа үзэх эрх <span className="font-bold text-primary">+1</span> нэмэгдлээ.</p>
               <p className="text-xs text-muted-foreground mt-1">5 цагийн дотор ашиглана уу.</p>
             </div>
           )}
