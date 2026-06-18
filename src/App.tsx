@@ -13,7 +13,6 @@ const MAINTENANCE_MODE = false;
 // Eagerly load Index (critical landing page)
 import Index from "./pages/Index";
 import MaintenancePage from "./components/MaintenancePage";
-import ChatbotWidget from "./components/ChatbotWidget";
 import PageViewTracker from "./components/PageViewTracker";
 
 // Retry wrapper for lazy imports (handles stale chunk hashes after redeploy)
