@@ -154,21 +154,11 @@ export default function SpinWheelPage() {
           {spinning ? "Эргэлдэж байна..." : balance > 0 ? "Эргүүлэх" : "Эрх дууссан"}
         </Button>
 
-        {result && (
-          <div className="mt-6 p-4 border rounded-xl bg-card text-center">
-            <p className="text-sm text-muted-foreground">Танай шагнал</p>
-            <p className="text-xl font-bold mt-1">{REWARD_LABEL[result.reward_type]}</p>
-            {result.coupon_code && (
-              <>
-                <p className="text-sm mt-2">Купон код:</p>
-                <p className="font-mono font-bold text-primary">{result.coupon_code}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Доод дүн: {result.minimum_order_amount.toLocaleString()}₮ · 5 цагт хүчинтэй
-                </p>
-              </>
-            )}
-          </div>
-        )}
+        <div className="mt-4 text-center">
+          <Button variant="link" asChild className="text-sm">
+            <Link to="/my-rewards">Миний шагналуудыг харах →</Link>
+          </Button>
+        </div>
 
         <div className="mt-8 p-4 border rounded-xl bg-card">
           <h2 className="font-semibold mb-2">Найзаа урих → +2 эрх</h2>
