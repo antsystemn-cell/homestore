@@ -146,7 +146,7 @@ export default function SpinWheelPage() {
   
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1a0b2e] via-[#0f0a1f] to-[#1a0b2e] flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
+    <div className="h-[33vh] bg-gradient-to-br from-[#1a0b2e] via-[#0f0a1f] to-[#1a0b2e] flex items-center justify-center p-3 sm:p-4 relative overflow-hidden rounded-2xl mx-auto max-w-lg">
       {/* Ambient glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] rounded-full bg-primary/20 blur-[120px] pointer-events-none" />
       <div className="absolute top-10 right-10 w-32 h-32 rounded-full bg-fuchsia-500/20 blur-3xl pointer-events-none" />
@@ -159,8 +159,8 @@ export default function SpinWheelPage() {
         <X className="w-5 h-5" />
       </button>
 
-      <div className="max-w-md w-full flex flex-col items-center justify-center flex-1 gap-y-5 sm:gap-y-6">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-center bg-gradient-to-r from-amber-200 via-pink-200 to-amber-200 bg-clip-text text-transparent tracking-tight">
+      <div className="max-w-md w-full flex flex-col items-center justify-center flex-1 gap-y-2 sm:gap-y-3">
+        <h1 className="text-lg sm:text-xl font-extrabold text-center bg-gradient-to-r from-amber-200 via-pink-200 to-amber-200 bg-clip-text text-transparent tracking-tight">
           ✨ Ёндоогоо үз... хож
         </h1>
         <p className="text-center text-xs text-white/60 -mt-2">
@@ -168,7 +168,7 @@ export default function SpinWheelPage() {
           {nextExpiry && balance > 0 && <span className="ml-2">· Дуусах: {expiryText}</span>}
         </p>
 
-        <div className="relative w-[320px] h-[320px] mx-auto">
+        <div className="relative w-[26vh] h-[26vh] mx-auto">
           {/* Outer halo */}
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-300/40 via-pink-400/30 to-violet-500/40 blur-2xl scale-110" />
 
@@ -181,7 +181,7 @@ export default function SpinWheelPage() {
                   key={i}
                   className="absolute top-1/2 left-1/2 w-2 h-2 rounded-full bg-amber-300 shadow-[0_0_8px_2px_rgba(252,211,77,0.7)]"
                   style={{
-                    transform: `rotate(${angle}deg) translate(0, -158px) translate(-50%, -50%)`,
+                    transform: `rotate(${angle}deg) translate(0, calc(-12vh + 2px)) translate(-50%, -50%)`,
                     opacity: spinning ? (i % 2 ? 1 : 0.35) : (i % 2 ? 0.9 : 0.5),
                     transition: "opacity 200ms",
                   }}
@@ -196,12 +196,12 @@ export default function SpinWheelPage() {
               <div
                 className="w-0 h-0 drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]"
                 style={{
-                  borderLeft: "14px solid transparent",
-                  borderRight: "14px solid transparent",
-                  borderTop: "26px solid #fbbf24",
+                  borderLeft: "1.1vh solid transparent",
+                  borderRight: "1.1vh solid transparent",
+                  borderTop: "2vh solid #fbbf24",
                 }}
               />
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-gradient-to-br from-amber-200 to-amber-500 border-2 border-white/70 shadow-lg" />
+              <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-gradient-to-br from-amber-200 to-amber-500 border-2 border-white/70 shadow-lg" />
             </div>
           </div>
 
@@ -272,8 +272,8 @@ export default function SpinWheelPage() {
           </div>
 
           {/* Center hub */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600 p-[3px] shadow-[0_0_30px_rgba(251,191,36,0.6)]">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-[25%] h-[25%]">
+            <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600 p-[3px] shadow-[0_0_30px_rgba(251,191,36,0.6)]">
               <div className="w-full h-full rounded-full bg-gradient-to-br from-[#1a0b2e] to-[#0f0a1f] border-2 border-amber-300/60 flex items-center justify-center">
                 <span className="text-amber-200 font-extrabold text-[10px] tracking-widest">ЁНДОО</span>
               </div>
@@ -283,7 +283,7 @@ export default function SpinWheelPage() {
 
 
         <Button
-          className="w-full h-14 text-base font-bold rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-[#1a0b2e] hover:opacity-95 shadow-[0_10px_30px_-10px_rgba(251,191,36,0.7)] disabled:opacity-40"
+          className="w-full h-10 text-sm font-bold rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-[#1a0b2e] hover:opacity-95 shadow-[0_10px_30px_-10px_rgba(251,191,36,0.7)] disabled:opacity-40"
           onClick={handleSpin}
           disabled={spinning || balance < 1}
         >
