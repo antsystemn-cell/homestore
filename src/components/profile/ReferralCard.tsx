@@ -52,7 +52,7 @@ export default function ReferralCard({ userId }: { userId: string }) {
   };
 
   const downloadQR = () => {
-    const svg = document.getElementById("referral-qr-svg") as SVGSVGElement | null;
+    const svg = document.getElementById("referral-qr-svg") as unknown as SVGSVGElement | null;
     if (!svg) return;
     const serializer = new XMLSerializer();
     const svgString = serializer.serializeToString(svg);
