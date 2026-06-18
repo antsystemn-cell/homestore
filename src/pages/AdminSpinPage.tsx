@@ -110,6 +110,7 @@ export default function AdminSpinPage() {
       spin_expiry_hours: cfg.spin_expiry_hours,
       signup_spins: cfg.signup_spins,
       referral_spins: cfg.referral_spins,
+      invitee_referral_spins: cfg.invitee_referral_spins,
       max_active_spins: cfg.max_active_spins,
       daily_referral_cap: cfg.daily_referral_cap,
       extra_spin_lifetime_cap: cfg.extra_spin_lifetime_cap,
