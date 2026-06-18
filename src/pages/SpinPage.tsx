@@ -28,6 +28,7 @@ export default function SpinWheelPage() {
   const [nextExpiry, setNextExpiry] = useState<string | null>(null);
   const [referralCode, setReferralCode] = useState<string>("");
   const [now, setNow] = useState(Date.now());
+  const spinningRef = useRef(false);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
