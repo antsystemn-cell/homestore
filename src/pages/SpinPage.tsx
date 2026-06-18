@@ -82,11 +82,9 @@ export default function SpinWheelPage() {
       setRotation((prev) => prev + targetAngle);
       setTimeout(() => {
         setResult(r);
+        setModalOpen(true);
         setSpinning(false);
         refresh();
-        toast.success(`Хожлоо: ${REWARD_LABEL[r.reward_type]}`, {
-          description: r.coupon_code ? `Купон код: ${r.coupon_code}` : undefined,
-        });
       }, 4200);
     } catch (e: unknown) {
       setSpinning(false);
