@@ -130,6 +130,7 @@ const App = () => (
               </Routes>
             </Suspense>
             {!MAINTENANCE_MODE && <ChatbotWidget />}
+            {!MAINTENANCE_MODE && <SpinFabLazy />}
           </CartProvider>
         </AuthProvider>
       </BrowserRouter>
