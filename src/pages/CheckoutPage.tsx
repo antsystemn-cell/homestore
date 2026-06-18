@@ -95,6 +95,26 @@ const CheckoutPage = () => {
     fetchProviderLogos();
   }, []);
 
+  // Fetch coupons earned within the last 5 hours (active, unused, not expired)
+  useEffect(() => {
+    if (!user) { setAvailableCoupons([]); return; }
+    (async () => {
+      const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString();
+      const nowIso = new Date().toISOString();
+      const { data } = await supabase
+        .from("spin_coupons")
+        .select("id, code, reward_value, minimum_order_amount, expires_at, created_at")
+        .eq("user_id", user.id)
+        .eq("is_used", false)
+        .is("invalidated_at", null)
+        .gte("created_at", fiveHoursAgo)
+        .gt("expires_at", nowIso)
+        .order("created_at", { ascending: false });
+      setAvailableCoupons((data as SpinCoupon[]) || []);
+      setSelectedCouponIds(((data as SpinCoupon[]) || []).map((c) => c.id));
+    })();
+  }, [user]);
+
   const selectedDeliveryOption = deliveryOptions.find(d => d.id === selectedDelivery);
   const deliveryFee = selectedDeliveryOption?.price || 0;
 
@@ -104,7 +124,13 @@ const CheckoutPage = () => {
   const productFree = hasFreeDeliveryProduct(items);
   const surcharge = (bundleFree || productFree) ? 0 : ((cartTotal < 50000 || hasSaleItems) ? 8000 : 0);
   const totalDeliveryFee = deliveryFee + surcharge;
-  const grandTotal = cartTotal + totalDeliveryFee;
+
+  // Sum discount of selected coupons (only those whose min_order ≤ cartTotal)
+  const validSelectedCoupons = availableCoupons.filter(
+    (c) => selectedCouponIds.includes(c.id) && (!c.minimum_order_amount || cartTotal >= Number(c.minimum_order_amount))
+  );
+  const couponDiscount = validSelectedCoupons.reduce((s, c) => s + Number(c.reward_value || 0), 0);
+  const grandTotal = Math.max(0, cartTotal + totalDeliveryFee - couponDiscount);
 
   const createOrder = async (paymentStatus = "unpaid", pm: PaymentMethod = "cash") => {
     if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return null; }
