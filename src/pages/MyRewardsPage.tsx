@@ -39,18 +39,27 @@ export default function MyRewardsPage() {
   }, []);
 
   useEffect(() => {
-    if (!loading && !user) navigate("/auth?redirect=/my-rewards");
-  }, [loading, user, navigate]);
-
-  useEffect(() => {
-    if (!user) return;
-    supabase
-      .from("spin_coupons")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => setCoupons((data as Coupon[]) || []));
-  }, [user]);
+    if (loading) return;
+    (async () => {
+      if (user) {
+        const { data } = await supabase
+          .from("spin_coupons")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+        setCoupons((data as Coupon[]) || []);
+      } else {
+        const { getDeviceFingerprint } = await import("@/lib/deviceFingerprint");
+        const fp = getDeviceFingerprint();
+        const { data } = await supabase
+          .from("spin_coupons")
+          .select("*")
+          .eq("guest_fingerprint", fp)
+          .order("created_at", { ascending: false });
+        setCoupons((data as Coupon[]) || []);
+      }
+    })();
+  }, [user, loading]);
 
   const active = useMemo(
     () => coupons.filter((c) => !c.is_used && !c.invalidated_at && new Date(c.expires_at).getTime() > now),
