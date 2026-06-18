@@ -146,9 +146,9 @@ export default function SpinWheelPage() {
   
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1a0b2e] via-[#0f0a1f] to-[#1a0b2e] flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#1a0b2e] via-[#0f0a1f] to-[#1a0b2e] flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
       {/* Ambient glow */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[420px] h-[420px] rounded-full bg-primary/20 blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] rounded-full bg-primary/20 blur-[120px] pointer-events-none" />
       <div className="absolute top-10 right-10 w-32 h-32 rounded-full bg-fuchsia-500/20 blur-3xl pointer-events-none" />
 
       <button
@@ -159,16 +159,16 @@ export default function SpinWheelPage() {
         <X className="w-5 h-5" />
       </button>
 
-      <div className="max-w-md w-full relative">
-        <h1 className="text-3xl font-extrabold text-center mt-4 mb-1 bg-gradient-to-r from-amber-200 via-pink-200 to-amber-200 bg-clip-text text-transparent tracking-tight">
+      <div className="max-w-md w-full flex flex-col items-center justify-center flex-1 gap-y-5 sm:gap-y-6">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-center bg-gradient-to-r from-amber-200 via-pink-200 to-amber-200 bg-clip-text text-transparent tracking-tight">
           ✨ Ёндоогоо үзэж хож
         </h1>
-        <p className="text-center text-xs text-white/60 mb-6">
+        <p className="text-center text-xs text-white/60 -mt-2">
           Эрх: <span className="font-semibold text-amber-200">{balance}</span>
           {nextExpiry && balance > 0 && <span className="ml-2">· Дуусах: {expiryText}</span>}
         </p>
 
-        <div className="relative w-[320px] h-[320px] mx-auto mb-8">
+        <div className="relative w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] mx-auto">
           {/* Outer halo */}
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-300/40 via-pink-400/30 to-violet-500/40 blur-2xl scale-110" />
 
