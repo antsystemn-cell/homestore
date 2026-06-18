@@ -35,26 +35,43 @@ export default function SpinWheelPage() {
     return () => clearInterval(t);
   }, []);
 
-  useEffect(() => {
-    if (!loading && !user) navigate("/auth?redirect=/spin");
-  }, [loading, user, navigate]);
+  // Guests are allowed — no auth redirect.
 
   async function refresh() {
-    if (!user) return;
-    const [bal, prof] = await Promise.all([
-      supabase
-        .from("spin_balances")
+    if (user) {
+      const [bal, prof] = await Promise.all([
+        supabase
+          .from("spin_balances")
+          .select("available_spins, expires_at")
+          .eq("user_id", user.id)
+          .gt("available_spins", 0)
+          .gt("expires_at", new Date().toISOString())
+          .order("expires_at", { ascending: true }),
+        supabase.from("profiles").select("referral_code").eq("user_id", user.id).maybeSingle(),
+      ]);
+      const total = (bal.data || []).reduce((s, r) => s + (r.available_spins as number), 0);
+      setBalance(total);
+      setNextExpiry((bal.data && bal.data[0]?.expires_at) || null);
+      setReferralCode(prof.data?.referral_code || "");
+    } else {
+      // Guest: lookup by device fingerprint
+      const { getDeviceFingerprint } = await import("@/lib/deviceFingerprint");
+      const fp = getDeviceFingerprint();
+      const { data } = await supabase
+        .from("guest_spin_balances")
         .select("available_spins, expires_at")
-        .eq("user_id", user.id)
-        .gt("available_spins", 0)
-        .gt("expires_at", new Date().toISOString())
-        .order("expires_at", { ascending: true }),
-      supabase.from("profiles").select("referral_code").eq("user_id", user.id).maybeSingle(),
-    ]);
-    const total = (bal.data || []).reduce((s, r) => s + (r.available_spins as number), 0);
-    setBalance(total);
-    setNextExpiry((bal.data && bal.data[0]?.expires_at) || null);
-    setReferralCode(prof.data?.referral_code || "");
+        .eq("fingerprint", fp)
+        .maybeSingle();
+      if (data && new Date(data.expires_at).getTime() > Date.now()) {
+        setBalance(data.available_spins as number);
+        setNextExpiry(data.expires_at);
+      } else {
+        // No record yet — show 3 free spins as available; server will grant on first spin
+        setBalance(3);
+        setNextExpiry(null);
+      }
+      setReferralCode("");
+    }
   }
 
   useEffect(() => {
