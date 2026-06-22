@@ -10,6 +10,9 @@ import { AuthProvider } from "@/context/AuthContext";
 // Maintenance mode — set to true to block public access
 const MAINTENANCE_MODE = false;
 
+// Spin feature toggle — set to false to temporarily disable
+const SPIN_ENABLED = false;
+
 // Eagerly load Index (critical landing page)
 import Index from "./pages/Index";
 import MaintenancePage from "./components/MaintenancePage";
