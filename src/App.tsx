@@ -138,7 +138,7 @@ const App = () => (
                 )}
               </Routes>
             </Suspense>
-            {!MAINTENANCE_MODE && <SpinFabLazy />}
+            {!MAINTENANCE_MODE && SPIN_ENABLED && <SpinFabLazy />}
           </CartProvider>
         </AuthProvider>
       </BrowserRouter>
