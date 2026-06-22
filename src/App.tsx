@@ -10,6 +10,9 @@ import { AuthProvider } from "@/context/AuthContext";
 // Maintenance mode — set to true to block public access
 const MAINTENANCE_MODE = false;
 
+// Spin feature toggle — set to false to temporarily disable
+const SPIN_ENABLED = false;
+
 // Eagerly load Index (critical landing page)
 import Index from "./pages/Index";
 import MaintenancePage from "./components/MaintenancePage";
@@ -120,13 +123,13 @@ const App = () => (
                     <Route path="/checkout" element={<CheckoutPage />} />
                     <Route path="/product/:slug" element={<ProductPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/spin" element={<SpinPage />} />
-                    <Route path="/my-rewards" element={<MyRewardsPage />} />
+                    {SPIN_ENABLED && <Route path="/spin" element={<SpinPage />} />}
+                    {SPIN_ENABLED && <Route path="/my-rewards" element={<MyRewardsPage />} />}
                     
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route path="/admin" element={<AdminPage />} />
-                    <Route path="/admin/spin" element={<AdminSpinPage />} />
+                    {SPIN_ENABLED && <Route path="/admin/spin" element={<AdminSpinPage />} />}
                     <Route path="/warehouse" element={<WarehousePage />} />
                     <Route path="/driver" element={<DriverPage />} />
                     <Route path="/delivery-entry" element={<DeliveryEntryPage />} />
@@ -135,7 +138,7 @@ const App = () => (
                 )}
               </Routes>
             </Suspense>
-            {!MAINTENANCE_MODE && <SpinFabLazy />}
+            {!MAINTENANCE_MODE && SPIN_ENABLED && <SpinFabLazy />}
           </CartProvider>
         </AuthProvider>
       </BrowserRouter>
