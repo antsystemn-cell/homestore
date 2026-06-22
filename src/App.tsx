@@ -123,8 +123,8 @@ const App = () => (
                     <Route path="/checkout" element={<CheckoutPage />} />
                     <Route path="/product/:slug" element={<ProductPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/spin" element={<SpinPage />} />
-                    <Route path="/my-rewards" element={<MyRewardsPage />} />
+                    {SPIN_ENABLED && <Route path="/spin" element={<SpinPage />} />}
+                    {SPIN_ENABLED && <Route path="/my-rewards" element={<MyRewardsPage />} />}
                     
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
