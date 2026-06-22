@@ -8,7 +8,7 @@ import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 
 // Maintenance mode — set to true to block public access
-const MAINTENANCE_MODE = false;
+const MAINTENANCE_MODE = true;
 
 // Spin feature toggle — set to false to temporarily disable
 const SPIN_ENABLED = false;
