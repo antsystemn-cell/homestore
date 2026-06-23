@@ -2677,6 +2677,26 @@ const AdminPage = () => {
                   {(() => {
                     const b = dbBrands.find((x: any) => x.id === form.brand_id);
                     const norm = (b?.name || "").toLowerCase().replace(/\s+/g, "");
+                    if (norm.includes("elle") && norm.includes("sport")) return null;
+                    return (
+                      <div className="rounded-xl border border-border bg-secondary/30 p-3 space-y-2">
+                        <label className="text-[11px] font-semibold text-foreground">Үлдэгдэл (ширхэг)</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number" min={0} placeholder="0"
+                            value={form.stock_quantity || ""}
+                            onChange={(e) => setForm({ ...form, stock_quantity: Math.max(0, +e.target.value || 0) })}
+                            className="w-40 rounded-lg bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                          />
+                          <span className="text-xs text-muted-foreground">ширхэг</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {(() => {
+                    const b = dbBrands.find((x: any) => x.id === form.brand_id);
+                    const norm = (b?.name || "").toLowerCase().replace(/\s+/g, "");
                     if (!(norm.includes("elle") && norm.includes("sport"))) return null;
 
                     const validColors = form.colors.filter(c => c.name.trim());
