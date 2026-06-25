@@ -58,6 +58,12 @@ Deno.serve(async (req: Request) => {
     }
 
     const payload: any = { external_order_id: externalOrderId };
+    // Send both references so every API-connected delivery system can locate the same order,
+    // whether it keys by EasyShop external_order_id or by its own internal delivery number.
+    if (order.delivery_order_id) {
+      payload.delivery_order_id = order.delivery_order_id;
+      payload.internal_order_number = order.delivery_order_id;
+    }
     if (payment_status) payload.payment_status = payment_status;
     if (fulfillment_status) payload.fulfillment_status = fulfillment_status;
     if (note) payload.note = note;
