@@ -773,10 +773,59 @@ const AdminPage = () => {
     setDeliveryDraft((prev) => { const c = { ...prev }; delete c[orderId]; return c; });
   };
 
+  const mapOrderStatusToDeliveryFulfillment = (status: string) => {
+    const map: Record<string, string> = {
+      pending: "confirmed",
+      confirmed: "confirmed",
+      preparing: "preparing",
+      delivering: "out_for_delivery",
+      completed: "delivered",
+      cancelled: "cancelled",
+    };
+    return map[status] || status;
+  };
+
+  const notifyDeliveryFulfillment = async (orderId: string, status: string, note?: string) => {
+    const order = orders.find((o) => o.id === orderId);
+    if (!order?.delivery_order_id) return;
+    const { data, error } = await supabase.functions.invoke("notify-delivery-status", {
+      body: {
+        order_id: orderId,
+        fulfillment_status: mapOrderStatusToDeliveryFulfillment(status),
+        note,
+      },
+    });
+    if (error || data?.success === false) {
+      console.error("Delivery fulfillment sync failed:", error || data);
+      toast.error("EasyShop төлөв хадгалагдсан ч хүргэлтийн систем рүү илгээхэд алдаа гарлаа");
+    }
+  };
+
+  const getOrderReactivationPatch = (newStatus: string, currentOrder?: any) => {
+    const wasTerminal = currentOrder?.status === "cancelled"
+      || currentOrder?.status === "completed"
+      || currentOrder?.delivery_status === "cancelled"
+      || currentOrder?.delivery_status === "delivered"
+      || !!currentOrder?.delivered_at;
+
+    if (!wasTerminal || newStatus === "cancelled" || newStatus === "completed") return {};
+
+    return {
+      delivered_at: null,
+      delivery_failed_at: null,
+      delivery_return_reason: null,
+      delivery_status: newStatus === "delivering"
+        ? "out_for_delivery"
+        : currentOrder?.delivery_order_id
+          ? "confirmed"
+          : null,
+    };
+  };
+
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    const order = orders.find((o) => o.id === orderId);
     if (newStatus === "delivering") {
-      const order = orders.find((o) => o.id === orderId);
       setDeliverDialog({
         orderId,
         driverId: order?.driver_id || "",
@@ -785,26 +834,29 @@ const AdminPage = () => {
       });
       return;
     }
-    const { error } = await supabase.from("orders").update({ status: newStatus, updated_at: new Date().toISOString() }).eq("id", orderId);
+    const patch = {
+      status: newStatus,
+      updated_at: new Date().toISOString(),
+      ...getOrderReactivationPatch(newStatus, order),
+    };
+    const { error } = await supabase.from("orders").update(patch).eq("id", orderId);
     if (error) {
       console.error("Order status update error:", error);
       toast.error("Төлөв өөрчлөхөд алдаа гарлаа: " + error.message);
     } else {
       toast.success(`Захиалгын төлөв "${statusLabels[newStatus]}" болж өөрчлөгдлөө`);
-      setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status: newStatus } : o));
+      setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, ...patch } : o));
 
-      // Notify delivery system on cancellation
-      if (newStatus === "cancelled") {
-        const order = orders.find(o => o.id === orderId);
-        if (order?.delivery_order_id) {
-          supabase.functions.invoke("notify-delivery-status", {
-            body: { order_id: orderId, fulfillment_status: "cancelled", note: "Easyshop дээр цуцлагдсан" },
-          }).catch(console.error);
-        }
-      }
+      // Keep API-connected delivery systems in sync, including terminal-state reactivation.
+      await notifyDeliveryFulfillment(
+        orderId,
+        newStatus,
+        newStatus === "cancelled"
+          ? "Easyshop дээр цуцлагдсан"
+          : "Easyshop дээр төлөв гараар шинэчлэгдсэн"
+      );
       // Notify delivery system when payment confirmed
       if (newStatus === "confirmed") {
-        const order = orders.find(o => o.id === orderId);
         if (order?.delivery_order_id) {
           supabase.functions.invoke("notify-delivery-status", {
             body: { order_id: orderId, payment_status: "paid" },
@@ -830,9 +882,13 @@ const AdminPage = () => {
     const signature = driver
       ? (driver.full_name || "") + (driver.phone ? ` · ${driver.phone}` : "")
       : manualPhone ? `${manualName} · ${manualPhone}` : manualName;
+    const currentOrder = orders.find((o) => o.id === orderId);
     const patch: Record<string, any> = {
       status: "delivering",
       delivery_status: "out_for_delivery",
+      delivered_at: null,
+      delivery_failed_at: null,
+      delivery_return_reason: null,
       delivery_signature_name: signature,
       picked_up_at: nowIso,
       updated_at: nowIso,
@@ -847,6 +903,9 @@ const AdminPage = () => {
     toast.success(`Хүргэлтэнд гарлаа${finalName ? ` · ${finalName}` : ""}`);
     setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, ...patch } : o)));
     setDeliverDialog(null);
+    if (currentOrder?.delivery_order_id) {
+      await notifyDeliveryFulfillment(orderId, "delivering", "Easyshop дээр цуцлагдсан/дууссан төлвөөс хүргэлтэнд буцааж гаргасан");
+    }
   };
 
 
