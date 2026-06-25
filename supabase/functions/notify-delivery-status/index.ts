@@ -58,6 +58,16 @@ Deno.serve(async (req: Request) => {
     }
 
     const payload: any = { external_order_id: externalOrderId };
+    const rawStatus = (fulfillment_status || "").toString().toLowerCase();
+    const reactivationStatuses = new Set([
+      "confirmed",
+      "preparing",
+      "out_for_delivery",
+      "delivering",
+      "dispatched",
+      "picked_up",
+      "in_transit",
+    ]);
     // Send both references so every API-connected delivery system can locate the same order,
     // whether it keys by EasyShop external_order_id or by its own internal delivery number.
     if (order.delivery_order_id) {
@@ -66,6 +76,10 @@ Deno.serve(async (req: Request) => {
     }
     if (payment_status) payload.payment_status = payment_status;
     if (fulfillment_status) payload.fulfillment_status = fulfillment_status;
+    if (reactivationStatuses.has(rawStatus)) {
+      payload.reopen_terminal = true;
+      payload.allow_terminal_reopen = true;
+    }
     if (note) payload.note = note;
 
     const res = await fetch(DELIVERY_STATUS_URL, {
