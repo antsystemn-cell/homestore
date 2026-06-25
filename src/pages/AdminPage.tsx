@@ -4261,14 +4261,19 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                                 <button
                                   type="button"
                                   onClick={async () => {
-                                    const { error } = await supabase.from("orders").update({
-                                      delivery_status: null,
+                                    const patch = {
+                                      status: "confirmed",
+                                      delivery_status: o.delivery_order_id ? "confirmed" : null,
                                       delivered_at: null,
+                                      delivery_failed_at: null,
+                                      delivery_return_reason: null,
                                       updated_at: new Date().toISOString(),
-                                    }).eq("id", o.id);
+                                    };
+                                    const { error } = await supabase.from("orders").update(patch).eq("id", o.id);
                                     if (error) { toast.error(error.message); return; }
-                                    toast.success("Хүргэлтийн төлөв буцаалаа");
-                                    setOrders((prev) => prev.map((x) => x.id === o.id ? { ...x, delivery_status: null, delivered_at: null } : x));
+                                    toast.success("Хүргэлтийн төлөвийг идэвхтэй болгож буцаалаа");
+                                    setOrders((prev) => prev.map((x) => x.id === o.id ? { ...x, ...patch } : x));
+                                    await notifyDeliveryFulfillment(o.id, "confirmed", "Easyshop дээр хүргэгдсэн төлвөөс гараар буцаасан");
                                   }}
                                   className="mt-2 text-[10px] font-semibold text-muted-foreground hover:text-destructive underline"
                                 >
