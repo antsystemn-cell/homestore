@@ -51,7 +51,9 @@ function mapPaymentToEasyshop(status: string): string {
   const map: Record<string, string> = {
     unpaid: "unpaid",
     cash_on_delivery: "unpaid",
-    paid: "paid",
+    paid: "confirmed",
+    confirmed: "confirmed",
+    completed: "confirmed",
     refunded: "refunded",
   };
   return map[status] || status;
@@ -151,12 +153,21 @@ Deno.serve(async (req: Request) => {
         mapped === "delivering" ? "out_for_delivery" :
         mapped === "completed"  ? "delivered" :
         fulfillment_status;
+
+      // If the connected delivery system re-opens a cancelled/delivered order,
+      // clear EasyShop terminal markers too; otherwise the admin UI can still
+      // keep the order under "Хүргэгдсэн" because delivered_at remains set.
+      if (mapped !== "completed" && mapped !== "cancelled") {
+        updates.delivered_at = null;
+        updates.delivery_failed_at = null;
+        updates.delivery_return_reason = null;
+      }
     }
 
     if (payment_status) {
       const mapped = mapPaymentToEasyshop(payment_status);
-      if (mapped === "paid") {
-        updates.payment_status = "paid";
+      if (mapped === "paid" || mapped === "confirmed") {
+        updates.payment_status = "confirmed";
       } else {
         updates.payment_status = mapped;
       }
