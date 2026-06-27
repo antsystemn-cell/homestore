@@ -130,7 +130,7 @@ Deno.serve(async (req: Request) => {
     if (!order && delivery_order_id) {
       const { data: byDelivery } = await supabase
         .from("orders")
-        .select("id, status, payment_status")
+        .select(ORDER_COLS)
         .eq("delivery_order_id", delivery_order_id)
         .maybeSingle();
       if (byDelivery) order = byDelivery;
