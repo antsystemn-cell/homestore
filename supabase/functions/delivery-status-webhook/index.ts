@@ -107,11 +107,12 @@ Deno.serve(async (req: Request) => {
     );
 
     // Find order by order_ref, id, or delivery_order_id
+    const ORDER_COLS = "id, status, payment_status, payment_method";
     let order: any = null;
     if (orderRef) {
       const { data: byRef } = await supabase
         .from("orders")
-        .select("id, status, payment_status")
+        .select(ORDER_COLS)
         .eq("order_ref", orderRef)
         .maybeSingle();
       if (byRef) order = byRef;
@@ -119,7 +120,7 @@ Deno.serve(async (req: Request) => {
       if (!order) {
         const { data: byId } = await supabase
           .from("orders")
-          .select("id, status, payment_status")
+          .select(ORDER_COLS)
           .eq("id", orderRef)
           .maybeSingle();
         if (byId) order = byId;
@@ -129,7 +130,7 @@ Deno.serve(async (req: Request) => {
     if (!order && delivery_order_id) {
       const { data: byDelivery } = await supabase
         .from("orders")
-        .select("id, status, payment_status")
+        .select(ORDER_COLS)
         .eq("delivery_order_id", delivery_order_id)
         .maybeSingle();
       if (byDelivery) order = byDelivery;
@@ -166,9 +167,19 @@ Deno.serve(async (req: Request) => {
 
     if (payment_status) {
       const mapped = mapPaymentToEasyshop(payment_status);
+      const incomingRaw = String(payment_status).toLowerCase();
+      const currentPaid = order.payment_status === "confirmed" || order.payment_status === "paid";
+
+      // Never downgrade a confirmed/paid order back to unpaid just because the
+      // connected delivery system echoes back "cash_on_delivery"/"unpaid" when
+      // a driver is assigned. Only accept upgrades (→ confirmed) or an
+      // explicit refund signal.
       if (mapped === "paid" || mapped === "confirmed") {
         updates.payment_status = "confirmed";
-      } else {
+      } else if (incomingRaw === "refunded" || mapped === "refunded") {
+        updates.payment_status = "refunded";
+      } else if (!currentPaid) {
+        // Only write unpaid-like statuses when the order isn't already paid.
         updates.payment_status = mapped;
       }
     }
