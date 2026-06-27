@@ -107,11 +107,12 @@ Deno.serve(async (req: Request) => {
     );
 
     // Find order by order_ref, id, or delivery_order_id
+    const ORDER_COLS = "id, status, payment_status, payment_method";
     let order: any = null;
     if (orderRef) {
       const { data: byRef } = await supabase
         .from("orders")
-        .select("id, status, payment_status")
+        .select(ORDER_COLS)
         .eq("order_ref", orderRef)
         .maybeSingle();
       if (byRef) order = byRef;
@@ -119,7 +120,7 @@ Deno.serve(async (req: Request) => {
       if (!order) {
         const { data: byId } = await supabase
           .from("orders")
-          .select("id, status, payment_status")
+          .select(ORDER_COLS)
           .eq("id", orderRef)
           .maybeSingle();
         if (byId) order = byId;
