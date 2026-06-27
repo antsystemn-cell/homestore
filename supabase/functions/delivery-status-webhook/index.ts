@@ -167,9 +167,19 @@ Deno.serve(async (req: Request) => {
 
     if (payment_status) {
       const mapped = mapPaymentToEasyshop(payment_status);
+      const incomingRaw = String(payment_status).toLowerCase();
+      const currentPaid = order.payment_status === "confirmed" || order.payment_status === "paid";
+
+      // Never downgrade a confirmed/paid order back to unpaid just because the
+      // connected delivery system echoes back "cash_on_delivery"/"unpaid" when
+      // a driver is assigned. Only accept upgrades (→ confirmed) or an
+      // explicit refund signal.
       if (mapped === "paid" || mapped === "confirmed") {
         updates.payment_status = "confirmed";
-      } else {
+      } else if (incomingRaw === "refunded" || mapped === "refunded") {
+        updates.payment_status = "refunded";
+      } else if (!currentPaid) {
+        // Only write unpaid-like statuses when the order isn't already paid.
         updates.payment_status = mapped;
       }
     }
