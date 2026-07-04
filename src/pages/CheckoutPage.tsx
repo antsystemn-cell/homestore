@@ -799,10 +799,30 @@ const CheckoutPage = () => {
                   </div>
                 )}
 
+                {!isGuestCheckout && (
+                  <WalletCreditsSection
+                    subtotal={cartTotal}
+                    hasFlashSaleItems={hasFlashSaleItems}
+                    selectedCreditId={walletCreditId}
+                    onSelect={(id, credit, discount) => {
+                      setWalletCreditId(id);
+                      setWalletCredit(credit);
+                      setWalletCreditDiscount(discount);
+                    }}
+                  />
+                )}
+
                 {couponDiscount > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Купон хямдрал</span>
                     <span className="text-primary font-semibold">-{formatPrice(couponDiscount)}</span>
+                  </div>
+                )}
+
+                {effectiveWalletDiscount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Урамшуулал</span>
+                    <span className="text-primary font-semibold">-{formatPrice(effectiveWalletDiscount)}</span>
                   </div>
                 )}
 
