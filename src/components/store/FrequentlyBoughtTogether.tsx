@@ -23,8 +23,10 @@ const FrequentlyBoughtTogether = ({
   title = "Үүнтэй хамт авдаг бараа",
   limit = 3,
   variant = "grid",
+  pageSize = 4,
 }: Props) => {
   const [items, setItems] = useState<Product[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
   const { addToCart } = useCart();
