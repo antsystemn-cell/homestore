@@ -13,7 +13,10 @@ import LoadError from "@/components/store/LoadError";
 import { fetchPublicProductBySlug, fetchPublicProductById, fetchPublicProductImages, fetchRelatedPublicProducts, fetchPublicBrands } from "@/lib/publicStoreApi";
 import Header from "@/components/store/Header";
 import { useProductStat } from "@/hooks/useProductStat";
+import { useFlashSaleFor } from "@/hooks/useFlashSales";
+import FlashSaleCountdown from "@/components/store/FlashSaleCountdown";
 import { supabase } from "@/integrations/supabase/client";
+
 
 const ProductRatingSummary = ({ productId }: { productId: string }) => {
   const stat = useProductStat(productId);
@@ -191,6 +194,10 @@ const ProductPage = () => {
     ? (variantSelected ? selectedVariantQty <= 0 : (stockQty !== null && stockQty <= 0))
     : false;
 
+  const flashSale = useFlashSaleFor(product?.id);
+  const displayPrice = flashSale ? Number(flashSale.sale_price) : (product?.price ?? 0);
+  const displayOriginal = flashSale ? (product?.price ?? null) : (product?.originalPrice ?? null);
+
   const handleAddToCart = (andNavigate?: boolean) => {
     if (product?.colors && product.colors.length > 0 && !selectedColor) {
       toast.error("Өнгөө сонгоно уу");
@@ -213,7 +220,12 @@ const ProductPage = () => {
       return;
     }
     const chosenPackage = product?.giftPackages?.find((p) => p.id === selectedGiftPackageId) || null;
-    addToCart(product!, selectedColor, selectedSize, quantity, chosenPackage);
+    // If a flash sale is active, override cart price + mark as on-sale so wallet
+    // credits are correctly disabled in checkout.
+    const cartProduct = flashSale
+      ? { ...product!, price: displayPrice, originalPrice: product!.price, isOnSale: true }
+      : product!;
+    addToCart(cartProduct, selectedColor, selectedSize, quantity, chosenPackage);
     setQuantity(1);
     if (andNavigate) {
       navigate("/cart");
@@ -221,6 +233,7 @@ const ProductPage = () => {
       toast.success("Сагсанд амжилттай нэмлээ 🛒");
     }
   };
+
 
   // Whether product requires the user to pick something before adding to cart
   const needsSelection = () => {
@@ -482,14 +495,26 @@ const ProductPage = () => {
 
 
             <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="text-2xl md:text-3xl font-extrabold text-foreground">{formatPrice(product.price)}</span>
-              {product.originalPrice ? (
-                <span className="text-muted-foreground line-through text-lg">{formatPrice(product.originalPrice)}</span>
+              <span className={`text-2xl md:text-3xl font-extrabold ${flashSale ? "text-destructive" : "text-foreground"}`}>
+                {formatPrice(displayPrice)}
+              </span>
+              {displayOriginal && displayOriginal > displayPrice ? (
+                <span className="text-muted-foreground line-through text-lg">{formatPrice(displayOriginal)}</span>
               ) : null}
               {product.isBogo ? (
                 <span className="bg-primary text-primary-foreground text-xs font-bold px-2.5 py-1 rounded-lg">1+1 Үнэгүй</span>
               ) : null}
             </div>
+
+            {flashSale && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="inline-flex items-center gap-1 bg-destructive text-destructive-foreground text-xs font-bold px-2.5 py-1 rounded-lg">
+                  ⚡ Flash Sale -{flashSale.discount_percent}%
+                </span>
+                <FlashSaleCountdown endsAt={flashSale.ends_at} />
+              </div>
+            )}
+
 
             {/* Gift package summary — moved into purchase sheet */}
 

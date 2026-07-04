@@ -11,6 +11,8 @@ import BrandLogos from "@/components/store/BrandLogos";
 import NewArrivals from "@/components/store/NewArrivals";
 import AdBanners, { useAdImages } from "@/components/store/AdBanners";
 import ForYou from "@/components/store/ForYou";
+import FlashSaleSection from "@/components/store/FlashSaleSection";
+
 
 
 import { Product, mapDbProduct } from "@/data/products";
@@ -216,12 +218,18 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
+          {/* Flash sale — "Өнөөдрийн хямдрал" */}
+          <ErrorBoundary>
+            <FlashSaleSection />
+          </ErrorBoundary>
+
           {/* New arrivals - between brands and sale */}
           {newProducts.length > 0 && (
             <ErrorBoundary>
               <NewArrivals products={newProducts} />
             </ErrorBoundary>
           )}
+
 
           {/* Personalized "For You" — signed-in users only, based on past purchases */}
           <ErrorBoundary>

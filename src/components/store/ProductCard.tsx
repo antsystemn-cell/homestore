@@ -1,10 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Star } from "lucide-react";
+import { Star, Zap } from "lucide-react";
 import { Product, formatPrice } from "@/data/products";
 import { getColorHex } from "@/lib/colorMap";
 import { transformImage, buildSrcSet } from "@/lib/imageUrl";
 import { useProductStat } from "@/hooks/useProductStat";
+import { useFlashSaleFor } from "@/hooks/useFlashSales";
+import FlashSaleCountdown from "./FlashSaleCountdown";
+
 
 
 interface Props {
@@ -30,6 +33,10 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
+  const flashSale = useFlashSaleFor(product.id);
+  const displayPrice = flashSale ? Number(flashSale.sale_price) : product.price;
+  const displayOriginal = flashSale ? product.price : product.originalPrice;
+
   const [isHovering, setIsHovering] = useState(false);
   const [pinnedColorIdx, setPinnedColorIdx] = useState<number | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
@@ -237,11 +244,23 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
             🎁 Бэлэгтэй
           </span>
         )}
-        {product.originalPrice != null && product.originalPrice > product.price && (
-          <span className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded z-10">
-            -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+        {flashSale ? (
+          <span className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded z-10 flex items-center gap-1">
+            <Zap className="h-3 w-3 fill-current" />
+            -{flashSale.discount_percent}%
           </span>
+        ) : displayOriginal != null && displayOriginal > displayPrice ? (
+          <span className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded z-10">
+            -{Math.round(((displayOriginal - displayPrice) / displayOriginal) * 100)}%
+          </span>
+        ) : null}
+
+        {flashSale && (
+          <div className="absolute bottom-2 left-2 z-10">
+            <FlashSaleCountdown endsAt={flashSale.ends_at} compact />
+          </div>
         )}
+
 
         {/* Color swatches overlay — horizontal scroll for many colors */}
         {hasSwatches && (
@@ -289,16 +308,17 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
         </h3>
         <RatingRow productId={product.id} />
         <div className="mt-2 flex items-baseline gap-1.5 flex-nowrap">
-          <span className="text-foreground font-extrabold text-sm md:text-base whitespace-nowrap">
-            {formatPrice(product.price)}
+          <span className={`font-extrabold text-sm md:text-base whitespace-nowrap ${flashSale ? "text-destructive" : "text-foreground"}`}>
+            {formatPrice(displayPrice)}
           </span>
-          {product.originalPrice != null && product.originalPrice > product.price && (
+          {displayOriginal != null && displayOriginal > displayPrice && (
             <span className="text-muted-foreground text-[10px] md:text-xs line-through whitespace-nowrap">
-              {formatPrice(product.originalPrice)}
+              {formatPrice(displayOriginal)}
             </span>
           )}
         </div>
       </div>
+
 
     </a>
   );
