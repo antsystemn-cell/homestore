@@ -49,6 +49,11 @@ const CheckoutPage = () => {
   const [availableCoupons, setAvailableCoupons] = useState<SpinCoupon[]>([]);
   const [selectedCouponIds, setSelectedCouponIds] = useState<string[]>([]);
 
+  // Loyalty points
+  const [loyaltyPoints, setLoyaltyPoints] = useState<number>(0);
+  const [usePoints, setUsePoints] = useState<boolean>(false);
+  const [pointsInput, setPointsInput] = useState<number>(0);
+
   // Redirect unauthenticated non-guest users
   useEffect(() => {
     if (!user && !isGuestCheckout) {
