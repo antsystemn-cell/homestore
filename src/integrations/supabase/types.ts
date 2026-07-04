@@ -1513,8 +1513,12 @@ export type Database = {
           comment: string | null
           created_at: string
           id: string
+          images: string[]
+          is_hidden: boolean
+          order_id: string | null
           product_id: string
           rating: number
+          updated_at: string
           user_id: string
           user_name: string | null
         }
@@ -1522,8 +1526,12 @@ export type Database = {
           comment?: string | null
           created_at?: string
           id?: string
+          images?: string[]
+          is_hidden?: boolean
+          order_id?: string | null
           product_id: string
           rating: number
+          updated_at?: string
           user_id: string
           user_name?: string | null
         }
@@ -1531,8 +1539,12 @@ export type Database = {
           comment?: string | null
           created_at?: string
           id?: string
+          images?: string[]
+          is_hidden?: boolean
+          order_id?: string | null
           product_id?: string
           rating?: number
+          updated_at?: string
           user_id?: string
           user_name?: string | null
         }
@@ -1991,6 +2003,22 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      admin_list_reviews: {
+        Args: { _limit?: number; _offset?: number }
+        Returns: {
+          comment: string
+          created_at: string
+          id: string
+          images: string[]
+          is_hidden: boolean
+          product_id: string
+          product_image: string
+          product_name: string
+          rating: number
+          user_id: string
+          user_name: string
+        }[]
+      }
       admin_list_users: {
         Args: never
         Returns: {
@@ -2119,6 +2147,22 @@ export type Database = {
           product_id: string
           score: number
         }[]
+      }
+      get_product_buyer_count: {
+        Args: { _product_id: string }
+        Returns: number
+      }
+      get_product_review_stats: {
+        Args: { _ids: string[] }
+        Returns: {
+          avg_rating: number
+          product_id: string
+          review_count: number
+        }[]
+      }
+      has_purchased_product: {
+        Args: { _product_id: string; _user_id: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
