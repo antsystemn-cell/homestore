@@ -223,6 +223,11 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
+          {/* Personalized "For You" — signed-in users only, based on past purchases */}
+          <ErrorBoundary>
+            <ForYou />
+          </ErrorBoundary>
+
           {/* Story reel disabled for performance */}
 
           {/* Sale carousel - below stories */}
