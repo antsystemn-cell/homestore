@@ -1942,6 +1942,21 @@ export type Database = {
       }
       generate_referral_code: { Args: never; Returns: string }
       generate_slug: { Args: { name: string }; Returns: string }
+      get_frequently_bought_together: {
+        Args: { _limit?: number; _product_id: string }
+        Returns: {
+          product_id: string
+          score: number
+          source: string
+        }[]
+      }
+      get_personalized_recommendations: {
+        Args: { _limit?: number }
+        Returns: {
+          product_id: string
+          score: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
