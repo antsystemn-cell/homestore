@@ -168,8 +168,9 @@ const CartPage = () => {
         )}
 
         {items.length > 0 && (
-          <FrequentlyBoughtTogether productId={items[0].product.id} limit={6} />
+          <FrequentlyBoughtTogether productId={items[0].product.id} limit={6} variant="cardGrid" />
         )}
+
 
       </div>
       <GuestCheckoutModal
