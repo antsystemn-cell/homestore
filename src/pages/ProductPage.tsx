@@ -13,7 +13,10 @@ import LoadError from "@/components/store/LoadError";
 import { fetchPublicProductBySlug, fetchPublicProductById, fetchPublicProductImages, fetchRelatedPublicProducts, fetchPublicBrands } from "@/lib/publicStoreApi";
 import Header from "@/components/store/Header";
 import { useProductStat } from "@/hooks/useProductStat";
+import { useFlashSaleFor } from "@/hooks/useFlashSales";
+import FlashSaleCountdown from "@/components/store/FlashSaleCountdown";
 import { supabase } from "@/integrations/supabase/client";
+
 
 const ProductRatingSummary = ({ productId }: { productId: string }) => {
   const stat = useProductStat(productId);
