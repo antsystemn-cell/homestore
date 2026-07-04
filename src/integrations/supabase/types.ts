@@ -663,6 +663,42 @@ export type Database = {
           },
         ]
       }
+      loyalty_config: {
+        Row: {
+          created_at: string
+          earn_rate_percent: number
+          id: number
+          is_enabled: boolean
+          max_redeem_percent: number
+          min_redeem_points: number
+          points_per_mnt: number
+          updated_at: string
+          vip_threshold: number
+        }
+        Insert: {
+          created_at?: string
+          earn_rate_percent?: number
+          id?: number
+          is_enabled?: boolean
+          max_redeem_percent?: number
+          min_redeem_points?: number
+          points_per_mnt?: number
+          updated_at?: string
+          vip_threshold?: number
+        }
+        Update: {
+          created_at?: string
+          earn_rate_percent?: number
+          id?: number
+          is_enabled?: boolean
+          max_redeem_percent?: number
+          min_redeem_points?: number
+          points_per_mnt?: number
+          updated_at?: string
+          vip_threshold?: number
+        }
+        Relationships: []
+      }
       order_status_history: {
         Row: {
           changed_by: string | null
@@ -730,6 +766,8 @@ export type Database = {
           payment_status: string | null
           phone: string | null
           picked_up_at: string | null
+          points_earned: number
+          points_redeemed: number
           sale_date: string | null
           shipping_address: string | null
           source: string
@@ -772,6 +810,8 @@ export type Database = {
           payment_status?: string | null
           phone?: string | null
           picked_up_at?: string | null
+          points_earned?: number
+          points_redeemed?: number
           sale_date?: string | null
           shipping_address?: string | null
           source?: string
@@ -814,6 +854,8 @@ export type Database = {
           payment_status?: string | null
           phone?: string | null
           picked_up_at?: string | null
+          points_earned?: number
+          points_redeemed?: number
           sale_date?: string | null
           shipping_address?: string | null
           source?: string
@@ -1128,6 +1170,7 @@ export type Database = {
           full_name: string | null
           id: string
           last_ip: string | null
+          loyalty_points: number
           phone: string | null
           phone_verified: boolean
           referral_code: string | null
@@ -1145,6 +1188,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           last_ip?: string | null
+          loyalty_points?: number
           phone?: string | null
           phone_verified?: boolean
           referral_code?: string | null
@@ -1162,6 +1206,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           last_ip?: string | null
+          loyalty_points?: number
           phone?: string | null
           phone_verified?: boolean
           referral_code?: string | null
@@ -1817,6 +1862,8 @@ export type Database = {
           payment_status: string | null
           phone: string | null
           picked_up_at: string | null
+          points_earned: number
+          points_redeemed: number
           sale_date: string | null
           shipping_address: string | null
           source: string
@@ -1922,6 +1969,8 @@ export type Database = {
           payment_status: string | null
           phone: string | null
           picked_up_at: string | null
+          points_earned: number
+          points_redeemed: number
           sale_date: string | null
           shipping_address: string | null
           source: string
