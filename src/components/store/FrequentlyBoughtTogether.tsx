@@ -79,14 +79,14 @@ const FrequentlyBoughtTogether = ({
   if (variant === "square") {
     return (
       <section className={`mt-2 ${className || ""}`}>
-        <h2 className="text-base md:text-lg font-bold text-foreground mb-3 md:mb-4">{title}</h2>
-        <div className="flex flex-col gap-3">
+        <h2 className="text-sm font-bold text-foreground mb-2">{title}</h2>
+        <div className="flex flex-col gap-2">
           {items.map((p) => {
             const added = addedIds.has(p.id);
             return (
               <div
                 key={p.id}
-                className="rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow"
+                className="rounded-lg border border-border bg-card overflow-hidden hover:shadow-md transition-shadow"
               >
                 <button
                   onClick={() => navigate(`/product/${p.slug || p.id}`)}
@@ -94,37 +94,38 @@ const FrequentlyBoughtTogether = ({
                   aria-label={p.name}
                 >
                   <img
-                    src={transformImage(p.thumbnail || p.image, 500) || "/placeholder.svg"}
+                    src={transformImage(p.thumbnail || p.image, 400) || "/placeholder.svg"}
                     alt={p.name}
                     loading="lazy"
                     decoding="async"
                     className="w-full h-full object-cover"
                   />
                 </button>
-                <div className="p-3 flex items-center gap-2">
+                <div className="p-2 flex items-center gap-1.5">
                   <div className="min-w-0 flex-1">
                     <button
                       onClick={() => navigate(`/product/${p.slug || p.id}`)}
-                      className="text-sm font-semibold text-foreground line-clamp-2 text-left hover:text-primary transition-colors"
+                      className="text-xs font-medium text-foreground line-clamp-2 text-left hover:text-primary transition-colors leading-tight"
                     >
                       {p.name}
                     </button>
-                    <p className="text-sm font-bold text-foreground mt-1">
+                    <p className="text-xs font-bold text-foreground mt-0.5">
                       {p.price.toLocaleString("mn-MN")}₮
                     </p>
                   </div>
                   <button
                     onClick={() => handleAdd(p)}
                     disabled={added}
-                    className={`shrink-0 h-9 w-9 rounded-full flex items-center justify-center transition-colors ${
+                    className={`shrink-0 h-7 w-7 rounded-full flex items-center justify-center transition-colors ${
                       added
                         ? "bg-primary/10 text-primary"
                         : "bg-primary text-primary-foreground hover:bg-primary/90"
                     }`}
                     aria-label="Сагсанд нэмэх"
                   >
-                    {added ? <Check className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
+                    {added ? <Check className="h-3.5 w-3.5" /> : <ShoppingCart className="h-3.5 w-3.5" />}
                   </button>
+
                 </div>
               </div>
             );

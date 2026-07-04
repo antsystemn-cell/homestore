@@ -344,15 +344,17 @@ const ProductPage = () => {
       </div>
 
       <div className="max-w-6xl mx-auto md:px-8">
-        <div className="md:grid md:grid-cols-[300px_1fr] md:gap-8">
-          {/* Left column (desktop): Frequently bought together with 1:1 cards */}
-          <aside className="hidden md:block order-1">
+        <div className="md:grid md:grid-cols-[220px_1fr] md:gap-6">
+          {/* Left column (desktop): Frequently bought together with 1:1 cards — aligned with description */}
+          <aside className="hidden md:block md:row-start-2 md:col-start-1 md:order-1">
             <div className="sticky top-20">
               <FrequentlyBoughtTogether productId={product.id} variant="square" limit={5} />
             </div>
           </aside>
 
-          <div className="relative space-y-4 md:order-2">
+
+
+          <div className="relative space-y-4 md:col-start-2 md:row-start-1 md:order-2">
 
             {/* Main product image */}
             <div className="relative">
