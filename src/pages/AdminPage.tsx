@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
   BarChart3, LayoutDashboard, Search, X, AlertTriangle, AlertCircle, BadgeCheck, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, FileSpreadsheet, Sparkles,
-  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw, Star
+  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw, Star, Gift
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
@@ -16,6 +16,7 @@ import ReminderSettingsManager from "@/components/admin/ReminderSettingsManager"
 import ReviewsManager from "@/components/admin/ReviewsManager";
 import SpinSettingsManager from "@/components/admin/SpinSettingsManager";
 import ReferralManager from "@/components/admin/ReferralManager";
+import WalletCreditsManager from "@/components/admin/WalletCreditsManager";
 
 
 
@@ -46,7 +47,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
 
-type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "settings" | "branches";
+type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "settings" | "branches";
 
 const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "referral", "drivers", "branches"];
 
@@ -1631,6 +1632,7 @@ const AdminPage = () => {
     { id: "reviews", label: "Сэтгэгдэл", icon: Star },
     { id: "spin", label: "Хүрд тоглоом", icon: Sparkles },
     { id: "referral", label: "Referral", icon: Users },
+    { id: "promotions", label: "Урамшуулал", icon: Gift },
 
 
 
@@ -4538,6 +4540,8 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
           {tab === "spin" && <SpinSettingsManager />}
 
           {tab === "referral" && <ReferralManager />}
+
+          {tab === "promotions" && <WalletCreditsManager />}
 
 
 

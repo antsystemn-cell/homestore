@@ -16,6 +16,8 @@ import SonoPayment from "@/components/store/SonoPayment";
 import { track, attachLeadContact } from "@/lib/tracking";
 import { useBundleFreeDelivery } from "@/lib/bundleDelivery";
 import { hasFreeDeliveryProduct } from "@/lib/freeDeliveryProducts";
+import WalletCreditsSection from "@/components/store/WalletCreditsSection";
+import type { WalletCredit } from "@/hooks/useWalletCredits";
 
 type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket" | "sono";
 
@@ -48,6 +50,11 @@ const CheckoutPage = () => {
   type SpinCoupon = { id: string; code: string; reward_value: number; minimum_order_amount: number | null; expires_at: string; created_at: string };
   const [availableCoupons, setAvailableCoupons] = useState<SpinCoupon[]>([]);
   const [selectedCouponIds, setSelectedCouponIds] = useState<string[]>([]);
+
+  // Wallet credit (single)
+  const [walletCreditId, setWalletCreditId] = useState<string | null>(null);
+  const [walletCredit, setWalletCredit] = useState<WalletCredit | null>(null);
+  const [walletCreditDiscount, setWalletCreditDiscount] = useState<number>(0);
 
   // Loyalty points
   const [loyaltyPoints, setLoyaltyPoints] = useState<number>(0);
@@ -138,6 +145,8 @@ const CheckoutPage = () => {
 
   // Extra 8,000₮ delivery surcharge: if cart total < 50,000₮ OR cart has any sale items
   const hasSaleItems = items.some(item => item.product.isOnSale || (item.product.discount && item.product.discount > 0));
+  // Flash sale = any sale item OR BOGO. Wallet credits are blocked in this case.
+  const hasFlashSaleItems = items.some(item => item.product.isOnSale || item.product.isBogo || (item.product.discount && item.product.discount > 0));
   const { eligible: bundleFree } = useBundleFreeDelivery(cartTotal, items.length);
   const productFree = hasFreeDeliveryProduct(items);
   const surcharge = (bundleFree || productFree) ? 0 : ((cartTotal < 50000 || hasSaleItems) ? 8000 : 0);
@@ -149,8 +158,11 @@ const CheckoutPage = () => {
   );
   const couponDiscount = validSelectedCoupons.reduce((s, c) => s + Number(c.reward_value || 0), 0);
 
+  // Wallet credit discount (only applies when no flash sale items)
+  const effectiveWalletDiscount = hasFlashSaleItems ? 0 : walletCreditDiscount;
+
   // Loyalty points discount (1 point = 1₮)
-  const totalBeforePoints = Math.max(0, cartTotal + totalDeliveryFee - couponDiscount);
+  const totalBeforePoints = Math.max(0, cartTotal + totalDeliveryFee - couponDiscount - effectiveWalletDiscount);
   const maxRedeemable = Math.max(0, Math.min(loyaltyPoints, totalBeforePoints));
   const pointsDiscount = usePoints ? Math.max(0, Math.min(pointsInput || 0, maxRedeemable)) : 0;
   const grandTotal = Math.max(0, totalBeforePoints - pointsDiscount);
@@ -227,6 +239,13 @@ const CheckoutPage = () => {
         .from("spin_coupons")
         .update({ is_used: true, used_order_id: data.id, used_at: new Date().toISOString() })
         .in("id", ids);
+    }
+
+    // Redeem selected wallet credit (single-use)
+    if (!isGuestCheckout && walletCreditId && effectiveWalletDiscount > 0) {
+      try {
+        await supabase.rpc("redeem_wallet_credit" as any, { _credit_id: walletCreditId, _order_id: data.id });
+      } catch (e) { console.error("wallet credit redeem failed", e); }
     }
 
     // NOTE: Delivery dispatch is handled automatically by the DB trigger
@@ -780,10 +799,30 @@ const CheckoutPage = () => {
                   </div>
                 )}
 
+                {!isGuestCheckout && (
+                  <WalletCreditsSection
+                    subtotal={cartTotal}
+                    hasFlashSaleItems={hasFlashSaleItems}
+                    selectedCreditId={walletCreditId}
+                    onSelect={(id, credit, discount) => {
+                      setWalletCreditId(id);
+                      setWalletCredit(credit);
+                      setWalletCreditDiscount(discount);
+                    }}
+                  />
+                )}
+
                 {couponDiscount > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Купон хямдрал</span>
                     <span className="text-primary font-semibold">-{formatPrice(couponDiscount)}</span>
+                  </div>
+                )}
+
+                {effectiveWalletDiscount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Урамшуулал</span>
+                    <span className="text-primary font-semibold">-{formatPrice(effectiveWalletDiscount)}</span>
                   </div>
                 )}
 
