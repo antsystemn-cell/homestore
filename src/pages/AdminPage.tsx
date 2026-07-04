@@ -4359,7 +4359,19 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                                 <div className="h-9 w-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold">
                                   {(u.full_name || u.email || "?")[0].toUpperCase()}
                                 </div>
-                                <span className="text-sm font-medium">{u.full_name || "Нэргүй"}</span>
+                                <div className="flex flex-col">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-sm font-medium">{u.full_name || "Нэргүй"}</span>
+                                    {u.is_vip && (
+                                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 border border-amber-500/30">
+                                        ⭐ VIP
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span className="text-[10px] text-muted-foreground">
+                                    {(u.order_count ?? 0)} захиалга · {(u.loyalty_points ?? 0).toLocaleString("mn-MN")} оноо
+                                  </span>
+                                </div>
                               </div>
                             </td>
                             <td className="px-6 py-4 text-sm text-muted-foreground">
