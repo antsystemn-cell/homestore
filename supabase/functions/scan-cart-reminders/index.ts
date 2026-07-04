@@ -129,44 +129,46 @@ Deno.serve(async (req) => {
 
     processed++;
 
-    if (!profile?.sms_reminders_consent || !profile?.phone) {
-      await admin.from("reminder_log").insert({
-        user_id: cart.user_id,
-        kind: "cart",
-        phone: profile?.phone ?? null,
-        message: "(skipped: no consent or no phone)",
-        status: "skipped",
-      });
-      await admin
-        .from("active_carts")
-        .update({ reminded_at: new Date().toISOString() })
-        .eq("user_id", cart.user_id);
-      continue;
-    }
-
     const productName = items[0]?.product?.name ?? "бараа";
-    const message = String(cfg.cart_message_template ?? "")
+    const itemCount = items.reduce((s, it) => s + (Number(it?.quantity) || 1), 0);
+    const message = String(cfg.cart_message_template ?? "Таны сагсанд {product} үлдсэн байна. Захиалгаа үргэлжлүүлэх үү?")
       .replace("{product}", productName)
       .replace("{link}", cfg.order_link_base ?? "");
 
-    const result = await sendSms(admin, cfg.sms_provider, cfg.sms_sender, profile.phone, message);
+    // Always create in-app notification
+    await admin.from("in_app_notifications").insert({
+      user_id: cart.user_id,
+      kind: "cart_abandoned",
+      title: "Сагсаа мартчихав уу? 🛒",
+      message: `${productName}${items.length > 1 ? ` болон ${items.length - 1} бусад бараа` : ""} таны сагсанд байна. Захиалгаа дуусгаарай!`,
+      link_url: "/cart",
+      metadata: { item_count: itemCount, product_count: items.length },
+    });
+
+    // Optional SMS if user has consent + phone
+    let smsStatus: "sent" | "queued" | "failed" | "skipped" = "skipped";
+    let smsResponse = "in-app only";
+    if (profile?.sms_reminders_consent && profile?.phone) {
+      const result = await sendSms(admin, cfg.sms_provider, cfg.sms_sender, profile.phone, message);
+      smsStatus = result.status;
+      smsResponse = result.response;
+      if (result.status === "sent") sent++;
+    }
 
     await admin.from("reminder_log").insert({
       user_id: cart.user_id,
       kind: "cart",
-      phone: profile.phone,
+      phone: profile?.phone ?? null,
       message,
-      status: result.status,
+      status: smsStatus,
       provider: cfg.sms_provider,
-      provider_response: result.response,
+      provider_response: smsResponse,
     });
 
     await admin
       .from("active_carts")
       .update({ reminded_at: new Date().toISOString() })
       .eq("user_id", cart.user_id);
-
-    if (result.status === "sent") sent++;
   }
 
   return new Response(JSON.stringify({ ok: true, processed, sent, scanned: carts?.length ?? 0 }), {
