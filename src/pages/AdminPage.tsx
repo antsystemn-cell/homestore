@@ -1630,6 +1630,8 @@ const AdminPage = () => {
     { id: "reminders", label: "Санамжийн SMS", icon: MessageCircle },
     { id: "reviews", label: "Сэтгэгдэл", icon: Star },
     { id: "spin", label: "Хүрд тоглоом", icon: Sparkles },
+    { id: "referral", label: "Referral", icon: Users },
+
 
 
     { id: "drivers", label: "Жолоочид", icon: Truck },
