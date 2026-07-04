@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
   BarChart3, LayoutDashboard, Search, X, AlertTriangle, AlertCircle, BadgeCheck, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, FileSpreadsheet, Sparkles,
-  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw
+  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw, Star
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
@@ -13,6 +13,8 @@ import ChatbotSettingsManager from "@/components/admin/ChatbotSettingsManager";
 import RecommendationSettingsManager from "@/components/admin/RecommendationSettingsManager";
 import LoyaltySettingsManager from "@/components/admin/LoyaltySettingsManager";
 import ReminderSettingsManager from "@/components/admin/ReminderSettingsManager";
+import ReviewsManager from "@/components/admin/ReviewsManager";
+
 import StockDeductionLog from "@/components/admin/StockDeductionLog";
 import DriversManager from "@/components/admin/DriversManager";
 import TrackingDashboard from "@/components/admin/TrackingDashboard";
@@ -40,9 +42,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
 
-type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "settings" | "branches";
+type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "settings" | "branches";
 
-const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "drivers", "branches"];
+const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "drivers", "branches"];
+
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -51,7 +54,7 @@ const AdminPage = () => {
   const hasAdminAccess = isAdmin || isModerator || isSeller;
   const [tab, setTab] = useState<Tab>(() => {
     const t = searchParams.get("tab") as Tab | null;
-    const valid: Tab[] = ["stats","tracking","products","orders","users","drivers","categories","brands","delivery","delivery-portal","payments","banner","collections","chatbot","analytics","diagnostics","stocklog","recommendations","loyalty","reminders","settings","branches"];
+    const valid: Tab[] = ["stats","tracking","products","orders","users","drivers","categories","brands","delivery","delivery-portal","payments","banner","collections","chatbot","analytics","diagnostics","stocklog","recommendations","loyalty","reminders","reviews","settings","branches"];
     return t && valid.includes(t) ? t : "stats";
   });
   const [products, setProducts] = useState<any[]>([]);
@@ -1619,6 +1622,8 @@ const AdminPage = () => {
     { id: "recommendations", label: "Зөвлөмжийн жинлүүр", icon: Sparkles },
     { id: "loyalty", label: "Лоялти оноо", icon: Sparkles },
     { id: "reminders", label: "Санамжийн SMS", icon: MessageCircle },
+    { id: "reviews", label: "Сэтгэгдэл", icon: Star },
+
     { id: "drivers", label: "Жолоочид", icon: Truck },
     { id: "branches", label: "Салбар & шивэгч", icon: Store },
   ];
@@ -4517,6 +4522,9 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
           {tab === "loyalty" && <LoyaltySettingsManager />}
 
           {tab === "reminders" && <ReminderSettingsManager />}
+
+          {tab === "reviews" && <ReviewsManager />}
+
 
 
           {/* Diagnostics Tab */}

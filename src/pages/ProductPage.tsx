@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Heart, ShoppingCart, Truck, Shield, RotateCcw, ChevronLeft, ChevronRight, Play, Gift, X } from "lucide-react";
+import { ArrowLeft, Heart, ShoppingCart, Truck, Shield, RotateCcw, ChevronLeft, ChevronRight, Play, Gift, X, Star, Users } from "lucide-react";
 import { Product, formatPrice, mapDbProduct, DetailMedia } from "@/data/products";
 import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
@@ -12,6 +12,40 @@ import FrequentlyBoughtTogether from "@/components/store/FrequentlyBoughtTogethe
 import LoadError from "@/components/store/LoadError";
 import { fetchPublicProductBySlug, fetchPublicProductById, fetchPublicProductImages, fetchRelatedPublicProducts, fetchPublicBrands } from "@/lib/publicStoreApi";
 import Header from "@/components/store/Header";
+import { useProductStat } from "@/hooks/useProductStat";
+import { supabase } from "@/integrations/supabase/client";
+
+const ProductRatingSummary = ({ productId }: { productId: string }) => {
+  const stat = useProductStat(productId);
+  if (!stat || stat.count === 0) return null;
+  return (
+    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+      <span className="font-semibold text-foreground">{stat.avg.toFixed(1)}</span>
+      <span>({stat.count} сэтгэгдэл)</span>
+    </span>
+  );
+};
+
+const ProductBuyerCount = ({ productId }: { productId: string }) => {
+  const [count, setCount] = useState<number | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    supabase.rpc("get_product_buyer_count" as any, { _product_id: productId }).then(({ data }) => {
+      if (!cancelled) setCount(typeof data === "number" ? data : 0);
+    });
+    return () => { cancelled = true; };
+  }, [productId]);
+  if (!count) return null;
+  return (
+    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+      <Users className="h-3.5 w-3.5" />
+      <span className="font-semibold text-foreground">{count.toLocaleString("mn-MN")}</span>
+      <span>хэрэглэгч худалдан авсан</span>
+    </span>
+  );
+};
+
 
 const VideoWithThumbnail = ({ media }: { media: DetailMedia }) => {
   const [playing, setPlaying] = useState(false);
@@ -437,13 +471,15 @@ const ProductPage = () => {
 
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-foreground leading-tight">{product.name}</h1>
-              <div className="flex items-center gap-3 mt-1">
+              <div className="flex items-center gap-3 mt-1 flex-wrap">
                 {product.productCode ? (
                   <span className="text-xs font-mono text-muted-foreground bg-secondary px-2 py-0.5 rounded">#{product.productCode}</span>
                 ) : null}
-                {product.sales ? <p className="text-muted-foreground text-sm">{product.sales} борлуулалт</p> : null}
+                <ProductRatingSummary productId={product.id} />
+                <ProductBuyerCount productId={product.id} />
               </div>
             </div>
+
 
             <div className="flex items-baseline gap-3 flex-wrap">
               <span className="text-2xl md:text-3xl font-extrabold text-foreground">{formatPrice(product.price)}</span>

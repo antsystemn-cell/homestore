@@ -1,8 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Star } from "lucide-react";
 import { Product, formatPrice } from "@/data/products";
 import { getColorHex } from "@/lib/colorMap";
 import { transformImage, buildSrcSet } from "@/lib/imageUrl";
+import { useProductStat } from "@/hooks/useProductStat";
+
 
 interface Props {
   product: Product;
@@ -10,7 +13,20 @@ interface Props {
   priority?: boolean;
 }
 
+const RatingRow = ({ productId }: { productId: string }) => {
+  const stat = useProductStat(productId);
+  if (!stat || stat.count === 0) return null;
+  return (
+    <div className="mt-1 flex items-center gap-1 text-[10px] md:text-xs text-muted-foreground">
+      <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+      <span className="font-semibold text-foreground">{stat.avg.toFixed(1)}</span>
+      <span>({stat.count})</span>
+    </div>
+  );
+};
+
 const ProductCard = React.memo(({ product, priority = false }: Props) => {
+
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -271,6 +287,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
         <h3 className="text-xs md:text-sm text-foreground line-clamp-2 leading-snug font-medium min-h-[2.5em]">
           {product.name}
         </h3>
+        <RatingRow productId={product.id} />
         <div className="mt-2 flex items-baseline gap-1.5 flex-nowrap">
           <span className="text-foreground font-extrabold text-sm md:text-base whitespace-nowrap">
             {formatPrice(product.price)}
@@ -282,6 +299,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
           )}
         </div>
       </div>
+
     </a>
   );
 });
