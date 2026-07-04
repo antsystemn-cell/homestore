@@ -274,6 +274,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
         <h3 className="text-xs md:text-sm text-foreground line-clamp-2 leading-snug font-medium min-h-[2.5em]">
           {product.name}
         </h3>
+        <RatingRow productId={product.id} />
         <div className="mt-2 flex items-baseline gap-1.5 flex-nowrap">
           <span className="text-foreground font-extrabold text-sm md:text-base whitespace-nowrap">
             {formatPrice(product.price)}
@@ -285,6 +286,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
           )}
         </div>
       </div>
+
     </a>
   );
 });
