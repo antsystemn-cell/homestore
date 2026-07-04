@@ -153,7 +153,25 @@ const ProfilePage = () => {
               </p>
             </div>
 
-            <div className="md:bg-card md:rounded-2xl md:border md:border-border md:overflow-hidden">
+            {/* SMS reminder consent */}
+            <div className="rounded-2xl p-4 md:p-5 bg-card border border-border">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3 min-w-0">
+                  <div className="h-10 w-10 rounded-xl bg-secondary flex items-center justify-center flex-shrink-0">
+                    <Bell className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">SMS сануулга авах</p>
+                    <p className="text-[11px] md:text-xs text-muted-foreground mt-0.5">
+                      Сагс орхисон, дахин захиалах цаг болсон үед бүртгэлтэй утас руу тань SMS илгээнэ.
+                    </p>
+                  </div>
+                </div>
+                <Switch checked={smsConsent} disabled={savingConsent} onCheckedChange={toggleSmsConsent} />
+              </div>
+            </div>
+
+
               {menuItems.map((item, i) => {
                 const Icon = item.icon;
                 return (
