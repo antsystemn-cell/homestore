@@ -218,12 +218,18 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
+          {/* Flash sale — "Өнөөдрийн хямдрал" */}
+          <ErrorBoundary>
+            <FlashSaleSection />
+          </ErrorBoundary>
+
           {/* New arrivals - between brands and sale */}
           {newProducts.length > 0 && (
             <ErrorBoundary>
               <NewArrivals products={newProducts} />
             </ErrorBoundary>
           )}
+
 
           {/* Personalized "For You" — signed-in users only, based on past purchases */}
           <ErrorBoundary>
