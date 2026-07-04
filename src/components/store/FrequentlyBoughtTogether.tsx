@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ShoppingCart, Check } from "lucide-react";
 import { Product, mapDbProduct } from "@/data/products";
@@ -12,8 +12,10 @@ interface Props {
   className?: string;
   title?: string;
   limit?: number;
-  variant?: "grid" | "vertical";
+  variant?: "grid" | "vertical" | "carousel";
+  pageSize?: number;
 }
+
 
 const FrequentlyBoughtTogether = ({
   productId,
@@ -21,8 +23,10 @@ const FrequentlyBoughtTogether = ({
   title = "Үүнтэй хамт авдаг бараа",
   limit = 3,
   variant = "grid",
+  pageSize = 4,
 }: Props) => {
   const [items, setItems] = useState<Product[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
   const { addToCart } = useCart();
@@ -54,6 +58,23 @@ const FrequentlyBoughtTogether = ({
   };
 
   if (loading || items.length === 0) return null;
+
+  if (variant === "carousel") {
+    const pages: Product[][] = [];
+    for (let i = 0; i < items.length; i += pageSize) {
+      pages.push(items.slice(i, i + pageSize));
+    }
+    return (
+      <CarouselView
+        pages={pages}
+        title={title}
+        className={className}
+        addedIds={addedIds}
+        onAdd={handleAdd}
+        onNavigate={(p) => navigate(`/product/${p.slug || p.id}`)}
+      />
+    );
+  }
 
   const containerClass =
     variant === "vertical"
@@ -114,5 +135,112 @@ const FrequentlyBoughtTogether = ({
     </section>
   );
 };
+
+interface CarouselViewProps {
+  pages: Product[][];
+  title: string;
+  className?: string;
+  addedIds: Set<string>;
+  onAdd: (p: Product) => void;
+  onNavigate: (p: Product) => void;
+}
+
+const CarouselView = ({ pages, title, className, addedIds, onAdd, onNavigate }: CarouselViewProps) => {
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [activePage, setActivePage] = useState(0);
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const idx = Math.round(el.scrollLeft / el.clientWidth);
+    if (idx !== activePage) setActivePage(idx);
+  };
+
+  return (
+    <section className={`mt-4 px-4 ${className || ""}`}>
+      <h2 className="text-base font-bold text-foreground mb-3">{title}</h2>
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide"
+        style={{ scrollbarWidth: "none" }}
+      >
+        {pages.map((page, pi) => (
+          <div
+            key={pi}
+            className="shrink-0 w-full snap-start grid grid-cols-2 gap-2"
+          >
+            {page.map((p) => {
+              const added = addedIds.has(p.id);
+              return (
+                <div
+                  key={p.id}
+                  className="relative rounded-xl border border-border bg-card overflow-hidden flex flex-col"
+                >
+                  <button
+                    onClick={() => onNavigate(p)}
+                    className="block aspect-square bg-secondary"
+                    aria-label={p.name}
+                  >
+                    <img
+                      src={transformImage(p.thumbnail || p.image, 300) || "/placeholder.svg"}
+                      alt={p.name}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                  <div className="p-2 flex-1 flex flex-col gap-1">
+                    <button
+                      onClick={() => onNavigate(p)}
+                      className="text-xs font-medium text-foreground line-clamp-2 text-left"
+                    >
+                      {p.name}
+                    </button>
+                    <div className="mt-auto flex items-center justify-between gap-2 pt-1">
+                      <p className="text-xs font-bold text-foreground truncate">
+                        {p.price.toLocaleString("mn-MN")}₮
+                      </p>
+                      <button
+                        onClick={() => onAdd(p)}
+                        disabled={added}
+                        className={`shrink-0 h-7 w-7 rounded-full flex items-center justify-center transition-colors ${
+                          added
+                            ? "bg-primary/10 text-primary"
+                            : "bg-primary text-primary-foreground hover:bg-primary/90"
+                        }`}
+                        aria-label="Сагсанд нэмэх"
+                      >
+                        {added ? <Check className="h-3.5 w-3.5" /> : <ShoppingCart className="h-3.5 w-3.5" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+      {pages.length > 1 && (
+        <div className="flex justify-center gap-1.5 mt-3">
+          {pages.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                const el = scrollRef.current;
+                if (el) el.scrollTo({ left: i * el.clientWidth, behavior: "smooth" });
+              }}
+              aria-label={`Хуудас ${i + 1}`}
+              className={`h-1.5 rounded-full transition-all ${
+                i === activePage ? "w-6 bg-primary" : "w-1.5 bg-muted-foreground/40"
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+};
+
 
 export default FrequentlyBoughtTogether;
