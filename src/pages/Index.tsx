@@ -11,6 +11,8 @@ import BrandLogos from "@/components/store/BrandLogos";
 import NewArrivals from "@/components/store/NewArrivals";
 import AdBanners, { useAdImages } from "@/components/store/AdBanners";
 import ForYou from "@/components/store/ForYou";
+import FlashSaleSection from "@/components/store/FlashSaleSection";
+
 
 
 import { Product, mapDbProduct } from "@/data/products";
