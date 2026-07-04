@@ -1,4 +1,5 @@
-import { Search, Bell, Clock, X, ArrowUpRight } from "lucide-react";
+import { Search, Clock, X, ArrowUpRight } from "lucide-react";
+import NotificationsBell from "./NotificationsBell";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Product, mapDbProduct } from "@/data/products";
@@ -276,13 +277,7 @@ const Header = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          <button
-            onClick={() => navigate("/profile")}
-            className="relative p-2 rounded-full bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-1 right-1 h-2 w-2 bg-sale rounded-full" />
-          </button>
+          <NotificationsBell />
         </div>
       </div>
     </header>
