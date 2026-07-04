@@ -576,16 +576,6 @@ const ProductPage = () => {
           <ProductReviews productId={product.id} />
         </div>
 
-        {related.length > 0 && (
-          <div className="mt-10 md:mt-16 px-4 md:px-0 pb-4">
-            <h2 className="text-lg font-bold text-foreground mb-4">Төстэй бараа</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-0 md:gap-5">
-              {related.slice(0, 8).map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border p-3 safe-bottom flex gap-2 md:hidden z-50">
