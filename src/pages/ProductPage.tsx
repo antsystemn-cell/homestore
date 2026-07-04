@@ -344,7 +344,7 @@ const ProductPage = () => {
       </div>
 
       <div className="max-w-6xl mx-auto md:px-8">
-        <div className="md:grid md:grid-cols-[1fr_200px] md:gap-8">
+        <div className="md:grid md:grid-cols-[1fr_240px] md:gap-8">
 
           {/* LEFT column (desktop): image gallery + long content (description/specs/detail media) */}
           <div className="relative space-y-4 md:col-start-1 md:row-start-1">
