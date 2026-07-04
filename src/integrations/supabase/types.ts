@@ -1842,6 +1842,9 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          is_vip: boolean
+          loyalty_points: number
+          order_count: number
           phone: string
           user_id: string
         }[]

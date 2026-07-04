@@ -49,6 +49,11 @@ const CheckoutPage = () => {
   const [availableCoupons, setAvailableCoupons] = useState<SpinCoupon[]>([]);
   const [selectedCouponIds, setSelectedCouponIds] = useState<string[]>([]);
 
+  // Loyalty points
+  const [loyaltyPoints, setLoyaltyPoints] = useState<number>(0);
+  const [usePoints, setUsePoints] = useState<boolean>(false);
+  const [pointsInput, setPointsInput] = useState<number>(0);
+
   // Redirect unauthenticated non-guest users
   useEffect(() => {
     if (!user && !isGuestCheckout) {
@@ -115,6 +120,19 @@ const CheckoutPage = () => {
     })();
   }, [user]);
 
+  // Fetch loyalty points for logged-in users
+  useEffect(() => {
+    if (!user) { setLoyaltyPoints(0); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("loyalty_points")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      setLoyaltyPoints((data as any)?.loyalty_points ?? 0);
+    })();
+  }, [user]);
+
   const selectedDeliveryOption = deliveryOptions.find(d => d.id === selectedDelivery);
   const deliveryFee = selectedDeliveryOption?.price || 0;
 
@@ -130,7 +148,12 @@ const CheckoutPage = () => {
     (c) => selectedCouponIds.includes(c.id) && (!c.minimum_order_amount || cartTotal >= Number(c.minimum_order_amount))
   );
   const couponDiscount = validSelectedCoupons.reduce((s, c) => s + Number(c.reward_value || 0), 0);
-  const grandTotal = Math.max(0, cartTotal + totalDeliveryFee - couponDiscount);
+
+  // Loyalty points discount (1 point = 1₮)
+  const totalBeforePoints = Math.max(0, cartTotal + totalDeliveryFee - couponDiscount);
+  const maxRedeemable = Math.max(0, Math.min(loyaltyPoints, totalBeforePoints));
+  const pointsDiscount = usePoints ? Math.max(0, Math.min(pointsInput || 0, maxRedeemable)) : 0;
+  const grandTotal = Math.max(0, totalBeforePoints - pointsDiscount);
 
   const createOrder = async (paymentStatus = "unpaid", pm: PaymentMethod = "cash") => {
     if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return null; }
@@ -168,6 +191,7 @@ const CheckoutPage = () => {
       orderData.guest_name = name.trim();
     } else {
       orderData.user_id = user!.id;
+      if (pointsDiscount > 0) orderData.points_redeemed = pointsDiscount;
     }
 
     let data: { id: string; order_ref: string | null } | null = null;
@@ -760,6 +784,55 @@ const CheckoutPage = () => {
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Купон хямдрал</span>
                     <span className="text-primary font-semibold">-{formatPrice(couponDiscount)}</span>
+                  </div>
+                )}
+
+                {!isGuestCheckout && loyaltyPoints > 0 && (
+                  <div className="border-t border-border pt-2 space-y-2">
+                    <label className="flex items-center justify-between gap-2 text-xs font-semibold text-foreground cursor-pointer">
+                      <span className="flex items-center gap-1.5">
+                        ✨ Оноогоо ашиглах
+                        <span className="text-[10px] text-muted-foreground font-normal">
+                          (боломжтой: {loyaltyPoints.toLocaleString("mn-MN")})
+                        </span>
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={usePoints}
+                        onChange={(e) => {
+                          setUsePoints(e.target.checked);
+                          if (e.target.checked && !pointsInput) setPointsInput(maxRedeemable);
+                          if (!e.target.checked) setPointsInput(0);
+                        }}
+                      />
+                    </label>
+                    {usePoints && (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min={0}
+                          max={maxRedeemable}
+                          value={pointsInput}
+                          onChange={(e) => setPointsInput(Math.max(0, Math.min(maxRedeemable, Number(e.target.value) || 0)))}
+                          className="flex-1 rounded-lg border border-border bg-card px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setPointsInput(maxRedeemable)}
+                          className="text-[10px] px-2 py-1 rounded-md bg-secondary text-foreground hover:bg-accent"
+                        >
+                          Бүгд
+                        </button>
+                      </div>
+                    )}
+                    <p className="text-[10px] text-muted-foreground">1 оноо = 1₮ хямдрал</p>
+                  </div>
+                )}
+
+                {pointsDiscount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Оноо хямдрал</span>
+                    <span className="text-primary font-semibold">-{formatPrice(pointsDiscount)}</span>
                   </div>
                 )}
 
