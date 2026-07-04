@@ -191,6 +191,9 @@ const FrequentlyBoughtTogether = ({
         </div>
       </section>
     );
+  }
+
+
 
 
   const containerClass =
