@@ -620,8 +620,175 @@ const ProductPage = () => {
           {isOutOfStock ? "Дууссан" : "Шууд авах"}
         </Button>
       </div>
+
+      {/* Purchase options sheet — opens on Add-to-cart / Buy-now when selections are needed */}
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[92vh] overflow-y-auto p-0">
+          <SheetHeader className="px-5 pt-5 pb-2">
+            <SheetTitle className="text-base font-bold text-foreground text-left">
+              {sheetIntent === "buy" ? "Худалдан авах" : "Сагсанд нэмэх"}
+            </SheetTitle>
+          </SheetHeader>
+
+          <div className="px-5 pb-5 space-y-5">
+            {/* Product summary */}
+            <div className="flex gap-3 items-center pb-3 border-b border-border">
+              <img
+                src={
+                  selectedColor && product.colors?.find(c => c.name === selectedColor)?.image
+                    ? product.colors.find(c => c.name === selectedColor)!.image
+                    : product.image
+                }
+                alt={product.name}
+                className="w-16 h-16 rounded-lg object-cover bg-secondary shrink-0"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-foreground line-clamp-2">{product.name}</p>
+                <p className="text-base font-extrabold text-foreground mt-0.5">{formatPrice(product.price)}</p>
+              </div>
+            </div>
+
+            {/* Gift package picker */}
+            {product.giftPackages && product.giftPackages.length > 0 && (() => {
+              const singlePackage = product.giftPackages.length === 1;
+              return (
+                <div className="bg-accent/30 rounded-xl p-3 space-y-2">
+                  <div className="flex items-center justify-between gap-2 text-sm font-semibold text-foreground">
+                    <div className="flex items-center gap-2">
+                      <Gift className="h-4 w-4 text-accent-foreground" />
+                      <span>{singlePackage ? "🎁 Дагалдах бэлэг" : "🎁 Бэлгийн багц"}</span>
+                    </div>
+                    {!singlePackage && selectedGiftPackageId && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedGiftPackageId(null)}
+                        className="text-xs font-medium text-muted-foreground underline"
+                      >
+                        Цэвэрлэх
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 gap-2">
+                    {product.giftPackages.map((pkg) => {
+                      const active = selectedGiftPackageId === pkg.id;
+                      const interactive = !singlePackage;
+                      return (
+                        <button
+                          key={pkg.id}
+                          type="button"
+                          disabled={!interactive}
+                          onClick={() => interactive && setSelectedGiftPackageId(active ? null : pkg.id)}
+                          className={`flex flex-col gap-1.5 rounded-lg p-2.5 border-2 text-left transition-colors ${
+                            active ? "border-primary bg-primary/10" : "border-border bg-background"
+                          } ${!interactive ? "cursor-default" : ""}`}
+                        >
+                          <div className="flex items-center gap-2">
+                            {interactive && (
+                              <span className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${active ? "border-primary" : "border-muted-foreground/40"}`}>
+                                {active && <span className="w-2 h-2 rounded-full bg-primary" />}
+                              </span>
+                            )}
+                            <span className="text-sm font-semibold text-foreground">{pkg.name}</span>
+                            <span className="text-[10px] text-muted-foreground ml-auto">{pkg.items.length} зүйл</span>
+                          </div>
+                          {pkg.items.length > 0 && (
+                            <div className={`flex flex-wrap gap-1.5 ${interactive ? "pl-6" : ""}`}>
+                              {pkg.items.map((gift) => (
+                                <span key={gift.product_id} className="text-[11px] bg-secondary text-foreground rounded px-1.5 py-0.5">
+                                  {gift.name}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Color */}
+            {product.colors && product.colors.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-foreground mb-2">Өнгө</h3>
+                <div className="flex flex-wrap gap-2">
+                  {product.colors.map((color) => (
+                    <button
+                      key={color.name}
+                      onClick={() => setSelectedColor(selectedColor === color.name ? null : color.name)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border-2 transition-colors ${
+                        selectedColor === color.name
+                          ? "border-primary bg-primary/10 text-foreground"
+                          : "border-border bg-secondary text-muted-foreground"
+                      }`}
+                    >
+                      {color.image && (
+                        <img src={color.image} alt={color.name} className="h-6 w-6 rounded-md object-cover" />
+                      )}
+                      {color.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Size */}
+            {product.sizes && product.sizes.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-foreground mb-2">Хэмжээ</h3>
+                <div className="flex flex-wrap gap-2">
+                  {product.sizes.map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(selectedSize === size ? null : size)}
+                      className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-colors ${
+                        selectedSize === size
+                          ? "border-primary bg-primary/10 text-foreground"
+                          : "border-border bg-secondary text-muted-foreground"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Quantity */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-2">Тоо ширхэг</h3>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="w-10 h-10 rounded-xl border-2 border-border bg-secondary text-foreground flex items-center justify-center text-lg font-bold"
+                >
+                  −
+                </button>
+                <span className="w-12 h-10 flex items-center justify-center text-sm font-semibold text-foreground">{quantity}</span>
+                <button
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="w-10 h-10 rounded-xl border-2 border-border bg-secondary text-foreground flex items-center justify-center text-lg font-bold"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <Button
+              size="lg"
+              className="w-full h-12 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-base font-bold"
+              onClick={confirmSheet}
+              disabled={isOutOfStock}
+            >
+              {sheetIntent === "buy" ? "Худалдан авах" : "Сагсанд нэмэх"}
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
+
 
 export default ProductPage;
