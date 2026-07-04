@@ -4530,6 +4530,9 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
 
           {tab === "reviews" && <ReviewsManager />}
 
+          {tab === "spin" && <SpinSettingsManager />}
+
+
 
 
           {/* Diagnostics Tab */}
