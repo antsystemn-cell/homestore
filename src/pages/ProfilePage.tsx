@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { ChevronRight, LogOut, Shield, User, MapPin, Phone, ShoppingBag, Heart, Settings, Sparkles, Bell } from "lucide-react";
+import { ChevronRight, LogOut, Shield, User, MapPin, Phone, ShoppingBag, Heart, Settings, Sparkles, Bell, Crown } from "lucide-react";
 import BottomNav from "@/components/store/BottomNav";
 import Header from "@/components/store/Header";
 import ReferralCard from "@/components/store/ReferralCard";
@@ -20,19 +20,27 @@ const ProfilePage = () => {
   const [points, setPoints] = useState<number>(0);
   const [smsConsent, setSmsConsent] = useState<boolean>(false);
   const [savingConsent, setSavingConsent] = useState(false);
+  const [orderCount, setOrderCount] = useState<number>(0);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("loyalty_points, sms_reminders_consent")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      setPoints((data as any)?.loyalty_points ?? 0);
-      setSmsConsent(Boolean((data as any)?.sms_reminders_consent));
+      const [{ data: prof }, { data: cnt }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("loyalty_points, sms_reminders_consent")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        supabase.rpc("get_my_order_count" as any),
+      ]);
+      setPoints((prof as any)?.loyalty_points ?? 0);
+      setSmsConsent(Boolean((prof as any)?.sms_reminders_consent));
+      setOrderCount(typeof cnt === "number" ? cnt : 0);
     })();
   }, [user]);
+
+  const isVip = orderCount >= 3;
+
 
   const toggleSmsConsent = async (v: boolean) => {
     if (!user) return;
@@ -115,9 +123,20 @@ const ProfilePage = () => {
                   {(user.user_metadata?.full_name || user.email || "?")[0].toUpperCase()}
                 </div>
                 <div className="md:mt-4">
-                  <p className="font-bold text-sm md:text-base">{user.user_metadata?.full_name || "Хэрэглэгч"}</p>
+                  <div className="flex items-center gap-2 md:justify-center flex-wrap">
+                    <p className="font-bold text-sm md:text-base">{user.user_metadata?.full_name || "Хэрэглэгч"}</p>
+                    {isVip && (
+                      <span className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                        <Crown className="h-3 w-3" /> VIP
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs md:text-sm text-muted-foreground">{user.email}</p>
+                  <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5">
+                    {orderCount} захиалга{isVip ? " • VIP хэрэглэгч" : ` • VIP болтол ${Math.max(0, 3 - orderCount)} захиалга`}
+                  </p>
                 </div>
+
               </div>
 
               {/* Desktop sign out */}

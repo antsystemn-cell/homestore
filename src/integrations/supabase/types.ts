@@ -2337,6 +2337,7 @@ export type Database = {
           source: string
         }[]
       }
+      get_my_order_count: { Args: never; Returns: number }
       get_my_referral_stats: {
         Args: never
         Returns: {
