@@ -303,7 +303,7 @@ const ProductPage = () => {
 
       <div className="max-w-6xl mx-auto md:px-8">
         <div className="md:grid md:grid-cols-2 md:gap-10">
-          <div className="relative md:sticky md:top-20 md:self-start space-y-4">
+          <div className="relative space-y-4">
             {/* Main product image */}
             <div className="relative">
               <div
