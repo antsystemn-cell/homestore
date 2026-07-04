@@ -325,6 +325,7 @@ const AdminPage = () => {
     sizes: [] as string[],
     stock_quantity: 0,
     variant_stock: {} as Record<string, number>,
+    average_reorder_days: 0,
   });
   const [newColor, setNewColor] = useState("");
   const [newSize, setNewSize] = useState("");
