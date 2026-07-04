@@ -167,6 +167,10 @@ const CartPage = () => {
           </div>
         )}
 
+        {items.length > 0 && (
+          <FrequentlyBoughtTogether productId={items[0].product.id} />
+        )}
+
         {items.length > 0 && <CartRecommendations items={items} weights={cartWeights} />}
       </div>
       <GuestCheckoutModal
