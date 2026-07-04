@@ -5,6 +5,7 @@ import { ChevronRight, LogOut, Shield, User, MapPin, Phone, ShoppingBag, Heart, 
 import BottomNav from "@/components/store/BottomNav";
 import Header from "@/components/store/Header";
 import ReferralCard from "@/components/store/ReferralCard";
+import MyWalletCreditsCard from "@/components/store/MyWalletCreditsCard";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/data/products";
 import { Switch } from "@/components/ui/switch";
