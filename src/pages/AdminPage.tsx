@@ -4548,6 +4548,9 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
 
           {tab === "promotions" && <WalletCreditsManager />}
 
+          {tab === "flash-sales" && <FlashSalesManager />}
+
+
 
 
 
