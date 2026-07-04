@@ -191,6 +191,7 @@ const CheckoutPage = () => {
       orderData.guest_name = name.trim();
     } else {
       orderData.user_id = user!.id;
+      if (pointsDiscount > 0) orderData.points_redeemed = pointsDiscount;
     }
 
     let data: { id: string; order_ref: string | null } | null = null;
