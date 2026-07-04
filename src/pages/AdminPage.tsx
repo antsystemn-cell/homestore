@@ -1351,6 +1351,7 @@ const AdminPage = () => {
       brand_id: form.brand_id || null,
       colors: form.colors.filter(c => c.name.trim()),
       sizes: form.sizes.filter(s => s.trim()),
+      average_reorder_days: Number(form.average_reorder_days) > 0 ? Number(form.average_reorder_days) : null,
       ...(() => {
         const b = dbBrands.find((x: any) => x.id === form.brand_id);
         const norm = (b?.name || "").toLowerCase().replace(/\s+/g, "");
