@@ -35,9 +35,9 @@ interface ChatbotSettings {
 }
 
 const DEFAULT_SETTINGS: ChatbotSettings = {
-  bot_name: "Эйси",
-  greeting_message: "Сайн байна уу! Танд юугаар туслах вэ?",
-  system_prompt: "Та easyshop.mn онлайн дэлгүүрийн туслах ажилтан. Монгол хэлээр товч хариулна уу.",
+  bot_name: "Ээгий",
+  greeting_message: "Сайн байна уу? Би easyshop.mn-ийн AI туслах Ээгий байна. Танд юугаар туслах вэ?",
+  system_prompt: "Та easyshop.mn онлайн дэлгүүрийн туслах Ээгий. Монгол хэлээр товч, найрсаг хариу өгнө.",
   is_enabled: true,
 };
 
