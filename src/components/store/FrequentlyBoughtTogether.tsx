@@ -11,9 +11,17 @@ interface Props {
   productId: string;
   className?: string;
   title?: string;
+  limit?: number;
+  variant?: "grid" | "vertical";
 }
 
-const FrequentlyBoughtTogether = ({ productId, className, title = "Үүнтэй хамт авдаг бараа" }: Props) => {
+const FrequentlyBoughtTogether = ({
+  productId,
+  className,
+  title = "Үүнтэй хамт авдаг бараа",
+  limit = 3,
+  variant = "grid",
+}: Props) => {
   const [items, setItems] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
@@ -23,7 +31,7 @@ const FrequentlyBoughtTogether = ({ productId, className, title = "Үүнтэй 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetchFrequentlyBoughtTogether(productId, 3)
+    fetchFrequentlyBoughtTogether(productId, limit)
       .then((rows) => {
         if (cancelled) return;
         setItems((rows || []).map(mapDbProduct));
@@ -37,7 +45,7 @@ const FrequentlyBoughtTogether = ({ productId, className, title = "Үүнтэй 
     return () => {
       cancelled = true;
     };
-  }, [productId]);
+  }, [productId, limit]);
 
   const handleAdd = (p: Product) => {
     addToCart(p, null, null, 1, null);
@@ -47,10 +55,15 @@ const FrequentlyBoughtTogether = ({ productId, className, title = "Үүнтэй 
 
   if (loading || items.length === 0) return null;
 
+  const containerClass =
+    variant === "vertical"
+      ? "flex flex-col gap-2 md:gap-3"
+      : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4";
+
   return (
-    <section className={`mt-10 md:mt-14 px-4 md:px-0 ${className || ""}`}>
+    <section className={`mt-6 md:mt-8 px-4 md:px-0 ${className || ""}`}>
       <h2 className="text-base md:text-lg font-bold text-foreground mb-3 md:mb-4">{title}</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+      <div className={containerClass}>
         {items.map((p) => {
           const added = addedIds.has(p.id);
           return (

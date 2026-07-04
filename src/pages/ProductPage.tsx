@@ -303,7 +303,7 @@ const ProductPage = () => {
 
       <div className="max-w-6xl mx-auto md:px-8">
         <div className="md:grid md:grid-cols-2 md:gap-10">
-          <div className="relative md:sticky md:top-20 md:self-start space-y-4">
+          <div className="relative space-y-4">
             {/* Main product image */}
             <div className="relative">
               <div
@@ -384,6 +384,9 @@ const ProductPage = () => {
                 ))}
               </div>
             )}
+
+            {/* Frequently bought together — vertical list under main image */}
+            <FrequentlyBoughtTogether productId={product.id} variant="vertical" limit={5} />
           </div>
 
           <div className="p-4 md:p-0 space-y-6">
@@ -666,8 +669,6 @@ const ProductPage = () => {
           </div>
         </div>
 
-        {/* Frequently bought together */}
-        <FrequentlyBoughtTogether productId={product.id} />
 
         {/* Reviews */}
         <div className="mt-10 md:mt-16 px-4 md:px-0">
