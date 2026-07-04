@@ -45,7 +45,7 @@ const FrequentlyBoughtTogether = ({
     return () => {
       cancelled = true;
     };
-  }, [productId]);
+  }, [productId, limit]);
 
   const handleAdd = (p: Product) => {
     addToCart(p, null, null, 1, null);
