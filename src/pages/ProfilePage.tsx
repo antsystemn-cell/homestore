@@ -1,12 +1,34 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { ChevronRight, LogOut, Shield, User, MapPin, Phone, ShoppingBag, Heart, Settings } from "lucide-react";
+import { ChevronRight, LogOut, Shield, User, MapPin, Phone, ShoppingBag, Heart, Settings, Sparkles } from "lucide-react";
 import BottomNav from "@/components/store/BottomNav";
 import Header from "@/components/store/Header";
+import { supabase } from "@/integrations/supabase/client";
+import { formatPrice } from "@/data/products";
+
+const REWARD_STEP = 1000; // 1000 points = 1000₮ discount
 
 const ProfilePage = () => {
   const navigate = useNavigate();
   const { user, isAdmin, isModerator, signOut, loading, authError } = useAuth();
+  const [points, setPoints] = useState<number>(0);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("loyalty_points")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      setPoints((data as any)?.loyalty_points ?? 0);
+    })();
+  }, [user]);
+
+  const nextTier = Math.max(REWARD_STEP, (Math.floor(points / REWARD_STEP) + 1) * REWARD_STEP);
+  const pointsToNext = Math.max(0, nextTier - points);
+  const progress = Math.min(100, Math.round(((points % REWARD_STEP) / REWARD_STEP) * 100));
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Уншиж байна...</div>;
