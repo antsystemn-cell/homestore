@@ -1957,11 +1957,96 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_credits: {
+        Row: {
+          created_at: string
+          credit_type: string
+          expires_at: string | null
+          id: string
+          max_discount_amount: number | null
+          min_order_amount: number
+          note: string | null
+          order_id: string | null
+          source_coupon_id: string | null
+          status: string
+          used_at: string | null
+          user_id: string
+          value: number
+          value_type: string
+        }
+        Insert: {
+          created_at?: string
+          credit_type: string
+          expires_at?: string | null
+          id?: string
+          max_discount_amount?: number | null
+          min_order_amount?: number
+          note?: string | null
+          order_id?: string | null
+          source_coupon_id?: string | null
+          status?: string
+          used_at?: string | null
+          user_id: string
+          value: number
+          value_type: string
+        }
+        Update: {
+          created_at?: string
+          credit_type?: string
+          expires_at?: string | null
+          id?: string
+          max_discount_amount?: number | null
+          min_order_amount?: number
+          note?: string | null
+          order_id?: string | null
+          source_coupon_id?: string | null
+          status?: string
+          used_at?: string | null
+          user_id?: string
+          value?: number
+          value_type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      admin_delete_wallet_credit: { Args: { _id: string }; Returns: boolean }
+      admin_grant_wallet_credit: {
+        Args: {
+          _expires_in_days?: number
+          _max_discount_amount?: number
+          _min_order_amount?: number
+          _note?: string
+          _user_id: string
+          _value: number
+          _value_type: string
+        }
+        Returns: {
+          created_at: string
+          credit_type: string
+          expires_at: string | null
+          id: string
+          max_discount_amount: number | null
+          min_order_amount: number
+          note: string | null
+          order_id: string | null
+          source_coupon_id: string | null
+          status: string
+          used_at: string | null
+          user_id: string
+          value: number
+          value_type: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wallet_credits"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_list_orders_light: {
         Args: never
         Returns: {
@@ -2045,6 +2130,26 @@ export type Database = {
           order_count: number
           phone: string
           user_id: string
+        }[]
+      }
+      admin_list_wallet_credits: {
+        Args: { _limit?: number }
+        Returns: {
+          created_at: string
+          credit_type: string
+          expires_at: string
+          id: string
+          max_discount_amount: number
+          min_order_amount: number
+          note: string
+          order_id: string
+          status: string
+          used_at: string
+          user_email: string
+          user_id: string
+          user_name: string
+          value: number
+          value_type: string
         }[]
       }
       admin_referral_leaderboard: {
@@ -2184,6 +2289,31 @@ export type Database = {
           referral_code: string
         }[]
       }
+      get_my_wallet_credits: {
+        Args: never
+        Returns: {
+          created_at: string
+          credit_type: string
+          expires_at: string | null
+          id: string
+          max_discount_amount: number | null
+          min_order_amount: number
+          note: string | null
+          order_id: string | null
+          source_coupon_id: string | null
+          status: string
+          used_at: string | null
+          user_id: string
+          value: number
+          value_type: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "wallet_credits"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_my_welcome_coupon: {
         Args: never
         Returns: {
@@ -2269,6 +2399,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      redeem_wallet_credit: {
+        Args: { _credit_id: string; _order_id: string }
+        Returns: boolean
       }
       touch_analytics_session: {
         Args: { _token: string; _user_id?: string }
