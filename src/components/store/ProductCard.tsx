@@ -1,10 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Star } from "lucide-react";
+import { Star, Zap } from "lucide-react";
 import { Product, formatPrice } from "@/data/products";
 import { getColorHex } from "@/lib/colorMap";
 import { transformImage, buildSrcSet } from "@/lib/imageUrl";
 import { useProductStat } from "@/hooks/useProductStat";
+import { useFlashSaleFor } from "@/hooks/useFlashSales";
+import FlashSaleCountdown from "./FlashSaleCountdown";
+
 
 
 interface Props {
