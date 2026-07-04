@@ -481,6 +481,47 @@ export type Database = {
         }
         Relationships: []
       }
+      flash_sales: {
+        Row: {
+          created_at: string
+          ends_at: string
+          id: string
+          is_active: boolean
+          product_id: string
+          sale_price: number
+          starts_at: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          id?: string
+          is_active?: boolean
+          product_id: string
+          sale_price: number
+          starts_at?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          id?: string
+          is_active?: boolean
+          product_id?: string
+          sale_price?: number
+          starts_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flash_sales_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gift_redemptions: {
         Row: {
           claimed_at: string
@@ -2272,6 +2313,22 @@ export type Database = {
       }
       generate_referral_code: { Args: never; Returns: string }
       generate_slug: { Args: { name: string }; Returns: string }
+      get_active_flash_sales: {
+        Args: never
+        Returns: {
+          discount_percent: number
+          ends_at: string
+          id: string
+          product_id: string
+          product_image: string
+          product_name: string
+          product_price: number
+          product_slug: string
+          product_thumbnail: string
+          sale_price: number
+          starts_at: string
+        }[]
+      }
       get_frequently_bought_together: {
         Args: { _limit?: number; _product_id: string }
         Returns: {
