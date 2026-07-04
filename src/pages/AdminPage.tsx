@@ -4492,6 +4492,8 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
           {/* Recommendation scoring weights */}
           {tab === "recommendations" && <RecommendationSettingsManager />}
 
+          {tab === "loyalty" && <LoyaltySettingsManager />}
+
 
           {/* Diagnostics Tab */}
           {tab === "diagnostics" && (() => {
