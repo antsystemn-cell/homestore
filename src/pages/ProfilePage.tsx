@@ -123,9 +123,20 @@ const ProfilePage = () => {
                   {(user.user_metadata?.full_name || user.email || "?")[0].toUpperCase()}
                 </div>
                 <div className="md:mt-4">
-                  <p className="font-bold text-sm md:text-base">{user.user_metadata?.full_name || "Хэрэглэгч"}</p>
+                  <div className="flex items-center gap-2 md:justify-center flex-wrap">
+                    <p className="font-bold text-sm md:text-base">{user.user_metadata?.full_name || "Хэрэглэгч"}</p>
+                    {isVip && (
+                      <span className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                        <Crown className="h-3 w-3" /> VIP
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs md:text-sm text-muted-foreground">{user.email}</p>
+                  <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5">
+                    {orderCount} захиалга{isVip ? " • VIP хэрэглэгч" : ` • VIP болтол ${Math.max(0, 3 - orderCount)} захиалга`}
+                  </p>
                 </div>
+
               </div>
 
               {/* Desktop sign out */}
