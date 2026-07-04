@@ -384,6 +384,9 @@ const ProductPage = () => {
                 ))}
               </div>
             )}
+
+            {/* Frequently bought together — vertical list under main image */}
+            <FrequentlyBoughtTogether productId={product.id} variant="vertical" limit={5} />
           </div>
 
           <div className="p-4 md:p-0 space-y-6">
