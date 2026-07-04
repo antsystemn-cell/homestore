@@ -1381,6 +1381,7 @@ export type Database = {
       }
       referrals: {
         Row: {
+          completed_order_id: string | null
           created_at: string
           id: string
           invited_email: string | null
@@ -1388,6 +1389,8 @@ export type Database = {
           invited_ip: string | null
           invited_phone: string | null
           invited_user_id: string
+          invitee_coupon_id: string | null
+          inviter_coupon_id: string | null
           inviter_user_id: string
           rejection_reason: string | null
           rewarded_at: string | null
@@ -1395,6 +1398,7 @@ export type Database = {
           status: string
         }
         Insert: {
+          completed_order_id?: string | null
           created_at?: string
           id?: string
           invited_email?: string | null
@@ -1402,6 +1406,8 @@ export type Database = {
           invited_ip?: string | null
           invited_phone?: string | null
           invited_user_id: string
+          invitee_coupon_id?: string | null
+          inviter_coupon_id?: string | null
           inviter_user_id: string
           rejection_reason?: string | null
           rewarded_at?: string | null
@@ -1409,6 +1415,7 @@ export type Database = {
           status?: string
         }
         Update: {
+          completed_order_id?: string | null
           created_at?: string
           id?: string
           invited_email?: string | null
@@ -1416,6 +1423,8 @@ export type Database = {
           invited_ip?: string | null
           invited_phone?: string | null
           invited_user_id?: string
+          invitee_coupon_id?: string | null
+          inviter_coupon_id?: string | null
           inviter_user_id?: string
           rejection_reason?: string | null
           rewarded_at?: string | null
@@ -2038,6 +2047,28 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_referral_leaderboard: {
+        Args: { _limit?: number }
+        Returns: {
+          completed_count: number
+          email: string
+          full_name: string
+          invited_count: number
+          inviter_user_id: string
+          last_invite_at: string
+          referral_code: string
+        }[]
+      }
+      admin_referral_summary: {
+        Args: never
+        Returns: {
+          total_completed: number
+          total_inviters: number
+          total_invites: number
+          total_reward_amount: number
+        }[]
+      }
+      apply_referral_code: { Args: { _code: string }; Returns: Json }
       attach_lead_contact: {
         Args: { _name?: string; _phone?: string; _token: string }
         Returns: undefined
@@ -2142,6 +2173,15 @@ export type Database = {
           product_id: string
           score: number
           source: string
+        }[]
+      }
+      get_my_referral_stats: {
+        Args: never
+        Returns: {
+          completed_count: number
+          invited_count: number
+          pending_count: number
+          referral_code: string
         }[]
       }
       get_personalized_recommendations: {

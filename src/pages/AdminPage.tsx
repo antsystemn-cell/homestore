@@ -15,6 +15,8 @@ import LoyaltySettingsManager from "@/components/admin/LoyaltySettingsManager";
 import ReminderSettingsManager from "@/components/admin/ReminderSettingsManager";
 import ReviewsManager from "@/components/admin/ReviewsManager";
 import SpinSettingsManager from "@/components/admin/SpinSettingsManager";
+import ReferralManager from "@/components/admin/ReferralManager";
+
 
 
 import StockDeductionLog from "@/components/admin/StockDeductionLog";
@@ -44,9 +46,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
 
-type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "settings" | "branches";
+type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "settings" | "branches";
 
-const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "drivers", "branches"];
+const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "referral", "drivers", "branches"];
+
 
 
 
@@ -57,7 +60,7 @@ const AdminPage = () => {
   const hasAdminAccess = isAdmin || isModerator || isSeller;
   const [tab, setTab] = useState<Tab>(() => {
     const t = searchParams.get("tab") as Tab | null;
-    const valid: Tab[] = ["stats","tracking","products","orders","users","drivers","categories","brands","delivery","delivery-portal","payments","banner","collections","chatbot","analytics","diagnostics","stocklog","recommendations","loyalty","reminders","reviews","spin","settings","branches"];
+    const valid: Tab[] = ["stats","tracking","products","orders","users","drivers","categories","brands","delivery","delivery-portal","payments","banner","collections","chatbot","analytics","diagnostics","stocklog","recommendations","loyalty","reminders","reviews","spin","referral","settings","branches"];
     return t && valid.includes(t) ? t : "stats";
   });
   const [products, setProducts] = useState<any[]>([]);
@@ -1627,6 +1630,8 @@ const AdminPage = () => {
     { id: "reminders", label: "Санамжийн SMS", icon: MessageCircle },
     { id: "reviews", label: "Сэтгэгдэл", icon: Star },
     { id: "spin", label: "Хүрд тоглоом", icon: Sparkles },
+    { id: "referral", label: "Referral", icon: Users },
+
 
 
     { id: "drivers", label: "Жолоочид", icon: Truck },
@@ -4531,6 +4536,9 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
           {tab === "reviews" && <ReviewsManager />}
 
           {tab === "spin" && <SpinSettingsManager />}
+
+          {tab === "referral" && <ReferralManager />}
+
 
 
 

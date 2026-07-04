@@ -4,10 +4,12 @@ import { useAuth } from "@/context/AuthContext";
 import { ChevronRight, LogOut, Shield, User, MapPin, Phone, ShoppingBag, Heart, Settings, Sparkles, Bell } from "lucide-react";
 import BottomNav from "@/components/store/BottomNav";
 import Header from "@/components/store/Header";
+import ReferralCard from "@/components/store/ReferralCard";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/data/products";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+
 
 const REWARD_STEP = 1000; // 1000 points = 1000₮ discount
 
@@ -170,6 +172,9 @@ const ProfilePage = () => {
                 <Switch checked={smsConsent} disabled={savingConsent} onCheckedChange={toggleSmsConsent} />
               </div>
             </div>
+            {/* Referral / Invite a friend */}
+            <ReferralCard />
+
 
             <div className="md:bg-card md:rounded-2xl md:border md:border-border md:overflow-hidden">
               {menuItems.map((item, i) => {
