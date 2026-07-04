@@ -500,7 +500,7 @@ const ProductPage = () => {
 
 
             <div className="hidden md:flex gap-3">
-              <Button variant="outline" size="lg" disabled={isOutOfStock} className="flex-1 gap-2 rounded-xl h-12" onClick={() => handleAddToCart()}>
+              <Button variant="outline" size="lg" disabled={isOutOfStock} className="flex-1 gap-2 rounded-xl h-12" onClick={() => openPurchase("cart")}>
                 <ShoppingCart className="h-4 w-4" />
                 {isOutOfStock ? "Дууссан" : "Сагсанд нэмэх"}
               </Button>
@@ -508,7 +508,7 @@ const ProductPage = () => {
                 size="lg"
                 disabled={isOutOfStock}
                 className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl h-12"
-                onClick={() => handleAddToCart(true)}
+                onClick={() => openPurchase("buy")}
               >
                 {isOutOfStock ? "Дууссан" : "Худалдаж авах"}
               </Button>
@@ -608,14 +608,14 @@ const ProductPage = () => {
         >
           <Heart className={`h-5 w-5 ${liked ? "fill-sale text-sale" : "text-muted-foreground"}`} />
         </button>
-        <Button variant="outline" disabled={isOutOfStock} className="flex-1 gap-2 rounded-2xl h-12 font-bold text-xs border-2" onClick={() => handleAddToCart()}>
+        <Button variant="outline" disabled={isOutOfStock} className="flex-1 gap-2 rounded-2xl h-12 font-bold text-xs border-2" onClick={() => openPurchase("cart")}>
           <ShoppingCart className="h-4 w-4" />
           {isOutOfStock ? "Дууссан" : "Сагсанд"}
         </Button>
         <Button
           disabled={isOutOfStock}
           className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl h-12 font-bold text-xs shadow-lg"
-          onClick={() => handleAddToCart(true)}
+          onClick={() => openPurchase("buy")}
         >
           {isOutOfStock ? "Дууссан" : "Шууд авах"}
         </Button>
