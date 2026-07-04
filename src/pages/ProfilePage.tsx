@@ -1,11 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { ChevronRight, LogOut, Shield, User, MapPin, Phone, ShoppingBag, Heart, Settings, Sparkles } from "lucide-react";
+import { ChevronRight, LogOut, Shield, User, MapPin, Phone, ShoppingBag, Heart, Settings, Sparkles, Bell } from "lucide-react";
 import BottomNav from "@/components/store/BottomNav";
 import Header from "@/components/store/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/data/products";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 
 const REWARD_STEP = 1000; // 1000 points = 1000₮ discount
 
