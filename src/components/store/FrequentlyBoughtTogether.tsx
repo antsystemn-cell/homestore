@@ -31,7 +31,7 @@ const FrequentlyBoughtTogether = ({
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetchFrequentlyBoughtTogether(productId, 3)
+    fetchFrequentlyBoughtTogether(productId, limit)
       .then((rows) => {
         if (cancelled) return;
         setItems((rows || []).map(mapDbProduct));
