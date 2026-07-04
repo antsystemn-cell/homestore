@@ -568,10 +568,8 @@ const ProductPage = () => {
           </div>
         </div>
 
-        {/* Frequently bought together — mobile only, after product info */}
-        <div className="md:hidden">
-          <FrequentlyBoughtTogether productId={product.id} variant="vertical" limit={5} />
-        </div>
+
+
 
         {/* Reviews */}
         <div className="mt-10 md:mt-16 px-4 md:px-0">
