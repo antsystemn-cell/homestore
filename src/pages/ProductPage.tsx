@@ -516,7 +516,7 @@ const ProductPage = () => {
 
             {/* Frequently bought together — mobile only, between price and description */}
             <div className="md:hidden -mx-4">
-              <FrequentlyBoughtTogether productId={product.id} variant="carousel" limit={12} pageSize={4} />
+              <FrequentlyBoughtTogether productId={product.id} variant="carousel" limit={18} pageSize={6} />
             </div>
 
             {product.description && (
