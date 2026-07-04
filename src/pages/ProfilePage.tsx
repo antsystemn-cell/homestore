@@ -171,7 +171,7 @@ const ProfilePage = () => {
               </div>
             </div>
 
-
+            <div className="md:bg-card md:rounded-2xl md:border md:border-border md:overflow-hidden">
               {menuItems.map((item, i) => {
                 const Icon = item.icon;
                 return (
