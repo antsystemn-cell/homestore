@@ -1632,6 +1632,7 @@ const AdminPage = () => {
     { id: "reviews", label: "Сэтгэгдэл", icon: Star },
     { id: "spin", label: "Хүрд тоглоом", icon: Sparkles },
     { id: "referral", label: "Referral", icon: Users },
+    { id: "promotions", label: "Урамшуулал", icon: Gift },
 
 
 
