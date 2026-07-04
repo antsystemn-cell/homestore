@@ -162,14 +162,22 @@ const CarouselView = ({ pages, title, className, addedIds, onAdd, onNavigate }: 
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide"
-        style={{ scrollbarWidth: "none" }}
+        className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth"
+        style={{
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          WebkitOverflowScrolling: "touch",
+          overscrollBehaviorX: "contain",
+          scrollSnapType: "x mandatory",
+        }}
       >
         {pages.map((page, pi) => (
           <div
             key={pi}
-            className="shrink-0 w-full snap-start grid grid-cols-3 gap-1.5"
+            className="shrink-0 w-full grid grid-cols-3 gap-1.5"
+            style={{ scrollSnapAlign: "start", scrollSnapStop: "always" }}
           >
+
             {page.map((p) => {
               const added = addedIds.has(p.id);
               return (
