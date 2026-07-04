@@ -7,6 +7,7 @@ import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/store/ProductCard";
 import ProductReviews from "@/components/store/ProductReviews";
+import FrequentlyBoughtTogether from "@/components/store/FrequentlyBoughtTogether";
 import LoadError from "@/components/store/LoadError";
 import { fetchPublicProductBySlug, fetchPublicProductById, fetchPublicProductImages, fetchRelatedPublicProducts, fetchPublicBrands } from "@/lib/publicStoreApi";
 import Header from "@/components/store/Header";
@@ -664,6 +665,9 @@ const ProductPage = () => {
 
           </div>
         </div>
+
+        {/* Frequently bought together */}
+        <FrequentlyBoughtTogether productId={product.id} />
 
         {/* Reviews */}
         <div className="mt-10 md:mt-16 px-4 md:px-0">
