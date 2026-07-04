@@ -344,7 +344,7 @@ const ProductPage = () => {
       </div>
 
       <div className="max-w-6xl mx-auto md:px-8">
-        <div className="md:grid md:grid-cols-[1fr_260px] md:gap-8">
+        <div className="md:grid md:grid-cols-[1fr_240px] md:gap-8">
 
           {/* LEFT column (desktop): image gallery + long content (description/specs/detail media) */}
           <div className="relative space-y-4 md:col-start-1 md:row-start-1">
@@ -433,7 +433,7 @@ const ProductPage = () => {
 
           </div>
 
-          <div className="p-4 md:p-0 space-y-6 md:col-start-2 md:row-start-1 md:row-span-2">
+          <div className="p-4 md:p-0 space-y-6 md:col-start-2 md:row-start-1">
 
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-foreground leading-tight">{product.name}</h1>
@@ -500,7 +500,7 @@ const ProductPage = () => {
             {/* Color / Size / Quantity selectors moved into purchase sheet */}
 
 
-            <div className="hidden md:flex gap-3">
+            <div className="hidden md:flex flex-col gap-2">
               <Button variant="outline" size="lg" disabled={isOutOfStock} className="flex-1 gap-2 rounded-xl h-12" onClick={() => openPurchase("cart")}>
                 <ShoppingCart className="h-4 w-4" />
                 {isOutOfStock ? "Дууссан" : "Сагсанд нэмэх"}
@@ -515,16 +515,17 @@ const ProductPage = () => {
               </Button>
             </div>
 
-            {/* Frequently bought together — desktop only, right column below buttons */}
-            <div className="hidden md:block">
-              <FrequentlyBoughtTogether productId={product.id} variant="square" limit={5} />
-            </div>
-
             {/* Frequently bought together — mobile only, between price and description */}
             <div className="md:hidden -mx-4">
               <FrequentlyBoughtTogether productId={product.id} variant="carousel" limit={18} pageSize={6} />
             </div>
           </div>
+
+          {/* RIGHT column row 2 (desktop): Frequently bought together aligned with description */}
+          <aside className="hidden md:block md:col-start-2 md:row-start-2 md:mt-6">
+            <FrequentlyBoughtTogether productId={product.id} variant="square" limit={5} />
+          </aside>
+
 
           {/* BOTTOM-LEFT column (desktop): long content stacked below main image */}
           <div className="p-4 md:p-0 space-y-6 md:col-start-1 md:row-start-2 md:mt-6">
