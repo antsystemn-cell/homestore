@@ -15,6 +15,8 @@ import LoyaltySettingsManager from "@/components/admin/LoyaltySettingsManager";
 import ReminderSettingsManager from "@/components/admin/ReminderSettingsManager";
 import ReviewsManager from "@/components/admin/ReviewsManager";
 import SpinSettingsManager from "@/components/admin/SpinSettingsManager";
+import ReferralManager from "@/components/admin/ReferralManager";
+
 
 
 import StockDeductionLog from "@/components/admin/StockDeductionLog";
