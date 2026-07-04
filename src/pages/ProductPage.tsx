@@ -562,78 +562,8 @@ const ProductPage = () => {
               );
             })()}
 
-            {/* Color selector */}
-            {product.colors && product.colors.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-foreground mb-2">Өнгө</h3>
-                <div className="flex flex-wrap gap-2">
-                  {product.colors.map((color) => (
-                    <button
-                      key={color.name}
-                      onClick={() => {
-                        const newColor = selectedColor === color.name ? null : color.name;
-                        setSelectedColor(newColor);
-                        if (newColor && color.image) {
-                          setActiveImg(0);
-                        }
-                      }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border-2 transition-colors ${
-                        selectedColor === color.name
-                          ? "border-primary bg-primary/10 text-foreground"
-                          : "border-border bg-secondary text-muted-foreground hover:border-primary/40"
-                      }`}
-                    >
-                      {color.image && (
-                        <img src={color.image} alt={color.name} className="h-6 w-6 rounded-md object-cover" />
-                      )}
-                      {color.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Color / Size / Quantity selectors moved into purchase sheet */}
 
-            {/* Size selector */}
-            {product.sizes && product.sizes.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-foreground mb-2">Хэмжээ</h3>
-                <div className="flex flex-wrap gap-2">
-                  {product.sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(selectedSize === size ? null : size)}
-                      className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-colors ${
-                        selectedSize === size
-                          ? "border-primary bg-primary/10 text-foreground"
-                          : "border-border bg-secondary text-muted-foreground hover:border-primary/40"
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Quantity selector */}
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-2">Тоо ширхэг</h3>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-10 h-10 rounded-xl border-2 border-border bg-secondary text-foreground flex items-center justify-center text-lg font-bold hover:border-primary/40 transition-colors"
-                >
-                  −
-                </button>
-                <span className="w-12 h-10 flex items-center justify-center text-sm font-semibold text-foreground">{quantity}</span>
-                <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="w-10 h-10 rounded-xl border-2 border-border bg-secondary text-foreground flex items-center justify-center text-lg font-bold hover:border-primary/40 transition-colors"
-                >
-                  +
-                </button>
-              </div>
-            </div>
 
             <div className="hidden md:flex gap-3">
               <Button variant="outline" size="lg" disabled={isOutOfStock} className="flex-1 gap-2 rounded-xl h-12" onClick={() => handleAddToCart()}>
