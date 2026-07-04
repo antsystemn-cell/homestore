@@ -176,6 +176,9 @@ const ProfilePage = () => {
             {/* Referral / Invite a friend */}
             <ReferralCard />
 
+            {/* Wallet credits — my promotions */}
+            <MyWalletCreditsCard />
+
 
             <div className="md:bg-card md:rounded-2xl md:border md:border-border md:overflow-hidden">
               {menuItems.map((item, i) => {
