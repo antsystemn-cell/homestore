@@ -188,6 +188,45 @@ const ProductPage = () => {
     }
   };
 
+  // Whether product requires the user to pick something before adding to cart
+  const needsSelection = () => {
+    if (!product) return false;
+    const hasColors = (product.colors?.length || 0) > 0;
+    const hasSizes = (product.sizes?.length || 0) > 0;
+    const hasMultiGift = (product.giftPackages?.length || 0) > 1;
+    return hasColors || hasSizes || hasMultiGift;
+  };
+
+  const openPurchase = (intent: "cart" | "buy") => {
+    if (isOutOfStock) {
+      toast.error("Энэ бараа дууссан байна");
+      return;
+    }
+    if (needsSelection()) {
+      setSheetIntent(intent);
+      setSheetOpen(true);
+      return;
+    }
+    handleAddToCart(intent === "buy");
+  };
+
+  const confirmSheet = () => {
+    // Reuse existing validation + add-to-cart flow
+    const beforeCount = 0; // handleAddToCart handles toasts itself
+    handleAddToCart(sheetIntent === "buy");
+    // Close sheet only if selections were valid — handleAddToCart returns void so
+    // we close optimistically and let toast.error above signal any failure state.
+    // To detect actual success, check required fields inline:
+    const missingColor = !!(product?.colors?.length) && !selectedColor;
+    const missingSize = !!(product?.sizes?.length) && !selectedSize;
+    const missingGift = (product?.giftPackages?.length || 0) > 1 && !selectedGiftPackageId;
+    if (!missingColor && !missingSize && !missingGift) {
+      setSheetOpen(false);
+    }
+    void beforeCount;
+  };
+
+
   useEffect(() => {
     const fetchProduct = async () => {
       setLoading(true);
