@@ -9,6 +9,7 @@ import Header from "@/components/store/Header";
 import BottomNav from "@/components/store/BottomNav";
 import GuestCheckoutModal from "@/components/store/GuestCheckoutModal";
 import CartRecommendations from "@/components/store/CartRecommendations";
+import FrequentlyBoughtTogether from "@/components/store/FrequentlyBoughtTogether";
 import { useRecommendationWeights } from "@/hooks/useRecommendationWeights";
 import { useBundleFreeDelivery } from "@/lib/bundleDelivery";
 import { hasFreeDeliveryProduct } from "@/lib/freeDeliveryProducts";
