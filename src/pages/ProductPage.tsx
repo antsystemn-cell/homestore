@@ -437,7 +437,7 @@ const ProductPage = () => {
 
           </div>
 
-          <div className="p-4 md:p-0 space-y-6 md:mt-6">
+          <div className="p-4 md:p-0 space-y-6 md:mt-6 md:col-start-2 md:order-3">
 
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-foreground leading-tight">{product.name}</h1>
