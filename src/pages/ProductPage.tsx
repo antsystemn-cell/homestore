@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Heart, ShoppingCart, Truck, Shield, RotateCcw, ChevronLeft, ChevronRight, Play, Gift } from "lucide-react";
+import { ArrowLeft, Heart, ShoppingCart, Truck, Shield, RotateCcw, ChevronLeft, ChevronRight, Play, Gift, X } from "lucide-react";
 import { Product, formatPrice, mapDbProduct, DetailMedia } from "@/data/products";
 import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import ProductCard from "@/components/store/ProductCard";
 import ProductReviews from "@/components/store/ProductReviews";
 import FrequentlyBoughtTogether from "@/components/store/FrequentlyBoughtTogether";
