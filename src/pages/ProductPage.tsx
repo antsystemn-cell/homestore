@@ -514,6 +514,10 @@ const ProductPage = () => {
               </Button>
             </div>
 
+            {/* Frequently bought together — mobile only, between price and description */}
+            <div className="md:hidden -mx-4">
+              <FrequentlyBoughtTogether productId={product.id} variant="carousel" limit={12} pageSize={4} />
+            </div>
 
             {product.description && (
               <div className="bg-secondary rounded-xl p-4 md:p-5">
@@ -521,6 +525,7 @@ const ProductPage = () => {
                 <p className="text-sm text-muted-foreground leading-relaxed">{product.description}</p>
               </div>
             )}
+
 
             {product.specifications && product.specifications.length > 0 && (
               <div className="bg-secondary rounded-xl p-4 md:p-5">
