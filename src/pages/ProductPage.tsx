@@ -385,8 +385,10 @@ const ProductPage = () => {
               </div>
             )}
 
-            {/* Frequently bought together — vertical list under main image */}
-            <FrequentlyBoughtTogether productId={product.id} variant="vertical" limit={5} />
+            {/* Frequently bought together — desktop only under main image */}
+            <div className="hidden md:block">
+              <FrequentlyBoughtTogether productId={product.id} variant="vertical" limit={5} />
+            </div>
           </div>
 
           <div className="p-4 md:p-0 space-y-6">
