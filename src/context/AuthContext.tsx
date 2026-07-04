@@ -92,6 +92,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    // Capture ?ref=CODE from URL and stash for post-signup redemption
+    try {
+      const p = new URLSearchParams(window.location.search);
+      const ref = p.get("ref");
+      if (ref && ref.length >= 4) {
+        localStorage.setItem("pending_ref", ref.trim());
+      }
+    } catch { /* noop */ }
+  }, []);
+
+  useEffect(() => {
     let mounted = true;
 
     const applySession = async (nextSession: Session | null) => {
@@ -101,6 +112,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (nextSession?.user) {
         await checkRoles(nextSession.user.id);
+        // Redeem stashed referral code (silent no-op if invalid / already used)
+        try {
+          const pending = localStorage.getItem("pending_ref");
+          if (pending) {
+            const { data } = await supabase.rpc("apply_referral_code" as any, { _code: pending });
+            const ok = (data as any)?.ok;
+            const err = (data as any)?.error;
+            if (ok || err === "already_referred" || err === "existing_customer" || err === "self_referral" || err === "code_not_found") {
+              localStorage.removeItem("pending_ref");
+            }
+          }
+        } catch { /* noop */ }
       } else {
         setIsAdmin(false);
         setIsModerator(false);
@@ -110,6 +133,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (mounted) setLoading(false);
     };
+
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setAuthError(false);
