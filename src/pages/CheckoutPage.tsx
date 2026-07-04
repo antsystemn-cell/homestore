@@ -787,6 +787,55 @@ const CheckoutPage = () => {
                   </div>
                 )}
 
+                {!isGuestCheckout && loyaltyPoints > 0 && (
+                  <div className="border-t border-border pt-2 space-y-2">
+                    <label className="flex items-center justify-between gap-2 text-xs font-semibold text-foreground cursor-pointer">
+                      <span className="flex items-center gap-1.5">
+                        ✨ Оноогоо ашиглах
+                        <span className="text-[10px] text-muted-foreground font-normal">
+                          (боломжтой: {loyaltyPoints.toLocaleString("mn-MN")})
+                        </span>
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={usePoints}
+                        onChange={(e) => {
+                          setUsePoints(e.target.checked);
+                          if (e.target.checked && !pointsInput) setPointsInput(maxRedeemable);
+                          if (!e.target.checked) setPointsInput(0);
+                        }}
+                      />
+                    </label>
+                    {usePoints && (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min={0}
+                          max={maxRedeemable}
+                          value={pointsInput}
+                          onChange={(e) => setPointsInput(Math.max(0, Math.min(maxRedeemable, Number(e.target.value) || 0)))}
+                          className="flex-1 rounded-lg border border-border bg-card px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setPointsInput(maxRedeemable)}
+                          className="text-[10px] px-2 py-1 rounded-md bg-secondary text-foreground hover:bg-accent"
+                        >
+                          Бүгд
+                        </button>
+                      </div>
+                    )}
+                    <p className="text-[10px] text-muted-foreground">1 оноо = 1₮ хямдрал</p>
+                  </div>
+                )}
+
+                {pointsDiscount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Оноо хямдрал</span>
+                    <span className="text-primary font-semibold">-{formatPrice(pointsDiscount)}</span>
+                  </div>
+                )}
+
                 <div className="flex justify-between border-t border-border pt-2">
                   <span className="font-bold text-foreground">Нийт</span>
                   <span className="font-extrabold text-foreground text-lg">{formatPrice(grandTotal)}</span>
