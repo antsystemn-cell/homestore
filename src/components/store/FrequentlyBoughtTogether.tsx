@@ -55,10 +55,15 @@ const FrequentlyBoughtTogether = ({
 
   if (loading || items.length === 0) return null;
 
+  const containerClass =
+    variant === "vertical"
+      ? "flex flex-col gap-2 md:gap-3"
+      : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4";
+
   return (
-    <section className={`mt-10 md:mt-14 px-4 md:px-0 ${className || ""}`}>
+    <section className={`mt-6 md:mt-8 px-4 md:px-0 ${className || ""}`}>
       <h2 className="text-base md:text-lg font-bold text-foreground mb-3 md:mb-4">{title}</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+      <div className={containerClass}>
         {items.map((p) => {
           const added = addedIds.has(p.id);
           return (
