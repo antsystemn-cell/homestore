@@ -437,13 +437,15 @@ const ProductPage = () => {
 
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-foreground leading-tight">{product.name}</h1>
-              <div className="flex items-center gap-3 mt-1">
+              <div className="flex items-center gap-3 mt-1 flex-wrap">
                 {product.productCode ? (
                   <span className="text-xs font-mono text-muted-foreground bg-secondary px-2 py-0.5 rounded">#{product.productCode}</span>
                 ) : null}
-                {product.sales ? <p className="text-muted-foreground text-sm">{product.sales} борлуулалт</p> : null}
+                <ProductRatingSummary productId={product.id} />
+                <ProductBuyerCount productId={product.id} />
               </div>
             </div>
+
 
             <div className="flex items-baseline gap-3 flex-wrap">
               <span className="text-2xl md:text-3xl font-extrabold text-foreground">{formatPrice(product.price)}</span>
