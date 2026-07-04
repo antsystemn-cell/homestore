@@ -514,20 +514,6 @@ const ProductPage = () => {
               </Button>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              <div className="flex flex-col items-center gap-1.5 bg-secondary rounded-xl p-3 md:p-4">
-                <Truck className="h-5 w-5 text-muted-foreground" />
-                <span className="text-[10px] md:text-xs font-medium text-muted-foreground text-center">Хүргэлттэй</span>
-              </div>
-              <div className="flex flex-col items-center gap-1.5 bg-secondary rounded-xl p-3 md:p-4">
-                <Shield className="h-5 w-5 text-muted-foreground" />
-                <span className="text-[10px] md:text-xs font-medium text-muted-foreground text-center">Баталгаатай</span>
-              </div>
-              <div className="flex flex-col items-center gap-1.5 bg-secondary rounded-xl p-3 md:p-4">
-                <RotateCcw className="h-5 w-5 text-muted-foreground" />
-                <span className="text-[10px] md:text-xs font-medium text-muted-foreground text-center">Буцаалттай</span>
-              </div>
-            </div>
 
             {product.description && (
               <div className="bg-secondary rounded-xl p-4 md:p-5">
