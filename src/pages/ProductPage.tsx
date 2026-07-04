@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Heart, ShoppingCart, Truck, Shield, RotateCcw, ChevronLeft, ChevronRight, Play, Gift } from "lucide-react";
+import { ArrowLeft, Heart, ShoppingCart, Truck, Shield, RotateCcw, ChevronLeft, ChevronRight, Play, Gift, X } from "lucide-react";
 import { Product, formatPrice, mapDbProduct, DetailMedia } from "@/data/products";
 import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import ProductCard from "@/components/store/ProductCard";
 import ProductReviews from "@/components/store/ProductReviews";
 import FrequentlyBoughtTogether from "@/components/store/FrequentlyBoughtTogether";
@@ -93,6 +94,8 @@ const ProductPage = () => {
   const [brandName, setBrandName] = useState<string | null>(null);
   const [stockQty, setStockQty] = useState<number | null>(null);
   const [variantStock, setVariantStock] = useState<Record<string, number>>({});
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetIntent, setSheetIntent] = useState<"cart" | "buy">("cart");
   const galleryRef = useRef<HTMLDivElement | null>(null);
   const userInteractedRef = useRef(false);
   const isProgrammaticScrollRef = useRef(false);
@@ -184,6 +187,45 @@ const ProductPage = () => {
       toast.success("Сагсанд амжилттай нэмлээ 🛒");
     }
   };
+
+  // Whether product requires the user to pick something before adding to cart
+  const needsSelection = () => {
+    if (!product) return false;
+    const hasColors = (product.colors?.length || 0) > 0;
+    const hasSizes = (product.sizes?.length || 0) > 0;
+    const hasMultiGift = (product.giftPackages?.length || 0) > 1;
+    return hasColors || hasSizes || hasMultiGift;
+  };
+
+  const openPurchase = (intent: "cart" | "buy") => {
+    if (isOutOfStock) {
+      toast.error("Энэ бараа дууссан байна");
+      return;
+    }
+    if (needsSelection()) {
+      setSheetIntent(intent);
+      setSheetOpen(true);
+      return;
+    }
+    handleAddToCart(intent === "buy");
+  };
+
+  const confirmSheet = () => {
+    // Reuse existing validation + add-to-cart flow
+    const beforeCount = 0; // handleAddToCart handles toasts itself
+    handleAddToCart(sheetIntent === "buy");
+    // Close sheet only if selections were valid — handleAddToCart returns void so
+    // we close optimistically and let toast.error above signal any failure state.
+    // To detect actual success, check required fields inline:
+    const missingColor = !!(product?.colors?.length) && !selectedColor;
+    const missingSize = !!(product?.sizes?.length) && !selectedSize;
+    const missingGift = (product?.giftPackages?.length || 0) > 1 && !selectedGiftPackageId;
+    if (!missingColor && !missingSize && !missingGift) {
+      setSheetOpen(false);
+    }
+    void beforeCount;
+  };
+
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -412,74 +454,8 @@ const ProductPage = () => {
               ) : null}
             </div>
 
-            {/* Gift packages */}
-            {product.giftPackages && product.giftPackages.length > 0 && (() => {
-              const singlePackage = product.giftPackages.length === 1;
-              return (
-              <div className="bg-accent/30 rounded-xl p-4 space-y-3">
-                <div className="flex items-center justify-between gap-2 text-sm font-semibold text-foreground">
-                  <div className="flex items-center gap-2">
-                    <Gift className="h-4 w-4 text-accent-foreground" />
-                    <span>{singlePackage ? "🎁 Дагалдах бэлэг" : "🎁 Бэлгийн багцаа сонгоно уу"}</span>
-                  </div>
-                  {!singlePackage && selectedGiftPackageId && (
-                    <button
-                      type="button"
-                      onClick={() => setSelectedGiftPackageId(null)}
-                      className="text-xs font-medium text-muted-foreground hover:text-foreground underline"
-                    >
-                      Цэвэрлэх
-                    </button>
-                  )}
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {product.giftPackages.map((pkg) => {
-                    const active = selectedGiftPackageId === pkg.id;
-                    const interactive = !singlePackage;
-                    return (
-                      <button
-                        key={pkg.id}
-                        type="button"
-                        disabled={!interactive}
-                        onClick={() => interactive && setSelectedGiftPackageId(active ? null : pkg.id)}
-                        className={`flex flex-col gap-2 rounded-lg p-3 border-2 text-left transition-colors ${
-                          active
-                            ? "border-primary bg-primary/10"
-                            : "border-border bg-background hover:border-primary/40"
-                        } ${!interactive ? "cursor-default" : ""}`}
-                      >
-                        <div className="flex items-center gap-2">
-                          {interactive && (
-                            <span className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${active ? "border-primary" : "border-muted-foreground/40"}`}>
-                              {active && <span className="w-2 h-2 rounded-full bg-primary" />}
-                            </span>
-                          )}
-                          <span className="text-sm font-semibold text-foreground">{pkg.name}</span>
-                          <span className="text-[10px] text-muted-foreground ml-auto">{pkg.items.length} зүйл</span>
-                        </div>
-                        {pkg.items.length > 0 && (
-                          <div className={`flex flex-wrap gap-1.5 ${interactive ? "pl-6" : ""}`}>
-                            {pkg.items.map((gift) => (
-                              <div key={gift.product_id} className="flex items-center gap-1.5 bg-secondary rounded-md px-1.5 py-1">
-                                {gift.image ? (
-                                  <img src={gift.image} alt={gift.name} className="w-6 h-6 rounded object-cover" />
-                                ) : (
-                                  <div className="w-6 h-6 rounded bg-muted flex items-center justify-center">
-                                    <Gift className="h-3 w-3 text-muted-foreground" />
-                                  </div>
-                                )}
-                                <span className="text-[11px] text-foreground line-clamp-1 max-w-[120px]">{gift.name}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-              );
-            })()}
+            {/* Gift package summary — moved into purchase sheet */}
+
 
             {/* Stock — shown only for Elle Sport brand. Per-variant when color/size selected. */}
             {(() => {
@@ -520,81 +496,11 @@ const ProductPage = () => {
               );
             })()}
 
-            {/* Color selector */}
-            {product.colors && product.colors.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-foreground mb-2">Өнгө</h3>
-                <div className="flex flex-wrap gap-2">
-                  {product.colors.map((color) => (
-                    <button
-                      key={color.name}
-                      onClick={() => {
-                        const newColor = selectedColor === color.name ? null : color.name;
-                        setSelectedColor(newColor);
-                        if (newColor && color.image) {
-                          setActiveImg(0);
-                        }
-                      }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border-2 transition-colors ${
-                        selectedColor === color.name
-                          ? "border-primary bg-primary/10 text-foreground"
-                          : "border-border bg-secondary text-muted-foreground hover:border-primary/40"
-                      }`}
-                    >
-                      {color.image && (
-                        <img src={color.image} alt={color.name} className="h-6 w-6 rounded-md object-cover" />
-                      )}
-                      {color.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Color / Size / Quantity selectors moved into purchase sheet */}
 
-            {/* Size selector */}
-            {product.sizes && product.sizes.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-foreground mb-2">Хэмжээ</h3>
-                <div className="flex flex-wrap gap-2">
-                  {product.sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(selectedSize === size ? null : size)}
-                      className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-colors ${
-                        selectedSize === size
-                          ? "border-primary bg-primary/10 text-foreground"
-                          : "border-border bg-secondary text-muted-foreground hover:border-primary/40"
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Quantity selector */}
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-2">Тоо ширхэг</h3>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-10 h-10 rounded-xl border-2 border-border bg-secondary text-foreground flex items-center justify-center text-lg font-bold hover:border-primary/40 transition-colors"
-                >
-                  −
-                </button>
-                <span className="w-12 h-10 flex items-center justify-center text-sm font-semibold text-foreground">{quantity}</span>
-                <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="w-10 h-10 rounded-xl border-2 border-border bg-secondary text-foreground flex items-center justify-center text-lg font-bold hover:border-primary/40 transition-colors"
-                >
-                  +
-                </button>
-              </div>
-            </div>
 
             <div className="hidden md:flex gap-3">
-              <Button variant="outline" size="lg" disabled={isOutOfStock} className="flex-1 gap-2 rounded-xl h-12" onClick={() => handleAddToCart()}>
+              <Button variant="outline" size="lg" disabled={isOutOfStock} className="flex-1 gap-2 rounded-xl h-12" onClick={() => openPurchase("cart")}>
                 <ShoppingCart className="h-4 w-4" />
                 {isOutOfStock ? "Дууссан" : "Сагсанд нэмэх"}
               </Button>
@@ -602,7 +508,7 @@ const ProductPage = () => {
                 size="lg"
                 disabled={isOutOfStock}
                 className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl h-12"
-                onClick={() => handleAddToCart(true)}
+                onClick={() => openPurchase("buy")}
               >
                 {isOutOfStock ? "Дууссан" : "Худалдаж авах"}
               </Button>
@@ -702,20 +608,187 @@ const ProductPage = () => {
         >
           <Heart className={`h-5 w-5 ${liked ? "fill-sale text-sale" : "text-muted-foreground"}`} />
         </button>
-        <Button variant="outline" disabled={isOutOfStock} className="flex-1 gap-2 rounded-2xl h-12 font-bold text-xs border-2" onClick={() => handleAddToCart()}>
+        <Button variant="outline" disabled={isOutOfStock} className="flex-1 gap-2 rounded-2xl h-12 font-bold text-xs border-2" onClick={() => openPurchase("cart")}>
           <ShoppingCart className="h-4 w-4" />
           {isOutOfStock ? "Дууссан" : "Сагсанд"}
         </Button>
         <Button
           disabled={isOutOfStock}
           className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl h-12 font-bold text-xs shadow-lg"
-          onClick={() => handleAddToCart(true)}
+          onClick={() => openPurchase("buy")}
         >
           {isOutOfStock ? "Дууссан" : "Шууд авах"}
         </Button>
       </div>
+
+      {/* Purchase options sheet — opens on Add-to-cart / Buy-now when selections are needed */}
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[92vh] overflow-y-auto p-0">
+          <SheetHeader className="px-5 pt-5 pb-2">
+            <SheetTitle className="text-base font-bold text-foreground text-left">
+              {sheetIntent === "buy" ? "Худалдан авах" : "Сагсанд нэмэх"}
+            </SheetTitle>
+          </SheetHeader>
+
+          <div className="px-5 pb-5 space-y-5">
+            {/* Product summary */}
+            <div className="flex gap-3 items-center pb-3 border-b border-border">
+              <img
+                src={
+                  selectedColor && product.colors?.find(c => c.name === selectedColor)?.image
+                    ? product.colors.find(c => c.name === selectedColor)!.image
+                    : product.image
+                }
+                alt={product.name}
+                className="w-16 h-16 rounded-lg object-cover bg-secondary shrink-0"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-foreground line-clamp-2">{product.name}</p>
+                <p className="text-base font-extrabold text-foreground mt-0.5">{formatPrice(product.price)}</p>
+              </div>
+            </div>
+
+            {/* Gift package picker */}
+            {product.giftPackages && product.giftPackages.length > 0 && (() => {
+              const singlePackage = product.giftPackages.length === 1;
+              return (
+                <div className="bg-accent/30 rounded-xl p-3 space-y-2">
+                  <div className="flex items-center justify-between gap-2 text-sm font-semibold text-foreground">
+                    <div className="flex items-center gap-2">
+                      <Gift className="h-4 w-4 text-accent-foreground" />
+                      <span>{singlePackage ? "🎁 Дагалдах бэлэг" : "🎁 Бэлгийн багц"}</span>
+                    </div>
+                    {!singlePackage && selectedGiftPackageId && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedGiftPackageId(null)}
+                        className="text-xs font-medium text-muted-foreground underline"
+                      >
+                        Цэвэрлэх
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 gap-2">
+                    {product.giftPackages.map((pkg) => {
+                      const active = selectedGiftPackageId === pkg.id;
+                      const interactive = !singlePackage;
+                      return (
+                        <button
+                          key={pkg.id}
+                          type="button"
+                          disabled={!interactive}
+                          onClick={() => interactive && setSelectedGiftPackageId(active ? null : pkg.id)}
+                          className={`flex flex-col gap-1.5 rounded-lg p-2.5 border-2 text-left transition-colors ${
+                            active ? "border-primary bg-primary/10" : "border-border bg-background"
+                          } ${!interactive ? "cursor-default" : ""}`}
+                        >
+                          <div className="flex items-center gap-2">
+                            {interactive && (
+                              <span className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${active ? "border-primary" : "border-muted-foreground/40"}`}>
+                                {active && <span className="w-2 h-2 rounded-full bg-primary" />}
+                              </span>
+                            )}
+                            <span className="text-sm font-semibold text-foreground">{pkg.name}</span>
+                            <span className="text-[10px] text-muted-foreground ml-auto">{pkg.items.length} зүйл</span>
+                          </div>
+                          {pkg.items.length > 0 && (
+                            <div className={`flex flex-wrap gap-1.5 ${interactive ? "pl-6" : ""}`}>
+                              {pkg.items.map((gift) => (
+                                <span key={gift.product_id} className="text-[11px] bg-secondary text-foreground rounded px-1.5 py-0.5">
+                                  {gift.name}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Color */}
+            {product.colors && product.colors.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-foreground mb-2">Өнгө</h3>
+                <div className="flex flex-wrap gap-2">
+                  {product.colors.map((color) => (
+                    <button
+                      key={color.name}
+                      onClick={() => setSelectedColor(selectedColor === color.name ? null : color.name)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border-2 transition-colors ${
+                        selectedColor === color.name
+                          ? "border-primary bg-primary/10 text-foreground"
+                          : "border-border bg-secondary text-muted-foreground"
+                      }`}
+                    >
+                      {color.image && (
+                        <img src={color.image} alt={color.name} className="h-6 w-6 rounded-md object-cover" />
+                      )}
+                      {color.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Size */}
+            {product.sizes && product.sizes.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-foreground mb-2">Хэмжээ</h3>
+                <div className="flex flex-wrap gap-2">
+                  {product.sizes.map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(selectedSize === size ? null : size)}
+                      className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-colors ${
+                        selectedSize === size
+                          ? "border-primary bg-primary/10 text-foreground"
+                          : "border-border bg-secondary text-muted-foreground"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Quantity */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-2">Тоо ширхэг</h3>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="w-10 h-10 rounded-xl border-2 border-border bg-secondary text-foreground flex items-center justify-center text-lg font-bold"
+                >
+                  −
+                </button>
+                <span className="w-12 h-10 flex items-center justify-center text-sm font-semibold text-foreground">{quantity}</span>
+                <button
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="w-10 h-10 rounded-xl border-2 border-border bg-secondary text-foreground flex items-center justify-center text-lg font-bold"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <Button
+              size="lg"
+              className="w-full h-12 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-base font-bold"
+              onClick={confirmSheet}
+              disabled={isOutOfStock}
+            >
+              {sheetIntent === "buy" ? "Худалдан авах" : "Сагсанд нэмэх"}
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
+
 
 export default ProductPage;
