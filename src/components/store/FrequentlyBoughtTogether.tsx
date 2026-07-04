@@ -12,7 +12,7 @@ interface Props {
   className?: string;
   title?: string;
   limit?: number;
-  variant?: "grid" | "vertical" | "carousel" | "square";
+  variant?: "grid" | "vertical" | "carousel" | "square" | "cardGrid";
   pageSize?: number;
 }
 
@@ -134,6 +134,67 @@ const FrequentlyBoughtTogether = ({
       </section>
     );
   }
+
+  if (variant === "cardGrid") {
+    return (
+      <section className={`mt-6 md:mt-8 ${className || ""}`}>
+        <h2 className="text-base md:text-lg font-bold text-foreground mb-3 md:mb-4">{title}</h2>
+        <div className="grid grid-cols-3 gap-2 md:gap-3">
+          {items.map((p) => {
+            const added = addedIds.has(p.id);
+            return (
+              <div
+                key={p.id}
+                className="rounded-lg border border-border bg-card overflow-hidden hover:shadow-md transition-shadow flex flex-col"
+              >
+                <button
+                  onClick={() => navigate(`/product/${p.slug || p.id}`)}
+                  className="block aspect-square w-full bg-secondary"
+                  aria-label={p.name}
+                >
+                  <img
+                    src={transformImage(p.thumbnail || p.image, 400) || "/placeholder.svg"}
+                    alt={p.name}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+                <div className="p-2 flex flex-col gap-1 flex-1">
+                  <button
+                    onClick={() => navigate(`/product/${p.slug || p.id}`)}
+                    className="text-[11px] md:text-xs font-medium text-foreground line-clamp-2 text-left hover:text-primary transition-colors leading-tight"
+                  >
+                    {p.name}
+                  </button>
+                  <div className="mt-auto flex items-center justify-between gap-1 pt-1">
+                    <p className="text-xs font-bold text-foreground truncate">
+                      {p.price.toLocaleString("mn-MN")}₮
+                    </p>
+                    <button
+                      onClick={() => handleAdd(p)}
+                      disabled={added}
+                      className={`shrink-0 h-7 w-7 rounded-full flex items-center justify-center transition-colors ${
+                        added
+                          ? "bg-primary/10 text-primary"
+                          : "bg-primary text-primary-foreground hover:bg-primary/90"
+                      }`}
+                      aria-label="Сагсанд нэмэх"
+                    >
+                      {added ? <Check className="h-3.5 w-3.5" /> : <ShoppingCart className="h-3.5 w-3.5" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    );
+  }
+
+
+
 
   const containerClass =
     variant === "vertical"
