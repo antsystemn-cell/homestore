@@ -16,6 +16,7 @@ import ReminderSettingsManager from "@/components/admin/ReminderSettingsManager"
 import ReviewsManager from "@/components/admin/ReviewsManager";
 import SpinSettingsManager from "@/components/admin/SpinSettingsManager";
 import ReferralManager from "@/components/admin/ReferralManager";
+import WalletCreditsManager from "@/components/admin/WalletCreditsManager";
 
 
 
