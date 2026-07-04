@@ -194,6 +194,10 @@ const ProductPage = () => {
     ? (variantSelected ? selectedVariantQty <= 0 : (stockQty !== null && stockQty <= 0))
     : false;
 
+  const flashSale = useFlashSaleFor(product?.id);
+  const displayPrice = flashSale ? Number(flashSale.sale_price) : (product?.price ?? 0);
+  const displayOriginal = flashSale ? (product?.price ?? null) : (product?.originalPrice ?? null);
+
   const handleAddToCart = (andNavigate?: boolean) => {
     if (product?.colors && product.colors.length > 0 && !selectedColor) {
       toast.error("Өнгөө сонгоно уу");
@@ -216,7 +220,12 @@ const ProductPage = () => {
       return;
     }
     const chosenPackage = product?.giftPackages?.find((p) => p.id === selectedGiftPackageId) || null;
-    addToCart(product!, selectedColor, selectedSize, quantity, chosenPackage);
+    // If a flash sale is active, override cart price + mark as on-sale so wallet
+    // credits are correctly disabled in checkout.
+    const cartProduct = flashSale
+      ? { ...product!, price: displayPrice, originalPrice: product!.price, isOnSale: true }
+      : product!;
+    addToCart(cartProduct, selectedColor, selectedSize, quantity, chosenPackage);
     setQuantity(1);
     if (andNavigate) {
       navigate("/cart");
@@ -224,6 +233,7 @@ const ProductPage = () => {
       toast.success("Сагсанд амжилттай нэмлээ 🛒");
     }
   };
+
 
   // Whether product requires the user to pick something before adding to cart
   const needsSelection = () => {
