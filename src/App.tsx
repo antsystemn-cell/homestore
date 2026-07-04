@@ -90,7 +90,10 @@ const PageFallback = () => (
   </div>
 );
 
-const App = () => (
+const App = () => {
+  const SPIN_ENABLED = useSpinEnabled();
+  return (
+
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
