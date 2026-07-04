@@ -18,6 +18,7 @@ import { useSpinEnabled } from "@/hooks/useSpinEnabled";
 import Index from "./pages/Index";
 import MaintenancePage from "./components/MaintenancePage";
 import PageViewTracker from "./components/PageViewTracker";
+import WelcomeBonus from "./components/store/WelcomeBonus";
 
 // Retry wrapper for lazy imports (handles stale chunk hashes after redeploy)
 function lazyRetry<T extends { default: React.ComponentType<any> }>(
