@@ -354,7 +354,7 @@ const ProductPage = () => {
 
 
 
-          <div className="relative space-y-4 md:order-2">
+          <div className="relative space-y-4 md:col-start-2 md:row-start-1 md:order-2">
 
             {/* Main product image */}
             <div className="relative">
