@@ -1,11 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { ChevronRight, LogOut, Shield, User, MapPin, Phone, ShoppingBag, Heart, Settings, Sparkles } from "lucide-react";
+import { ChevronRight, LogOut, Shield, User, MapPin, Phone, ShoppingBag, Heart, Settings, Sparkles, Bell } from "lucide-react";
 import BottomNav from "@/components/store/BottomNav";
 import Header from "@/components/store/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/data/products";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 
 const REWARD_STEP = 1000; // 1000 points = 1000₮ discount
 
@@ -13,18 +15,36 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const { user, isAdmin, isModerator, signOut, loading, authError } = useAuth();
   const [points, setPoints] = useState<number>(0);
+  const [smsConsent, setSmsConsent] = useState<boolean>(false);
+  const [savingConsent, setSavingConsent] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("loyalty_points")
+        .select("loyalty_points, sms_reminders_consent")
         .eq("user_id", user.id)
         .maybeSingle();
       setPoints((data as any)?.loyalty_points ?? 0);
+      setSmsConsent(Boolean((data as any)?.sms_reminders_consent));
     })();
   }, [user]);
+
+  const toggleSmsConsent = async (v: boolean) => {
+    if (!user) return;
+    setSavingConsent(true);
+    const prev = smsConsent;
+    setSmsConsent(v);
+    const { error } = await supabase.from("profiles").update({ sms_reminders_consent: v } as any).eq("user_id", user.id);
+    setSavingConsent(false);
+    if (error) {
+      setSmsConsent(prev);
+      toast.error("Хадгалж чадсангүй");
+    } else {
+      toast.success(v ? "SMS сануулга идэвхтэй боллоо" : "SMS сануулга унтарлаа");
+    }
+  };
 
   const nextTier = Math.max(REWARD_STEP, (Math.floor(points / REWARD_STEP) + 1) * REWARD_STEP);
   const pointsToNext = Math.max(0, nextTier - points);
@@ -131,6 +151,24 @@ const ProfilePage = () => {
               <p className="text-[10px] mt-1 opacity-70">
                 Захиалга хүргэгдэх бүрт барааны дүнгийн 1%-тай тэнцэх оноо нэмэгдэнэ.
               </p>
+            </div>
+
+            {/* SMS reminder consent */}
+            <div className="rounded-2xl p-4 md:p-5 bg-card border border-border">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3 min-w-0">
+                  <div className="h-10 w-10 rounded-xl bg-secondary flex items-center justify-center flex-shrink-0">
+                    <Bell className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">SMS сануулга авах</p>
+                    <p className="text-[11px] md:text-xs text-muted-foreground mt-0.5">
+                      Сагс орхисон, дахин захиалах цаг болсон үед бүртгэлтэй утас руу тань SMS илгээнэ.
+                    </p>
+                  </div>
+                </div>
+                <Switch checked={smsConsent} disabled={savingConsent} onCheckedChange={toggleSmsConsent} />
+              </div>
             </div>
 
             <div className="md:bg-card md:rounded-2xl md:border md:border-border md:overflow-hidden">

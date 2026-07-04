@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      active_carts: {
+        Row: {
+          items: Json
+          reminded_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          items?: Json
+          reminded_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          items?: Json
+          reminded_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ad_images: {
         Row: {
           created_at: string
@@ -1054,6 +1075,7 @@ export type Database = {
       }
       products: {
         Row: {
+          average_reorder_days: number | null
           brand_id: string | null
           brand_position: number | null
           category: string
@@ -1086,6 +1108,7 @@ export type Database = {
           variant_stock: Json
         }
         Insert: {
+          average_reorder_days?: number | null
           brand_id?: string | null
           brand_position?: number | null
           category?: string
@@ -1118,6 +1141,7 @@ export type Database = {
           variant_stock?: Json
         }
         Update: {
+          average_reorder_days?: number | null
           brand_id?: string | null
           brand_position?: number | null
           category?: string
@@ -1175,6 +1199,7 @@ export type Database = {
           phone_verified: boolean
           referral_code: string | null
           referred_by: string | null
+          sms_reminders_consent: boolean
           updated_at: string
           user_id: string
         }
@@ -1193,6 +1218,7 @@ export type Database = {
           phone_verified?: boolean
           referral_code?: string | null
           referred_by?: string | null
+          sms_reminders_consent?: boolean
           updated_at?: string
           user_id: string
         }
@@ -1211,6 +1237,7 @@ export type Database = {
           phone_verified?: boolean
           referral_code?: string | null
           referred_by?: string | null
+          sms_reminders_consent?: boolean
           updated_at?: string
           user_id?: string
         }
@@ -1394,6 +1421,90 @@ export type Database = {
           rewarded_at?: string | null
           rewarded_spins?: number
           status?: string
+        }
+        Relationships: []
+      }
+      reminder_config: {
+        Row: {
+          cart_delay_hours: number
+          cart_enabled: boolean
+          cart_message_template: string
+          created_at: string
+          id: number
+          order_link_base: string
+          reorder_enabled: boolean
+          reorder_message_template: string
+          sms_provider: string
+          sms_sender: string
+          updated_at: string
+        }
+        Insert: {
+          cart_delay_hours?: number
+          cart_enabled?: boolean
+          cart_message_template?: string
+          created_at?: string
+          id?: number
+          order_link_base?: string
+          reorder_enabled?: boolean
+          reorder_message_template?: string
+          sms_provider?: string
+          sms_sender?: string
+          updated_at?: string
+        }
+        Update: {
+          cart_delay_hours?: number
+          cart_enabled?: boolean
+          cart_message_template?: string
+          created_at?: string
+          id?: number
+          order_link_base?: string
+          reorder_enabled?: boolean
+          reorder_message_template?: string
+          sms_provider?: string
+          sms_sender?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reminder_log: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          message: string
+          order_id: string | null
+          phone: string | null
+          product_id: string | null
+          provider: string | null
+          provider_response: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          message: string
+          order_id?: string | null
+          phone?: string | null
+          product_id?: string | null
+          provider?: string | null
+          provider_response?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          message?: string
+          order_id?: string | null
+          phone?: string | null
+          product_id?: string | null
+          provider?: string | null
+          provider_response?: string | null
+          status?: string
+          user_id?: string | null
         }
         Relationships: []
       }

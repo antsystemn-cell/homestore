@@ -12,6 +12,7 @@ import CollectionsManager from "@/components/admin/CollectionsManager";
 import ChatbotSettingsManager from "@/components/admin/ChatbotSettingsManager";
 import RecommendationSettingsManager from "@/components/admin/RecommendationSettingsManager";
 import LoyaltySettingsManager from "@/components/admin/LoyaltySettingsManager";
+import ReminderSettingsManager from "@/components/admin/ReminderSettingsManager";
 import StockDeductionLog from "@/components/admin/StockDeductionLog";
 import DriversManager from "@/components/admin/DriversManager";
 import TrackingDashboard from "@/components/admin/TrackingDashboard";
@@ -39,9 +40,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
 
-type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "settings" | "branches";
+type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "settings" | "branches";
 
-const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "drivers", "branches"];
+const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "drivers", "branches"];
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -50,7 +51,7 @@ const AdminPage = () => {
   const hasAdminAccess = isAdmin || isModerator || isSeller;
   const [tab, setTab] = useState<Tab>(() => {
     const t = searchParams.get("tab") as Tab | null;
-    const valid: Tab[] = ["stats","tracking","products","orders","users","drivers","categories","brands","delivery","delivery-portal","payments","banner","collections","chatbot","analytics","diagnostics","stocklog","recommendations","loyalty","settings","branches"];
+    const valid: Tab[] = ["stats","tracking","products","orders","users","drivers","categories","brands","delivery","delivery-portal","payments","banner","collections","chatbot","analytics","diagnostics","stocklog","recommendations","loyalty","reminders","settings","branches"];
     return t && valid.includes(t) ? t : "stats";
   });
   const [products, setProducts] = useState<any[]>([]);
@@ -324,6 +325,7 @@ const AdminPage = () => {
     sizes: [] as string[],
     stock_quantity: 0,
     variant_stock: {} as Record<string, number>,
+    average_reorder_days: 0,
   });
   const [newColor, setNewColor] = useState("");
   const [newSize, setNewSize] = useState("");
@@ -1286,7 +1288,7 @@ const AdminPage = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, is_bogo: false, has_gift: false, gift_name: "", gifts: [], gift_packages: [], is_active: true, product_code: "", slug: "", specifications: [], detail_media: [], brand_id: "", colors: [], sizes: [], stock_quantity: 0, variant_stock: {} });
+    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, is_bogo: false, has_gift: false, gift_name: "", gifts: [], gift_packages: [], is_active: true, product_code: "", slug: "", specifications: [], detail_media: [], brand_id: "", colors: [], sizes: [], stock_quantity: 0, variant_stock: {}, average_reorder_days: 0 });
     setNewColor(""); setNewSize("");
     setEditId(null);
     setShowForm(false);
@@ -1349,6 +1351,7 @@ const AdminPage = () => {
       brand_id: form.brand_id || null,
       colors: form.colors.filter(c => c.name.trim()),
       sizes: form.sizes.filter(s => s.trim()),
+      average_reorder_days: Number(form.average_reorder_days) > 0 ? Number(form.average_reorder_days) : null,
       ...(() => {
         const b = dbBrands.find((x: any) => x.id === form.brand_id);
         const norm = (b?.name || "").toLowerCase().replace(/\s+/g, "");
@@ -1453,6 +1456,7 @@ const AdminPage = () => {
       sizes: Array.isArray(full.sizes) ? full.sizes : [],
       stock_quantity: typeof p.stock_quantity === "number" ? p.stock_quantity : 0,
       variant_stock: (full.variant_stock && typeof full.variant_stock === "object") ? full.variant_stock : {},
+      average_reorder_days: typeof p.average_reorder_days === "number" ? p.average_reorder_days : 0,
     });
     setEditId(p.id);
     setShowForm(true);
@@ -1512,6 +1516,7 @@ const AdminPage = () => {
       sizes: Array.isArray(full.sizes) ? full.sizes : [],
       stock_quantity: 0,
       variant_stock: {},
+      average_reorder_days: typeof p.average_reorder_days === "number" ? p.average_reorder_days : 0,
     });
     setEditId(null); // important: create new, don't update
     setShowForm(true);
@@ -1613,6 +1618,7 @@ const AdminPage = () => {
     { id: "stocklog", label: "Нөөцийн хасалт", icon: Package },
     { id: "recommendations", label: "Зөвлөмжийн жинлүүр", icon: Sparkles },
     { id: "loyalty", label: "Лоялти оноо", icon: Sparkles },
+    { id: "reminders", label: "Санамжийн SMS", icon: MessageCircle },
     { id: "drivers", label: "Жолоочид", icon: Truck },
     { id: "branches", label: "Салбар & шивэгч", icon: Store },
   ];
@@ -2754,6 +2760,22 @@ const AdminPage = () => {
                       </div>
                     );
                   })()}
+
+                  {/* Average reorder days — for SMS reorder reminders */}
+                  <div className="rounded-xl border border-border bg-secondary/30 p-3 space-y-2">
+                    <label className="text-[11px] font-semibold text-foreground">Дундаж дахин захиалгын хугацаа</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number" min={0} placeholder="жнь 30"
+                        value={form.average_reorder_days || ""}
+                        onChange={(e) => setForm({ ...form, average_reorder_days: Math.max(0, +e.target.value || 0) })}
+                        className="w-40 rounded-lg bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      />
+                      <span className="text-xs text-muted-foreground">хоног</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">Хэрэглэгчид энэ хоногийн дараа "дахин захиалах уу?" SMS илгээнэ. 0 үед сануулга явахгүй.</p>
+                  </div>
+
 
                   {(() => {
                     const b = dbBrands.find((x: any) => x.id === form.brand_id);
@@ -4493,6 +4515,8 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
           {tab === "recommendations" && <RecommendationSettingsManager />}
 
           {tab === "loyalty" && <LoyaltySettingsManager />}
+
+          {tab === "reminders" && <ReminderSettingsManager />}
 
 
           {/* Diagnostics Tab */}

@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode, useEffect, useRef } from "react";
 import { Product, GiftPackage } from "@/data/products";
 import { track } from "@/lib/tracking";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CartItem {
   product: Product;
@@ -51,6 +52,33 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     saveCartToStorage(items);
+  }, [items]);
+
+  // Persist cart to `active_carts` for logged-in users so abandoned-cart reminders work
+  const syncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (syncTimer.current) clearTimeout(syncTimer.current);
+    syncTimer.current = setTimeout(async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        if (items.length === 0) {
+          await supabase.from("active_carts" as any).delete().eq("user_id", user.id);
+          return;
+        }
+        const slim = items.map((i) => ({
+          product_id: i.product.id,
+          product: { id: i.product.id, name: i.product.name, price: i.product.price },
+          quantity: i.quantity,
+          color: i.selectedColor ?? null,
+          size: i.selectedSize ?? null,
+        }));
+        await supabase
+          .from("active_carts" as any)
+          .upsert({ user_id: user.id, items: slim, updated_at: new Date().toISOString(), reminded_at: null }, { onConflict: "user_id" });
+      } catch {}
+    }, 1500);
+    return () => { if (syncTimer.current) clearTimeout(syncTimer.current); };
   }, [items]);
 
   const addToCart = useCallback((product: Product, color?: string | null, size?: string | null, quantity: number = 1, giftPackage?: GiftPackage | null) => {
