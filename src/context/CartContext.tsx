@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode, useEffect, useRef } from "react";
 import { Product, GiftPackage } from "@/data/products";
 import { track } from "@/lib/tracking";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CartItem {
   product: Product;
