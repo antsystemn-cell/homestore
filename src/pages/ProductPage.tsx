@@ -495,14 +495,26 @@ const ProductPage = () => {
 
 
             <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="text-2xl md:text-3xl font-extrabold text-foreground">{formatPrice(product.price)}</span>
-              {product.originalPrice ? (
-                <span className="text-muted-foreground line-through text-lg">{formatPrice(product.originalPrice)}</span>
+              <span className={`text-2xl md:text-3xl font-extrabold ${flashSale ? "text-destructive" : "text-foreground"}`}>
+                {formatPrice(displayPrice)}
+              </span>
+              {displayOriginal && displayOriginal > displayPrice ? (
+                <span className="text-muted-foreground line-through text-lg">{formatPrice(displayOriginal)}</span>
               ) : null}
               {product.isBogo ? (
                 <span className="bg-primary text-primary-foreground text-xs font-bold px-2.5 py-1 rounded-lg">1+1 Үнэгүй</span>
               ) : null}
             </div>
+
+            {flashSale && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="inline-flex items-center gap-1 bg-destructive text-destructive-foreground text-xs font-bold px-2.5 py-1 rounded-lg">
+                  ⚡ Flash Sale -{flashSale.discount_percent}%
+                </span>
+                <FlashSaleCountdown endsAt={flashSale.ends_at} />
+              </div>
+            )}
+
 
             {/* Gift package summary — moved into purchase sheet */}
 
