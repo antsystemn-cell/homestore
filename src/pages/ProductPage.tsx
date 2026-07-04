@@ -344,17 +344,11 @@ const ProductPage = () => {
       </div>
 
       <div className="max-w-6xl mx-auto md:px-8">
-        <div className="md:grid md:grid-cols-[220px_1fr] md:gap-6">
-          {/* Left column (desktop): Frequently bought together with 1:1 cards — aligned with description */}
-          <aside className="hidden md:block md:row-start-2 md:col-start-1 md:order-1">
-            <div className="sticky top-20">
-              <FrequentlyBoughtTogether productId={product.id} variant="square" limit={5} />
-            </div>
-          </aside>
+        <div className="md:grid md:grid-cols-[1fr_260px] md:gap-8">
 
+          {/* LEFT column (desktop): image gallery + long content (description/specs/detail media) */}
+          <div className="relative space-y-4 md:col-start-1 md:row-start-1">
 
-
-          <div className="relative space-y-4 md:col-start-2 md:row-start-1 md:order-2">
 
             {/* Main product image */}
             <div className="relative">
@@ -439,7 +433,7 @@ const ProductPage = () => {
 
           </div>
 
-          <div className="p-4 md:p-0 space-y-6 md:mt-6 md:col-start-2 md:order-3">
+          <div className="p-4 md:p-0 space-y-6 md:col-start-2 md:row-start-1 md:row-span-2">
 
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-foreground leading-tight">{product.name}</h1>
@@ -521,10 +515,20 @@ const ProductPage = () => {
               </Button>
             </div>
 
+            {/* Frequently bought together — desktop only, right column below buttons */}
+            <div className="hidden md:block">
+              <FrequentlyBoughtTogether productId={product.id} variant="square" limit={5} />
+            </div>
+
             {/* Frequently bought together — mobile only, between price and description */}
             <div className="md:hidden -mx-4">
               <FrequentlyBoughtTogether productId={product.id} variant="carousel" limit={18} pageSize={6} />
             </div>
+          </div>
+
+          {/* BOTTOM-LEFT column (desktop): long content stacked below main image */}
+          <div className="p-4 md:p-0 space-y-6 md:col-start-1 md:row-start-2 md:mt-6">
+
 
             {product.description && (
               <div className="bg-secondary rounded-xl p-4 md:p-5">
