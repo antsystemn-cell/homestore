@@ -13,6 +13,8 @@ import ChatbotSettingsManager from "@/components/admin/ChatbotSettingsManager";
 import RecommendationSettingsManager from "@/components/admin/RecommendationSettingsManager";
 import LoyaltySettingsManager from "@/components/admin/LoyaltySettingsManager";
 import ReminderSettingsManager from "@/components/admin/ReminderSettingsManager";
+import ReviewsManager from "@/components/admin/ReviewsManager";
+
 import StockDeductionLog from "@/components/admin/StockDeductionLog";
 import DriversManager from "@/components/admin/DriversManager";
 import TrackingDashboard from "@/components/admin/TrackingDashboard";
