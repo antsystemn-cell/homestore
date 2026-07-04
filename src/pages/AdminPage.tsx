@@ -4521,6 +4521,9 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
 
           {tab === "reminders" && <ReminderSettingsManager />}
 
+          {tab === "reviews" && <ReviewsManager />}
+
+
 
           {/* Diagnostics Tab */}
           {tab === "diagnostics" && (() => {
