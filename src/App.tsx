@@ -10,8 +10,9 @@ import { AuthProvider } from "@/context/AuthContext";
 // Maintenance mode — set to true to block public access
 const MAINTENANCE_MODE = false;
 
-// Spin feature toggle — set to false to temporarily disable
-const SPIN_ENABLED = false;
+// Spin feature toggle — now controlled dynamically via admin panel (spin_config.is_enabled)
+import { useSpinEnabled } from "@/hooks/useSpinEnabled";
+
 
 // Eagerly load Index (critical landing page)
 import Index from "./pages/Index";
@@ -89,7 +90,10 @@ const PageFallback = () => (
   </div>
 );
 
-const App = () => (
+const App = () => {
+  const SPIN_ENABLED = useSpinEnabled();
+  return (
+
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -144,6 +148,8 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
+
 
 export default App;
