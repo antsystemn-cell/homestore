@@ -33,6 +33,10 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
+  const flashSale = useFlashSaleFor(product.id);
+  const displayPrice = flashSale ? Number(flashSale.sale_price) : product.price;
+  const displayOriginal = flashSale ? product.price : product.originalPrice;
+
   const [isHovering, setIsHovering] = useState(false);
   const [pinnedColorIdx, setPinnedColorIdx] = useState<number | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
