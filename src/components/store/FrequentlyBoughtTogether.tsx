@@ -12,7 +12,7 @@ interface Props {
   className?: string;
   title?: string;
   limit?: number;
-  variant?: "grid" | "vertical" | "carousel" | "square";
+  variant?: "grid" | "vertical" | "carousel" | "square" | "cardGrid";
   pageSize?: number;
 }
 
