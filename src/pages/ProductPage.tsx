@@ -669,8 +669,6 @@ const ProductPage = () => {
           </div>
         </div>
 
-        {/* Frequently bought together */}
-        <FrequentlyBoughtTogether productId={product.id} />
 
         {/* Reviews */}
         <div className="mt-10 md:mt-16 px-4 md:px-0">
