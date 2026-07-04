@@ -241,6 +241,13 @@ const CheckoutPage = () => {
         .in("id", ids);
     }
 
+    // Redeem selected wallet credit (single-use)
+    if (!isGuestCheckout && walletCreditId && effectiveWalletDiscount > 0) {
+      try {
+        await supabase.rpc("redeem_wallet_credit" as any, { _credit_id: walletCreditId, _order_id: data.id });
+      } catch (e) { console.error("wallet credit redeem failed", e); }
+    }
+
     // NOTE: Delivery dispatch is handled automatically by the DB trigger
     // `auto_send_order_to_delivery` once payment_status='paid' (online)
     // or admin marks the order 'confirmed' (cash). No client-side call needed.
