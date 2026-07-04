@@ -1455,6 +1455,7 @@ const AdminPage = () => {
       sizes: Array.isArray(full.sizes) ? full.sizes : [],
       stock_quantity: typeof p.stock_quantity === "number" ? p.stock_quantity : 0,
       variant_stock: (full.variant_stock && typeof full.variant_stock === "object") ? full.variant_stock : {},
+      average_reorder_days: typeof p.average_reorder_days === "number" ? p.average_reorder_days : 0,
     });
     setEditId(p.id);
     setShowForm(true);
