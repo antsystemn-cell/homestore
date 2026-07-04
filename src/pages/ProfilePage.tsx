@@ -172,6 +172,9 @@ const ProfilePage = () => {
                 <Switch checked={smsConsent} disabled={savingConsent} onCheckedChange={toggleSmsConsent} />
               </div>
             </div>
+            {/* Referral / Invite a friend */}
+            <ReferralCard />
+
 
             <div className="md:bg-card md:rounded-2xl md:border md:border-border md:overflow-hidden">
               {menuItems.map((item, i) => {
