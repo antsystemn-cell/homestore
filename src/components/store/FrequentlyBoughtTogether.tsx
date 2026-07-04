@@ -162,7 +162,7 @@ const CarouselView = ({ pages, title, className, addedIds, onAdd, onNavigate }: 
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth -mx-4 px-4 gap-3 scrollbar-hide"
+        className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide"
         style={{ scrollbarWidth: "none" }}
       >
         {pages.map((page, pi) => (
