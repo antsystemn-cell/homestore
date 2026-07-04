@@ -18,6 +18,7 @@ import { useBundleFreeDelivery } from "@/lib/bundleDelivery";
 import { hasFreeDeliveryProduct } from "@/lib/freeDeliveryProducts";
 import WalletCreditsSection from "@/components/store/WalletCreditsSection";
 import type { WalletCredit } from "@/hooks/useWalletCredits";
+import AddressSelector from "@/components/store/AddressSelector";
 
 type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket" | "sono";
 
@@ -458,12 +459,7 @@ const CheckoutPage = () => {
                   className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
-              <input
-                placeholder="Хаяг *"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              />
+              <AddressSelector value={address} onChange={setAddress} />
               <textarea
                 placeholder="Нэмэлт тэмдэглэл — хүргэлт, бараа болон бусад хүсэлт (заавал биш)"
                 rows={3}
