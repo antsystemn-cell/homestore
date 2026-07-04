@@ -308,16 +308,17 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
         </h3>
         <RatingRow productId={product.id} />
         <div className="mt-2 flex items-baseline gap-1.5 flex-nowrap">
-          <span className="text-foreground font-extrabold text-sm md:text-base whitespace-nowrap">
-            {formatPrice(product.price)}
+          <span className={`font-extrabold text-sm md:text-base whitespace-nowrap ${flashSale ? "text-destructive" : "text-foreground"}`}>
+            {formatPrice(displayPrice)}
           </span>
-          {product.originalPrice != null && product.originalPrice > product.price && (
+          {displayOriginal != null && displayOriginal > displayPrice && (
             <span className="text-muted-foreground text-[10px] md:text-xs line-through whitespace-nowrap">
-              {formatPrice(product.originalPrice)}
+              {formatPrice(displayOriginal)}
             </span>
           )}
         </div>
       </div>
+
 
     </a>
   );
