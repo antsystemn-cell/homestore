@@ -155,38 +155,41 @@ Deno.serve(async (req) => {
         .eq("user_id", o.user_id)
         .maybeSingle();
 
-      if (!profile?.sms_reminders_consent || !profile?.phone) {
-        await admin.from("reminder_log").insert({
-          user_id: o.user_id,
-          kind: "reorder",
-          product_id: pid,
-          order_id: o.id,
-          phone: profile?.phone ?? null,
-          message: "(skipped: no consent or no phone)",
-          status: "skipped",
-        });
-        continue;
-      }
-
-      const message = String(cfg.reorder_message_template ?? "")
+      const message = String(cfg.reorder_message_template ?? "{product} дахин захиалах цаг болжээ. {link}")
         .replace("{product}", p.name)
         .replace("{link}", cfg.order_link_base ?? "");
 
-      const result = await sendSms(cfg.sms_provider, cfg.sms_sender, profile.phone, message);
+      // Always create in-app notification
+      await admin.from("in_app_notifications").insert({
+        user_id: o.user_id,
+        kind: "reorder",
+        title: "Дахин захиалах цаг боллоо ⏰",
+        message: `${p.name} дуусах цаг болсон байх. Дахин захиалах уу?`,
+        link_url: "/",
+        metadata: { product_id: pid, product_name: p.name, order_id: o.id },
+      });
+
+      // Optional SMS if user has consent + phone
+      let smsStatus: "sent" | "queued" | "failed" | "skipped" = "skipped";
+      let smsResponse = "in-app only";
+      if (profile?.sms_reminders_consent && profile?.phone) {
+        const result = await sendSms(cfg.sms_provider, cfg.sms_sender, profile.phone, message);
+        smsStatus = result.status;
+        smsResponse = result.response;
+        if (result.status === "sent") sent++;
+      }
 
       await admin.from("reminder_log").insert({
         user_id: o.user_id,
         kind: "reorder",
         product_id: pid,
         order_id: o.id,
-        phone: profile.phone,
+        phone: profile?.phone ?? null,
         message,
-        status: result.status,
+        status: smsStatus,
         provider: cfg.sms_provider,
-        provider_response: result.response,
+        provider_response: smsResponse,
       });
-
-      if (result.status === "sent") sent++;
     }
   }
 
