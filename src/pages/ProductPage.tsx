@@ -500,7 +500,7 @@ const ProductPage = () => {
             {/* Color / Size / Quantity selectors moved into purchase sheet */}
 
 
-            <div className="hidden md:flex gap-3">
+            <div className="hidden md:flex flex-col gap-2">
               <Button variant="outline" size="lg" disabled={isOutOfStock} className="flex-1 gap-2 rounded-xl h-12" onClick={() => openPurchase("cart")}>
                 <ShoppingCart className="h-4 w-4" />
                 {isOutOfStock ? "Дууссан" : "Сагсанд нэмэх"}
