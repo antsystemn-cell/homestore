@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ShoppingCart, Check } from "lucide-react";
 import { Product, mapDbProduct } from "@/data/products";
@@ -12,8 +12,10 @@ interface Props {
   className?: string;
   title?: string;
   limit?: number;
-  variant?: "grid" | "vertical";
+  variant?: "grid" | "vertical" | "carousel";
+  pageSize?: number;
 }
+
 
 const FrequentlyBoughtTogether = ({
   productId,
