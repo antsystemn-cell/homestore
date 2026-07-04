@@ -15,18 +15,36 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const { user, isAdmin, isModerator, signOut, loading, authError } = useAuth();
   const [points, setPoints] = useState<number>(0);
+  const [smsConsent, setSmsConsent] = useState<boolean>(false);
+  const [savingConsent, setSavingConsent] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("loyalty_points")
+        .select("loyalty_points, sms_reminders_consent")
         .eq("user_id", user.id)
         .maybeSingle();
       setPoints((data as any)?.loyalty_points ?? 0);
+      setSmsConsent(Boolean((data as any)?.sms_reminders_consent));
     })();
   }, [user]);
+
+  const toggleSmsConsent = async (v: boolean) => {
+    if (!user) return;
+    setSavingConsent(true);
+    const prev = smsConsent;
+    setSmsConsent(v);
+    const { error } = await supabase.from("profiles").update({ sms_reminders_consent: v } as any).eq("user_id", user.id);
+    setSavingConsent(false);
+    if (error) {
+      setSmsConsent(prev);
+      toast.error("Хадгалж чадсангүй");
+    } else {
+      toast.success(v ? "SMS сануулга идэвхтэй боллоо" : "SMS сануулга унтарлаа");
+    }
+  };
 
   const nextTier = Math.max(REWARD_STEP, (Math.floor(points / REWARD_STEP) + 1) * REWARD_STEP);
   const pointsToNext = Math.max(0, nextTier - points);
