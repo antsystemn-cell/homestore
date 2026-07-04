@@ -16,6 +16,8 @@ import SonoPayment from "@/components/store/SonoPayment";
 import { track, attachLeadContact } from "@/lib/tracking";
 import { useBundleFreeDelivery } from "@/lib/bundleDelivery";
 import { hasFreeDeliveryProduct } from "@/lib/freeDeliveryProducts";
+import WalletCreditsSection from "@/components/store/WalletCreditsSection";
+import type { WalletCredit } from "@/hooks/useWalletCredits";
 
 type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket" | "sono";
 
