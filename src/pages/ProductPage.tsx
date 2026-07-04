@@ -515,10 +515,20 @@ const ProductPage = () => {
               </Button>
             </div>
 
+            {/* Frequently bought together — desktop only, right column below buttons */}
+            <div className="hidden md:block">
+              <FrequentlyBoughtTogether productId={product.id} variant="square" limit={5} />
+            </div>
+
             {/* Frequently bought together — mobile only, between price and description */}
             <div className="md:hidden -mx-4">
               <FrequentlyBoughtTogether productId={product.id} variant="carousel" limit={18} pageSize={6} />
             </div>
+          </div>
+
+          {/* BOTTOM-LEFT column (desktop): long content stacked below main image */}
+          <div className="p-4 md:p-0 space-y-6 md:col-start-1 md:row-start-2 md:mt-6">
+
 
             {product.description && (
               <div className="bg-secondary rounded-xl p-4 md:p-5">
