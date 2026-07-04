@@ -168,10 +168,9 @@ const CartPage = () => {
         )}
 
         {items.length > 0 && (
-          <FrequentlyBoughtTogether productId={items[0].product.id} />
+          <FrequentlyBoughtTogether productId={items[0].product.id} limit={6} />
         )}
 
-        {items.length > 0 && <CartRecommendations items={items} weights={cartWeights} />}
       </div>
       <GuestCheckoutModal
         open={showGuestModal}
