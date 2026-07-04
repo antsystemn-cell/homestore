@@ -1626,6 +1626,8 @@ const AdminPage = () => {
     { id: "loyalty", label: "Лоялти оноо", icon: Sparkles },
     { id: "reminders", label: "Санамжийн SMS", icon: MessageCircle },
     { id: "reviews", label: "Сэтгэгдэл", icon: Star },
+    { id: "spin", label: "Хүрд тоглоом", icon: Sparkles },
+
 
     { id: "drivers", label: "Жолоочид", icon: Truck },
     { id: "branches", label: "Салбар & шивэгч", icon: Store },
