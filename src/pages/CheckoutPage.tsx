@@ -120,6 +120,19 @@ const CheckoutPage = () => {
     })();
   }, [user]);
 
+  // Fetch loyalty points for logged-in users
+  useEffect(() => {
+    if (!user) { setLoyaltyPoints(0); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("loyalty_points")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      setLoyaltyPoints((data as any)?.loyalty_points ?? 0);
+    })();
+  }, [user]);
+
   const selectedDeliveryOption = deliveryOptions.find(d => d.id === selectedDelivery);
   const deliveryFee = selectedDeliveryOption?.price || 0;
 
@@ -135,7 +148,12 @@ const CheckoutPage = () => {
     (c) => selectedCouponIds.includes(c.id) && (!c.minimum_order_amount || cartTotal >= Number(c.minimum_order_amount))
   );
   const couponDiscount = validSelectedCoupons.reduce((s, c) => s + Number(c.reward_value || 0), 0);
-  const grandTotal = Math.max(0, cartTotal + totalDeliveryFee - couponDiscount);
+
+  // Loyalty points discount (1 point = 1₮)
+  const totalBeforePoints = Math.max(0, cartTotal + totalDeliveryFee - couponDiscount);
+  const maxRedeemable = Math.max(0, Math.min(loyaltyPoints, totalBeforePoints));
+  const pointsDiscount = usePoints ? Math.max(0, Math.min(pointsInput || 0, maxRedeemable)) : 0;
+  const grandTotal = Math.max(0, totalBeforePoints - pointsDiscount);
 
   const createOrder = async (paymentStatus = "unpaid", pm: PaymentMethod = "cash") => {
     if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return null; }
