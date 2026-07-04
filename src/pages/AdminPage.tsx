@@ -14,6 +14,8 @@ import RecommendationSettingsManager from "@/components/admin/RecommendationSett
 import LoyaltySettingsManager from "@/components/admin/LoyaltySettingsManager";
 import ReminderSettingsManager from "@/components/admin/ReminderSettingsManager";
 import ReviewsManager from "@/components/admin/ReviewsManager";
+import SpinSettingsManager from "@/components/admin/SpinSettingsManager";
+
 
 import StockDeductionLog from "@/components/admin/StockDeductionLog";
 import DriversManager from "@/components/admin/DriversManager";
