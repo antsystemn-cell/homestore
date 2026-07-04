@@ -2184,6 +2184,16 @@ export type Database = {
           referral_code: string
         }[]
       }
+      get_my_welcome_coupon: {
+        Args: never
+        Returns: {
+          code: string
+          expires_at: string
+          is_used: boolean
+          minimum_order_amount: number
+          reward_value: number
+        }[]
+      }
       get_personalized_recommendations: {
         Args: { _limit?: number }
         Returns: {
