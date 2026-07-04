@@ -11,6 +11,7 @@ import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
 import ChatbotSettingsManager from "@/components/admin/ChatbotSettingsManager";
 import RecommendationSettingsManager from "@/components/admin/RecommendationSettingsManager";
+import LoyaltySettingsManager from "@/components/admin/LoyaltySettingsManager";
 import StockDeductionLog from "@/components/admin/StockDeductionLog";
 import DriversManager from "@/components/admin/DriversManager";
 import TrackingDashboard from "@/components/admin/TrackingDashboard";
