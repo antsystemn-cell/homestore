@@ -20,19 +20,27 @@ const ProfilePage = () => {
   const [points, setPoints] = useState<number>(0);
   const [smsConsent, setSmsConsent] = useState<boolean>(false);
   const [savingConsent, setSavingConsent] = useState(false);
+  const [orderCount, setOrderCount] = useState<number>(0);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("loyalty_points, sms_reminders_consent")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      setPoints((data as any)?.loyalty_points ?? 0);
-      setSmsConsent(Boolean((data as any)?.sms_reminders_consent));
+      const [{ data: prof }, { data: cnt }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("loyalty_points, sms_reminders_consent")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        supabase.rpc("get_my_order_count" as any),
+      ]);
+      setPoints((prof as any)?.loyalty_points ?? 0);
+      setSmsConsent(Boolean((prof as any)?.sms_reminders_consent));
+      setOrderCount(typeof cnt === "number" ? cnt : 0);
     })();
   }, [user]);
+
+  const isVip = orderCount >= 3;
+
 
   const toggleSmsConsent = async (v: boolean) => {
     if (!user) return;
