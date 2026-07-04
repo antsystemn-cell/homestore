@@ -12,7 +12,7 @@ interface Props {
   className?: string;
   title?: string;
   limit?: number;
-  variant?: "grid" | "vertical" | "carousel";
+  variant?: "grid" | "vertical" | "carousel" | "square";
   pageSize?: number;
 }
 
@@ -73,6 +73,64 @@ const FrequentlyBoughtTogether = ({
         onAdd={handleAdd}
         onNavigate={(p) => navigate(`/product/${p.slug || p.id}`)}
       />
+    );
+  }
+
+  if (variant === "square") {
+    return (
+      <section className={`mt-2 ${className || ""}`}>
+        <h2 className="text-base md:text-lg font-bold text-foreground mb-3 md:mb-4">{title}</h2>
+        <div className="flex flex-col gap-3">
+          {items.map((p) => {
+            const added = addedIds.has(p.id);
+            return (
+              <div
+                key={p.id}
+                className="rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow"
+              >
+                <button
+                  onClick={() => navigate(`/product/${p.slug || p.id}`)}
+                  className="block aspect-square w-full bg-secondary"
+                  aria-label={p.name}
+                >
+                  <img
+                    src={transformImage(p.thumbnail || p.image, 500) || "/placeholder.svg"}
+                    alt={p.name}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+                <div className="p-3 flex items-center gap-2">
+                  <div className="min-w-0 flex-1">
+                    <button
+                      onClick={() => navigate(`/product/${p.slug || p.id}`)}
+                      className="text-sm font-semibold text-foreground line-clamp-2 text-left hover:text-primary transition-colors"
+                    >
+                      {p.name}
+                    </button>
+                    <p className="text-sm font-bold text-foreground mt-1">
+                      {p.price.toLocaleString("mn-MN")}₮
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleAdd(p)}
+                    disabled={added}
+                    className={`shrink-0 h-9 w-9 rounded-full flex items-center justify-center transition-colors ${
+                      added
+                        ? "bg-primary/10 text-primary"
+                        : "bg-primary text-primary-foreground hover:bg-primary/90"
+                    }`}
+                    aria-label="Сагсанд нэмэх"
+                  >
+                    {added ? <Check className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
     );
   }
 
