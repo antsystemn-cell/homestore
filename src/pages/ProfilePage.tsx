@@ -110,6 +110,29 @@ const ProfilePage = () => {
 
           {/* Menu Items */}
           <div className="px-4 md:px-0 md:col-span-2 space-y-4">
+            {/* Loyalty points card */}
+            <div className="rounded-2xl p-4 md:p-5 bg-gradient-to-br from-primary/90 to-primary text-primary-foreground shadow-sm">
+              <div className="flex items-center gap-2 text-xs opacity-90">
+                <Sparkles className="h-4 w-4" />
+                Лоялти оноо
+              </div>
+              <div className="mt-1 flex items-baseline gap-2">
+                <span className="text-2xl md:text-3xl font-extrabold">{points.toLocaleString("mn-MN")}</span>
+                <span className="text-xs opacity-80">оноо</span>
+              </div>
+              <div className="mt-3 h-1.5 bg-white/25 rounded-full overflow-hidden">
+                <div className="h-full bg-white rounded-full" style={{ width: `${progress}%` }} />
+              </div>
+              <p className="text-[11px] md:text-xs mt-2 opacity-90">
+                {pointsToNext > 0
+                  ? `Дараагийн ${formatPrice(nextTier)} хямдрал авахад ${pointsToNext.toLocaleString("mn-MN")} оноо хэрэгтэй`
+                  : `Одоо ${formatPrice(points)}-ийн хямдралд ашиглаж болно`}
+              </p>
+              <p className="text-[10px] mt-1 opacity-70">
+                Захиалга хүргэгдэх бүрт барааны дүнгийн 1%-тай тэнцэх оноо нэмэгдэнэ.
+              </p>
+            </div>
+
             <div className="md:bg-card md:rounded-2xl md:border md:border-border md:overflow-hidden">
               {menuItems.map((item, i) => {
                 const Icon = item.icon;
