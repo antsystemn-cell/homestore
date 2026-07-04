@@ -168,14 +168,14 @@ const CarouselView = ({ pages, title, className, addedIds, onAdd, onNavigate }: 
         {pages.map((page, pi) => (
           <div
             key={pi}
-            className="shrink-0 w-full snap-start grid grid-cols-2 gap-2"
+            className="shrink-0 w-full snap-start grid grid-cols-3 gap-1.5"
           >
             {page.map((p) => {
               const added = addedIds.has(p.id);
               return (
                 <div
                   key={p.id}
-                  className="relative rounded-xl border border-border bg-card overflow-hidden flex flex-col"
+                  className="relative rounded-lg border border-border bg-card overflow-hidden flex flex-col"
                 >
                   <button
                     onClick={() => onNavigate(p)}
@@ -183,36 +183,37 @@ const CarouselView = ({ pages, title, className, addedIds, onAdd, onNavigate }: 
                     aria-label={p.name}
                   >
                     <img
-                      src={transformImage(p.thumbnail || p.image, 300) || "/placeholder.svg"}
+                      src={transformImage(p.thumbnail || p.image, 200) || "/placeholder.svg"}
                       alt={p.name}
                       loading="lazy"
                       decoding="async"
                       className="w-full h-full object-cover"
                     />
                   </button>
-                  <div className="p-2 flex-1 flex flex-col gap-1">
+                  <div className="p-1.5 flex-1 flex flex-col gap-0.5">
                     <button
                       onClick={() => onNavigate(p)}
-                      className="text-xs font-medium text-foreground line-clamp-2 text-left"
+                      className="text-[10px] leading-tight font-medium text-foreground line-clamp-2 text-left"
                     >
                       {p.name}
                     </button>
-                    <div className="mt-auto flex items-center justify-between gap-2 pt-1">
-                      <p className="text-xs font-bold text-foreground truncate">
+                    <div className="mt-auto flex items-center justify-between gap-1 pt-0.5">
+                      <p className="text-[10px] font-bold text-foreground truncate">
                         {p.price.toLocaleString("mn-MN")}₮
                       </p>
                       <button
                         onClick={() => onAdd(p)}
                         disabled={added}
-                        className={`shrink-0 h-7 w-7 rounded-full flex items-center justify-center transition-colors ${
+                        className={`shrink-0 h-6 w-6 rounded-full flex items-center justify-center transition-colors ${
                           added
                             ? "bg-primary/10 text-primary"
                             : "bg-primary text-primary-foreground hover:bg-primary/90"
                         }`}
                         aria-label="Сагсанд нэмэх"
                       >
-                        {added ? <Check className="h-3.5 w-3.5" /> : <ShoppingCart className="h-3.5 w-3.5" />}
+                        {added ? <Check className="h-3 w-3" /> : <ShoppingCart className="h-3 w-3" />}
                       </button>
+
                     </div>
                   </div>
                 </div>
