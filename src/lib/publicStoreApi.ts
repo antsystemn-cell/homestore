@@ -307,3 +307,54 @@ export const fetchFeaturedProducts = async () => {
     return [];
   }
 };
+
+// Fetch product rows for a list of IDs using the lightweight LIST_SELECT.
+// Preserves the order of the input IDs (RPC callers expect ranked output).
+export const fetchPublicProductsByIds = async (ids: string[]) => {
+  try {
+    const clean = Array.from(new Set((ids || []).filter(Boolean)));
+    if (clean.length === 0) return [];
+    const rows = await fetchPublic<any[]>("products", {
+      select: LIST_SELECT,
+      id: `in.(${clean.join(",")})`,
+      is_active: "eq.true",
+    });
+    const stripped = stripColorImages(rows || []);
+    const byId = new Map(stripped.map((r: any) => [r.id, r]));
+    return clean.map((id) => byId.get(id)).filter(Boolean) as any[];
+  } catch (error) {
+    logError("productsByIds", error);
+    return [];
+  }
+};
+
+// "Үүнтэй хамт авдаг бараа" — RPC returns ranked product_ids; hydrate to list rows.
+export const fetchFrequentlyBoughtTogether = async (productId: string, limit = 3) => {
+  try {
+    const { data, error } = await supabase.rpc("get_frequently_bought_together", {
+      _product_id: productId,
+      _limit: limit,
+    });
+    if (error) throw error;
+    const ids = (data || []).map((r: any) => r.product_id).filter(Boolean);
+    return await fetchPublicProductsByIds(ids);
+  } catch (error) {
+    logError("frequentlyBoughtTogether", error);
+    return [];
+  }
+};
+
+// "Танд зориулсан" — personalized based on user's past-purchase categories.
+export const fetchPersonalizedRecommendations = async (limit = 8) => {
+  try {
+    const { data, error } = await supabase.rpc("get_personalized_recommendations", {
+      _limit: limit,
+    });
+    if (error) throw error;
+    const ids = (data || []).map((r: any) => r.product_id).filter(Boolean);
+    return await fetchPublicProductsByIds(ids);
+  } catch (error) {
+    logError("personalizedRecommendations", error);
+    return [];
+  }
+};
