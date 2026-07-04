@@ -11,9 +11,17 @@ interface Props {
   productId: string;
   className?: string;
   title?: string;
+  limit?: number;
+  variant?: "grid" | "vertical";
 }
 
-const FrequentlyBoughtTogether = ({ productId, className, title = "Үүнтэй хамт авдаг бараа" }: Props) => {
+const FrequentlyBoughtTogether = ({
+  productId,
+  className,
+  title = "Үүнтэй хамт авдаг бараа",
+  limit = 3,
+  variant = "grid",
+}: Props) => {
   const [items, setItems] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
