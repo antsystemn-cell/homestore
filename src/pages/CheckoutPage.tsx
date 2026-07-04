@@ -51,6 +51,11 @@ const CheckoutPage = () => {
   const [availableCoupons, setAvailableCoupons] = useState<SpinCoupon[]>([]);
   const [selectedCouponIds, setSelectedCouponIds] = useState<string[]>([]);
 
+  // Wallet credit (single)
+  const [walletCreditId, setWalletCreditId] = useState<string | null>(null);
+  const [walletCredit, setWalletCredit] = useState<WalletCredit | null>(null);
+  const [walletCreditDiscount, setWalletCreditDiscount] = useState<number>(0);
+
   // Loyalty points
   const [loyaltyPoints, setLoyaltyPoints] = useState<number>(0);
   const [usePoints, setUsePoints] = useState<boolean>(false);
