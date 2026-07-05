@@ -56,6 +56,7 @@ const SpinPage = lazy(() => lazyRetry(() => import("./pages/SpinPage")));
 const SpinFabLazy = lazy(() => lazyRetry(() => import("./components/spin/SpinFab")));
 const AdminSpinPage = lazy(() => lazyRetry(() => import("./pages/AdminSpinPage")));
 const MyRewardsPage = lazy(() => lazyRetry(() => import("./pages/MyRewardsPage")));
+const ReelsPage = lazy(() => lazyRetry(() => import("./pages/ReelsPage")));
 
 
 const queryClient = new QueryClient({
