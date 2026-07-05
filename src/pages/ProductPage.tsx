@@ -763,24 +763,37 @@ const ProductPage = () => {
             {/* Color */}
             {product.colors && product.colors.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold text-foreground mb-2">Өнгө</h3>
-                <div className="flex flex-wrap gap-2">
-                  {product.colors.map((color) => (
-                    <button
-                      key={color.name}
-                      onClick={() => setSelectedColor(selectedColor === color.name ? null : color.name)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border-2 transition-colors ${
-                        selectedColor === color.name
-                          ? "border-primary bg-primary/10 text-foreground"
-                          : "border-border bg-secondary text-muted-foreground"
-                      }`}
-                    >
-                      {color.image && (
-                        <img src={color.image} alt={color.name} className="h-6 w-6 rounded-md object-cover" />
-                      )}
-                      {color.name}
-                    </button>
-                  ))}
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-semibold text-foreground">
+                    Өнгө{selectedColor ? <span className="ml-1 text-muted-foreground font-normal">· {selectedColor}</span> : null}
+                  </h3>
+                  <span className="text-xs text-muted-foreground">{product.colors.length} сонголт</span>
+                </div>
+                <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1 snap-x">
+                  {product.colors.map((color) => {
+                    const active = selectedColor === color.name;
+                    return (
+                      <button
+                        key={color.name}
+                        onClick={() => setSelectedColor(active ? null : color.name)}
+                        className={`snap-start shrink-0 flex items-center gap-2 pl-1.5 pr-3.5 py-1.5 rounded-full text-sm font-medium bg-secondary/60 border-2 transition-all ${
+                          active
+                            ? "border-foreground text-foreground bg-background shadow-sm"
+                            : "border-transparent text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {color.image ? (
+                          <img src={color.image} alt={color.name} className="h-8 w-8 rounded-full object-cover ring-1 ring-black/5" />
+                        ) : (
+                          <span
+                            className="h-8 w-8 rounded-full ring-1 ring-black/10"
+                            style={{ backgroundColor: getColorHex(color.name, (product as any).productCode || product.id) }}
+                          />
+                        )}
+                        <span className="whitespace-nowrap">{color.name}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
