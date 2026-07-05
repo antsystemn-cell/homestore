@@ -4542,6 +4542,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                           <p className="text-[10px] text-muted-foreground truncate">{u.email || "Имэйл байхгүй"}</p>
                           <p className="text-[10px] text-muted-foreground truncate">{u.phone || "Утас байхгүй"}</p>
                           <p className="text-[10px] text-muted-foreground truncate">{(u.order_count ?? 0)} захиалга · {(u.loyalty_points ?? 0).toLocaleString("mn-MN")} оноо</p>
+                          <div className="mt-1"><DeviceBadge info={u.device_info} /></div>
                         </div>
                         <span className="text-[10px] text-muted-foreground shrink-0">{new Date(u.created_at).toLocaleDateString("mn-MN")}</span>
                       </div>
