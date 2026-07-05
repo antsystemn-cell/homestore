@@ -4609,6 +4609,8 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
 
           {tab === "flash-sales" && <FlashSalesManager />}
 
+          {tab === "reels" && <ReelsManager />}
+
 
 
 
