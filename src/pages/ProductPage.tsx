@@ -479,6 +479,56 @@ const ProductPage = () => {
               </div>
             )}
 
+            {/* Color chooser below main image (mirrors buy-sheet styling) */}
+            {product.colors && product.colors.length > 0 && (
+              <div className="px-4 md:px-0 pt-1">
+                <div className="flex items-end justify-between mb-2 px-0.5">
+                  <div className="space-y-0.5">
+                    <h3 className="text-sm font-bold text-foreground leading-none">Өнгө</h3>
+                    <p className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">
+                      {selectedColor ? `Сонгосон: ${selectedColor}` : `${product.colors.length} сонголт`}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2.5 overflow-x-auto no-scrollbar -mx-4 md:mx-0 px-4 md:px-0 pb-2 snap-x">
+                  {product.colors.map((color) => {
+                    const active = selectedColor === color.name;
+                    return (
+                      <button
+                        key={color.name}
+                        type="button"
+                        onClick={() => {
+                          userInteractedRef.current = true;
+                          setSelectedColor(active ? null : color.name);
+                        }}
+                        className={`snap-start shrink-0 flex items-center gap-2.5 pl-1.5 pr-3.5 py-1.5 rounded-2xl transition-all duration-200 active:scale-[0.97] ${
+                          active
+                            ? "bg-background border-2 border-foreground shadow-md"
+                            : "bg-secondary/70 border-2 border-transparent"
+                        }`}
+                      >
+                        {color.image ? (
+                          <img
+                            src={color.image}
+                            alt={color.name}
+                            className="h-11 w-11 rounded-xl object-cover ring-1 ring-black/5 bg-background"
+                          />
+                        ) : (
+                          <span
+                            className="h-11 w-11 rounded-xl ring-1 ring-black/10"
+                            style={{ backgroundColor: getColorHex(color.name, (product as any).productCode || product.id) }}
+                          />
+                        )}
+                        <span className={`text-[13px] leading-tight whitespace-nowrap ${active ? "font-bold text-foreground" : "font-semibold text-muted-foreground"}`}>
+                          {color.name}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
           </div>
 
           <div className="p-4 md:p-0 space-y-6 md:col-start-2 md:row-start-1">
