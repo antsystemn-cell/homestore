@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
   BarChart3, LayoutDashboard, Search, X, AlertTriangle, AlertCircle, BadgeCheck, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, FileSpreadsheet, Sparkles,
-  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw, Star, Gift
+  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw, Star, Gift, Smartphone, Monitor, Tablet
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
@@ -56,6 +56,38 @@ const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "b
 
 
 
+
+type DeviceInfo = { device: string; user_agent: string | null; last_seen_at: string } | null;
+
+const DeviceBadge = ({ info }: { info: DeviceInfo }) => {
+  if (!info) return <span className="text-xs text-muted-foreground">—</span>;
+  const ua = (info.user_agent || "").toLowerCase();
+  const isTablet = /ipad|tablet/.test(ua) || info.device === "tablet";
+  const isMobile = !isTablet && info.device === "mobile";
+  const Icon = isTablet ? Tablet : isMobile ? Smartphone : Monitor;
+  const label = isTablet ? "Таблет" : isMobile ? "Гар утас" : "Компьютер";
+  const cls = isTablet
+    ? "bg-amber-500/10 text-amber-600 border-amber-500/30"
+    : isMobile
+    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
+    : "bg-blue-500/10 text-blue-600 border-blue-500/30";
+  let osTag = "";
+  if (/iphone|ipad|ios/.test(ua)) osTag = "iOS";
+  else if (/android/.test(ua)) osTag = "Android";
+  else if (/windows/.test(ua)) osTag = "Windows";
+  else if (/mac os|macintosh/.test(ua)) osTag = "macOS";
+  else if (/linux/.test(ua)) osTag = "Linux";
+  return (
+    <div
+      className={`inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-1 rounded-full border ${cls}`}
+      title={info.user_agent || ""}
+    >
+      <Icon className="h-3 w-3" />
+      <span>{label}</span>
+      {osTag && <span className="opacity-70">· {osTag}</span>}
+    </div>
+  );
+};
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -1260,9 +1292,29 @@ const AdminPage = () => {
         rolesMap[r.user_id].push(r.role);
       });
 
+      // Attach latest device info per user from analytics_sessions
+      const deviceMap: Record<string, { device: string; user_agent: string | null; last_seen_at: string }> = {};
+      try {
+        const { data: sessData } = await supabase
+          .from("analytics_sessions")
+          .select("user_id, device, user_agent, last_seen_at")
+          .not("user_id", "is", null)
+          .order("last_seen_at", { ascending: false })
+          .limit(2000);
+        (sessData || []).forEach((s: any) => {
+          if (!s.user_id) return;
+          if (!deviceMap[s.user_id]) {
+            deviceMap[s.user_id] = { device: s.device, user_agent: s.user_agent, last_seen_at: s.last_seen_at };
+          }
+        });
+      } catch (e) {
+        console.warn("Failed to load device sessions", e);
+      }
+
       const enriched = baseUsers.map((u: any) => ({
         ...u,
         roles: rolesMap[u.user_id] || [],
+        device_info: deviceMap[u.user_id] || null,
       }));
       setUsers(enriched);
     } catch (error) {
@@ -4386,6 +4438,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Хэрэглэгч</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Имэйл</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Утас</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Төхөөрөмж</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Эрх</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Бүртгүүлсэн</th>
                       </tr>
@@ -4429,6 +4482,9 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                               {u.phone ? (
                                 <a href={`tel:${u.phone}`} className="hover:text-foreground hover:underline">{u.phone}</a>
                               ) : "—"}
+                            </td>
+                            <td className="px-6 py-4">
+                              <DeviceBadge info={u.device_info} />
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex flex-wrap gap-1.5">
@@ -4486,6 +4542,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                           <p className="text-[10px] text-muted-foreground truncate">{u.email || "Имэйл байхгүй"}</p>
                           <p className="text-[10px] text-muted-foreground truncate">{u.phone || "Утас байхгүй"}</p>
                           <p className="text-[10px] text-muted-foreground truncate">{(u.order_count ?? 0)} захиалга · {(u.loyalty_points ?? 0).toLocaleString("mn-MN")} оноо</p>
+                          <div className="mt-1"><DeviceBadge info={u.device_info} /></div>
                         </div>
                         <span className="text-[10px] text-muted-foreground shrink-0">{new Date(u.created_at).toLocaleDateString("mn-MN")}</span>
                       </div>
