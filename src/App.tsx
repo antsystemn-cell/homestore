@@ -129,6 +129,7 @@ const App = () => {
                     <Route path="/checkout" element={<CheckoutPage />} />
                     <Route path="/product/:slug" element={<ProductPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/reels" element={<ReelsPage />} />
                     {SPIN_ENABLED && <Route path="/spin" element={<SpinPage />} />}
                     {SPIN_ENABLED && <Route path="/my-rewards" element={<MyRewardsPage />} />}
                     
