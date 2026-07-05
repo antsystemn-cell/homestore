@@ -71,14 +71,22 @@ const ProductGrid = React.memo(({ products, brands }: Props) => {
 
     if (brands && brands.length > 0 && list.length > 0) {
       const seed = hashString(products.map((p) => p.id).join("|"));
-      brands.forEach((b, idx) => {
-        // Pseudo-random position based on seed + brand id — stable across re-renders.
-        const rand = hashString(b.id + ":" + seed + ":" + idx);
-        // Keep first ~2 slots as products so the grid opens with products.
-        const minPos = Math.min(2, list.length);
-        const range = list.length - minPos + 1;
-        const pos = minPos + (rand % Math.max(range, 1));
-        list.splice(pos, 0, { kind: "brand", brand: b });
+      const n = brands.length;
+      // Even spacing: divide product list into n+1 segments, drop one brand per boundary.
+      // Small deterministic jitter per brand keeps placement organic without clustering.
+      const step = products.length / (n + 1);
+      // Sort insertion positions descending so earlier splices don't shift later indices.
+      const placements = brands
+        .map((b, idx) => {
+          const jitter = (hashString(b.id + ":" + seed) % 3) - 1; // -1, 0, +1
+          const basePos = Math.round(step * (idx + 1)) + jitter;
+          const minPos = Math.min(2, products.length);
+          const pos = Math.max(minPos, Math.min(products.length, basePos));
+          return { brand: b, pos };
+        })
+        .sort((a, b) => b.pos - a.pos);
+      placements.forEach(({ brand, pos }) => {
+        list.splice(pos, 0, { kind: "brand", brand });
       });
     }
     return list;
