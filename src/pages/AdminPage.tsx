@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
   BarChart3, LayoutDashboard, Search, X, AlertTriangle, AlertCircle, BadgeCheck, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, FileSpreadsheet, Sparkles,
-  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw, Star, Gift, Smartphone, Monitor, Tablet
+  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw, Star, Gift, Smartphone, Monitor, Tablet, PlayCircle
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
@@ -18,6 +18,7 @@ import SpinSettingsManager from "@/components/admin/SpinSettingsManager";
 import ReferralManager from "@/components/admin/ReferralManager";
 import WalletCreditsManager from "@/components/admin/WalletCreditsManager";
 import FlashSalesManager from "@/components/admin/FlashSalesManager";
+import ReelsManager from "@/components/admin/ReelsManager";
 
 
 
@@ -49,9 +50,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
 
-type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "flash-sales" | "settings" | "branches";
+type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "flash-sales" | "reels" | "settings" | "branches";
 
-const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "referral", "promotions", "flash-sales", "drivers", "branches"];
+const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "referral", "promotions", "flash-sales", "reels", "drivers", "branches"];
 
 
 
@@ -1689,6 +1690,7 @@ const AdminPage = () => {
     { id: "referral", label: "Referral", icon: Users },
     { id: "promotions", label: "Урамшуулал", icon: Gift },
     { id: "flash-sales", label: "Flash Sale", icon: Sparkles },
+    { id: "reels", label: "Reels удирдах", icon: PlayCircle },
 
 
 
@@ -4606,6 +4608,8 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
           {tab === "promotions" && <WalletCreditsManager />}
 
           {tab === "flash-sales" && <FlashSalesManager />}
+
+          {tab === "reels" && <ReelsManager />}
 
 
 

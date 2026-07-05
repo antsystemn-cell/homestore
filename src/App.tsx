@@ -56,6 +56,7 @@ const SpinPage = lazy(() => lazyRetry(() => import("./pages/SpinPage")));
 const SpinFabLazy = lazy(() => lazyRetry(() => import("./components/spin/SpinFab")));
 const AdminSpinPage = lazy(() => lazyRetry(() => import("./pages/AdminSpinPage")));
 const MyRewardsPage = lazy(() => lazyRetry(() => import("./pages/MyRewardsPage")));
+const ReelsPage = lazy(() => lazyRetry(() => import("./pages/ReelsPage")));
 
 
 const queryClient = new QueryClient({
@@ -128,6 +129,7 @@ const App = () => {
                     <Route path="/checkout" element={<CheckoutPage />} />
                     <Route path="/product/:slug" element={<ProductPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/reels" element={<ReelsPage />} />
                     {SPIN_ENABLED && <Route path="/spin" element={<SpinPage />} />}
                     {SPIN_ENABLED && <Route path="/my-rewards" element={<MyRewardsPage />} />}
                     

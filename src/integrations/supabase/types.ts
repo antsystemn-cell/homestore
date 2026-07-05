@@ -1456,6 +1456,50 @@ export type Database = {
           },
         ]
       }
+      reels: {
+        Row: {
+          created_at: string
+          facebook_embed_url: string
+          facebook_page_url: string | null
+          id: string
+          is_active: boolean
+          product_id: string | null
+          sort_order: number
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          facebook_embed_url: string
+          facebook_page_url?: string | null
+          id?: string
+          is_active?: boolean
+          product_id?: string | null
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          facebook_embed_url?: string
+          facebook_page_url?: string | null
+          id?: string
+          is_active?: boolean
+          product_id?: string | null
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reels_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       referrals: {
         Row: {
           completed_order_id: string | null
