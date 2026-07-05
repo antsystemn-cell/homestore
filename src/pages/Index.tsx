@@ -257,7 +257,7 @@ const Index = () => {
             <>
 
               <ErrorBoundary>
-                <ProductGrid products={visible} />
+                <ProductGrid products={visible} brands={brands} />
               </ErrorBoundary>
 
 
