@@ -4406,6 +4406,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Хэрэглэгч</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Имэйл</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Утас</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Төхөөрөмж</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Эрх</th>
                         <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">Бүртгүүлсэн</th>
                       </tr>
