@@ -1260,9 +1260,29 @@ const AdminPage = () => {
         rolesMap[r.user_id].push(r.role);
       });
 
+      // Attach latest device info per user from analytics_sessions
+      const deviceMap: Record<string, { device: string; user_agent: string | null; last_seen_at: string }> = {};
+      try {
+        const { data: sessData } = await supabase
+          .from("analytics_sessions")
+          .select("user_id, device, user_agent, last_seen_at")
+          .not("user_id", "is", null)
+          .order("last_seen_at", { ascending: false })
+          .limit(2000);
+        (sessData || []).forEach((s: any) => {
+          if (!s.user_id) return;
+          if (!deviceMap[s.user_id]) {
+            deviceMap[s.user_id] = { device: s.device, user_agent: s.user_agent, last_seen_at: s.last_seen_at };
+          }
+        });
+      } catch (e) {
+        console.warn("Failed to load device sessions", e);
+      }
+
       const enriched = baseUsers.map((u: any) => ({
         ...u,
         roles: rolesMap[u.user_id] || [],
+        device_info: deviceMap[u.user_id] || null,
       }));
       setUsers(enriched);
     } catch (error) {
