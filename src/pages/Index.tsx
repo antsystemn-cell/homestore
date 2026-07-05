@@ -213,12 +213,7 @@ const Index = () => {
 
 
 
-          {/* Brand logos */}
-          {brands.length > 0 && (
-            <ErrorBoundary>
-              <BrandLogos brands={brands} />
-            </ErrorBoundary>
-          )}
+          {/* Brand logos are now interspersed randomly inside the product grid below */}
 
           {/* Flash sale — "Өнөөдрийн хямдрал" */}
           <ErrorBoundary>
@@ -262,7 +257,7 @@ const Index = () => {
             <>
 
               <ErrorBoundary>
-                <ProductGrid products={visible} />
+                <ProductGrid products={visible} brands={brands} />
               </ErrorBoundary>
 
 
