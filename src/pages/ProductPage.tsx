@@ -16,6 +16,7 @@ import { useProductStat } from "@/hooks/useProductStat";
 import { useFlashSaleFor } from "@/hooks/useFlashSales";
 import FlashSaleCountdown from "@/components/store/FlashSaleCountdown";
 import { supabase } from "@/integrations/supabase/client";
+import { getColorHex } from "@/lib/colorMap";
 
 
 const ProductRatingSummary = ({ productId }: { productId: string }) => {
