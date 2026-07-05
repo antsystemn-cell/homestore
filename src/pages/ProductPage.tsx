@@ -462,9 +462,9 @@ const ProductPage = () => {
                 </span>
               ) : null}
             </div>
-            {/* Thumbnails */}
+            {/* Thumbnails — hidden on mobile; color chips below act as selector */}
             {allImages.length > 1 && (
-              <div className="flex gap-2 px-4 md:px-0 overflow-x-auto pb-1">
+              <div className="hidden md:flex gap-2 px-4 md:px-0 overflow-x-auto pb-1">
                 {allImages.map((img, idx) => (
                   <button
                     key={idx}
