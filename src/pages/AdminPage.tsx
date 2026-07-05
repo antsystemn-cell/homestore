@@ -57,6 +57,38 @@ const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "b
 
 
 
+type DeviceInfo = { device: string; user_agent: string | null; last_seen_at: string } | null;
+
+const DeviceBadge = ({ info }: { info: DeviceInfo }) => {
+  if (!info) return <span className="text-xs text-muted-foreground">—</span>;
+  const ua = (info.user_agent || "").toLowerCase();
+  const isTablet = /ipad|tablet/.test(ua) || info.device === "tablet";
+  const isMobile = !isTablet && info.device === "mobile";
+  const Icon = isTablet ? Tablet : isMobile ? Smartphone : Monitor;
+  const label = isTablet ? "Таблет" : isMobile ? "Гар утас" : "Компьютер";
+  const cls = isTablet
+    ? "bg-amber-500/10 text-amber-600 border-amber-500/30"
+    : isMobile
+    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
+    : "bg-blue-500/10 text-blue-600 border-blue-500/30";
+  let osTag = "";
+  if (/iphone|ipad|ios/.test(ua)) osTag = "iOS";
+  else if (/android/.test(ua)) osTag = "Android";
+  else if (/windows/.test(ua)) osTag = "Windows";
+  else if (/mac os|macintosh/.test(ua)) osTag = "macOS";
+  else if (/linux/.test(ua)) osTag = "Linux";
+  return (
+    <div
+      className={`inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-1 rounded-full border ${cls}`}
+      title={info.user_agent || ""}
+    >
+      <Icon className="h-3 w-3" />
+      <span>{label}</span>
+      {osTag && <span className="opacity-70">· {osTag}</span>}
+    </div>
+  );
+};
+
 const AdminPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
