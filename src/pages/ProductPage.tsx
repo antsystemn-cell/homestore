@@ -764,34 +764,53 @@ const ProductPage = () => {
             {/* Color */}
             {product.colors && product.colors.length > 0 && (
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-semibold text-foreground">
-                    Өнгө{selectedColor ? <span className="ml-1 text-muted-foreground font-normal">· {selectedColor}</span> : null}
-                  </h3>
-                  <span className="text-xs text-muted-foreground">{product.colors.length} сонголт</span>
+                <div className="flex items-end justify-between mb-3 px-0.5">
+                  <div className="space-y-0.5">
+                    <h3 className="text-base font-bold text-foreground leading-none">Өнгө</h3>
+                    <p className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">
+                      {selectedColor ? `Сонгосон: ${selectedColor}` : `Сонголт: ${product.colors.length}`}
+                    </p>
+                  </div>
+                  {!selectedColor && (
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-destructive/80">
+                      Заавал
+                    </span>
+                  )}
                 </div>
-                <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1 snap-x">
+                <div className="flex gap-2.5 overflow-x-auto no-scrollbar -mx-5 px-5 pb-2 snap-x">
                   {product.colors.map((color) => {
                     const active = selectedColor === color.name;
                     return (
                       <button
                         key={color.name}
+                        type="button"
                         onClick={() => setSelectedColor(active ? null : color.name)}
-                        className={`snap-start shrink-0 flex items-center gap-2 pl-1.5 pr-3.5 py-1.5 rounded-full text-sm font-medium bg-secondary/60 border-2 transition-all ${
+                        className={`snap-start shrink-0 flex items-center gap-2.5 pl-1.5 pr-3.5 py-1.5 rounded-2xl transition-all duration-200 active:scale-[0.97] ${
                           active
-                            ? "border-foreground text-foreground bg-background shadow-sm"
-                            : "border-transparent text-muted-foreground hover:text-foreground"
+                            ? "bg-background border-2 border-foreground shadow-md"
+                            : "bg-secondary/70 border-2 border-transparent"
                         }`}
                       >
                         {color.image ? (
-                          <img src={color.image} alt={color.name} className="h-8 w-8 rounded-full object-cover ring-1 ring-black/5" />
+                          <img
+                            src={color.image}
+                            alt={color.name}
+                            className="h-11 w-11 rounded-xl object-cover ring-1 ring-black/5 bg-background"
+                          />
                         ) : (
                           <span
-                            className="h-8 w-8 rounded-full ring-1 ring-black/10"
+                            className="h-11 w-11 rounded-xl ring-1 ring-black/10"
                             style={{ backgroundColor: getColorHex(color.name, (product as any).productCode || product.id) }}
                           />
                         )}
-                        <span className="whitespace-nowrap">{color.name}</span>
+                        <div className="flex flex-col items-start pr-0.5">
+                          <span className={`text-[13px] leading-tight whitespace-nowrap ${active ? "font-bold text-foreground" : "font-semibold text-muted-foreground"}`}>
+                            {color.name}
+                          </span>
+                          <span className="text-[10px] font-medium text-muted-foreground/70 leading-tight mt-0.5">
+                            Бэлэн байгаа
+                          </span>
+                        </div>
                       </button>
                     );
                   })}
