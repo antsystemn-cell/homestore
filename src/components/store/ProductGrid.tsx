@@ -24,14 +24,15 @@ const BrandTile = ({ brand }: { brand: Brand }) => {
       onClick={() => navigate(`/${brand.name.replace(/\s+/g, "")}`)}
       className="bg-card overflow-hidden group transition-all duration-200 hover:shadow-lg rounded-none md:rounded-xl animate-fade-in block text-left w-full"
     >
-      <div className="relative aspect-square bg-secondary overflow-hidden flex items-center justify-center p-6">
+      <div className="relative aspect-square bg-secondary overflow-hidden flex items-center justify-center">
         {brand.logo_url ? (
           <img
             src={brand.logo_url}
             alt={brand.name}
-            className="max-w-[75%] max-h-[75%] object-contain group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
             loading="lazy"
           />
+
         ) : (
           <span className="text-4xl font-bold text-muted-foreground">
             {brand.name.charAt(0)}
