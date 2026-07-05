@@ -4452,6 +4452,9 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                               ) : "—"}
                             </td>
                             <td className="px-6 py-4">
+                              <DeviceBadge info={u.device_info} />
+                            </td>
+                            <td className="px-6 py-4">
                               <div className="flex flex-wrap gap-1.5">
                                 {roleOptions.map((r) => {
                                   const active = userRoles.includes(r.key);
