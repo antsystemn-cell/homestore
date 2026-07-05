@@ -247,11 +247,13 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
-          {/* Middle ADS — барааны жагсаалтын дээр */}
+          {/* Middle ADS — desktop only */}
           {middleAds.length > 0 && (
-            <ErrorBoundary>
-              <AdBanners ads={middleAds} />
-            </ErrorBoundary>
+            <div className="hidden md:block">
+              <ErrorBoundary>
+                <AdBanners ads={middleAds} />
+              </ErrorBoundary>
+            </div>
           )}
 
           {gridLoading && visible.length === 0 ? (
