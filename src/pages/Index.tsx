@@ -197,17 +197,19 @@ const Index = () => {
         <LoadError onRetry={fetchAll} retrying={loading} />
       ) : (
         <>
-          {/* Promo banner */}
-          <ErrorBoundary>
-            <PromoBanner />
-          </ErrorBoundary>
-
-          {/* Top ADS — banner-ийн доор */}
-          {topAds.length > 0 && (
+          {/* Promo banner — desktop only */}
+          <div className="hidden md:block">
             <ErrorBoundary>
-              <AdBanners ads={topAds} />
+              <PromoBanner />
             </ErrorBoundary>
-          )}
+
+            {/* Top ADS — banner-ийн доор */}
+            {topAds.length > 0 && (
+              <ErrorBoundary>
+                <AdBanners ads={topAds} />
+              </ErrorBoundary>
+            )}
+          </div>
 
 
 
