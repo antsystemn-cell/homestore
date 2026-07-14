@@ -148,6 +148,7 @@ const App = () => {
             </Suspense>
             {!MAINTENANCE_MODE && SPIN_ENABLED && <SpinFabLazy />}
             {!MAINTENANCE_MODE && <WelcomeBonus />}
+            {!MAINTENANCE_MODE && <AnnouncementModal />}
           </CartProvider>
         </AuthProvider>
       </BrowserRouter>
