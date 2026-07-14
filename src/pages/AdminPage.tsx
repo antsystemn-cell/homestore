@@ -4592,6 +4592,9 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
           {/* Collections / Багц линк */}
           {tab === "collections" && <CollectionsManager products={products} />}
 
+          {/* Announcements / Popup мэдэгдэл */}
+          {tab === "announcements" && <AnnouncementsManager />}
+
           {/* Chatbot settings */}
           {tab === "chatbot" && <ChatbotSettingsManager />}
 
