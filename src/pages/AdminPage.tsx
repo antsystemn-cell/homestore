@@ -1679,6 +1679,7 @@ const AdminPage = () => {
     { id: "delivery", label: "Хүргэлт", icon: Truck },
     { id: "payments", label: "Төлбөр", icon: CreditCard },
     { id: "banner", label: "Баннер", icon: Megaphone },
+    { id: "announcements", label: "Popup мэдэгдэл", icon: Megaphone },
     { id: "collections", label: "Багц линк", icon: Link2 },
     { id: "analytics", label: "Хандалт", icon: Globe },
     { id: "diagnostics", label: "Оношлогоо", icon: AlertTriangle },
