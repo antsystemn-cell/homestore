@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Star, Zap } from "lucide-react";
 import { Product, formatPrice } from "@/data/products";
 import { getColorHex } from "@/lib/colorMap";
@@ -29,6 +29,8 @@ const RatingRow = ({ productId }: { productId: string }) => {
 };
 
 const ProductCard = React.memo(({ product, priority = false }: Props) => {
+  const location = useLocation();
+  const isHome = location.pathname === "/";
 
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
@@ -249,7 +251,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
             <Zap className="h-3 w-3 fill-current" />
             -{flashSale.discount_percent}%
           </span>
-        ) : displayOriginal != null && displayOriginal > displayPrice ? (
+        ) : !isHome && displayOriginal != null && displayOriginal > displayPrice ? (
           <span className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded z-10">
             -{Math.round(((displayOriginal - displayPrice) / displayOriginal) * 100)}%
           </span>
