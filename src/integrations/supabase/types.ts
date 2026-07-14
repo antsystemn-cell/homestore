@@ -175,6 +175,54 @@ export type Database = {
         }
         Relationships: []
       }
+      announcements: {
+        Row: {
+          body: string | null
+          button_link: string | null
+          button_text: string | null
+          created_at: string
+          ends_at: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          position: number
+          starts_at: string | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string | null
+          button_link?: string | null
+          button_text?: string | null
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          position?: number
+          starts_at?: string | null
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string | null
+          button_link?: string | null
+          button_text?: string | null
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          position?: number
+          starts_at?: string | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       branches: {
         Row: {
           code: string | null

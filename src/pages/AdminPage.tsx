@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
+import AnnouncementsManager from "@/components/admin/AnnouncementsManager";
 import ChatbotSettingsManager from "@/components/admin/ChatbotSettingsManager";
 import RecommendationSettingsManager from "@/components/admin/RecommendationSettingsManager";
 import LoyaltySettingsManager from "@/components/admin/LoyaltySettingsManager";
@@ -50,9 +51,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
 
-type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "flash-sales" | "reels" | "settings" | "branches";
+type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "flash-sales" | "reels" | "settings" | "branches";
 
-const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "referral", "promotions", "flash-sales", "reels", "drivers", "branches"];
+const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "announcements", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "referral", "promotions", "flash-sales", "reels", "drivers", "branches"];
 
 
 
@@ -97,7 +98,7 @@ const AdminPage = () => {
   const hasAdminAccess = isAdmin || isModerator || isSeller;
   const [tab, setTab] = useState<Tab>(() => {
     const t = searchParams.get("tab") as Tab | null;
-    const valid: Tab[] = ["stats","tracking","products","orders","users","drivers","categories","brands","delivery","delivery-portal","payments","banner","collections","chatbot","analytics","diagnostics","stocklog","recommendations","loyalty","reminders","reviews","spin","referral","promotions","flash-sales","settings","branches"];
+    const valid: Tab[] = ["stats","tracking","products","orders","users","drivers","categories","brands","delivery","delivery-portal","payments","banner","announcements","collections","chatbot","analytics","diagnostics","stocklog","recommendations","loyalty","reminders","reviews","spin","referral","promotions","flash-sales","settings","branches"];
     return t && valid.includes(t) ? t : "stats";
   });
   const [products, setProducts] = useState<any[]>([]);
@@ -1678,6 +1679,7 @@ const AdminPage = () => {
     { id: "delivery", label: "Хүргэлт", icon: Truck },
     { id: "payments", label: "Төлбөр", icon: CreditCard },
     { id: "banner", label: "Баннер", icon: Megaphone },
+    { id: "announcements", label: "Popup мэдэгдэл", icon: Megaphone },
     { id: "collections", label: "Багц линк", icon: Link2 },
     { id: "analytics", label: "Хандалт", icon: Globe },
     { id: "diagnostics", label: "Оношлогоо", icon: AlertTriangle },
@@ -2454,6 +2456,7 @@ const AdminPage = () => {
               {tab === "brands" && `Нийт ${dbBrands.length} брэнд`}
               {tab === "delivery" && `Нийт ${deliveryOptions.length} хүргэлтийн сонголт`}
               {tab === "banner" && `Баннер болон ${paymentProviders.length} лого`}
+              {tab === "announcements" && "Вэбрүү анх орсон үед popup хэлбэрээр гарах мэдэгдэл"}
               {tab === "payments" && `Нийт ${paymentProviders.length} төлбөрийн суваг`}
               
               {tab === "analytics" && "Вэб сайтын хандалтын мэдээлэл"}
@@ -4588,6 +4591,9 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
 
           {/* Collections / Багц линк */}
           {tab === "collections" && <CollectionsManager products={products} />}
+
+          {/* Announcements / Popup мэдэгдэл */}
+          {tab === "announcements" && <AnnouncementsManager />}
 
           {/* Chatbot settings */}
           {tab === "chatbot" && <ChatbotSettingsManager />}
