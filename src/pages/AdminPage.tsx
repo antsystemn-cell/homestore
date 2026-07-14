@@ -2456,6 +2456,7 @@ const AdminPage = () => {
               {tab === "brands" && `Нийт ${dbBrands.length} брэнд`}
               {tab === "delivery" && `Нийт ${deliveryOptions.length} хүргэлтийн сонголт`}
               {tab === "banner" && `Баннер болон ${paymentProviders.length} лого`}
+              {tab === "announcements" && "Вэбрүү анх орсон үед popup хэлбэрээр гарах мэдэгдэл"}
               {tab === "payments" && `Нийт ${paymentProviders.length} төлбөрийн суваг`}
               
               {tab === "analytics" && "Вэб сайтын хандалтын мэдээлэл"}
