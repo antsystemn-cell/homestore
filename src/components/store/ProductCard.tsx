@@ -29,6 +29,8 @@ const RatingRow = ({ productId }: { productId: string }) => {
 };
 
 const ProductCard = React.memo(({ product, priority = false }: Props) => {
+  const location = useLocation();
+  const isHome = location.pathname === "/";
 
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
