@@ -262,45 +262,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
         )}
 
 
-        {/* Color swatches overlay — horizontal scroll for many colors */}
-        {hasSwatches && (
-          <div
-            className="absolute bottom-2 left-2 right-2 z-10 flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5"
-            onClick={(e) => e.stopPropagation()}
-            onTouchStart={(e) => e.stopPropagation()}
-          >
-            {colors!.map((c, i) => {
-              const slideForColor = colorSlideMap.get(i) ?? 0;
-              const isActive = pinnedColorIdx === i || (pinnedColorIdx === null && slideForColor === activeIdx && slideForColor !== 0);
-              const scope = `${(product as any).product_code || product.id}::${(c as any).id ?? i}`;
-              const hex = getColorHex(c.name, scope);
-              const isPinned = pinnedColorIdx === i;
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  title={c.name}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setPinnedColorIdx(isPinned ? null : i);
-                  }}
-                  className={`rounded-full border transition-all duration-200 flex-shrink-0 ${
-                    isActive
-                      ? "border-primary ring-2 ring-primary/40 scale-110"
-                      : "border-black/20 hover:border-primary/60"
-                  }`}
-                  style={{
-                    backgroundColor: hex,
-                    boxShadow: "0 0 0 1.5px rgba(255,255,255,0.95), 0 1px 3px rgba(0,0,0,0.4)",
-                    width: 18,
-                    height: 18,
-                  }}
-                />
-              );
-            })}
-          </div>
-        )}
+        {/* Color swatches disabled on cards — colors chosen on product detail page */}
       </div>
       <div className="px-3 py-2.5 md:px-4 md:py-3">
         <h3 className="text-xs md:text-sm text-foreground line-clamp-2 leading-snug font-medium min-h-[2.5em]">
