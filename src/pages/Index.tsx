@@ -220,12 +220,15 @@ const Index = () => {
             <FlashSaleSection />
           </ErrorBoundary>
 
-          {/* New arrivals - between brands and sale */}
+          {/* New arrivals - between brands and sale (hidden on mobile) */}
           {newProducts.length > 0 && (
             <ErrorBoundary>
-              <NewArrivals products={newProducts} />
+              <div className="hidden md:block">
+                <NewArrivals products={newProducts} />
+              </div>
             </ErrorBoundary>
           )}
+
 
 
           {/* Personalized "For You" — signed-in users only, based on past purchases */}
