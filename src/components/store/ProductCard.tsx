@@ -175,7 +175,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
-      <div className="relative aspect-square bg-secondary overflow-hidden">
+      <div className="relative aspect-square bg-secondary overflow-hidden p-3 md:p-0">
         {hasMultipleSlides ? (
           <>
             <div
@@ -195,7 +195,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
                     srcSet={imgError ? undefined : buildSrcSet(src, [200, 400, 800])}
                     sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
                     alt={`${product.name}${i > 0 ? ` - ${i + 1}` : ""}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
+                    className="w-full h-full object-contain md:object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
                     loading={priority && i === 0 ? "eager" : "lazy"}
                     fetchPriority={priority && i === 0 ? "high" : "auto"}
                     decoding="async"
@@ -226,7 +226,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
             srcSet={imgError ? undefined : buildSrcSet(fallbackSrc, [200, 400, 800])}
             sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-contain md:object-cover group-hover:scale-105 transition-transform duration-300"
             loading={priority ? "eager" : "lazy"}
             fetchPriority={priority ? "high" : "auto"}
             decoding="async"
@@ -266,17 +266,17 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
 
         {/* Color swatches disabled on cards — colors chosen on product detail page */}
       </div>
-      <div className="px-3 py-2.5 md:px-4 md:py-3">
-        <h3 className="text-xs md:text-sm text-foreground line-clamp-2 leading-snug font-medium min-h-[2.5em]">
+      <div className="px-3 py-3 md:px-4 md:py-3">
+        <h3 className="text-sm md:text-sm text-foreground line-clamp-2 leading-snug font-medium min-h-[2.6em]">
           {product.name}
         </h3>
         <RatingRow productId={product.id} />
         <div className="mt-2 flex items-baseline gap-1.5 flex-nowrap">
-          <span className={`font-extrabold text-sm md:text-base whitespace-nowrap ${flashSale ? "text-destructive" : "text-foreground"}`}>
+          <span className={`font-extrabold text-base md:text-base whitespace-nowrap ${flashSale ? "text-destructive" : "text-foreground"}`}>
             {formatPrice(displayPrice)}
           </span>
           {displayOriginal != null && displayOriginal > displayPrice && (
-            <span className="text-muted-foreground text-[10px] md:text-xs line-through whitespace-nowrap">
+            <span className="text-muted-foreground text-xs md:text-xs line-through whitespace-nowrap">
               {formatPrice(displayOriginal)}
             </span>
           )}
