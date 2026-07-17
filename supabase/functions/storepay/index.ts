@@ -224,7 +224,8 @@ async function handleCreateLoan(body: any, req: Request) {
       .update({ status: "FAILED", storepay_response: responseData })
       .eq("id", intent.id);
 
-    return err(errorMsg, 502);
+    // Return 200 so the client SDK can read the body and surface the real Mongolian message
+    return json({ error: errorMsg, status: "Failed", response: responseData });
   }
 
   // value contains the loan ID
