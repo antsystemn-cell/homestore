@@ -1,8 +1,9 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Product } from "@/data/products";
 import ProductCard from "./ProductCard";
 import ErrorBoundary from "./ErrorBoundary";
+import { transformImage } from "@/lib/imageUrl";
 
 interface Brand {
   id: string;
@@ -14,10 +15,28 @@ interface Props {
   title?: string;
   products: Product[];
   brands?: Brand[];
+  /** Full catalog used to pick each brand's slideshow images. Falls back to `products`. */
+  allProducts?: Product[];
 }
 
-const BrandTile = ({ brand }: { brand: Brand }) => {
+const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Product[] }) => {
   const navigate = useNavigate();
+  const slides = useMemo(
+    () =>
+      brandProducts
+        .map((p) => p.thumbnail || p.image)
+        .filter((u): u is string => !!u && u !== "/placeholder.svg")
+        .slice(0, 8),
+    [brandProducts]
+  );
+
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    if (slides.length < 2) return;
+    const t = setInterval(() => setIdx((i) => (i + 1) % slides.length), 2500);
+    return () => clearInterval(t);
+  }, [slides.length]);
+
   return (
     <button
       type="button"
@@ -25,14 +44,49 @@ const BrandTile = ({ brand }: { brand: Brand }) => {
       className="bg-card overflow-hidden group transition-all duration-200 hover:shadow-lg rounded-none md:rounded-xl animate-fade-in block text-left w-full"
     >
       <div className="relative aspect-square bg-secondary overflow-hidden flex items-center justify-center">
-        {brand.logo_url ? (
+        {slides.length > 0 ? (
+          <>
+            {slides.map((src, i) => (
+              <img
+                key={src + i}
+                src={transformImage(src, 400)}
+                alt={brand.name}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+                  i === idx ? "opacity-100" : "opacity-0"
+                }`}
+                loading="lazy"
+              />
+            ))}
+            {brand.logo_url && (
+              <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur rounded-lg p-1.5 shadow-md">
+                <img
+                  src={brand.logo_url}
+                  alt={brand.name}
+                  className="h-6 md:h-8 w-auto object-contain"
+                  loading="lazy"
+                />
+              </div>
+            )}
+            {slides.length > 1 && (
+              <div className="absolute bottom-2 left-2 flex gap-1">
+                {slides.map((_, i) => (
+                  <span
+                    key={i}
+                    className={`h-1 rounded-full transition-all ${
+                      i === idx ? "w-3 bg-white" : "w-1 bg-white/60"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        ) : brand.logo_url ? (
           <img
             src={brand.logo_url}
             alt={brand.name}
             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
             loading="lazy"
           />
-
         ) : (
           <span className="text-4xl font-bold text-muted-foreground">
             {brand.name.charAt(0)}
@@ -63,7 +117,19 @@ function hashString(s: string): number {
   return Math.abs(h);
 }
 
-const ProductGrid = React.memo(({ products, brands }: Props) => {
+const ProductGrid = React.memo(({ products, brands, allProducts }: Props) => {
+  const source = allProducts && allProducts.length > 0 ? allProducts : products;
+  const productsByBrand = useMemo(() => {
+    const map = new Map<string, Product[]>();
+    for (const p of source) {
+      if (!p.brand_id) continue;
+      const arr = map.get(p.brand_id) || [];
+      arr.push(p);
+      map.set(p.brand_id, arr);
+    }
+    return map;
+  }, [source]);
+
   const items = useMemo(() => {
     const list: Array<
       { kind: "product"; product: Product } | { kind: "brand"; brand: Brand }
@@ -72,13 +138,10 @@ const ProductGrid = React.memo(({ products, brands }: Props) => {
     if (brands && brands.length > 0 && list.length > 0) {
       const seed = hashString(products.map((p) => p.id).join("|"));
       const n = brands.length;
-      // Even spacing: divide product list into n+1 segments, drop one brand per boundary.
-      // Small deterministic jitter per brand keeps placement organic without clustering.
       const step = products.length / (n + 1);
-      // Sort insertion positions descending so earlier splices don't shift later indices.
       const placements = brands
         .map((b, idx) => {
-          const jitter = (hashString(b.id + ":" + seed) % 3) - 1; // -1, 0, +1
+          const jitter = (hashString(b.id + ":" + seed) % 3) - 1;
           const basePos = Math.round(step * (idx + 1)) + jitter;
           const minPos = Math.min(2, products.length);
           const pos = Math.max(minPos, Math.min(products.length, basePos));
@@ -102,7 +165,10 @@ const ProductGrid = React.memo(({ products, brands }: Props) => {
             </ErrorBoundary>
           ) : (
             <ErrorBoundary key={`b-${it.brand.id}-${i}`}>
-              <BrandTile brand={it.brand} />
+              <BrandTile
+                brand={it.brand}
+                brandProducts={productsByBrand.get(it.brand.id) || []}
+              />
             </ErrorBoundary>
           )
         )}
