@@ -195,7 +195,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
                     srcSet={imgError ? undefined : buildSrcSet(src, [200, 400, 800])}
                     sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
                     alt={`${product.name}${i > 0 ? ` - ${i + 1}` : ""}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
+                    className="w-full h-full object-contain md:object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none select-none"
                     loading={priority && i === 0 ? "eager" : "lazy"}
                     fetchPriority={priority && i === 0 ? "high" : "auto"}
                     decoding="async"
@@ -226,7 +226,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
             srcSet={imgError ? undefined : buildSrcSet(fallbackSrc, [200, 400, 800])}
             sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-contain md:object-cover group-hover:scale-105 transition-transform duration-300"
             loading={priority ? "eager" : "lazy"}
             fetchPriority={priority ? "high" : "auto"}
             decoding="async"
