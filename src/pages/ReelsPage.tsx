@@ -137,7 +137,9 @@ const ReelsPage = () => {
                 </div>
               </div>
             </section>
-          ))}
+            );
+          })}
+
         </div>
       )}
     </div>
