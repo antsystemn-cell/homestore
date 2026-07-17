@@ -28,7 +28,7 @@ const FlashSaleSection = React.memo(() => {
               <Zap className="h-4 w-4 md:h-5 md:w-5 text-destructive fill-destructive" />
             </div>
             <h2 className="text-sm md:text-base font-bold text-foreground tracking-tight">
-              Өнөөдрийн хямдрал
+              Flash Sales
             </h2>
             <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
           </div>
