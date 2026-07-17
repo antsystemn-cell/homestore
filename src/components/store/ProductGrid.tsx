@@ -43,7 +43,7 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
       onClick={() => navigate(`/${brand.name.replace(/\s+/g, "")}`)}
       className="bg-card overflow-hidden group transition-all duration-200 hover:shadow-lg rounded-none md:rounded-xl animate-fade-in block text-left w-full"
     >
-      <div className="relative aspect-square bg-secondary overflow-hidden flex items-center justify-center">
+      <div className="relative aspect-square overflow-hidden flex items-center justify-center bg-gradient-to-b from-white to-neutral-300">
         {slides.length > 0 ? (
           <>
             {slides.map((src, i) => (
