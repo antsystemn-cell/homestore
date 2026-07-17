@@ -87,7 +87,8 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const { slides, colorSlideMap } = useMemo(() => {
     const list: string[] = [baseImage];
     const map = new Map<number, number>();
-    if (colors && colors.length) {
+    // On home page: don't expose color variants as slides — keep a single image.
+    if (!isHome && colors && colors.length) {
       colors.forEach((c, ci) => {
         if (c.image && c.image.trim()) {
           const existing = list.indexOf(c.image);
@@ -98,13 +99,12 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
             map.set(ci, list.length - 1);
           }
         } else {
-          // No dedicated image — pin still selects the color but stays on base image.
           map.set(ci, 0);
         }
       });
     }
     return { slides: list, colorSlideMap: map };
-  }, [baseImage, colors]);
+  }, [baseImage, colors, isHome]);
 
   const hasMultipleSlides = slides.length > 1;
   const hasSwatches = !!(colors && colors.length > 1);
