@@ -88,19 +88,23 @@ const ReelsPage = () => {
           className="h-full w-full overflow-y-scroll snap-y snap-mandatory"
           style={{ scrollbarWidth: "none" }}
         >
-          {reels.map((r) => (
+          {reels.map((r) => {
+            const src = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(
+              r.facebook_embed_url
+            )}&show_text=false&autoplay=true&mute=0`;
+            return (
             <section
               key={r.id}
               className="h-screen w-full snap-start relative flex items-center justify-center bg-black"
             >
-              <div
-                className="fb-video"
-                data-href={r.facebook_embed_url}
-                data-width="auto"
-                data-show-text="false"
-                data-autoplay="true"
-                data-allowfullscreen="true"
+              <iframe
+                src={src}
+                className="w-full h-full border-0"
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                allowFullScreen
+                title={r.title || "Reel"}
               />
+
 
               {/* Overlay actions */}
               <div className="absolute bottom-24 left-0 right-0 px-4 flex flex-col gap-2 z-10">
