@@ -58,11 +58,11 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
               />
             ))}
             {brand.logo_url && (
-              <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur rounded-lg p-1.5 shadow-md">
+              <div className="absolute bottom-2 right-2 bg-white/95 backdrop-blur rounded-xl p-2.5 md:p-3 shadow-lg">
                 <img
                   src={brand.logo_url}
                   alt={brand.name}
-                  className="h-6 md:h-8 w-auto object-contain"
+                  className="h-12 md:h-16 w-auto object-contain"
                   loading="lazy"
                 />
               </div>
