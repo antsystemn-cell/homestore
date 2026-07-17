@@ -175,7 +175,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
-      <div className="relative aspect-square bg-secondary overflow-hidden">
+      <div className="relative aspect-square bg-secondary overflow-hidden p-3 md:p-0">
         {hasMultipleSlides ? (
           <>
             <div
@@ -266,17 +266,17 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
 
         {/* Color swatches disabled on cards — colors chosen on product detail page */}
       </div>
-      <div className="px-3 py-2.5 md:px-4 md:py-3">
-        <h3 className="text-xs md:text-sm text-foreground line-clamp-2 leading-snug font-medium min-h-[2.5em]">
+      <div className="px-3 py-3 md:px-4 md:py-3">
+        <h3 className="text-sm md:text-sm text-foreground line-clamp-2 leading-snug font-medium min-h-[2.6em]">
           {product.name}
         </h3>
         <RatingRow productId={product.id} />
         <div className="mt-2 flex items-baseline gap-1.5 flex-nowrap">
-          <span className={`font-extrabold text-sm md:text-base whitespace-nowrap ${flashSale ? "text-destructive" : "text-foreground"}`}>
+          <span className={`font-extrabold text-base md:text-base whitespace-nowrap ${flashSale ? "text-destructive" : "text-foreground"}`}>
             {formatPrice(displayPrice)}
           </span>
           {displayOriginal != null && displayOriginal > displayPrice && (
-            <span className="text-muted-foreground text-[10px] md:text-xs line-through whitespace-nowrap">
+            <span className="text-muted-foreground text-xs md:text-xs line-through whitespace-nowrap">
               {formatPrice(displayOriginal)}
             </span>
           )}
