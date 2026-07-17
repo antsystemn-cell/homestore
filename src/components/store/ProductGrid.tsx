@@ -57,21 +57,8 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
                 loading="lazy"
               />
             ))}
-            <div className="absolute inset-0 bg-black/35" />
-            {brand.logo_url ? (
-              <img
-                src={brand.logo_url}
-                alt={brand.name}
-                className="relative z-10 max-w-[85%] max-h-[70%] w-auto h-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.55)]"
-                loading="lazy"
-              />
-            ) : (
-              <span className="relative z-10 text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
-                {brand.name}
-              </span>
-            )}
             {slides.length > 1 && (
-              <div className="absolute bottom-2 left-2 flex gap-1 z-10">
+              <div className="absolute top-2 right-2 flex gap-1 z-10">
                 {slides.map((_, i) => (
                   <span
                     key={i}
@@ -95,9 +82,19 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
             {brand.name.charAt(0)}
           </span>
         )}
-        <span className="absolute top-2 left-2 bg-primary/90 text-primary-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded">
+        <span className="absolute top-2 left-2 bg-primary/90 text-primary-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded z-10">
           Брэнд
         </span>
+        {slides.length > 0 && brand.logo_url && (
+          <div className="absolute bottom-2 left-2 z-10 bg-white/95 rounded-md px-2 py-1 shadow-md">
+            <img
+              src={brand.logo_url}
+              alt={brand.name}
+              className="h-6 md:h-8 w-auto object-contain"
+              loading="lazy"
+            />
+          </div>
+        )}
       </div>
       <div className="px-3 py-2.5 md:px-4 md:py-3">
         <h3 className="text-xs md:text-sm text-foreground line-clamp-2 leading-snug font-medium min-h-[2.5em]">
