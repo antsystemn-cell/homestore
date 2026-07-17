@@ -57,18 +57,21 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
                 loading="lazy"
               />
             ))}
-            {brand.logo_url && (
-              <div className="absolute bottom-2 right-2 bg-white/95 backdrop-blur rounded-xl p-2.5 md:p-3 shadow-lg">
-                <img
-                  src={brand.logo_url}
-                  alt={brand.name}
-                  className="h-12 md:h-16 w-auto object-contain"
-                  loading="lazy"
-                />
-              </div>
+            <div className="absolute inset-0 bg-black/35" />
+            {brand.logo_url ? (
+              <img
+                src={brand.logo_url}
+                alt={brand.name}
+                className="relative z-10 max-w-[85%] max-h-[70%] w-auto h-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.55)]"
+                loading="lazy"
+              />
+            ) : (
+              <span className="relative z-10 text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
+                {brand.name}
+              </span>
             )}
             {slides.length > 1 && (
-              <div className="absolute bottom-2 left-2 flex gap-1">
+              <div className="absolute bottom-2 left-2 flex gap-1 z-10">
                 {slides.map((_, i) => (
                   <span
                     key={i}
