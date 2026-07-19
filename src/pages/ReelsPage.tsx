@@ -1,8 +1,21 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
-import { ArrowLeft, ShoppingCart, Facebook } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Facebook, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useCart } from "@/context/CartContext";
+import { toast } from "sonner";
+
+type ReelProduct = {
+  id: string;
+  slug: string | null;
+  name: string;
+  price: number;
+  original_price?: number | null;
+  thumbnail_url?: string | null;
+  image_url?: string | null;
+  stock?: number | null;
+};
 
 type Reel = {
   id: string;
@@ -10,8 +23,9 @@ type Reel = {
   facebook_page_url: string | null;
   product_id: string | null;
   title: string | null;
-  product_slug?: string | null;
+  product?: ReelProduct | null;
 };
+
 
 declare global {
   interface Window {
