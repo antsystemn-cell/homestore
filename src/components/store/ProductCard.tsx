@@ -175,7 +175,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
-      <div className="relative aspect-square bg-secondary overflow-hidden p-3 md:p-0">
+      <div className="relative aspect-square bg-secondary overflow-hidden p-6 md:p-0">
         {hasMultipleSlides ? (
           <>
             <div
