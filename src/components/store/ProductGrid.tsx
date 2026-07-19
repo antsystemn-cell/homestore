@@ -136,24 +136,35 @@ const ProductGrid = React.memo(({ products, brands, allProducts }: Props) => {
     > = products.map((p) => ({ kind: "product" as const, product: p }));
 
     if (brands && brands.length > 0 && list.length > 0) {
-      const seed = hashString(products.map((p) => p.id).join("|"));
-      const n = brands.length;
-      const step = products.length / (n + 1);
-      const placements = brands
-        .map((b, idx) => {
-          const jitter = (hashString(b.id + ":" + seed) % 3) - 1;
-          const basePos = Math.round(step * (idx + 1)) + jitter;
-          const minPos = Math.min(2, products.length);
-          const pos = Math.max(minPos, Math.min(products.length, basePos));
-          return { brand: b, pos };
-        })
+      // Evenly space brand tiles across the ENTIRE catalog with a wide, fixed gap.
+      // Every INTERVAL products we insert one brand, cycling through the brand list.
+      // Using allProducts.length ensures spacing stays consistent as more products load.
+      const INTERVAL = 10; // ~one brand every 10 products => wide, even spacing
+      const START = 6; // first brand appears after some products
+      const total = source.length || products.length;
+      const seed = hashString(brands.map((b) => b.id).join("|"));
+      const shuffled = [...brands].sort(
+        (a, b) => (hashString(a.id + seed) % 1000) - (hashString(b.id + seed) % 1000)
+      );
+
+      const globalPositions: Array<{ brand: Brand; pos: number }> = [];
+      let bi = 0;
+      for (let pos = START; pos <= total; pos += INTERVAL) {
+        globalPositions.push({ brand: shuffled[bi % shuffled.length], pos });
+        bi++;
+      }
+
+      // Only apply positions that fall within the currently visible slice.
+      const visibleCount = products.length;
+      const placements = globalPositions
+        .filter((p) => p.pos <= visibleCount)
         .sort((a, b) => b.pos - a.pos);
       placements.forEach(({ brand, pos }) => {
         list.splice(pos, 0, { kind: "brand", brand });
       });
     }
     return list;
-  }, [products, brands]);
+  }, [products, brands, source.length]);
 
   return (
     <div className="max-w-6xl mx-auto md:px-8 md:py-6">
