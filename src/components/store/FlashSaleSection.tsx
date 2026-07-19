@@ -30,15 +30,20 @@ const HeaderCountdown = ({ endsAt }: { endsAt: string }) => {
   }, [endsAt]);
   if (t.total <= 0) return null;
 
-  const Box = ({ v }: { v: number }) => (
-    <span className="min-w-[22px] md:min-w-[26px] px-1 md:px-1.5 py-0.5 rounded-md bg-destructive text-destructive-foreground text-[11px] md:text-sm font-bold tabular-nums text-center">
+  const Box = ({ v, pulse = false }: { v: number; pulse?: boolean }) => (
+    <span
+      key={pulse ? v : undefined}
+      className={`min-w-[22px] md:min-w-[26px] px-1 md:px-1.5 py-0.5 rounded-md bg-destructive text-destructive-foreground text-[11px] md:text-sm font-bold tabular-nums text-center ${
+        pulse ? "animate-scale-in" : ""
+      }`}
+    >
       {pad(v)}
     </span>
   );
   const Sep = () => <span className="text-destructive font-bold text-xs md:text-sm">:</span>;
 
   return (
-    <div className="flex items-center gap-1 md:gap-1.5" aria-label="Flash sale үлдсэн хугацаа">
+    <div className="flex items-center gap-1 md:gap-1.5" aria-label="Flash sale үлдсэн хугацаа" aria-live="polite">
       <Clock className="h-3.5 w-3.5 md:h-4 md:w-4 text-destructive flex-shrink-0" />
       {t.d > 0 && (
         <>
@@ -50,9 +55,10 @@ const HeaderCountdown = ({ endsAt }: { endsAt: string }) => {
       <Sep />
       <Box v={t.m} />
       <Sep />
-      <Box v={t.s} />
+      <Box v={t.s} pulse />
     </div>
   );
+
 };
 
 
