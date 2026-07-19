@@ -36,6 +36,7 @@ declare global {
 const ReelsPage = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { addToCart } = useCart();
   const [reels, setReels] = useState<Reel[]>([]);
   const [loading, setLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -54,17 +55,18 @@ const ReelsPage = () => {
       if (pids.length) {
         const { data: prods } = await supabase
           .from("products")
-          .select("id, slug")
+          .select("id, slug, name, price, original_price, thumbnail_url, image_url, stock")
           .in("id", pids);
-        const map = new Map((prods || []).map((p: any) => [p.id, p.slug]));
+        const map = new Map((prods || []).map((p: any) => [p.id, p]));
         list.forEach((r) => {
-          if (r.product_id) r.product_slug = map.get(r.product_id) || null;
+          if (r.product_id) r.product = (map.get(r.product_id) as ReelProduct) || null;
         });
       }
       setReels(list);
       setLoading(false);
     })();
   }, []);
+
 
   useEffect(() => {
     if (!reels.length) return;
