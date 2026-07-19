@@ -86,11 +86,11 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
           Брэнд
         </span>
         {slides.length > 0 && brand.logo_url && (
-          <div className="absolute bottom-2 left-2 z-10 bg-white/95 rounded-md shadow-md ring-1 ring-black/5 backdrop-blur-sm overflow-hidden h-8 md:h-10 w-16 md:w-20 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
+          <div className="absolute bottom-2 left-2 z-10 bg-white/95 rounded-md shadow-md ring-1 ring-black/5 backdrop-blur-sm overflow-hidden h-9 md:h-11 w-20 md:w-24 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
             <img
               src={brand.logo_url}
               alt={brand.name}
-              className="w-full h-full object-contain p-0.5"
+              className="max-h-full max-w-full object-contain"
               loading="lazy"
             />
           </div>
