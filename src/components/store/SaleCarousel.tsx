@@ -41,7 +41,7 @@ const SaleCarousel = React.memo(({ products }: Props) => {
               <Flame className="h-4 w-4 md:h-5 md:w-5 text-destructive" />
             </div>
             <h2 className="text-sm md:text-base font-bold text-foreground tracking-tight group-hover/link:text-destructive transition-colors">
-              Хямдралтай
+              Flash Sales
             </h2>
             <ArrowRight className="h-3.5 w-3.5 text-muted-foreground group-hover/link:text-destructive group-hover/link:translate-x-0.5 transition-all" />
           </a>
