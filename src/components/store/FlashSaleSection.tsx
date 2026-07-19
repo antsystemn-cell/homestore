@@ -19,20 +19,31 @@ const FlashSaleSection = React.memo(() => {
 
   if (!rows.length) return null;
 
+  // Soonest-ending active flash sale drives the header countdown
+  const soonestEndsAt = rows
+    .map((r) => r.ends_at)
+    .filter(Boolean)
+    .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0];
+
   return (
     <section className="py-4 md:py-6">
       <div className="max-w-6xl mx-auto px-4 md:px-8">
-        <div className="flex items-center justify-between mb-3 md:mb-5">
-          <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 md:h-9 md:w-9 rounded-lg bg-destructive/10 flex items-center justify-center">
+        <div className="flex items-center justify-between gap-2 mb-3 md:mb-5">
+          <div className="flex items-center gap-2 md:gap-2.5 min-w-0">
+            <div className="h-8 w-8 md:h-9 md:w-9 rounded-lg bg-destructive/10 flex items-center justify-center flex-shrink-0">
               <Zap className="h-4 w-4 md:h-5 md:w-5 text-destructive fill-destructive" />
             </div>
-            <h2 className="text-sm md:text-base font-bold text-foreground tracking-tight">
+            <h2 className="text-sm md:text-base font-bold text-foreground tracking-tight whitespace-nowrap">
               Flash Sales
             </h2>
-            <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+            {soonestEndsAt && (
+              <>
+                <span className="hidden sm:inline text-xs text-muted-foreground">Дуусахад:</span>
+                <HeaderCountdown endsAt={soonestEndsAt} />
+              </>
+            )}
           </div>
-          <div className="hidden md:flex items-center gap-1.5">
+          <div className="hidden md:flex items-center gap-1.5 flex-shrink-0">
             <button
               onClick={() => scroll("left")}
               className="p-1.5 rounded-full border border-border hover:border-destructive/40 hover:bg-destructive/5 transition-colors text-muted-foreground hover:text-destructive"
@@ -49,6 +60,7 @@ const FlashSaleSection = React.memo(() => {
             </button>
           </div>
         </div>
+
 
         <div
           ref={scrollRef}
