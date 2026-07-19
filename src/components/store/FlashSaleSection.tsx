@@ -1,10 +1,60 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Zap, ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Zap, Clock } from "lucide-react";
 import { formatPrice } from "@/data/products";
 import { useFlashSales } from "@/hooks/useFlashSales";
 import FlashSaleCountdown from "./FlashSaleCountdown";
 import { transformImage } from "@/lib/imageUrl";
+
+function pad(n: number) {
+  return n.toString().padStart(2, "0");
+}
+
+const HeaderCountdown = ({ endsAt }: { endsAt: string }) => {
+  const compute = () => {
+    const total = Math.max(0, new Date(endsAt).getTime() - Date.now());
+    const s = Math.floor(total / 1000);
+    return {
+      d: Math.floor(s / 86400),
+      h: Math.floor((s % 86400) / 3600),
+      m: Math.floor((s % 3600) / 60),
+      s: s % 60,
+      total,
+    };
+  };
+  const [t, setT] = useState(compute);
+  useEffect(() => {
+    setT(compute());
+    const id = window.setInterval(() => setT(compute()), 1000);
+    return () => window.clearInterval(id);
+  }, [endsAt]);
+  if (t.total <= 0) return null;
+
+  const Box = ({ v }: { v: number }) => (
+    <span className="min-w-[22px] md:min-w-[26px] px-1 md:px-1.5 py-0.5 rounded-md bg-destructive text-destructive-foreground text-[11px] md:text-sm font-bold tabular-nums text-center">
+      {pad(v)}
+    </span>
+  );
+  const Sep = () => <span className="text-destructive font-bold text-xs md:text-sm">:</span>;
+
+  return (
+    <div className="flex items-center gap-1 md:gap-1.5" aria-label="Flash sale үлдсэн хугацаа">
+      <Clock className="h-3.5 w-3.5 md:h-4 md:w-4 text-destructive flex-shrink-0" />
+      {t.d > 0 && (
+        <>
+          <Box v={t.d} />
+          <Sep />
+        </>
+      )}
+      <Box v={t.h} />
+      <Sep />
+      <Box v={t.m} />
+      <Sep />
+      <Box v={t.s} />
+    </div>
+  );
+};
+
 
 const FlashSaleSection = React.memo(() => {
   const rows = useFlashSales();
