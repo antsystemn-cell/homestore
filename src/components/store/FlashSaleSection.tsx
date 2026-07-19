@@ -1,10 +1,60 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Zap, ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Zap, Clock } from "lucide-react";
 import { formatPrice } from "@/data/products";
 import { useFlashSales } from "@/hooks/useFlashSales";
 import FlashSaleCountdown from "./FlashSaleCountdown";
 import { transformImage } from "@/lib/imageUrl";
+
+function pad(n: number) {
+  return n.toString().padStart(2, "0");
+}
+
+const HeaderCountdown = ({ endsAt }: { endsAt: string }) => {
+  const compute = () => {
+    const total = Math.max(0, new Date(endsAt).getTime() - Date.now());
+    const s = Math.floor(total / 1000);
+    return {
+      d: Math.floor(s / 86400),
+      h: Math.floor((s % 86400) / 3600),
+      m: Math.floor((s % 3600) / 60),
+      s: s % 60,
+      total,
+    };
+  };
+  const [t, setT] = useState(compute);
+  useEffect(() => {
+    setT(compute());
+    const id = window.setInterval(() => setT(compute()), 1000);
+    return () => window.clearInterval(id);
+  }, [endsAt]);
+  if (t.total <= 0) return null;
+
+  const Box = ({ v }: { v: number }) => (
+    <span className="min-w-[22px] md:min-w-[26px] px-1 md:px-1.5 py-0.5 rounded-md bg-destructive text-destructive-foreground text-[11px] md:text-sm font-bold tabular-nums text-center">
+      {pad(v)}
+    </span>
+  );
+  const Sep = () => <span className="text-destructive font-bold text-xs md:text-sm">:</span>;
+
+  return (
+    <div className="flex items-center gap-1 md:gap-1.5" aria-label="Flash sale үлдсэн хугацаа">
+      <Clock className="h-3.5 w-3.5 md:h-4 md:w-4 text-destructive flex-shrink-0" />
+      {t.d > 0 && (
+        <>
+          <Box v={t.d} />
+          <Sep />
+        </>
+      )}
+      <Box v={t.h} />
+      <Sep />
+      <Box v={t.m} />
+      <Sep />
+      <Box v={t.s} />
+    </div>
+  );
+};
+
 
 const FlashSaleSection = React.memo(() => {
   const rows = useFlashSales();
@@ -19,20 +69,31 @@ const FlashSaleSection = React.memo(() => {
 
   if (!rows.length) return null;
 
+  // Soonest-ending active flash sale drives the header countdown
+  const soonestEndsAt = rows
+    .map((r) => r.ends_at)
+    .filter(Boolean)
+    .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0];
+
   return (
     <section className="py-4 md:py-6">
       <div className="max-w-6xl mx-auto px-4 md:px-8">
-        <div className="flex items-center justify-between mb-3 md:mb-5">
-          <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 md:h-9 md:w-9 rounded-lg bg-destructive/10 flex items-center justify-center">
+        <div className="flex items-center justify-between gap-2 mb-3 md:mb-5">
+          <div className="flex items-center gap-2 md:gap-2.5 min-w-0">
+            <div className="h-8 w-8 md:h-9 md:w-9 rounded-lg bg-destructive/10 flex items-center justify-center flex-shrink-0">
               <Zap className="h-4 w-4 md:h-5 md:w-5 text-destructive fill-destructive" />
             </div>
-            <h2 className="text-sm md:text-base font-bold text-foreground tracking-tight">
+            <h2 className="text-sm md:text-base font-bold text-foreground tracking-tight whitespace-nowrap">
               Flash Sales
             </h2>
-            <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+            {soonestEndsAt && (
+              <>
+                <span className="hidden sm:inline text-xs text-muted-foreground">Дуусахад:</span>
+                <HeaderCountdown endsAt={soonestEndsAt} />
+              </>
+            )}
           </div>
-          <div className="hidden md:flex items-center gap-1.5">
+          <div className="hidden md:flex items-center gap-1.5 flex-shrink-0">
             <button
               onClick={() => scroll("left")}
               className="p-1.5 rounded-full border border-border hover:border-destructive/40 hover:bg-destructive/5 transition-colors text-muted-foreground hover:text-destructive"
@@ -49,6 +110,7 @@ const FlashSaleSection = React.memo(() => {
             </button>
           </div>
         </div>
+
 
         <div
           ref={scrollRef}
