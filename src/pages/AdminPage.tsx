@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
   BarChart3, LayoutDashboard, Search, X, AlertTriangle, AlertCircle, BadgeCheck, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, FileSpreadsheet, Sparkles,
-  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw, Star, Gift, Smartphone, Monitor, Tablet, PlayCircle
+  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw, Star, Gift, Smartphone, Monitor, Tablet, PlayCircle, ExternalLink
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
@@ -576,6 +576,30 @@ const AdminPage = () => {
     loadAdminData();
   }, [authLoading, isAdmin]);
 
+  // Realtime sync: reflect delivery/payment/status updates from the partner
+  // portal & webhooks without needing a manual refresh.
+  useEffect(() => {
+    if (authLoading || !hasAdminAccess) return;
+    const channel = supabase
+      .channel("admin-orders-sync")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "orders" },
+        (payload: any) => {
+          const row = payload?.new;
+          if (!row?.id) return;
+          setOrders((prev: any[]) => prev.map((o) => o.id === row.id ? { ...o, ...row, items: o.items } : o));
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "orders" },
+        () => { fetchOrders(); }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [authLoading, hasAdminAccess]);
+
   // Open product editor when URL has ?edit=<id> (supports new tab / right-click open)
   useEffect(() => {
     const editParam = searchParams.get("edit");
@@ -961,6 +985,8 @@ const AdminPage = () => {
 
 
   const [sendingDelivery, setSendingDelivery] = useState<string | null>(null);
+  const [bulkSending, setBulkSending] = useState(false);
+  const [openingPortal, setOpeningPortal] = useState<string | null>(null);
 
   const sendToDelivery = async (orderId: string) => {
     setSendingDelivery(orderId);
@@ -980,6 +1006,63 @@ const AdminPage = () => {
     } finally {
       setSendingDelivery(null);
     }
+  };
+
+  const openOrderInPortal = async (order: any) => {
+    setOpeningPortal(order.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("partner-portal-session", {
+        body: {
+          external_order_id: `EASY-${order.order_ref || order.id}`,
+          delivery_order_id: order.delivery_order_id || undefined,
+          order_ref: order.order_ref || undefined,
+        },
+      });
+      if (error) throw error;
+      if (!data?.ok || !data?.portal_url) throw new Error(data?.error || "Порталын линк ирсэнгүй");
+      window.open(data.portal_url, "_blank", "noopener,noreferrer");
+    } catch (e: any) {
+      toast.error("Порталыг нээхэд алдаа: " + (e?.message || e));
+    } finally {
+      setOpeningPortal(null);
+    }
+  };
+
+  const unsentOrders = useMemo(
+    () => orders.filter((o: any) =>
+      !o.delivery_order_id
+      && o.status !== "cancelled"
+      && (o.status === "confirmed" || o.status === "delivering" || o.payment_status === "confirmed" || o.payment_status === "paid")
+    ),
+    [orders]
+  );
+
+  const deliveryStatusCounts = useMemo(() => {
+    const c = { processing: 0, confirmed: 0, out_for_delivery: 0, delivered: 0, cancelled: 0 } as Record<string, number>;
+    for (const o of orders as any[]) {
+      if (!o.delivery_order_id) continue;
+      const s = o.delivery_status || "processing";
+      if (c[s] === undefined) c[s] = 0;
+      c[s] += 1;
+    }
+    return c;
+  }, [orders]);
+
+  const bulkResendUnsent = async () => {
+    if (unsentOrders.length === 0) return;
+    if (!window.confirm(`${unsentOrders.length} захиалгыг хүргэлтэнд илгээх үү?`)) return;
+    setBulkSending(true);
+    let ok = 0, fail = 0;
+    for (const o of unsentOrders) {
+      try {
+        const { data, error } = await supabase.functions.invoke("send-to-delivery", { body: { order_id: o.id } });
+        if (error || !data?.success) { fail += 1; continue; }
+        ok += 1;
+        setOrders((prev) => prev.map((x: any) => x.id === o.id ? { ...x, delivery_order_id: data.delivery_order_id, delivery_status: "processing" } : x));
+      } catch { fail += 1; }
+    }
+    setBulkSending(false);
+    toast.success(`Илгээгдсэн: ${ok}${fail ? ` · Алдаа: ${fail}` : ""}`);
   };
 
   const [deleteOrderTarget, setDeleteOrderTarget] = useState<{ id: string } | null>(null);
@@ -3537,6 +3620,56 @@ const AdminPage = () => {
                 </div>
               </div>
 
+              {/* Delivery integration summary */}
+              <div className="rounded-2xl border border-border bg-card p-3 sm:p-4 space-y-3">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <Truck className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-bold">Хүргэлт удирдах уяалдаа</span>
+                  </div>
+                  <button
+                    onClick={() => setTab("delivery-portal")}
+                    className="text-xs font-medium text-primary hover:underline inline-flex items-center gap-1"
+                  >
+                    Порталыг нээх →
+                  </button>
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                  <span className="px-2 py-1 rounded-lg bg-blue-500/10 text-blue-700 font-semibold">
+                    Боловсруулж: {deliveryStatusCounts.processing || 0}
+                  </span>
+                  <span className="px-2 py-1 rounded-lg bg-sky-500/10 text-sky-700 font-semibold">
+                    Баталгаажсан: {deliveryStatusCounts.confirmed || 0}
+                  </span>
+                  <span className="px-2 py-1 rounded-lg bg-violet-500/10 text-violet-700 font-semibold">
+                    Хүргэлтэнд: {deliveryStatusCounts.out_for_delivery || 0}
+                  </span>
+                  <span className="px-2 py-1 rounded-lg bg-green-500/10 text-green-700 font-semibold">
+                    Хүргэгдсэн: {deliveryStatusCounts.delivered || 0}
+                  </span>
+                  {(deliveryStatusCounts.cancelled || 0) > 0 && (
+                    <span className="px-2 py-1 rounded-lg bg-red-500/10 text-red-700 font-semibold">
+                      Цуцлагдсан: {deliveryStatusCounts.cancelled}
+                    </span>
+                  )}
+                </div>
+                {unsentOrders.length > 0 && (
+                  <div className="flex items-center justify-between gap-3 flex-wrap rounded-xl bg-amber-500/10 border border-amber-500/30 px-3 py-2">
+                    <div className="text-xs text-amber-800 font-semibold">
+                      ⚠️ {unsentOrders.length} захиалга хүргэлтэнд илгээгдээгүй байна
+                    </div>
+                    <button
+                      onClick={bulkResendUnsent}
+                      disabled={bulkSending}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-50"
+                    >
+                      {bulkSending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Truck className="h-3.5 w-3.5" />}
+                      Бүгдийг илгээх
+                    </button>
+                  </div>
+                )}
+              </div>
+
               {/* Phone search */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -3885,6 +4018,16 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                             title="Хүргэлтэнд илгээх"
                           >
                             {sendingDelivery === o.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Truck className="h-4 w-4" />}
+                          </button>
+                        )}
+                        {o.delivery_order_id && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); openOrderInPortal(o); }}
+                            disabled={openingPortal === o.id}
+                            className="p-2 rounded-lg hover:bg-primary/10 text-primary transition-colors disabled:opacity-50"
+                            title="Хүргэлтийн порталаар харах"
+                          >
+                            {openingPortal === o.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
                           </button>
                         )}
                         {(ordersSubTab === "active" || ordersSubTab === "unpaid_delivery" || isDeliveredOrder(o)) && (
