@@ -530,6 +530,70 @@ const ProductPage = () => {
               </div>
             )}
 
+            {/* Size chips — Elle Sport clothing, directly under color */}
+            {isElleSportBrand && product.sizes && product.sizes.length > 0 && (
+              <div className="px-4 md:px-0 pt-2">
+                <div className="flex items-end justify-between mb-2 px-0.5">
+                  <div className="space-y-0.5">
+                    <h3 className="text-sm font-bold text-foreground leading-none">Хэмжээ</h3>
+                    <p className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">
+                      {selectedSize ? `Сонгосон: ${selectedSize}` : `${product.sizes.length} сонголт`}
+                    </p>
+                  </div>
+                  {!selectedSize && (
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-destructive/80">
+                      Заавал
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {product.sizes.map((size) => {
+                    let sizeQty: number | null = null;
+                    if (variantStock) {
+                      if (hasColors && selectedColor) {
+                        sizeQty = Number(variantStock[`${selectedColor}|${size}`]) || 0;
+                      } else if (hasColors) {
+                        sizeQty = (product.colors || []).reduce(
+                          (sum, c) => sum + (Number(variantStock[`${c.name}|${size}`]) || 0),
+                          0
+                        );
+                      } else {
+                        sizeQty = Number(variantStock[`|${size}`]) || 0;
+                      }
+                    }
+                    const isSoldOut = sizeQty !== null && sizeQty <= 0;
+                    return (
+                      <button
+                        key={size}
+                        onClick={() => {
+                          userInteractedRef.current = true;
+                          if (!isSoldOut) setSelectedSize(selectedSize === size ? null : size);
+                        }}
+                        disabled={isSoldOut}
+                        className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-colors flex flex-col items-center leading-tight min-w-[64px] ${
+                          selectedSize === size
+                            ? "border-primary bg-primary/10 text-foreground"
+                            : isSoldOut
+                            ? "border-border bg-secondary/50 text-muted-foreground/50 line-through cursor-not-allowed"
+                            : "border-border bg-secondary text-muted-foreground hover:border-foreground/40"
+                        }`}
+                      >
+                        <span>{size}</span>
+                        {sizeQty !== null && (
+                          <span className={`text-[10px] font-normal mt-0.5 ${
+                            isSoldOut ? "text-destructive/70" : sizeQty <= 3 ? "text-destructive" : "text-muted-foreground/70"
+                          }`}>
+                            {isSoldOut ? "Дууссан" : `${sizeQty} ширхэг`}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+
           </div>
 
           <div className="p-4 md:p-0 space-y-6 md:col-start-2 md:row-start-1">
