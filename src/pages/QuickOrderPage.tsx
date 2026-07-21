@@ -439,41 +439,72 @@ export default function QuickOrderPage() {
 
       {tab === "new" ? (
         <div className="max-w-3xl mx-auto px-4 py-5 space-y-4">
+          {/* SECTION 1 — Contact & address */}
           <div className="bg-card rounded-2xl border border-border p-4">
-            <label className="text-xs font-bold text-muted-foreground flex items-center justify-between">
-              <span>Захиалгын мэдээллийг чөлөөтэй бичих эсвэл ярих</span>
-              {text && <button onClick={() => setText("")} className="text-[10px] text-muted-foreground hover:text-destructive">Цэвэрлэх</button>}
-            </label>
-            <div className="relative mt-2">
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-bold text-muted-foreground">
+                📞 Утас ба хаяг
+              </label>
+              {contactText && <button onClick={() => setContactText("")} className="text-[10px] text-muted-foreground hover:text-destructive">Цэвэрлэх</button>}
+            </div>
+            <div className="relative">
               <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                rows={6}
-                placeholder="Жишээ: 99112233 Сүхбаатар дүүрэг 3-р хороолол 15-р байр 42 тоот, ногоон цамц 2ш, хар өмд L 1ш"
+                value={contactText}
+                onChange={(e) => setContactText(e.target.value)}
+                rows={4}
+                placeholder="Жишээ: 99112233 Сүхбаатар дүүрэг 3-р хороолол 15-р байр 42 тоот"
                 className="w-full rounded-xl border border-border bg-background px-4 py-3 pr-14 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <button
-                onClick={listening ? stopMic : startMic}
+                onClick={() => (listeningField === "contact" ? stopMic() : startMic("contact"))}
                 className={`absolute right-2 top-2 h-11 w-11 rounded-full flex items-center justify-center ${
-                  listening ? "bg-red-500 text-white animate-pulse" : "bg-primary text-primary-foreground"
+                  listeningField === "contact" ? "bg-red-500 text-white animate-pulse" : "bg-primary text-primary-foreground"
                 }`}
-                aria-label="Микрофон"
-                type="button"
+                aria-label="Микрофон" type="button"
               >
-                {listening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+                {listeningField === "contact" ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+              </button>
+            </div>
+            <p className="mt-1.5 text-[10px] text-muted-foreground">{contactText.length} тэмдэгт</p>
+          </div>
+
+          {/* SECTION 2 — Products */}
+          <div className="bg-card rounded-2xl border border-border p-4">
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-bold text-muted-foreground">
+                🛍️ Бараа
+              </label>
+              {productText && <button onClick={() => { setProductText(""); setLiveMatches([]); }} className="text-[10px] text-muted-foreground hover:text-destructive">Цэвэрлэх</button>}
+            </div>
+            <div className="relative">
+              <textarea
+                value={productText}
+                onChange={(e) => setProductText(e.target.value)}
+                rows={4}
+                placeholder="Жишээ: ногоон цамц 2ш, хар өмд L 1ш"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 pr-14 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <button
+                onClick={() => (listeningField === "product" ? stopMic() : startMic("product"))}
+                className={`absolute right-2 top-2 h-11 w-11 rounded-full flex items-center justify-center ${
+                  listeningField === "product" ? "bg-red-500 text-white animate-pulse" : "bg-primary text-primary-foreground"
+                }`}
+                aria-label="Микрофон" type="button"
+              >
+                {listeningField === "product" ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
               </button>
             </div>
             <div className="mt-2 flex items-center justify-between text-[10px] text-muted-foreground">
-              <span>{text.length} тэмдэгт</span>
+              <span>{productText.length} тэмдэгт</span>
               {products.length > 0 && <span>{products.length} бараа AI-д илгээгдэнэ</span>}
             </div>
 
-            {/* Live voice product matches — appears while user is dictating */}
-            {(listening || liveMatches.length > 0) && (
+            {/* Live voice product matches */}
+            {(listeningField === "product" || liveMatches.length > 0) && (
               <div className="mt-3 rounded-xl border border-primary/30 bg-primary/5 p-2.5">
                 <div className="flex items-center justify-between mb-1.5">
                   <p className="text-[10px] font-bold text-primary flex items-center gap-1">
-                    {listening && <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />}
+                    {listeningField === "product" && <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />}
                     Бодит цагийн бараа таних {liveMatches.length > 0 && `(${liveMatches.length})`}
                   </p>
                   {liveMatches.length > 0 && (
@@ -503,16 +534,17 @@ export default function QuickOrderPage() {
                 )}
               </div>
             )}
-
-            <button
-              onClick={handleParse}
-              disabled={loading || !text.trim()}
-              className="mt-3 w-full bg-primary text-primary-foreground rounded-xl py-3.5 text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              {loading ? "AI задалж байна..." : "AI-аар задлах"}
-            </button>
           </div>
+
+          <button
+            onClick={handleParse}
+            disabled={loading || (!contactText.trim() && !productText.trim())}
+            className="w-full bg-primary text-primary-foreground rounded-xl py-3.5 text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {loading ? "AI задалж байна..." : "AI-аар задлах"}
+          </button>
+
 
           {parsed && (
             <div className="bg-card rounded-2xl border-2 border-primary/40 p-4 space-y-4">
