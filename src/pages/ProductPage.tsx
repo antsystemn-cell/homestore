@@ -12,6 +12,7 @@ import FrequentlyBoughtTogether from "@/components/store/FrequentlyBoughtTogethe
 import LoadError from "@/components/store/LoadError";
 import { fetchPublicProductBySlug, fetchPublicProductById, fetchPublicProductImages, fetchRelatedPublicProducts, fetchPublicBrands } from "@/lib/publicStoreApi";
 import Header from "@/components/store/Header";
+import BottomNav from "@/components/store/BottomNav";
 import { useProductStat } from "@/hooks/useProductStat";
 import { useFlashSaleFor } from "@/hooks/useFlashSales";
 import FlashSaleCountdown from "@/components/store/FlashSaleCountdown";
