@@ -33,7 +33,72 @@ declare global {
   }
 }
 
+const NativeReelVideo = ({ url, title }: { url: string; title: string | null }) => {
+  const [resolved, setResolved] = useState<string>(() => (url.startsWith("storage://product-videos/") ? "" : url));
+  const [muted, setMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!url.startsWith("storage://product-videos/")) {
+      setResolved(url);
+      return;
+    }
+    const path = url.replace("storage://product-videos/", "");
+    supabase.storage
+      .from("product-videos")
+      .createSignedUrl(path, 60 * 60)
+      .then(({ data }) => {
+        if (!cancelled) setResolved(data?.signedUrl || "");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [url]);
+
+  return (
+    <div className="relative w-full h-full flex items-center justify-center bg-black">
+      {resolved ? (
+        <video
+          ref={videoRef}
+          src={resolved}
+          autoPlay
+          muted={muted}
+          loop
+          playsInline
+          preload="auto"
+          className="w-full h-full object-contain"
+          onLoadedMetadata={(e) => {
+            const v = e.currentTarget;
+            v.muted = muted;
+            const p = v.play();
+            if (p && typeof p.catch === "function") p.catch(() => {});
+          }}
+        />
+      ) : (
+        <div className="text-white/60 text-xs">Видео ачааллаж байна...</div>
+      )}
+      <button
+        onClick={() => {
+          const v = videoRef.current;
+          const next = !muted;
+          setMuted(next);
+          if (v) v.muted = next;
+        }}
+        className="absolute top-3 right-3 z-10 bg-black/50 backdrop-blur px-3 py-1.5 rounded-full text-xs"
+        aria-label={muted ? "Дуутай болгох" : "Дуугүй болгох"}
+      >
+        {muted ? "🔇 Дуутай" : "🔊 Дуугүй"}
+      </button>
+      {title && (
+        <p className="sr-only">{title}</p>
+      )}
+    </div>
+  );
+};
+
 const ReelsPage = () => {
+
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { addToCart } = useCart();
