@@ -461,7 +461,7 @@ const ProductPage = () => {
     const videos: GalleryItem[] = (product.detailMedia || [])
       .filter((m) => m.type === "video" && m.url)
       .map((m) => ({ type: "video", url: m.url, thumbnail: m.thumbnail, caption: m.caption }));
-    return [...imgs, ...videos];
+    return videos.length > 0 ? [...videos, ...imgs] : imgs;
   }, [allImages, product.image, product.detailMedia]);
   const totalGallery = galleryItems.length;
 
