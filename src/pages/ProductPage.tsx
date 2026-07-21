@@ -377,7 +377,7 @@ const ProductPage = () => {
         <button onClick={() => navigate(-1)} className="p-1.5 rounded-full hover:bg-secondary">
           <ArrowLeft className="h-5 w-5 text-foreground" />
         </button>
-        <span className="text-sm font-semibold text-foreground truncate">{product.name}</span>
+        
       </div>
 
       <div className="hidden md:block">
