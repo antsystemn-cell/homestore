@@ -351,13 +351,23 @@ export default function QuickOrderPage() {
                         <td className="p-3 text-xs">{o.shipping_address}</td>
                         <td className="p-3 text-xs">{Array.isArray(o.items) ? o.items.map((it: any) => `${it.name} × ${it.quantity}`).join(", ") : ""}</td>
                         <td className="p-3">
-                          <select
-                            value={STATUS_OPTIONS.find((x) => x.value === o.status) ? o.status : "pending"}
-                            onChange={(e) => updateStatus(o.id, e.target.value)}
-                            className="rounded-lg border border-border bg-background px-2 py-1.5 text-xs"
-                          >
-                            {STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-                          </select>
+                          <div className="flex items-center gap-2">
+                            <select
+                              value={STATUS_OPTIONS.find((x) => x.value === o.status) ? o.status : "pending"}
+                              onChange={(e) => updateStatus(o.id, e.target.value)}
+                              className="rounded-lg border border-border bg-background px-2 py-1.5 text-xs"
+                            >
+                              {STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                            </select>
+                            {o.status === "pending" && (
+                              <button
+                                onClick={() => updateStatus(o.id, "confirmed")}
+                                className="rounded-lg bg-emerald-600 text-white px-3 py-1.5 text-xs font-bold flex items-center gap-1 whitespace-nowrap"
+                              >
+                                <CheckCircle2 className="h-3.5 w-3.5" /> Баталгаажуулах
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
