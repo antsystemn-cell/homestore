@@ -873,19 +873,46 @@ const ProductPage = () => {
               <div>
                 <h3 className="text-sm font-semibold text-foreground mb-2">Хэмжээ</h3>
                 <div className="flex flex-wrap gap-2">
-                  {product.sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(selectedSize === size ? null : size)}
-                      className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-colors ${
-                        selectedSize === size
-                          ? "border-primary bg-primary/10 text-foreground"
-                          : "border-border bg-secondary text-muted-foreground"
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
+                  {product.sizes.map((size) => {
+                    // Per-size stock: if color selected use that color, otherwise sum across colors
+                    let sizeQty: number | null = null;
+                    if (isElleSportBrand && variantStock) {
+                      if (hasColors && selectedColor) {
+                        sizeQty = Number(variantStock[`${selectedColor}|${size}`]) || 0;
+                      } else if (hasColors) {
+                        sizeQty = (product.colors || []).reduce(
+                          (sum, c) => sum + (Number(variantStock[`${c.name}|${size}`]) || 0),
+                          0
+                        );
+                      } else {
+                        sizeQty = Number(variantStock[`|${size}`]) || 0;
+                      }
+                    }
+                    const isSoldOut = sizeQty !== null && sizeQty <= 0;
+                    return (
+                      <button
+                        key={size}
+                        onClick={() => !isSoldOut && setSelectedSize(selectedSize === size ? null : size)}
+                        disabled={isSoldOut}
+                        className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-colors flex flex-col items-center leading-tight min-w-[64px] ${
+                          selectedSize === size
+                            ? "border-primary bg-primary/10 text-foreground"
+                            : isSoldOut
+                            ? "border-border bg-secondary/50 text-muted-foreground/50 line-through cursor-not-allowed"
+                            : "border-border bg-secondary text-muted-foreground"
+                        }`}
+                      >
+                        <span>{size}</span>
+                        {sizeQty !== null && (
+                          <span className={`text-[10px] font-normal mt-0.5 ${
+                            isSoldOut ? "text-destructive/70" : sizeQty <= 3 ? "text-destructive" : "text-muted-foreground/70"
+                          }`}>
+                            {isSoldOut ? "Дууссан" : `${sizeQty} ширхэг`}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
