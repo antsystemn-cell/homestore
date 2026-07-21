@@ -373,12 +373,12 @@ const ProductPage = () => {
   return (
     <div className="min-h-screen bg-background pb-32 md:pb-12">
       <div className="hidden md:block"><Header /></div>
-      <div className="md:hidden sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border px-4 py-3 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="p-1.5 rounded-full hover:bg-secondary">
+      <div className="md:hidden absolute top-0 left-0 right-0 z-40 px-4 py-3 flex items-center gap-3">
+        <button onClick={() => navigate(-1)} className="p-1.5 rounded-full bg-background/70 backdrop-blur-md hover:bg-background">
           <ArrowLeft className="h-5 w-5 text-foreground" />
         </button>
-        
       </div>
+
 
       <div className="hidden md:block">
         <div className="max-w-6xl mx-auto px-8 py-3">
