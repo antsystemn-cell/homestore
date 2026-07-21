@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
   BarChart3, LayoutDashboard, Search, X, AlertTriangle, AlertCircle, BadgeCheck, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, FileSpreadsheet, Sparkles,
-  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw, Star, Gift, Smartphone, Monitor, Tablet, PlayCircle, ExternalLink
+  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw, Star, Gift, Smartphone, Monitor, Tablet, PlayCircle, ExternalLink, Zap
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
@@ -3689,12 +3689,21 @@ const AdminPage = () => {
                     Шинэчлэх
                   </button>
                   <button
+                    onClick={() => navigate("/quick-order")}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary text-sm font-medium hover:bg-secondary/80 transition-colors"
+                    title="Хурдан захиалга (AI/дуут оролт)"
+                  >
+                    <Zap className="h-4 w-4" />
+                    Хурдан захиалга
+                  </button>
+                  <button
                     onClick={() => { resetManualForm(); setShowManualOrder(true); }}
                     className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow hover:opacity-90 transition-opacity"
                   >
                     <Plus className="h-4 w-4" />
                     Захиалга оруулах
                   </button>
+
                 </div>
               </div>
 
