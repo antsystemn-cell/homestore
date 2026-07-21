@@ -117,7 +117,7 @@ export default function QuickOrderPage() {
     return scored;
   }, [products]);
 
-  const startMic = () => {
+  const startMic = (field: "contact" | "product") => {
     const SR: any = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) { toast.error("Энэ browser Speech Recognition-г дэмжихгүй байна"); return; }
     const rec = new SR();
@@ -125,7 +125,9 @@ export default function QuickOrderPage() {
     rec.continuous = true;
     rec.interimResults = true;
     rec.maxAlternatives = 3;
-    let finalText = text ? text + " " : "";
+    const current = field === "contact" ? contactText : productText;
+    const setter = field === "contact" ? setContactText : setProductText;
+    let finalText = current ? current + " " : "";
     rec.onresult = (e: any) => {
       let interim = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
@@ -134,17 +136,17 @@ export default function QuickOrderPage() {
         else interim += t;
       }
       const full = (finalText + interim).replace(/\s+/g, " ");
-      setText(full);
-      // Live product suggestions from the running transcript
-      setLiveMatches(topMatches(full, 6));
+      setter(full);
+      if (field === "product") setLiveMatches(topMatches(full, 6));
     };
-    rec.onerror = (e: any) => { toast.error("Микрофон алдаа: " + (e.error || "unknown")); setListening(false); };
-    rec.onend = () => setListening(false);
+    rec.onerror = (e: any) => { toast.error("Микрофон алдаа: " + (e.error || "unknown")); setListeningField(null); };
+    rec.onend = () => setListeningField(null);
     rec.start();
     recRef.current = rec;
-    setListening(true);
+    setListeningField(field);
   };
-  const stopMic = () => { try { recRef.current?.stop(); } catch {} setListening(false); };
+  const stopMic = () => { try { recRef.current?.stop(); } catch {} setListeningField(null); };
+
 
   // Voice search inside the product picker modal
   const startPickerMic = () => {
