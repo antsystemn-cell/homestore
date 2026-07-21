@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { scoreCandidate } from "@/lib/searchNormalize";
 
-interface ProductLite { id: string; name: string; price: number; original_price: number | null; is_on_sale: boolean | null }
+interface ProductLite { id: string; name: string; price: number; original_price: number | null; is_on_sale: boolean | null; image_url: string | null; thumbnail_url: string | null }
 
 interface ParsedItem {
   name: string;
