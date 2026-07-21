@@ -3689,12 +3689,21 @@ const AdminPage = () => {
                     Шинэчлэх
                   </button>
                   <button
+                    onClick={() => navigate("/quick-order")}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary text-sm font-medium hover:bg-secondary/80 transition-colors"
+                    title="Хурдан захиалга (AI/дуут оролт)"
+                  >
+                    <Zap className="h-4 w-4" />
+                    Хурдан захиалга
+                  </button>
+                  <button
                     onClick={() => { resetManualForm(); setShowManualOrder(true); }}
                     className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow hover:opacity-90 transition-opacity"
                   >
                     <Plus className="h-4 w-4" />
                     Захиалга оруулах
                   </button>
+
                 </div>
               </div>
 
