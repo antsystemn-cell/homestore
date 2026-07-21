@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Product, mapDbProduct } from "@/data/products";
 import { searchPublicProducts } from "@/lib/publicStoreApi";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
+import easyshopLogo from "@/assets/easyshop-logo.png.asset.json";
 
 const DEBOUNCE_MS = 300;
 const SUGGEST_DEBOUNCE_MS = 150;
@@ -136,16 +137,25 @@ const Header = () => {
           collapsed ? "py-1.5 md:py-3" : "py-3"
         }`}
       >
-        <span
+        <button
           onClick={() => navigate("/")}
-          className={`cursor-pointer shrink-0 text-foreground overflow-hidden whitespace-nowrap transition-all duration-300 ease-out md:!max-w-none md:!opacity-100 md:!ml-0 md:text-2xl ${
+          aria-label="EasyShop"
+          className={`cursor-pointer shrink-0 overflow-hidden transition-all duration-300 ease-out md:!max-w-none md:!opacity-100 md:!ml-0 ${
             collapsed
-              ? "max-w-0 opacity-0 -ml-4 text-base"
-              : "max-w-[180px] opacity-100 ml-0 text-xl"
+              ? "max-w-0 opacity-0 -ml-4"
+              : "max-w-[180px] opacity-100 ml-0"
           }`}
         >
-          <span className="font-bold">Easy</span><span className="font-light text-muted-foreground">Shop</span>
-        </span>
+          <img
+            src={easyshopLogo.url}
+            alt="EasyShop"
+            className={`w-auto object-contain transition-all duration-300 ease-out md:h-9 ${
+              collapsed ? "h-6" : "h-8"
+            }`}
+            loading="eager"
+            decoding="async"
+          />
+        </button>
 
         {/* Desktop nav links */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
