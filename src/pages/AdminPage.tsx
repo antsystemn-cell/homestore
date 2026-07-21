@@ -18,6 +18,7 @@ import ReviewsManager from "@/components/admin/ReviewsManager";
 import SpinSettingsManager from "@/components/admin/SpinSettingsManager";
 import ReferralManager from "@/components/admin/ReferralManager";
 import WalletCreditsManager from "@/components/admin/WalletCreditsManager";
+import CouponUsageManager from "@/components/admin/CouponUsageManager";
 import FlashSalesManager from "@/components/admin/FlashSalesManager";
 import ReelsManager from "@/components/admin/ReelsManager";
 
