@@ -20,7 +20,7 @@ const BottomNav = () => {
   const tabs = [
     { path: "/", label: "Нүүр", icon: Home },
     { path: "/wishlist", label: "Таалагдсан", icon: Heart },
-    { path: "/reels", label: "Reels", icon: PlayCircle },
+    { path: "/reels", label: "Reels", icon: ReelsIcon },
     { path: "/cart", label: "Сагс", icon: ShoppingCart, badge: cartCount },
     { path: "/profile", label: "Профайл", icon: User },
   ];
