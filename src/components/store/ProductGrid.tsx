@@ -163,7 +163,10 @@ const ProductGrid = React.memo(({ products, brands, allProducts }: Props) => {
         list.splice(pos, 0, { kind: "brand", brand });
       });
     }
-    return list;
+    // Trim to a multiple of 4 so each row on desktop (lg: 4 cols) is fully filled.
+    // Brand tiles inserted above can leave 1–3 orphans on the last row otherwise.
+    const trimmed = list.length - (list.length % 4);
+    return list.slice(0, trimmed);
   }, [products, brands, source.length]);
 
   return (
