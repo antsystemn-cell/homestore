@@ -486,6 +486,7 @@ const AdminPage = () => {
   // Image upload
   const fileInputRef = useRef<HTMLInputElement>(null);
   const extraFileInputRef = useRef<HTMLInputElement>(null);
+  const extraVideoInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -530,6 +531,35 @@ const AdminPage = () => {
       toast.success(`${newImages.length} зураг WebP болгож нэмэгдлээ`);
     }
     if (extraFileInputRef.current) extraFileInputRef.current.value = "";
+  };
+
+  const handleExtraVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    const newVideos: string[] = [];
+    let hasError = false;
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (!file.type.startsWith("video/") && !/\.(mp4|webm|mov|m4v|ogv)$/i.test(file.name)) { hasError = true; continue; }
+      if (file.size > 50 * 1024 * 1024) { toast.error("Бичлэг 50MB-ээс бага байх ёстой"); hasError = true; continue; }
+      try {
+        const dataUrl: string = await new Promise((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result as string);
+          r.onerror = reject;
+          r.readAsDataURL(file);
+        });
+        newVideos.push(dataUrl);
+      } catch {
+        hasError = true;
+      }
+    }
+    if (hasError) toast.error("Зарим бичлэг оруулж чадсангүй");
+    if (newVideos.length > 0) {
+      setExtraImages((prev) => [...prev, ...newVideos]);
+      toast.success(`${newVideos.length} бичлэг нэмэгдлээ`);
+    }
+    if (extraVideoInputRef.current) extraVideoInputRef.current.value = "";
   };
 
   useEffect(() => {
