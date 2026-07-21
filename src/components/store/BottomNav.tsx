@@ -32,13 +32,13 @@ const BottomNav = () => {
               key={t.path}
               onClick={() => navigate(t.path)}
               className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 transition-colors ${
-                active ? "text-primary" : "text-muted-foreground"
+                active ? "text-sale" : "text-muted-foreground"
               }`}
             >
               {/* Top indicator bar for active tab */}
               <span
                 className={`absolute top-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full transition-all ${
-                  active ? "w-8 bg-primary" : "w-0 bg-transparent"
+                  active ? "w-8 bg-sale" : "w-0 bg-transparent"
                 }`}
                 aria-hidden
               />
@@ -50,7 +50,7 @@ const BottomNav = () => {
                     t.path === "/wishlist" && wishlist.length > 0
                       ? "fill-sale text-sale"
                       : active
-                      ? "fill-primary/15"
+                      ? "fill-sale/15"
                       : ""
                   }`}
                 />
