@@ -4020,6 +4020,16 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                             {sendingDelivery === o.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Truck className="h-4 w-4" />}
                           </button>
                         )}
+                        {o.delivery_order_id && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); openOrderInPortal(o); }}
+                            disabled={openingPortal === o.id}
+                            className="p-2 rounded-lg hover:bg-primary/10 text-primary transition-colors disabled:opacity-50"
+                            title="Хүргэлтийн порталаар харах"
+                          >
+                            {openingPortal === o.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
+                          </button>
+                        )}
                         {(ordersSubTab === "active" || ordersSubTab === "unpaid_delivery" || isDeliveredOrder(o)) && (
                           <button
                             onClick={async (e) => {
