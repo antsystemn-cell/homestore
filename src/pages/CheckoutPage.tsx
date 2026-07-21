@@ -108,7 +108,9 @@ const CheckoutPage = () => {
     fetchProviderLogos();
   }, []);
 
-  // Fetch coupons earned within the last 5 hours (active, unused, not expired)
+  // Fetch coupons earned within the last 5 hours (active, unused, not expired).
+  // Exclude coupons that are already mirrored into wallet_credits to prevent
+  // double-counting (WELCOME/REF/INV/wheel rewards are handled via wallet).
   useEffect(() => {
     if (!user) { setAvailableCoupons([]); return; }
     (async () => {
@@ -123,8 +125,16 @@ const CheckoutPage = () => {
         .gte("created_at", fiveHoursAgo)
         .gt("expires_at", nowIso)
         .order("created_at", { ascending: false });
-      setAvailableCoupons((data as SpinCoupon[]) || []);
-      setSelectedCouponIds(((data as SpinCoupon[]) || []).map((c) => c.id));
+      const raw = (data as SpinCoupon[]) || [];
+      const { data: mirrored } = await supabase
+        .from("wallet_credits" as any)
+        .select("source_coupon_id")
+        .eq("user_id", user.id)
+        .not("source_coupon_id", "is", null);
+      const mirroredIds = new Set(((mirrored as any[]) || []).map((r) => r.source_coupon_id));
+      const filtered = raw.filter((c) => !mirroredIds.has(c.id));
+      setAvailableCoupons(filtered);
+      setSelectedCouponIds(filtered.map((c) => c.id));
     })();
   }, [user]);
 
