@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Heart, ShoppingCart, Truck, Shield, RotateCcw, ChevronLeft, ChevronRight, Play, Gift, X, Star, Users } from "lucide-react";
 import { Product, formatPrice, mapDbProduct, DetailMedia } from "@/data/products";
@@ -110,6 +110,90 @@ const VideoWithThumbnail = ({ media }: { media: DetailMedia }) => {
         className="w-full h-auto"
         controlsList="nodownload"
         playsInline
+      />
+    </div>
+  );
+};
+
+type GalleryItem =
+  | { type: "image"; url: string }
+  | { type: "video"; url: string; thumbnail?: string; caption?: string };
+
+const GalleryVideo = ({ item, active }: { item: Extract<GalleryItem, { type: "video" }>; active: boolean }) => {
+  const [playing, setPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const isYoutube = item.url.includes("youtube.com") || item.url.includes("youtu.be");
+  const isFacebook = item.url.includes("facebook.com") || item.url.includes("fb.watch");
+
+  useEffect(() => {
+    if (!active && videoRef.current) {
+      videoRef.current.pause();
+      setPlaying(false);
+    }
+  }, [active]);
+
+  if (!playing) {
+    return (
+      <div
+        className="w-full h-full flex-shrink-0 snap-start relative bg-black cursor-pointer group"
+        style={{ minWidth: "100%" }}
+        onClick={() => setPlaying(true)}
+      >
+        {item.thumbnail ? (
+          <img src={item.thumbnail} alt={item.caption || "Video"} className="w-full h-full object-cover" />
+        ) : !isYoutube && !isFacebook ? (
+          <video src={item.url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+        ) : (
+          <div className="w-full h-full bg-secondary" />
+        )}
+        <div className="absolute inset-0 bg-black/25 flex items-center justify-center group-hover:bg-black/35 transition-colors">
+          <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
+            <Play className="h-7 w-7 text-foreground ml-1" fill="currentColor" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isYoutube) {
+    const src = item.url.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/") + "?autoplay=1";
+    return (
+      <div className="w-full h-full flex-shrink-0 snap-start bg-black" style={{ minWidth: "100%" }}>
+        <iframe
+          src={src}
+          className="w-full h-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+          allowFullScreen
+          title={item.caption || "Video"}
+        />
+      </div>
+    );
+  }
+
+  if (isFacebook) {
+    return (
+      <div className="w-full h-full flex-shrink-0 snap-start bg-black" style={{ minWidth: "100%" }}>
+        <iframe
+          src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(item.url)}&show_text=false&autoplay=true&width=0`}
+          className="w-full h-full"
+          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; fullscreen"
+          allowFullScreen
+          title={item.caption || "Facebook Video"}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full h-full flex-shrink-0 snap-start bg-black flex items-center justify-center" style={{ minWidth: "100%" }}>
+      <video
+        ref={videoRef}
+        src={item.url}
+        controls
+        autoPlay
+        playsInline
+        className="w-full h-full object-contain"
+        controlsList="nodownload"
       />
     </div>
   );
@@ -370,6 +454,15 @@ const ProductPage = () => {
 
   const liked = isInWishlist(product.id);
 
+  const galleryItems: GalleryItem[] = useMemo(() => {
+    const imgs: GalleryItem[] = (allImages.length > 0 ? allImages : [product.image]).map((u) => ({ type: "image", url: u }));
+    const videos: GalleryItem[] = (product.detailMedia || [])
+      .filter((m) => m.type === "video" && m.url)
+      .map((m) => ({ type: "video", url: m.url, thumbnail: m.thumbnail, caption: m.caption }));
+    return [...imgs, ...videos];
+  }, [allImages, product.image, product.detailMedia]);
+  const totalGallery = galleryItems.length;
+
   return (
     <div className="min-h-screen bg-background pb-32 md:pb-12 relative">
       <div className="hidden md:block"><Header /></div>
@@ -410,31 +503,35 @@ const ProductPage = () => {
                   if (!isProgrammaticScrollRef.current) {
                     userInteractedRef.current = true;
                   }
-                  if (i !== activeImg && i >= 0 && i < allImages.length) {
+                  if (i !== activeImg && i >= 0 && i < totalGallery) {
                     setActiveImg(i);
                   }
                 }}
                 onTouchStart={() => { userInteractedRef.current = true; }}
                 onPointerDown={() => { userInteractedRef.current = true; }}
               >
-                {(allImages.length > 0 ? allImages : [product.image]).map((src, idx) => (
-                  <img
-                    key={idx}
-                    src={src}
-                    alt={`${product.name}${idx > 0 ? ` - ${idx + 1}` : ""}`}
-                    className="w-full h-full flex-shrink-0 object-cover snap-start"
-                    style={{ minWidth: "100%" }}
-                    loading={idx === 0 ? "eager" : "lazy"}
-                    draggable={false}
-                  />
-                ))}
+                {galleryItems.map((item, idx) =>
+                  item.type === "image" ? (
+                    <img
+                      key={idx}
+                      src={item.url}
+                      alt={`${product.name}${idx > 0 ? ` - ${idx + 1}` : ""}`}
+                      className="w-full h-full flex-shrink-0 object-cover snap-start"
+                      style={{ minWidth: "100%" }}
+                      loading={idx === 0 ? "eager" : "lazy"}
+                      draggable={false}
+                    />
+                  ) : (
+                    <GalleryVideo key={idx} item={item} active={idx === activeImg} />
+                  )
+                )}
               </div>
-              {allImages.length > 1 && (
+              {totalGallery > 1 && (
                 <>
                   <button
                     onClick={() => {
                       userInteractedRef.current = true;
-                      setActiveImg((i) => (i - 1 + allImages.length) % allImages.length);
+                      setActiveImg((i) => (i - 1 + totalGallery) % totalGallery);
                     }}
                     className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
                   >
@@ -443,7 +540,7 @@ const ProductPage = () => {
                   <button
                     onClick={() => {
                       userInteractedRef.current = true;
-                      setActiveImg((i) => (i + 1) % allImages.length);
+                      setActiveImg((i) => (i + 1) % totalGallery);
                     }}
                     className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
                   >
@@ -453,7 +550,7 @@ const ProductPage = () => {
 
                   {/* Pagination dots at bottom */}
                   <div className="md:hidden absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 pointer-events-none">
-                    {allImages.map((_, i) => (
+                    {galleryItems.map((_, i) => (
                       <span
                         key={i}
                         className={`h-1.5 rounded-full transition-all duration-300 ${
@@ -479,21 +576,35 @@ const ProductPage = () => {
               ) : null}
             </div>
             {/* Thumbnails — hidden on mobile; color chips below act as selector */}
-            {allImages.length > 1 && (
+            {totalGallery > 1 && (
               <div className="hidden md:flex gap-2 px-4 md:px-0 overflow-x-auto pb-1">
-                {allImages.map((img, idx) => (
+                {galleryItems.map((item, idx) => (
                   <button
                     key={idx}
                     onClick={() => { userInteractedRef.current = true; setActiveImg(idx); }}
-                    className={`h-14 w-14 rounded-lg overflow-hidden shrink-0 border-2 transition-colors ${
+                    className={`relative h-14 w-14 rounded-lg overflow-hidden shrink-0 border-2 transition-colors bg-secondary ${
                       idx === activeImg ? "border-primary" : "border-transparent"
                     }`}
                   >
-                    <img src={img} alt="" className="h-full w-full object-cover" />
+                    {item.type === "image" ? (
+                      <img src={item.url} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <>
+                        {item.thumbnail ? (
+                          <img src={item.thumbnail} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="h-full w-full bg-black/70" />
+                        )}
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                          <Play className="h-4 w-4 text-white" fill="currentColor" />
+                        </div>
+                      </>
+                    )}
                   </button>
                 ))}
               </div>
             )}
+
 
             {/* Color chooser below main image (mirrors buy-sheet styling) */}
             {product.colors && product.colors.length > 0 && (
