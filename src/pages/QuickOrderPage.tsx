@@ -595,9 +595,14 @@ export default function QuickOrderPage() {
                       <button
                         key={p.id}
                         onClick={() => chooseProduct(pickerIdx, p)}
-                        className="w-full text-left p-3 border-b border-border hover:bg-secondary flex items-center justify-between gap-2"
+                        className="w-full text-left p-2.5 border-b border-border hover:bg-secondary flex items-center gap-2"
                       >
-                        <span className="text-sm truncate">{p.name}</span>
+                        {p.thumbnail_url ? (
+                          <img src={p.thumbnail_url} alt="" className="h-10 w-10 rounded-lg object-cover shrink-0" />
+                        ) : (
+                          <div className="h-10 w-10 rounded-lg bg-secondary shrink-0" />
+                        )}
+                        <span className="flex-1 text-sm truncate">{p.name}</span>
                         <span className="text-xs font-bold text-primary shrink-0">{money(p.price)}</span>
                       </button>
                     ))
