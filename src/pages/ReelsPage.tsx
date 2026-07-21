@@ -181,16 +181,28 @@ const ReelsPage = () => {
               className="h-screen w-full snap-start relative flex items-center justify-center bg-black"
             >
               {isFacebook ? (
-                <iframe
-                  src={src}
-                  className="w-full h-full border-0"
-                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                  allowFullScreen
-                  title={r.title || "Reel"}
-                />
+                <>
+                  <iframe
+                    src={src}
+                    className="w-full h-full border-0"
+                    allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                    allowFullScreen
+                    title={r.title || "Reel"}
+                  />
+                  {/* Fallback: if FB blocks embedding ("Unavailable"), user can still open original */}
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute top-16 right-3 z-20 flex items-center gap-1.5 bg-black/70 hover:bg-black/90 backdrop-blur text-white text-xs font-medium px-3 py-1.5 rounded-full border border-white/20"
+                  >
+                    <Facebook className="h-3.5 w-3.5" /> Нээх
+                  </a>
+                </>
               ) : (
                 <NativeReelVideo url={url} title={r.title} />
               )}
+
 
 
 
