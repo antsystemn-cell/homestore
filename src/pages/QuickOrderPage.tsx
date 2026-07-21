@@ -74,6 +74,10 @@ export default function QuickOrderPage() {
   // Which item is showing the product picker (index)
   const [pickerIdx, setPickerIdx] = useState<number | null>(null);
   const [pickerQuery, setPickerQuery] = useState("");
+  const [pickerListening, setPickerListening] = useState(false);
+  const pickerRecRef = useRef<any>(null);
+  // Live product suggestions while user is dictating into the main textarea
+  const [liveMatches, setLiveMatches] = useState<ProductLite[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -96,6 +100,21 @@ export default function QuickOrderPage() {
     return bestScore >= 150 ? best : null;
   };
 
+  // Fuzzy top-N products for a free-text phrase (used for live voice suggestions).
+  const topMatches = useCallback((phrase: string, n = 5): ProductLite[] => {
+    const q = phrase.trim();
+    if (!q || products.length === 0) return [];
+    // Also try the last 6 words — user often names product at the end.
+    const tail = q.split(/\s+/).slice(-6).join(" ");
+    const scored = products
+      .map((p) => ({ p, s: Math.max(scoreCandidate(p.name, q), scoreCandidate(p.name, tail)) }))
+      .filter((x) => x.s > 40)
+      .sort((a, b) => b.s - a.s)
+      .slice(0, n)
+      .map((x) => x.p);
+    return scored;
+  }, [products]);
+
   const startMic = () => {
     const SR: any = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) { toast.error("Энэ browser Speech Recognition-г дэмжихгүй байна"); return; }
@@ -103,6 +122,7 @@ export default function QuickOrderPage() {
     rec.lang = "mn-MN";
     rec.continuous = true;
     rec.interimResults = true;
+    rec.maxAlternatives = 3;
     let finalText = text ? text + " " : "";
     rec.onresult = (e: any) => {
       let interim = "";
@@ -111,7 +131,10 @@ export default function QuickOrderPage() {
         if (e.results[i].isFinal) finalText += t + " ";
         else interim += t;
       }
-      setText((finalText + interim).replace(/\s+/g, " "));
+      const full = (finalText + interim).replace(/\s+/g, " ");
+      setText(full);
+      // Live product suggestions from the running transcript
+      setLiveMatches(topMatches(full, 6));
     };
     rec.onerror = (e: any) => { toast.error("Микрофон алдаа: " + (e.error || "unknown")); setListening(false); };
     rec.onend = () => setListening(false);
@@ -120,6 +143,52 @@ export default function QuickOrderPage() {
     setListening(true);
   };
   const stopMic = () => { try { recRef.current?.stop(); } catch {} setListening(false); };
+
+  // Voice search inside the product picker modal
+  const startPickerMic = () => {
+    const SR: any = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) { toast.error("Энэ browser Speech Recognition-г дэмжихгүй байна"); return; }
+    const rec = new SR();
+    rec.lang = "mn-MN";
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.maxAlternatives = 3;
+    rec.onresult = (e: any) => {
+      let t = "";
+      for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+      setPickerQuery(t.trim());
+    };
+    rec.onerror = () => setPickerListening(false);
+    rec.onend = () => setPickerListening(false);
+    rec.start();
+    pickerRecRef.current = rec;
+    setPickerListening(true);
+  };
+  const stopPickerMic = () => { try { pickerRecRef.current?.stop(); } catch {} setPickerListening(false); };
+
+  // Add a live-detected product directly to the items list (voice quick-add)
+  const quickAddFromVoice = (p: ProductLite) => {
+    const newItem: ParsedItem = {
+      name: p.name, quantity: 1,
+      matched_product_id: p.id, matched_product_name: p.name,
+      price: Number(p.price) || 0, confidence: 1,
+    };
+    if (parsed) {
+      // If item already exists, bump quantity
+      const idx = parsed.items.findIndex((it) => it.matched_product_id === p.id);
+      if (idx >= 0) {
+        const items = [...parsed.items];
+        items[idx] = { ...items[idx], quantity: items[idx].quantity + 1 };
+        setParsed({ ...parsed, items });
+      } else {
+        setParsed({ ...parsed, items: [...parsed.items, newItem] });
+      }
+    } else {
+      setParsed({ phone: "", address: "", items: [newItem], source: "", note: "" });
+    }
+    toast.success(`${p.name} нэмэгдлээ`);
+  };
+
 
   const handleParse = async () => {
     if (!text.trim()) { toast.error("Текст оруулна уу"); return; }
@@ -394,6 +463,43 @@ export default function QuickOrderPage() {
               <span>{text.length} тэмдэгт</span>
               {products.length > 0 && <span>{products.length} бараа AI-д илгээгдэнэ</span>}
             </div>
+
+            {/* Live voice product matches — appears while user is dictating */}
+            {(listening || liveMatches.length > 0) && (
+              <div className="mt-3 rounded-xl border border-primary/30 bg-primary/5 p-2.5">
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-[10px] font-bold text-primary flex items-center gap-1">
+                    {listening && <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />}
+                    Бодит цагийн бараа таних {liveMatches.length > 0 && `(${liveMatches.length})`}
+                  </p>
+                  {liveMatches.length > 0 && (
+                    <button onClick={() => setLiveMatches([])} className="text-[10px] text-muted-foreground">Цэвэрлэх</button>
+                  )}
+                </div>
+                {liveMatches.length === 0 ? (
+                  <p className="text-[10px] text-muted-foreground py-1">Бараа нэрлээд ярина уу — таарсан бараа энд гарч ирнэ</p>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {liveMatches.map((p) => (
+                      <button
+                        key={p.id}
+                        onClick={() => quickAddFromVoice(p)}
+                        className="flex items-center gap-1.5 rounded-full bg-white border border-primary/40 hover:bg-primary hover:text-primary-foreground hover:border-primary transition pl-1 pr-2.5 py-1"
+                      >
+                        {p.thumbnail_url ? (
+                          <img src={p.thumbnail_url} alt="" className="h-6 w-6 rounded-full object-cover" />
+                        ) : (
+                          <div className="h-6 w-6 rounded-full bg-secondary" />
+                        )}
+                        <span className="text-[11px] font-medium max-w-[140px] truncate">{p.name}</span>
+                        <Plus className="h-3 w-3" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             <button
               onClick={handleParse}
               disabled={loading || !text.trim()}
@@ -582,11 +688,26 @@ export default function QuickOrderPage() {
                     autoFocus
                     value={pickerQuery}
                     onChange={(e) => setPickerQuery(e.target.value)}
-                    placeholder="Барааны нэрээр хайх"
+                    placeholder="Бичих эсвэл ярих..."
                     className="flex-1 bg-transparent text-sm focus:outline-none"
                   />
-                  <button onClick={() => setPickerIdx(null)}><X className="h-4 w-4" /></button>
+                  <button
+                    onClick={pickerListening ? stopPickerMic : startPickerMic}
+                    className={`h-8 w-8 rounded-full flex items-center justify-center transition ${
+                      pickerListening ? "bg-red-500 text-white animate-pulse" : "bg-primary text-primary-foreground"
+                    }`}
+                    aria-label="Дуугаар хайх"
+                    type="button"
+                  >
+                    {pickerListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  </button>
+                  <button onClick={() => { stopPickerMic(); setPickerIdx(null); }}><X className="h-4 w-4" /></button>
                 </div>
+                {pickerListening && (
+                  <div className="px-3 py-2 bg-red-50 text-red-700 text-[10px] font-bold border-b border-red-100 flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" /> Сонсож байна... барааны нэрээ хэлнэ үү
+                  </div>
+                )}
                 <div className="flex-1 overflow-y-auto">
                   {pickerResults.length === 0 ? (
                     <p className="p-6 text-center text-xs text-muted-foreground">Илэрц олдсонгүй</p>
