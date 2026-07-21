@@ -2750,6 +2750,38 @@ const AdminPage = () => {
                 </p>
               ) : null}
 
+              {/* Select-all / clear controls */}
+              {filteredProducts.length > 0 && (
+                <div className="flex items-center gap-2 mb-3 flex-wrap">
+                  {(() => {
+                    const allSelected = filteredProducts.every((p: any) => productSelected.has(p.id));
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const next = new Set(productSelected);
+                          if (allSelected) filteredProducts.forEach((p: any) => next.delete(p.id));
+                          else filteredProducts.forEach((p: any) => next.add(p.id));
+                          setProductSelected(next);
+                        }}
+                        className="text-xs font-semibold rounded-lg bg-secondary hover:bg-secondary/80 px-3 py-2"
+                      >
+                        {allSelected
+                          ? `✕ Сонголт цуцлах (${filteredProducts.length})`
+                          : `☑ Бүгдийг сонгох (${filteredProducts.length})`}
+                      </button>
+                    );
+                  })()}
+                  {productSelected.size > 0 && (
+                    <span className="text-xs text-muted-foreground">
+                      {productSelected.size} сонгосон
+                    </span>
+                  )}
+                </div>
+              )}
+
+
+
               {/* Bulk discount bar */}
               {productSelected.size > 0 && (
                 <div className="bg-card rounded-2xl border border-primary/30 p-3 mb-3 flex flex-col sm:flex-row sm:items-center gap-3 flex-wrap">
