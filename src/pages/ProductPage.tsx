@@ -120,52 +120,37 @@ type GalleryItem =
   | { type: "video"; url: string; thumbnail?: string; caption?: string };
 
 const GalleryVideo = ({ item, active }: { item: Extract<GalleryItem, { type: "video" }>; active: boolean }) => {
-  const [playing, setPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [muted, setMuted] = useState(true);
   const isYoutube = item.url.includes("youtube.com") || item.url.includes("youtu.be");
   const isFacebook = item.url.includes("facebook.com") || item.url.includes("fb.watch");
 
   useEffect(() => {
-    if (!active && videoRef.current) {
-      videoRef.current.pause();
-      setPlaying(false);
+    const v = videoRef.current;
+    if (!v) return;
+    if (active) {
+      v.muted = true;
+      const p = v.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    } else {
+      v.pause();
     }
   }, [active]);
 
-  if (!playing) {
-    return (
-      <div
-        className="w-full h-full flex-shrink-0 snap-start relative bg-black cursor-pointer group"
-        style={{ minWidth: "100%" }}
-        onClick={() => setPlaying(true)}
-      >
-        {item.thumbnail ? (
-          <img src={item.thumbnail} alt={item.caption || "Video"} className="w-full h-full object-cover" />
-        ) : !isYoutube && !isFacebook ? (
-          <video src={item.url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
-        ) : (
-          <div className="w-full h-full bg-secondary" />
-        )}
-        <div className="absolute inset-0 bg-black/25 flex items-center justify-center group-hover:bg-black/35 transition-colors">
-          <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
-            <Play className="h-7 w-7 text-foreground ml-1" fill="currentColor" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   if (isYoutube) {
-    const src = item.url.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/") + "?autoplay=1";
+    const base = item.url.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/");
+    const src = `${base}?autoplay=1&mute=1&playsinline=1&loop=1`;
     return (
       <div className="w-full h-full flex-shrink-0 snap-start bg-black" style={{ minWidth: "100%" }}>
-        <iframe
-          src={src}
-          className="w-full h-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-          allowFullScreen
-          title={item.caption || "Video"}
-        />
+        {active && (
+          <iframe
+            src={src}
+            className="w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowFullScreen
+            title={item.caption || "Video"}
+          />
+        )}
       </div>
     );
   }
@@ -173,28 +158,45 @@ const GalleryVideo = ({ item, active }: { item: Extract<GalleryItem, { type: "vi
   if (isFacebook) {
     return (
       <div className="w-full h-full flex-shrink-0 snap-start bg-black" style={{ minWidth: "100%" }}>
-        <iframe
-          src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(item.url)}&show_text=false&autoplay=true&width=0`}
-          className="w-full h-full"
-          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; fullscreen"
-          allowFullScreen
-          title={item.caption || "Facebook Video"}
-        />
+        {active && (
+          <iframe
+            src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(item.url)}&show_text=false&autoplay=true&mute=1&width=0`}
+            className="w-full h-full"
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; fullscreen"
+            allowFullScreen
+            title={item.caption || "Facebook Video"}
+          />
+        )}
       </div>
     );
   }
 
   return (
-    <div className="w-full h-full flex-shrink-0 snap-start bg-black flex items-center justify-center" style={{ minWidth: "100%" }}>
+    <div className="w-full h-full flex-shrink-0 snap-start bg-black flex items-center justify-center relative" style={{ minWidth: "100%" }}>
       <video
         ref={videoRef}
         src={item.url}
-        controls
         autoPlay
+        muted={muted}
+        loop
         playsInline
+        controls
         className="w-full h-full object-contain"
         controlsList="nodownload"
       />
+      {muted && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (videoRef.current) videoRef.current.muted = false;
+            setMuted(false);
+          }}
+          className="absolute bottom-16 right-3 bg-black/60 text-white text-xs px-3 py-1.5 rounded-full backdrop-blur"
+        >
+          🔇 Дуутай
+        </button>
+      )}
     </div>
   );
 };
@@ -459,7 +461,7 @@ const ProductPage = () => {
     const videos: GalleryItem[] = (product.detailMedia || [])
       .filter((m) => m.type === "video" && m.url)
       .map((m) => ({ type: "video", url: m.url, thumbnail: m.thumbnail, caption: m.caption }));
-    return [...imgs, ...videos];
+    return videos.length > 0 ? [...videos, ...imgs] : imgs;
   }, [allImages, product.image, product.detailMedia]);
   const totalGallery = galleryItems.length;
 
