@@ -26,6 +26,40 @@ const BottomNav = () => {
         {tabs.map((t) => {
           const active = isActive(t.path);
           const Icon = t.icon;
+          const isReels = t.path === "/reels";
+
+          if (isReels) {
+            return (
+              <button
+                key={t.path}
+                onClick={() => navigate(t.path)}
+                className="relative flex flex-col items-center justify-end flex-1 -mt-6"
+                aria-label="Reels"
+              >
+                <span className="absolute inset-x-0 -top-6 flex justify-center pointer-events-none">
+                  <span className="relative flex h-14 w-14 items-center justify-center">
+                    {/* pulsing halo */}
+                    <span className="absolute inset-0 rounded-full bg-sale/40 animate-ping" />
+                    <span className="absolute -inset-1 rounded-full bg-gradient-to-tr from-fuchsia-500 via-rose-500 to-amber-400 blur-[6px] opacity-70" />
+                    {/* solid gradient button */}
+                    <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-fuchsia-600 via-rose-500 to-amber-400 shadow-[0_8px_24px_-4px_rgba(244,63,94,0.6)] ring-4 ring-card">
+                      <Icon className="h-7 w-7 text-white drop-shadow" strokeWidth={2.25} />
+                    </span>
+                    {/* LIVE dot */}
+                    <span className="absolute top-0 right-0 flex h-3 w-3">
+                      <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75" />
+                      <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500 ring-2 ring-card" />
+                    </span>
+                  </span>
+                </span>
+                <span
+                  className={`mb-1.5 text-[10px] font-extrabold tracking-wide bg-gradient-to-r from-fuchsia-600 via-rose-500 to-amber-500 bg-clip-text text-transparent`}
+                >
+                  Reels
+                </span>
+              </button>
+            );
+          }
 
           return (
             <button
@@ -66,6 +100,7 @@ const BottomNav = () => {
             </button>
           );
         })}
+
       </div>
     </nav>
   );
