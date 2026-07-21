@@ -144,7 +144,7 @@ const ReelsPage = () => {
     return () => clearTimeout(t);
   }, [reels]);
 
-  if (isMobile === false) return <Navigate to="/" replace />;
+  if (typeof window !== "undefined" && window.innerWidth >= 768) return <Navigate to="/" replace />;
 
   return (
     <div className="fixed inset-0 bg-black text-white z-50">
