@@ -36,7 +36,7 @@ import AdminSkeleton from "@/components/admin/AdminSkeleton";
 import { useRef } from "react";
 import { toast } from "sonner";
 import { formatPrice } from "@/data/products";
-import { optimizeImage, generateThumbnail, estimateBase64Size, cropAndOptimizeImage } from "@/lib/imageOptimize";
+import { optimizeImage, generateThumbnail, estimateBase64Size, cropAndOptimizeImage, uploadVideo } from "@/lib/imageOptimize";
 import { resolveColor } from "@/lib/colorMap";
 import { cyrillicToLatinSlug } from "@/lib/cyrillicToLatin";
 import { parseAddressBlob } from "@/lib/addressParser";
@@ -410,19 +410,18 @@ const AdminPage = () => {
     const newMedia: { type: "image" | "video"; url: string; caption: string }[] = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      if (!file.type.startsWith("video/")) continue;
+      if (!file.type.startsWith("video/") && !/\.(mp4|webm|mov|m4v|ogv)$/i.test(file.name)) continue;
       if (file.size > 50 * 1024 * 1024) { toast.error("Видео 50MB-ээс бага байх ёстой"); continue; }
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = (ev) => resolve(ev.target?.result as string);
-        r.onerror = reject;
-        r.readAsDataURL(file);
-      });
-      newMedia.push({ type: "video", url: dataUrl, caption: "" });
+      try {
+        const videoUrl = await uploadVideo(file, "detail");
+        newMedia.push({ type: "video", url: videoUrl, caption: "" });
+      } catch {
+        toast.error("Видео хадгалахад алдаа гарлаа");
+      }
     }
     if (newMedia.length > 0) {
       setForm((prev) => ({ ...prev, detail_media: [...prev.detail_media, ...newMedia] }));
-      toast.success(`${newMedia.length} бичлэг нэмэгдлээ`);
+      toast.success(`${newMedia.length} бичлэг файл хэлбэрээр нэмэгдлээ`);
     }
     if (detailVideoFileRef.current) detailVideoFileRef.current.value = "";
   };
@@ -543,13 +542,8 @@ const AdminPage = () => {
       if (!file.type.startsWith("video/") && !/\.(mp4|webm|mov|m4v|ogv)$/i.test(file.name)) { hasError = true; continue; }
       if (file.size > 50 * 1024 * 1024) { toast.error("Бичлэг 50MB-ээс бага байх ёстой"); hasError = true; continue; }
       try {
-        const dataUrl: string = await new Promise((resolve, reject) => {
-          const r = new FileReader();
-          r.onload = () => resolve(r.result as string);
-          r.onerror = reject;
-          r.readAsDataURL(file);
-        });
-        newVideos.push(dataUrl);
+        const videoUrl = await uploadVideo(file, "gallery");
+        newVideos.push(videoUrl);
       } catch {
         hasError = true;
       }
@@ -557,7 +551,7 @@ const AdminPage = () => {
     if (hasError) toast.error("Зарим бичлэг оруулж чадсангүй");
     if (newVideos.length > 0) {
       setExtraImages((prev) => [...prev, ...newVideos]);
-      toast.success(`${newVideos.length} бичлэг нэмэгдлээ`);
+      toast.success(`${newVideos.length} бичлэг файл хэлбэрээр нэмэгдлээ`);
     }
     if (extraVideoInputRef.current) extraVideoInputRef.current.value = "";
   };
