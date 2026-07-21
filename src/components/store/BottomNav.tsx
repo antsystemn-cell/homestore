@@ -1,4 +1,14 @@
-import { Home, ShoppingCart, Heart, User, PlayCircle } from "lucide-react";
+import { Home, ShoppingCart, Heart, User } from "lucide-react";
+
+const ReelsIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+    <rect x="2.5" y="2.5" width="19" height="19" rx="5" fill="white" />
+    <path d="M2.5 7.5 L7 2.5 L11 2.5 L6.5 7.5 Z" fill="#F59E0B" />
+    <path d="M8 7.5 L12.5 2.5 L16.5 2.5 L12 7.5 Z" fill="#EC4899" />
+    <path d="M13.5 7.5 L18 2.5 L21.5 2.5 L21.5 5 L18 7.5 Z" fill="#A855F7" />
+    <path d="M10 11.5 L16 14.5 L10 17.5 Z" fill="#F43F5E" />
+  </svg>
+);
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 
@@ -10,7 +20,7 @@ const BottomNav = () => {
   const tabs = [
     { path: "/", label: "Нүүр", icon: Home },
     { path: "/wishlist", label: "Таалагдсан", icon: Heart },
-    { path: "/reels", label: "Reels", icon: PlayCircle },
+    { path: "/reels", label: "Reels", icon: ReelsIcon },
     { path: "/cart", label: "Сагс", icon: ShoppingCart, badge: cartCount },
     { path: "/profile", label: "Профайл", icon: User },
   ];
