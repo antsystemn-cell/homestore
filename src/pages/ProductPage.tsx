@@ -403,7 +403,7 @@ const ProductPage = () => {
             <div className="relative">
               <div
                 ref={galleryRef}
-                className="w-full aspect-square overflow-x-auto flex snap-x snap-mandatory no-scrollbar bg-secondary md:rounded-2xl scroll-smooth"
+                className="w-full aspect-[4/5] md:aspect-square overflow-x-auto flex snap-x snap-mandatory no-scrollbar bg-secondary md:rounded-2xl scroll-smooth"
                 onScroll={(e) => {
                   const el = e.currentTarget;
                   const i = Math.round(el.scrollLeft / Math.max(el.clientWidth, 1));
@@ -436,7 +436,7 @@ const ProductPage = () => {
                       userInteractedRef.current = true;
                       setActiveImg((i) => (i - 1 + allImages.length) % allImages.length);
                     }}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
+                    className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
                   >
                     <ChevronLeft className="h-4 w-4 text-foreground" />
                   </button>
@@ -445,10 +445,26 @@ const ProductPage = () => {
                       userInteractedRef.current = true;
                       setActiveImg((i) => (i + 1) % allImages.length);
                     }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
+                    className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
                   >
                     <ChevronRight className="h-4 w-4 text-foreground" />
                   </button>
+                  {/* Counter badge (like 1/3) */}
+                  <span className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/55 text-white text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm">
+                    {activeImg + 1}/{allImages.length}
+                  </span>
+                  {/* Pagination dots at bottom */}
+                  <div className="md:hidden absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 pointer-events-none">
+                    {allImages.map((_, i) => (
+                      <span
+                        key={i}
+                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                          i === activeImg ? "w-5 bg-white" : "w-1.5 bg-white/60"
+                        }`}
+                        style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.3)" }}
+                      />
+                    ))}
+                  </div>
                 </>
               )}
               <button
