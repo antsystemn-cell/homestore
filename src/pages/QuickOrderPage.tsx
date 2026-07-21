@@ -25,8 +25,10 @@ interface OrderRow {
 
 const STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: "pending", label: "Шинэ" },
+  { value: "confirmed", label: "Баталгаажсан" },
   { value: "delivering", label: "Хүргэгдэж буй" },
   { value: "delivered", label: "Хүргэгдсэн" },
+  { value: "cancelled", label: "Цуцлагдсан" },
 ];
 const STATUS_LABEL = (s: string) => STATUS_OPTIONS.find((x) => x.value === s)?.label ?? s;
 
