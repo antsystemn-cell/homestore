@@ -457,11 +457,18 @@ const ProductPage = () => {
   const liked = isInWishlist(product.id);
 
   const galleryItems: GalleryItem[] = useMemo(() => {
-    const imgs: GalleryItem[] = (allImages.length > 0 ? allImages : [product.image]).map((u) => ({ type: "image", url: u }));
-    const videos: GalleryItem[] = (product.detailMedia || [])
+    const isVideoUrl = (u: string) =>
+      u.startsWith("data:video/") || /\.(mp4|webm|mov|m4v|ogv)(\?|$)/i.test(u);
+    const media: GalleryItem[] = (allImages.length > 0 ? allImages : [product.image]).map((u) =>
+      isVideoUrl(u) ? { type: "video", url: u } : { type: "image", url: u }
+    );
+    const detailVideos: GalleryItem[] = (product.detailMedia || [])
       .filter((m) => m.type === "video" && m.url)
       .map((m) => ({ type: "video", url: m.url, thumbnail: m.thumbnail, caption: m.caption }));
-    return videos.length > 0 ? [...videos, ...imgs] : imgs;
+    // Put videos first so autoplay kicks in on entry
+    const inlineVideos = media.filter((m) => m.type === "video");
+    const inlineImages = media.filter((m) => m.type === "image");
+    return [...detailVideos, ...inlineVideos, ...inlineImages];
   }, [allImages, product.image, product.detailMedia]);
   const totalGallery = galleryItems.length;
 
