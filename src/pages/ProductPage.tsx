@@ -228,7 +228,16 @@ const ProductPage = () => {
 
   // Number of color variants with images — controls auto-scroll behavior
   const colorImageCount = (product?.colors || []).filter((c) => !!c.image).length;
+  // Detect if any gallery slide is a video (inline or detailMedia) — video slides must not
+  // be auto-scrolled past, otherwise the video gets paused a few seconds after entry.
+  const hasAnyGalleryVideo = ((): boolean => {
+    if (!product) return false;
+    const isVideoUrl = (u: string) => u.startsWith("data:video/") || /\.(mp4|webm|mov|m4v|ogv)(\?|$)/i.test(u);
+    if ((product.detailMedia || []).some((m) => m.type === "video" && m.url)) return true;
+    return (allImages || []).some(isVideoUrl);
+  })();
   const shouldAutoScroll =
+    !hasAnyGalleryVideo &&
     colorImageCount >= 2 && allImages.length >= 2 && !selectedColor && !userInteractedRef.current;
 
   // Auto-advance gallery when product has 2+ color images (stops once user interacts)
