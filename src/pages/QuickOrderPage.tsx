@@ -79,7 +79,7 @@ export default function QuickOrderPage() {
     (async () => {
       const { data } = await supabase
         .from("products")
-        .select("id,name,price,original_price,is_on_sale")
+        .select("id,name,price,original_price,is_on_sale,thumbnail_url")
         .eq("is_active", true);
       setProducts((data as ProductLite[]) || []);
     })();
