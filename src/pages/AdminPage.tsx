@@ -819,15 +819,41 @@ const AdminPage = () => {
 
   const fetchOrders = async () => {
     try {
-      // Use lightweight RPC that strips heavy base64 images from items jsonb
-      const { data, error } = await (supabase as any).rpc("admin_list_orders_light");
-      if (error) throw error;
-      setOrders(data || []);
+      // Use lightweight RPC that strips heavy base64 images from items jsonb.
+      // PostgREST caps rows at 1000 per request, so page through with .range().
+      const PAGE = 1000;
+      let from = 0;
+      const all: any[] = [];
+      // Safety cap: 50k orders
+      for (let i = 0; i < 50; i++) {
+        const { data, error } = await (supabase as any)
+          .rpc("admin_list_orders_light")
+          .range(from, from + PAGE - 1);
+        if (error) throw error;
+        const rows = data || [];
+        all.push(...rows);
+        if (rows.length < PAGE) break;
+        from += PAGE;
+      }
+      setOrders(all);
     } catch (error) {
       console.error("Failed to load admin orders", error);
-      // Fallback to direct query
-      const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
-      setOrders(data || []);
+      // Fallback to direct paginated query
+      const PAGE = 1000;
+      let from = 0;
+      const all: any[] = [];
+      for (let i = 0; i < 50; i++) {
+        const { data } = await supabase
+          .from("orders")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .range(from, from + PAGE - 1);
+        const rows = data || [];
+        all.push(...rows);
+        if (rows.length < PAGE) break;
+        from += PAGE;
+      }
+      setOrders(all);
     }
   };
 
