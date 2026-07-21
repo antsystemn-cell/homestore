@@ -34,7 +34,7 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 24;
 const MOBILE_INITIAL = 10;
 const MOBILE_LOAD_MORE = 10;
 
