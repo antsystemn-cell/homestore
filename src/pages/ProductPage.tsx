@@ -119,9 +119,16 @@ type GalleryItem =
   | { type: "image"; url: string }
   | { type: "video"; url: string; thumbnail?: string; caption?: string };
 
+const getStorageVideoPath = (url: string) => {
+  if (!url.startsWith("storage://product-videos/")) return null;
+  return url.replace("storage://product-videos/", "");
+};
+
 const GalleryVideo = ({ item, active }: { item: Extract<GalleryItem, { type: "video" }>; active: boolean }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [muted, setMuted] = useState(true);
+  const [resolvedUrl, setResolvedUrl] = useState(item.url);
+  const [videoError, setVideoError] = useState(false);
   const isYoutube = item.url.includes("youtube.com") || item.url.includes("youtu.be");
   const isFacebook = item.url.includes("facebook.com") || item.url.includes("fb.watch");
 
@@ -133,6 +140,25 @@ const GalleryVideo = ({ item, active }: { item: Extract<GalleryItem, { type: "vi
     const p = v.play();
     if (p && typeof p.catch === "function") p.catch(() => {});
   };
+
+  useEffect(() => {
+    let cancelled = false;
+    const storagePath = getStorageVideoPath(item.url);
+    setVideoError(false);
+    if (!storagePath) {
+      setResolvedUrl(item.url);
+      return;
+    }
+    supabase.storage
+      .from("product-videos")
+      .createSignedUrl(storagePath, 60 * 60)
+      .then(({ data, error }) => {
+        if (!cancelled) setResolvedUrl(error || !data?.signedUrl ? item.url : data.signedUrl);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [item.url]);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -148,7 +174,7 @@ const GalleryVideo = ({ item, active }: { item: Extract<GalleryItem, { type: "vi
     } else {
       v.pause();
     }
-  }, [active, item.url]);
+  }, [active, item.url, resolvedUrl]);
 
   if (isYoutube) {
     const base = item.url.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/");
@@ -187,9 +213,9 @@ const GalleryVideo = ({ item, active }: { item: Extract<GalleryItem, { type: "vi
   return (
     <div className="w-full h-full flex-shrink-0 snap-start bg-black flex items-center justify-center relative" style={{ minWidth: "100%" }}>
       <video
-        key={item.url}
+        key={resolvedUrl}
         ref={videoRef}
-        src={item.url}
+        src={resolvedUrl}
         autoPlay
         muted={muted}
         loop
@@ -198,9 +224,15 @@ const GalleryVideo = ({ item, active }: { item: Extract<GalleryItem, { type: "vi
         controls
         onLoadedMetadata={attemptPlay}
         onCanPlay={attemptPlay}
+        onError={() => setVideoError(true)}
         className="w-full h-full object-contain"
         controlsList="nodownload"
       />
+      {videoError && (
+        <div className="absolute inset-x-4 bottom-16 rounded-xl bg-background/90 px-3 py-2 text-center text-xs text-muted-foreground backdrop-blur">
+          Видео формат дэмжигдэхгүй байна. MP4/WebM файл дахин оруулна уу.
+        </div>
+      )}
       {muted && (
         <button
           type="button"
@@ -467,7 +499,7 @@ const ProductPage = () => {
   const galleryItems: GalleryItem[] = useMemo(() => {
     if (!product) return [];
     const isVideoUrl = (u: string) =>
-      u.startsWith("data:video/") || /\.(mp4|webm|mov|m4v|ogv)(\?|$)/i.test(u);
+      u.startsWith("storage://product-videos/") || u.startsWith("data:video/") || /\.(mp4|webm|mov|m4v|ogv)(\?|$)/i.test(u);
     const media: GalleryItem[] = (allImages.length > 0 ? allImages : [product.image]).map((u) =>
       isVideoUrl(u) ? { type: "video", url: u } : { type: "image", url: u }
     );
