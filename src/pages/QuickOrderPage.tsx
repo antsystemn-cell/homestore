@@ -50,6 +50,31 @@ export default function QuickOrderPage() {
 
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
+  const [products, setProducts] = useState<ProductLite[]>([]);
+  const [confirming, setConfirming] = useState<string | null>(null);
+
+  // Load products once for auto-matching on confirm.
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("products")
+        .select("id,name,price,original_price,is_on_sale")
+        .eq("is_active", true);
+      setProducts((data as ProductLite[]) || []);
+    })();
+  }, []);
+
+  const matchProduct = (name: string): ProductLite | null => {
+    if (!name || products.length === 0) return null;
+    let best: ProductLite | null = null;
+    let bestScore = 0;
+    for (const p of products) {
+      const s = scoreCandidate(p.name, name);
+      if (s > bestScore) { bestScore = s; best = p; }
+    }
+    return bestScore >= 150 ? best : null;
+  };
+
 
   const startMic = () => {
     const SR: any = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
