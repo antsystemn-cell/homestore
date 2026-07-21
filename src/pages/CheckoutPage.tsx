@@ -132,9 +132,17 @@ const CheckoutPage = () => {
         .eq("user_id", user.id)
         .not("source_coupon_id", "is", null);
       const mirroredIds = new Set(((mirrored as any[]) || []).map((r) => r.source_coupon_id));
-      const filtered = raw.filter((c) => !mirroredIds.has(c.id));
+      // Dedupe by coupon code (safety net against duplicate rows)
+      const seenCodes = new Set<string>();
+      const filtered = raw.filter((c) => {
+        if (mirroredIds.has(c.id)) return false;
+        if (seenCodes.has(c.code)) return false;
+        seenCodes.add(c.code);
+        return true;
+      });
       setAvailableCoupons(filtered);
       setSelectedCouponIds(filtered.map((c) => c.id));
+
     })();
   }, [user]);
 
