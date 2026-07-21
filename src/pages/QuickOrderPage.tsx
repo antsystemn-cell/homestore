@@ -195,22 +195,21 @@ export default function QuickOrderPage() {
 
 
   const handleParse = async () => {
-    if (!text.trim()) { toast.error("Текст оруулна уу"); return; }
+    const combined = [contactText.trim(), productText.trim()].filter(Boolean).join("\n");
+    if (!combined) { toast.error("Текст оруулна уу"); return; }
     setLoading(true);
     try {
-      // Send a compact catalog to help AI match products directly.
       const catalog = products.slice(0, 400).map((p) => ({
         id: p.id, name: p.name, price: p.price,
       }));
       const res = await fetch(`${SUPABASE_URL}/functions/v1/parse-quick-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json", apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
-        body: JSON.stringify({ text, products: catalog }),
+        body: JSON.stringify({ text: combined, products: catalog }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "AI алдаа");
 
-      // Fallback fuzzy-match for items AI missed.
       const items: ParsedItem[] = (Array.isArray(data.items) ? data.items : []).map((it: any) => {
         if (it.matched_product_id) return it as ParsedItem;
         const local = matchProduct(String(it.name || ""));
@@ -240,6 +239,7 @@ export default function QuickOrderPage() {
       setLoading(false);
     }
   };
+
 
   const subtotal = useMemo(
     () => (parsed?.items || []).reduce((s, it) => s + (it.price || 0) * it.quantity, 0),
