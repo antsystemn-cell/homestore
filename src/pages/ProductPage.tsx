@@ -610,60 +610,8 @@ const ProductPage = () => {
               );
             })()}
 
-            {/* Size chips — visible on main page for Elle Sport clothing */}
-            {isElleSportBrand && product.sizes && product.sizes.length > 0 && (
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-semibold text-foreground">Хэмжээ</h3>
-                  {!selectedSize && (
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-destructive/80">
-                      Заавал
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {product.sizes.map((size) => {
-                    let sizeQty: number | null = null;
-                    if (variantStock) {
-                      if (hasColors && selectedColor) {
-                        sizeQty = Number(variantStock[`${selectedColor}|${size}`]) || 0;
-                      } else if (hasColors) {
-                        sizeQty = (product.colors || []).reduce(
-                          (sum, c) => sum + (Number(variantStock[`${c.name}|${size}`]) || 0),
-                          0
-                        );
-                      } else {
-                        sizeQty = Number(variantStock[`|${size}`]) || 0;
-                      }
-                    }
-                    const isSoldOut = sizeQty !== null && sizeQty <= 0;
-                    return (
-                      <button
-                        key={size}
-                        onClick={() => !isSoldOut && setSelectedSize(selectedSize === size ? null : size)}
-                        disabled={isSoldOut}
-                        className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-colors flex flex-col items-center leading-tight min-w-[64px] ${
-                          selectedSize === size
-                            ? "border-primary bg-primary/10 text-foreground"
-                            : isSoldOut
-                            ? "border-border bg-secondary/50 text-muted-foreground/50 line-through cursor-not-allowed"
-                            : "border-border bg-secondary text-muted-foreground hover:border-foreground/40"
-                        }`}
-                      >
-                        <span>{size}</span>
-                        {sizeQty !== null && (
-                          <span className={`text-[10px] font-normal mt-0.5 ${
-                            isSoldOut ? "text-destructive/70" : sizeQty <= 3 ? "text-destructive" : "text-muted-foreground/70"
-                          }`}>
-                            {isSoldOut ? "Дууссан" : `${sizeQty} ширхэг`}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+
+
 
 
 
