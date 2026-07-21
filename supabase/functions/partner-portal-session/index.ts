@@ -61,6 +61,24 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Optional deep-link params from the caller — forwarded to the partner
+    // so the portal can open at a specific order when supported.
+    let forward: Record<string, unknown> = {};
+    try {
+      const raw = await req.text();
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object") {
+          const { external_order_id, delivery_order_id, order_ref } = parsed as Record<string, unknown>;
+          if (external_order_id) forward.external_order_id = external_order_id;
+          if (delivery_order_id) forward.delivery_order_id = delivery_order_id;
+          if (order_ref) forward.order_ref = order_ref;
+        }
+      }
+    } catch {
+      forward = {};
+    }
+
     const upstream = await fetch(
       "https://vvqbrpuiqzksygpcmrmg.supabase.co/functions/v1/partner-portal-session",
       {
@@ -69,11 +87,24 @@ Deno.serve(async (req) => {
           "x-api-key": apiKey,
           "Content-Type": "application/json",
         },
-        body: "{}",
+        body: JSON.stringify(forward),
       },
     );
 
-    const text = await upstream.text();
+    let text = await upstream.text();
+    // If upstream returned OK + portal_url but ignored our deep-link,
+    // append a hash the portal client may use to auto-focus the order.
+    if (upstream.ok && (forward.external_order_id || forward.delivery_order_id)) {
+      try {
+        const parsed = JSON.parse(text);
+        if (parsed?.portal_url && typeof parsed.portal_url === "string" && !/[#?]order=/i.test(parsed.portal_url)) {
+          const key = (forward.external_order_id || forward.delivery_order_id) as string;
+          const sep = parsed.portal_url.includes("#") ? "&" : "#";
+          parsed.portal_url = `${parsed.portal_url}${sep}order=${encodeURIComponent(key)}`;
+          text = JSON.stringify(parsed);
+        }
+      } catch { /* keep original */ }
+    }
     return new Response(text, {
       status: upstream.status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
