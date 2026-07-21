@@ -949,6 +949,9 @@ const ProductPage = () => {
           </div>
         </SheetContent>
       </Sheet>
+      {/* Spacer so content isn't hidden behind mobile action bar + bottom nav */}
+      <div className="h-32 md:hidden" aria-hidden />
+      <BottomNav />
     </div>
   );
 };
