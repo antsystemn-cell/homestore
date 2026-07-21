@@ -100,6 +100,21 @@ export default function QuickOrderPage() {
     return bestScore >= 150 ? best : null;
   };
 
+  // Fuzzy top-N products for a free-text phrase (used for live voice suggestions).
+  const topMatches = useCallback((phrase: string, n = 5): ProductLite[] => {
+    const q = phrase.trim();
+    if (!q || products.length === 0) return [];
+    // Also try the last 6 words — user often names product at the end.
+    const tail = q.split(/\s+/).slice(-6).join(" ");
+    const scored = products
+      .map((p) => ({ p, s: Math.max(scoreCandidate(p.name, q), scoreCandidate(p.name, tail)) }))
+      .filter((x) => x.s > 40)
+      .sort((a, b) => b.s - a.s)
+      .slice(0, n)
+      .map((x) => x.p);
+    return scored;
+  }, [products]);
+
   const startMic = () => {
     const SR: any = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) { toast.error("Энэ browser Speech Recognition-г дэмжихгүй байна"); return; }
@@ -107,6 +122,7 @@ export default function QuickOrderPage() {
     rec.lang = "mn-MN";
     rec.continuous = true;
     rec.interimResults = true;
+    rec.maxAlternatives = 3;
     let finalText = text ? text + " " : "";
     rec.onresult = (e: any) => {
       let interim = "";
@@ -115,7 +131,10 @@ export default function QuickOrderPage() {
         if (e.results[i].isFinal) finalText += t + " ";
         else interim += t;
       }
-      setText((finalText + interim).replace(/\s+/g, " "));
+      const full = (finalText + interim).replace(/\s+/g, " ");
+      setText(full);
+      // Live product suggestions from the running transcript
+      setLiveMatches(topMatches(full, 6));
     };
     rec.onerror = (e: any) => { toast.error("Микрофон алдаа: " + (e.error || "unknown")); setListening(false); };
     rec.onend = () => setListening(false);
@@ -124,6 +143,52 @@ export default function QuickOrderPage() {
     setListening(true);
   };
   const stopMic = () => { try { recRef.current?.stop(); } catch {} setListening(false); };
+
+  // Voice search inside the product picker modal
+  const startPickerMic = () => {
+    const SR: any = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) { toast.error("Энэ browser Speech Recognition-г дэмжихгүй байна"); return; }
+    const rec = new SR();
+    rec.lang = "mn-MN";
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.maxAlternatives = 3;
+    rec.onresult = (e: any) => {
+      let t = "";
+      for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+      setPickerQuery(t.trim());
+    };
+    rec.onerror = () => setPickerListening(false);
+    rec.onend = () => setPickerListening(false);
+    rec.start();
+    pickerRecRef.current = rec;
+    setPickerListening(true);
+  };
+  const stopPickerMic = () => { try { pickerRecRef.current?.stop(); } catch {} setPickerListening(false); };
+
+  // Add a live-detected product directly to the items list (voice quick-add)
+  const quickAddFromVoice = (p: ProductLite) => {
+    const newItem: ParsedItem = {
+      name: p.name, quantity: 1,
+      matched_product_id: p.id, matched_product_name: p.name,
+      price: Number(p.price) || 0, confidence: 1,
+    };
+    if (parsed) {
+      // If item already exists, bump quantity
+      const idx = parsed.items.findIndex((it) => it.matched_product_id === p.id);
+      if (idx >= 0) {
+        const items = [...parsed.items];
+        items[idx] = { ...items[idx], quantity: items[idx].quantity + 1 };
+        setParsed({ ...parsed, items });
+      } else {
+        setParsed({ ...parsed, items: [...parsed.items, newItem] });
+      }
+    } else {
+      setParsed({ phone: "", address: "", items: [newItem], source: "", note: "" });
+    }
+    toast.success(`${p.name} нэмэгдлээ`);
+  };
+
 
   const handleParse = async () => {
     if (!text.trim()) { toast.error("Текст оруулна уу"); return; }
