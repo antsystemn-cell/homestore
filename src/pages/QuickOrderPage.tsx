@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Mic, MicOff, Send, Check, Pencil, List, Plus, Trash2, Loader2, CheckCircle2 } from "lucide-react";
+import { scoreCandidate } from "@/lib/searchNormalize";
+
+interface ProductLite { id: string; name: string; price: number; original_price: number | null; is_on_sale: boolean | null }
 
 interface ParsedItem { name: string; quantity: number }
 interface Parsed {
@@ -47,6 +50,31 @@ export default function QuickOrderPage() {
 
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
+  const [products, setProducts] = useState<ProductLite[]>([]);
+  const [confirming, setConfirming] = useState<string | null>(null);
+
+  // Load products once for auto-matching on confirm.
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("products")
+        .select("id,name,price,original_price,is_on_sale")
+        .eq("is_active", true);
+      setProducts((data as ProductLite[]) || []);
+    })();
+  }, []);
+
+  const matchProduct = (name: string): ProductLite | null => {
+    if (!name || products.length === 0) return null;
+    let best: ProductLite | null = null;
+    let bestScore = 0;
+    for (const p of products) {
+      const s = scoreCandidate(p.name, name);
+      if (s > bestScore) { bestScore = s; best = p; }
+    }
+    return bestScore >= 150 ? best : null;
+  };
+
 
   const startMic = () => {
     const SR: any = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -149,6 +177,66 @@ export default function QuickOrderPage() {
     if (error) { toast.error("Статус солиход алдаа"); setOrders(prev); }
     else toast.success("Статус солигдлоо");
   };
+
+  // Confirm quick-order → match items to real products, fill prices, compute
+  // total and delivery fee, then flip status to `confirmed` so it appears as a
+  // regular order in the main admin flow.
+  const confirmOrder = async (o: OrderRow) => {
+    if (products.length === 0) { toast.error("Барааны жагсаалт ачаалагдаагүй байна"); return; }
+    const rawItems = Array.isArray(o.items) ? o.items : [];
+    if (rawItems.length === 0) { toast.error("Бараа хоосон"); return; }
+    setConfirming(o.id);
+    try {
+      const enriched: any[] = [];
+      const unmatched: string[] = [];
+      for (const it of rawItems) {
+        const qty = Math.max(1, parseInt(it.quantity) || 1);
+        const p = matchProduct(String(it.name || ""));
+        if (p) {
+          enriched.push({
+            product_id: p.id,
+            name: p.name,
+            price: Number(p.price) || 0,
+            quantity: qty,
+          });
+        } else {
+          unmatched.push(String(it.name || ""));
+          enriched.push({
+            product_id: null,
+            name: String(it.name || ""),
+            price: Number(it.price) || 0,
+            quantity: qty,
+          });
+        }
+      }
+      const subtotal = enriched.reduce((s, it) => s + (it.price * it.quantity), 0);
+      const deliveryFee = subtotal >= 50000 ? 0 : 8000;
+      const total = subtotal + deliveryFee;
+
+      const { error } = await supabase
+        .from("orders")
+        .update({
+          items: enriched,
+          total,
+          delivery_fee: deliveryFee,
+          status: "confirmed",
+        })
+        .eq("id", o.id);
+      if (error) throw error;
+
+      setOrders((os) => os.map((x) => (x.id === o.id ? { ...x, status: "confirmed", items: enriched } : x)));
+      if (unmatched.length > 0) {
+        toast.warning(`Баталгаажлаа. Тохирохгүй бараа: ${unmatched.join(", ")}`);
+      } else {
+        toast.success(`Баталгаажлаа — Нийт ${total.toLocaleString("mn-MN")}₮`);
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Баталгаажуулж чадсангүй");
+    } finally {
+      setConfirming(null);
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -319,10 +407,11 @@ export default function QuickOrderPage() {
                       </select>
                       {o.status === "pending" && (
                         <button
-                          onClick={() => updateStatus(o.id, "confirmed")}
-                          className="rounded-lg bg-emerald-600 text-white px-3 py-1.5 text-xs font-bold flex items-center gap-1"
+                          onClick={() => confirmOrder(o)}
+                          disabled={confirming === o.id}
+                          className="rounded-lg bg-emerald-600 text-white px-3 py-1.5 text-xs font-bold flex items-center gap-1 disabled:opacity-50"
                         >
-                          <CheckCircle2 className="h-3.5 w-3.5" /> Баталгаажуулах
+                          {confirming === o.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />} Баталгаажуулах
                         </button>
                       )}
                     </div>
@@ -361,10 +450,11 @@ export default function QuickOrderPage() {
                             </select>
                             {o.status === "pending" && (
                               <button
-                                onClick={() => updateStatus(o.id, "confirmed")}
-                                className="rounded-lg bg-emerald-600 text-white px-3 py-1.5 text-xs font-bold flex items-center gap-1 whitespace-nowrap"
+                                onClick={() => confirmOrder(o)}
+                                disabled={confirming === o.id}
+                                className="rounded-lg bg-emerald-600 text-white px-3 py-1.5 text-xs font-bold flex items-center gap-1 whitespace-nowrap disabled:opacity-50"
                               >
-                                <CheckCircle2 className="h-3.5 w-3.5" /> Баталгаажуулах
+                                {confirming === o.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />} Баталгаажуулах
                               </button>
                             )}
                           </div>
