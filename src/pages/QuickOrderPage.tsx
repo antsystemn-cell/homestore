@@ -74,6 +74,10 @@ export default function QuickOrderPage() {
   // Which item is showing the product picker (index)
   const [pickerIdx, setPickerIdx] = useState<number | null>(null);
   const [pickerQuery, setPickerQuery] = useState("");
+  const [pickerListening, setPickerListening] = useState(false);
+  const pickerRecRef = useRef<any>(null);
+  // Live product suggestions while user is dictating into the main textarea
+  const [liveMatches, setLiveMatches] = useState<ProductLite[]>([]);
 
   useEffect(() => {
     (async () => {
