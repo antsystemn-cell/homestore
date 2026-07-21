@@ -12,6 +12,7 @@ import FrequentlyBoughtTogether from "@/components/store/FrequentlyBoughtTogethe
 import LoadError from "@/components/store/LoadError";
 import { fetchPublicProductBySlug, fetchPublicProductById, fetchPublicProductImages, fetchRelatedPublicProducts, fetchPublicBrands } from "@/lib/publicStoreApi";
 import Header from "@/components/store/Header";
+import BottomNav from "@/components/store/BottomNav";
 import { useProductStat } from "@/hooks/useProductStat";
 import { useFlashSaleFor } from "@/hooks/useFlashSales";
 import FlashSaleCountdown from "@/components/store/FlashSaleCountdown";
@@ -702,7 +703,7 @@ const ProductPage = () => {
 
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border p-3 safe-bottom flex gap-2 md:hidden z-50">
+      <div className="fixed bottom-16 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border p-3 safe-bottom flex gap-2 md:hidden z-50">
         <button
           onClick={() => toggleWishlist(product)}
           className={`flex items-center justify-center w-12 h-12 rounded-2xl border-2 transition-all ${
@@ -948,6 +949,9 @@ const ProductPage = () => {
           </div>
         </SheetContent>
       </Sheet>
+      {/* Spacer so content isn't hidden behind mobile action bar + bottom nav */}
+      <div className="h-32 md:hidden" aria-hidden />
+      <BottomNav />
     </div>
   );
 };
