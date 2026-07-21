@@ -127,7 +127,7 @@ const getStorageVideoPath = (url: string) => {
 const GalleryVideo = ({ item, active }: { item: Extract<GalleryItem, { type: "video" }>; active: boolean }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [muted, setMuted] = useState(true);
-  const [resolvedUrl, setResolvedUrl] = useState(item.url);
+  const [resolvedUrl, setResolvedUrl] = useState(() => (getStorageVideoPath(item.url) ? "" : item.url));
   const [videoError, setVideoError] = useState(false);
   const isYoutube = item.url.includes("youtube.com") || item.url.includes("youtu.be");
   const isFacebook = item.url.includes("facebook.com") || item.url.includes("fb.watch");
@@ -153,7 +153,10 @@ const GalleryVideo = ({ item, active }: { item: Extract<GalleryItem, { type: "vi
       .from("product-videos")
       .createSignedUrl(storagePath, 60 * 60)
       .then(({ data, error }) => {
-        if (!cancelled) setResolvedUrl(error || !data?.signedUrl ? item.url : data.signedUrl);
+        if (!cancelled) {
+          setVideoError(false);
+          setResolvedUrl(error || !data?.signedUrl ? "" : data.signedUrl);
+        }
       });
     return () => {
       cancelled = true;
@@ -212,22 +215,26 @@ const GalleryVideo = ({ item, active }: { item: Extract<GalleryItem, { type: "vi
 
   return (
     <div className="w-full h-full flex-shrink-0 snap-start bg-black flex items-center justify-center relative" style={{ minWidth: "100%" }}>
-      <video
-        key={resolvedUrl}
-        ref={videoRef}
-        src={resolvedUrl}
-        autoPlay
-        muted={muted}
-        loop
-        playsInline
-        preload="auto"
-        controls
-        onLoadedMetadata={attemptPlay}
-        onCanPlay={attemptPlay}
-        onError={() => setVideoError(true)}
-        className="w-full h-full object-contain"
-        controlsList="nodownload"
-      />
+      {resolvedUrl ? (
+        <video
+          key={resolvedUrl}
+          ref={videoRef}
+          src={resolvedUrl}
+          autoPlay
+          muted={muted}
+          loop
+          playsInline
+          preload="auto"
+          controls
+          onLoadedMetadata={attemptPlay}
+          onCanPlay={attemptPlay}
+          onError={() => setVideoError(true)}
+          className="w-full h-full object-contain"
+          controlsList="nodownload"
+        />
+      ) : (
+        <div className="text-xs text-muted-foreground">Видео ачааллаж байна...</div>
+      )}
       {videoError && (
         <div className="absolute inset-x-4 bottom-16 rounded-xl bg-background/90 px-3 py-2 text-center text-xs text-muted-foreground backdrop-blur">
           Видео формат дэмжигдэхгүй байна. MP4/WebM файл дахин оруулна уу.
