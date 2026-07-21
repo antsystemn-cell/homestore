@@ -961,6 +961,8 @@ const AdminPage = () => {
 
 
   const [sendingDelivery, setSendingDelivery] = useState<string | null>(null);
+  const [bulkSending, setBulkSending] = useState(false);
+  const [openingPortal, setOpeningPortal] = useState<string | null>(null);
 
   const sendToDelivery = async (orderId: string) => {
     setSendingDelivery(orderId);
@@ -980,6 +982,63 @@ const AdminPage = () => {
     } finally {
       setSendingDelivery(null);
     }
+  };
+
+  const openOrderInPortal = async (order: any) => {
+    setOpeningPortal(order.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("partner-portal-session", {
+        body: {
+          external_order_id: `EASY-${order.order_ref || order.id}`,
+          delivery_order_id: order.delivery_order_id || undefined,
+          order_ref: order.order_ref || undefined,
+        },
+      });
+      if (error) throw error;
+      if (!data?.ok || !data?.portal_url) throw new Error(data?.error || "Порталын линк ирсэнгүй");
+      window.open(data.portal_url, "_blank", "noopener,noreferrer");
+    } catch (e: any) {
+      toast.error("Порталыг нээхэд алдаа: " + (e?.message || e));
+    } finally {
+      setOpeningPortal(null);
+    }
+  };
+
+  const unsentOrders = useMemo(
+    () => orders.filter((o: any) =>
+      !o.delivery_order_id
+      && o.status !== "cancelled"
+      && (o.status === "confirmed" || o.status === "delivering" || o.payment_status === "confirmed" || o.payment_status === "paid")
+    ),
+    [orders]
+  );
+
+  const deliveryStatusCounts = useMemo(() => {
+    const c = { processing: 0, confirmed: 0, out_for_delivery: 0, delivered: 0, cancelled: 0 } as Record<string, number>;
+    for (const o of orders as any[]) {
+      if (!o.delivery_order_id) continue;
+      const s = o.delivery_status || "processing";
+      if (c[s] === undefined) c[s] = 0;
+      c[s] += 1;
+    }
+    return c;
+  }, [orders]);
+
+  const bulkResendUnsent = async () => {
+    if (unsentOrders.length === 0) return;
+    if (!window.confirm(`${unsentOrders.length} захиалгыг хүргэлтэнд илгээх үү?`)) return;
+    setBulkSending(true);
+    let ok = 0, fail = 0;
+    for (const o of unsentOrders) {
+      try {
+        const { data, error } = await supabase.functions.invoke("send-to-delivery", { body: { order_id: o.id } });
+        if (error || !data?.success) { fail += 1; continue; }
+        ok += 1;
+        setOrders((prev) => prev.map((x: any) => x.id === o.id ? { ...x, delivery_order_id: data.delivery_order_id, delivery_status: "processing" } : x));
+      } catch { fail += 1; }
+    }
+    setBulkSending(false);
+    toast.success(`Илгээгдсэн: ${ok}${fail ? ` · Алдаа: ${fail}` : ""}`);
   };
 
   const [deleteOrderTarget, setDeleteOrderTarget] = useState<{ id: string } | null>(null);
