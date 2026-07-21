@@ -576,6 +576,30 @@ const AdminPage = () => {
     loadAdminData();
   }, [authLoading, isAdmin]);
 
+  // Realtime sync: reflect delivery/payment/status updates from the partner
+  // portal & webhooks without needing a manual refresh.
+  useEffect(() => {
+    if (authLoading || !hasAdminAccess) return;
+    const channel = supabase
+      .channel("admin-orders-sync")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "orders" },
+        (payload: any) => {
+          const row = payload?.new;
+          if (!row?.id) return;
+          setOrders((prev: any[]) => prev.map((o) => o.id === row.id ? { ...o, ...row, items: o.items } : o));
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "orders" },
+        () => { fetchOrders(); }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [authLoading, hasAdminAccess]);
+
   // Open product editor when URL has ?edit=<id> (supports new tab / right-click open)
   useEffect(() => {
     const editParam = searchParams.get("edit");
