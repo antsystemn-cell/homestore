@@ -18,6 +18,7 @@ import ReviewsManager from "@/components/admin/ReviewsManager";
 import SpinSettingsManager from "@/components/admin/SpinSettingsManager";
 import ReferralManager from "@/components/admin/ReferralManager";
 import WalletCreditsManager from "@/components/admin/WalletCreditsManager";
+import CouponUsageManager from "@/components/admin/CouponUsageManager";
 import FlashSalesManager from "@/components/admin/FlashSalesManager";
 import ReelsManager from "@/components/admin/ReelsManager";
 
@@ -51,9 +52,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
 
-type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "flash-sales" | "reels" | "settings" | "branches";
+type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "coupon-usage" | "flash-sales" | "reels" | "settings" | "branches";
 
-const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "announcements", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "referral", "promotions", "flash-sales", "reels", "drivers", "branches"];
+const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "announcements", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "referral", "promotions", "coupon-usage", "flash-sales", "reels", "drivers", "branches"];
 
 
 
@@ -98,7 +99,7 @@ const AdminPage = () => {
   const hasAdminAccess = isAdmin || isModerator || isSeller;
   const [tab, setTab] = useState<Tab>(() => {
     const t = searchParams.get("tab") as Tab | null;
-    const valid: Tab[] = ["stats","tracking","products","orders","users","drivers","categories","brands","delivery","delivery-portal","payments","banner","announcements","collections","chatbot","analytics","diagnostics","stocklog","recommendations","loyalty","reminders","reviews","spin","referral","promotions","flash-sales","settings","branches"];
+    const valid: Tab[] = ["stats","tracking","products","orders","users","drivers","categories","brands","delivery","delivery-portal","payments","banner","announcements","collections","chatbot","analytics","diagnostics","stocklog","recommendations","loyalty","reminders","reviews","spin","referral","promotions","coupon-usage","flash-sales","reels","settings","branches"];
     return t && valid.includes(t) ? t : "stats";
   });
   const [products, setProducts] = useState<any[]>([]);
@@ -1774,6 +1775,7 @@ const AdminPage = () => {
     { id: "spin", label: "Хүрд тоглоом", icon: Sparkles },
     { id: "referral", label: "Referral", icon: Users },
     { id: "promotions", label: "Урамшуулал", icon: Gift },
+    { id: "coupon-usage", label: "Купон/Хожил", icon: Gift },
     { id: "flash-sales", label: "Flash Sale", icon: Sparkles },
     { id: "reels", label: "Reels удирдах", icon: PlayCircle },
 
@@ -4755,6 +4757,8 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
           {tab === "referral" && <ReferralManager />}
 
           {tab === "promotions" && <WalletCreditsManager />}
+
+          {tab === "coupon-usage" && <CouponUsageManager />}
 
           {tab === "flash-sales" && <FlashSalesManager />}
 

@@ -2285,6 +2285,43 @@ export type Database = {
           user_name: string
         }[]
       }
+      admin_list_spin_winners: {
+        Args: { _limit?: number }
+        Returns: {
+          coupon_code: string
+          coupon_id: string
+          coupon_used: boolean
+          created_at: string
+          gift_product_id: string
+          gift_product_name: string
+          id: string
+          reward_type: string
+          reward_value: number
+          user_email: string
+          user_id: string
+          user_name: string
+        }[]
+      }
+      admin_list_used_coupons: {
+        Args: { _limit?: number }
+        Returns: {
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          minimum_order_amount: number
+          order_ref: string
+          order_total: number
+          reward_type: string
+          reward_value: number
+          source: string
+          used_at: string
+          used_order_id: string
+          user_email: string
+          user_id: string
+          user_name: string
+        }[]
+      }
       admin_list_users: {
         Args: never
         Returns: {
