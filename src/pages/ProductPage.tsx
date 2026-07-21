@@ -371,7 +371,7 @@ const ProductPage = () => {
   const liked = isInWishlist(product.id);
 
   return (
-    <div className="min-h-screen bg-background pb-32 md:pb-12">
+    <div className="min-h-screen bg-background pb-32 md:pb-12 relative">
       <div className="hidden md:block"><Header /></div>
       <div className="md:hidden absolute top-0 left-0 right-0 z-40 px-4 py-3 flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="p-1.5 rounded-full bg-background/70 backdrop-blur-md hover:bg-background">
