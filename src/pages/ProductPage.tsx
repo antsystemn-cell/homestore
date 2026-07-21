@@ -469,10 +469,11 @@ const ProductPage = () => {
               )}
               <button
                 onClick={() => toggleWishlist(product)}
-                className="absolute top-4 right-4 p-2.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
+                className="absolute bottom-4 right-4 p-2.5 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors shadow-sm"
               >
                 <Heart className={`h-5 w-5 ${liked ? "fill-sale text-sale" : "text-foreground"}`} />
               </button>
+
               {product.discount ? (
                 <span className="absolute bottom-4 left-4 bg-sale text-sale-foreground text-xs font-bold px-3 py-1.5 rounded-full">
                   -{product.discount}% хямдрал
