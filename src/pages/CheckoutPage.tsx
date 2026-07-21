@@ -171,17 +171,22 @@ const CheckoutPage = () => {
   const surcharge = (bundleFree || productFree) ? 0 : ((cartTotal < 50000 || hasSaleItems) ? 8000 : 0);
   const totalDeliveryFee = deliveryFee + surcharge;
 
-  // Sum discount of selected coupons (only those whose min_order ≤ cartTotal)
-  const validSelectedCoupons = availableCoupons.filter(
+  // Sum discount of selected coupons (only those whose min_order ≤ cartTotal).
+  // Mutual exclusion: if a wallet credit is selected, ignore stacked coupons
+  // entirely to prevent any double-application of promotions.
+  const walletActive = !hasFlashSaleItems && !!walletCreditId && walletCreditDiscount > 0;
+  const validSelectedCoupons = walletActive ? [] : availableCoupons.filter(
     (c) => selectedCouponIds.includes(c.id) && (!c.minimum_order_amount || cartTotal >= Number(c.minimum_order_amount))
   );
-  const couponDiscount = validSelectedCoupons.reduce((s, c) => s + Number(c.reward_value || 0), 0);
+  const rawCouponDiscount = validSelectedCoupons.reduce((s, c) => s + Number(c.reward_value || 0), 0);
+  const couponDiscount = Math.max(0, Math.min(rawCouponDiscount, cartTotal));
 
   // Wallet credit discount (only applies when no flash sale items)
   const effectiveWalletDiscount = hasFlashSaleItems ? 0 : walletCreditDiscount;
 
   // Loyalty points discount (1 point = 1₮)
   const totalBeforePoints = Math.max(0, cartTotal + totalDeliveryFee - couponDiscount - effectiveWalletDiscount);
+
   const maxRedeemable = Math.max(0, Math.min(loyaltyPoints, totalBeforePoints));
   const pointsDiscount = usePoints ? Math.max(0, Math.min(pointsInput || 0, maxRedeemable)) : 0;
   const grandTotal = Math.max(0, totalBeforePoints - pointsDiscount);
