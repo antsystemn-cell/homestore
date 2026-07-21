@@ -320,7 +320,7 @@ export default function QuickOrderPage() {
       if (error) throw error;
       const ref = Array.isArray(data) && data[0]?.order_ref ? data[0].order_ref : "";
       toast.success(`Хадгалагдлаа ${ref}`);
-      setText(""); setParsed(null);
+      setContactText(""); setProductText(""); setParsed(null); setLiveMatches([]);
       void loadOrders();
     } catch (e: any) {
       toast.error(e.message || "Хадгалж чадсангүй");
