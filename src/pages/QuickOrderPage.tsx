@@ -463,6 +463,43 @@ export default function QuickOrderPage() {
               <span>{text.length} тэмдэгт</span>
               {products.length > 0 && <span>{products.length} бараа AI-д илгээгдэнэ</span>}
             </div>
+
+            {/* Live voice product matches — appears while user is dictating */}
+            {(listening || liveMatches.length > 0) && (
+              <div className="mt-3 rounded-xl border border-primary/30 bg-primary/5 p-2.5">
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-[10px] font-bold text-primary flex items-center gap-1">
+                    {listening && <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />}
+                    Бодит цагийн бараа таних {liveMatches.length > 0 && `(${liveMatches.length})`}
+                  </p>
+                  {liveMatches.length > 0 && (
+                    <button onClick={() => setLiveMatches([])} className="text-[10px] text-muted-foreground">Цэвэрлэх</button>
+                  )}
+                </div>
+                {liveMatches.length === 0 ? (
+                  <p className="text-[10px] text-muted-foreground py-1">Бараа нэрлээд ярина уу — таарсан бараа энд гарч ирнэ</p>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {liveMatches.map((p) => (
+                      <button
+                        key={p.id}
+                        onClick={() => quickAddFromVoice(p)}
+                        className="flex items-center gap-1.5 rounded-full bg-white border border-primary/40 hover:bg-primary hover:text-primary-foreground hover:border-primary transition pl-1 pr-2.5 py-1"
+                      >
+                        {p.thumbnail_url ? (
+                          <img src={p.thumbnail_url} alt="" className="h-6 w-6 rounded-full object-cover" />
+                        ) : (
+                          <div className="h-6 w-6 rounded-full bg-secondary" />
+                        )}
+                        <span className="text-[11px] font-medium max-w-[140px] truncate">{p.name}</span>
+                        <Plus className="h-3 w-3" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             <button
               onClick={handleParse}
               disabled={loading || !text.trim()}
