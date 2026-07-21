@@ -4758,6 +4758,8 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
 
           {tab === "promotions" && <WalletCreditsManager />}
 
+          {tab === "coupon-usage" && <CouponUsageManager />}
+
           {tab === "flash-sales" && <FlashSalesManager />}
 
           {tab === "reels" && <ReelsManager />}
