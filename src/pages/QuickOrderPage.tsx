@@ -450,10 +450,11 @@ export default function QuickOrderPage() {
                             </select>
                             {o.status === "pending" && (
                               <button
-                                onClick={() => updateStatus(o.id, "confirmed")}
-                                className="rounded-lg bg-emerald-600 text-white px-3 py-1.5 text-xs font-bold flex items-center gap-1 whitespace-nowrap"
+                                onClick={() => confirmOrder(o)}
+                                disabled={confirming === o.id}
+                                className="rounded-lg bg-emerald-600 text-white px-3 py-1.5 text-xs font-bold flex items-center gap-1 whitespace-nowrap disabled:opacity-50"
                               >
-                                <CheckCircle2 className="h-3.5 w-3.5" /> Баталгаажуулах
+                                {confirming === o.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />} Баталгаажуулах
                               </button>
                             )}
                           </div>
