@@ -19,6 +19,7 @@ export const THUMB_WIDTH = 200;
 export const THUMB_QUALITY = 0.55;
 
 const STORAGE_BUCKET = "product-images";
+const VIDEO_BUCKET = "product-videos";
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -88,6 +89,24 @@ async function uploadWebp(blob: Blob, prefix = "img"): Promise<string> {
 
   const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filename);
   return data.publicUrl;
+}
+
+/** Upload browser-playable product video to private Storage and return a stable storage marker. */
+export async function uploadVideo(file: File, prefix = "videos"): Promise<string> {
+  const ext = (file.name.split(".").pop() || "mp4").toLowerCase().replace(/[^a-z0-9]/g, "") || "mp4";
+  const filename = `${prefix}/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`;
+  const contentType = file.type || (ext === "webm" ? "video/webm" : "video/mp4");
+
+  const { error } = await supabase.storage
+    .from(VIDEO_BUCKET)
+    .upload(filename, file, {
+      contentType,
+      cacheControl: "31536000",
+      upsert: false,
+    });
+  if (error) throw error;
+
+  return `storage://${VIDEO_BUCKET}/${filename}`;
 }
 
 /** Load a File or data: URL into an HTMLImageElement. */
