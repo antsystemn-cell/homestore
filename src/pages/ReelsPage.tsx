@@ -105,21 +105,29 @@ const ReelsPage = () => {
           style={{ scrollbarWidth: "none" }}
         >
           {reels.map((r) => {
-            const src = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(
-              r.facebook_embed_url
-            )}&show_text=false&autoplay=true&mute=0`;
+            const url = r.facebook_embed_url;
+            const isFacebook = url.includes("facebook.com") || url.includes("fb.watch");
+            const src = isFacebook
+              ? `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true&mute=0`
+              : "";
             return (
             <section
               key={r.id}
               className="h-screen w-full snap-start relative flex items-center justify-center bg-black"
             >
-              <iframe
-                src={src}
-                className="w-full h-full border-0"
-                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                allowFullScreen
-                title={r.title || "Reel"}
-              />
+              {isFacebook ? (
+                <iframe
+                  src={src}
+                  className="w-full h-full border-0"
+                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                  allowFullScreen
+                  title={r.title || "Reel"}
+                />
+              ) : (
+                <NativeReelVideo url={url} title={r.title} />
+              )}
+
+
 
 
               {/* Overlay actions */}
