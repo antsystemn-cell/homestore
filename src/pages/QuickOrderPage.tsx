@@ -178,6 +178,66 @@ export default function QuickOrderPage() {
     else toast.success("Статус солигдлоо");
   };
 
+  // Confirm quick-order → match items to real products, fill prices, compute
+  // total and delivery fee, then flip status to `confirmed` so it appears as a
+  // regular order in the main admin flow.
+  const confirmOrder = async (o: OrderRow) => {
+    if (products.length === 0) { toast.error("Барааны жагсаалт ачаалагдаагүй байна"); return; }
+    const rawItems = Array.isArray(o.items) ? o.items : [];
+    if (rawItems.length === 0) { toast.error("Бараа хоосон"); return; }
+    setConfirming(o.id);
+    try {
+      const enriched: any[] = [];
+      const unmatched: string[] = [];
+      for (const it of rawItems) {
+        const qty = Math.max(1, parseInt(it.quantity) || 1);
+        const p = matchProduct(String(it.name || ""));
+        if (p) {
+          enriched.push({
+            product_id: p.id,
+            name: p.name,
+            price: Number(p.price) || 0,
+            quantity: qty,
+          });
+        } else {
+          unmatched.push(String(it.name || ""));
+          enriched.push({
+            product_id: null,
+            name: String(it.name || ""),
+            price: Number(it.price) || 0,
+            quantity: qty,
+          });
+        }
+      }
+      const subtotal = enriched.reduce((s, it) => s + (it.price * it.quantity), 0);
+      const deliveryFee = subtotal >= 50000 ? 0 : 8000;
+      const total = subtotal + deliveryFee;
+
+      const { error } = await supabase
+        .from("orders")
+        .update({
+          items: enriched,
+          total,
+          delivery_fee: deliveryFee,
+          status: "confirmed",
+        })
+        .eq("id", o.id);
+      if (error) throw error;
+
+      setOrders((os) => os.map((x) => (x.id === o.id ? { ...x, status: "confirmed", items: enriched } : x)));
+      if (unmatched.length > 0) {
+        toast.warning(`Баталгаажлаа. Тохирохгүй бараа: ${unmatched.join(", ")}`);
+      } else {
+        toast.success(`Баталгаажлаа — Нийт ${total.toLocaleString("mn-MN")}₮`);
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Баталгаажуулж чадсангүй");
+    } finally {
+      setConfirming(null);
+    }
+  };
+
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur border-b border-border">
