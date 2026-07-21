@@ -3,15 +3,40 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SYSTEM_PROMPT = `Та Монгол хэлээр борлуулалтын захиалгыг задлан ялгаж JSON гаргадаг туслах юм.
-Хэрэглэгчийн чөлөөт бичсэн текстээс дараах JSON форматаар л буцаа (өөр юу ч бүү бич):
+const SYSTEM_PROMPT = `Та Монгол хэлээр борлуулалтын захиалгыг задлан ялгаж JSON гаргадаг мэргэшсэн туслах юм.
+
+Хэрэглэгчийн чөлөөт бичсэн (эсвэл ярьсан) текстээс дараах ЯГ энэ форматтай JSON л буцаа:
 {
-  "phone": "утасны дугаар (зөвхөн 8 оронтой Монгол дугаар, олдохгүй бол хоосон)",
-  "address": "хаяг (дүүрэг, хороолол, гэр/байр гэх мэт)",
-  "items": [{ "name": "барааны нэр", "quantity": тоо }],
-  "source": "Facebook эсвэл Утас (мэдэгдэхгүй бол хоосон)"
+  "phone": "8 оронтой Монгол дугаар (олдохгүй бол \"\")",
+  "address": {
+    "district": "дүүрэг (СБД, БЗД, ХУД, ЧД, БГД, СХД гэх мэт бүтэн нэр)",
+    "khoroo": "хороо (тоо)",
+    "khoroolol": "хороолол/байршил",
+    "building": "байр/гэрийн дугаар",
+    "apt": "тоот",
+    "note": "нэмэлт тэмдэглэл",
+    "full": "бүх хаягийг цэвэрхэн нэг мөрөнд нэгтгэсэн"
+  },
+  "items": [
+    {
+      "name": "барааны нэр (текстэд байгаа шиг)",
+      "quantity": тоо,
+      "matched_product_id": "олдвол ID, олдохгүй бол null",
+      "matched_product_name": "олдсон бүтээгдэхүүний нэр эсвэл null",
+      "confidence": 0-1 хооронд тоо
+    }
+  ],
+  "source": "Facebook | Instagram | Утас | Messenger | Direct | \"\"",
+  "note": "AI тэмдэглэл (жишээ нь: 'quantity таамагласан', 'бараа тодорхойгүй')"
 }
-Зөвхөн зөв JSON буцаа. Тайлбар нэмж болохгүй. Барааны quantity олдохгүй бол 1 гэж бич.`;
+
+Дүрэм:
+- Утас: 8 оронтой, 6-9 -р эхэлсэн Монгол дугаар. Зайг арилга.
+- Тоо ширхэг: "2ш", "хоёр", "2 ширхэг", "хос" гэх мэт ойлгож бүхэл тоо болго. Олдохгүй бол 1.
+- Бараа таних: доор өгсөн PRODUCTS каталогтой ойролцоо нэрээр тааруулж matched_product_id, matched_product_name, confidence-ыг бөглө. Confidence < 0.5 бол null үлдээ.
+- Өнгө/хэмжээ (жишээ "хар өмд L") барааны нэрний хэсэг гэж үз.
+- Хаягийг задлан ялга. Бүх хэсгийг олоогүй бол "" үлдээж, "full" талбарт бүхэлд нь бич.
+- Зөвхөн зөв JSON л буцаа. Markdown/тайлбар нэмж болохгүй.`;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -22,12 +47,23 @@ Deno.serve(async (req) => {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const { text } = await req.json();
+    const { text, products } = await req.json();
     if (!text || typeof text !== "string" || text.trim().length < 3) {
       return new Response(JSON.stringify({ error: "Текст хоосон байна" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Compact catalog: id|name|price  — cap to avoid huge prompts
+    const catalog: Array<{ id: string; name: string; price: number }> = Array.isArray(products)
+      ? products.slice(0, 400)
+      : [];
+    const catalogText = catalog.length
+      ? "PRODUCTS каталог (id | нэр | үнэ₮):\n" +
+        catalog.map((p) => `${p.id} | ${p.name} | ${p.price}`).join("\n")
+      : "PRODUCTS каталог өгөгдөөгүй — matched_product_id-г null-ээр буцаа.";
+
+    const userMsg = `${catalogText}\n\n---\nЗАХИАЛГЫН ТЕКСТ:\n${text}`;
 
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -38,9 +74,9 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 800,
+        max_tokens: 2000,
         system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: text }],
+        messages: [{ role: "user", content: userMsg }],
       }),
     });
     if (!res.ok) {
@@ -63,16 +99,44 @@ Deno.serve(async (req) => {
         status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Normalize address (support both old string form and new object form)
+    let addressFull = "";
+    let addressObj: any = null;
+    if (typeof parsed.address === "string") {
+      addressFull = parsed.address.trim();
+    } else if (parsed.address && typeof parsed.address === "object") {
+      addressObj = parsed.address;
+      addressFull =
+        String(parsed.address.full ?? "").trim() ||
+        [parsed.address.district, parsed.address.khoroolol, parsed.address.khoroo && `${parsed.address.khoroo}-р хороо`, parsed.address.building && `${parsed.address.building}-р байр`, parsed.address.apt && `${parsed.address.apt} тоот`, parsed.address.note]
+          .filter(Boolean).join(", ");
+    }
+
+    // Build a quick id->price lookup so we surface prices immediately.
+    const priceById = new Map(catalog.map((p) => [p.id, p.price]));
+
     const out = {
-      phone: String(parsed.phone ?? "").trim(),
-      address: String(parsed.address ?? "").trim(),
+      phone: String(parsed.phone ?? "").replace(/\D/g, "").slice(0, 8),
+      address: addressFull,
+      addressParts: addressObj,
       items: Array.isArray(parsed.items)
-        ? parsed.items.map((it: any) => ({
-            name: String(it?.name ?? "").trim(),
-            quantity: Math.max(1, parseInt(it?.quantity ?? 1) || 1),
-          })).filter((it: any) => it.name)
+        ? parsed.items.map((it: any) => {
+            const pid = it?.matched_product_id && priceById.has(String(it.matched_product_id))
+              ? String(it.matched_product_id)
+              : null;
+            return {
+              name: String(it?.name ?? "").trim(),
+              quantity: Math.max(1, parseInt(it?.quantity ?? 1) || 1),
+              matched_product_id: pid,
+              matched_product_name: pid ? String(it.matched_product_name ?? "").trim() : null,
+              price: pid ? Number(priceById.get(pid)) || 0 : 0,
+              confidence: Math.max(0, Math.min(1, Number(it?.confidence ?? 0))),
+            };
+          }).filter((it: any) => it.name)
         : [],
       source: String(parsed.source ?? "").trim(),
+      note: String(parsed.note ?? "").trim(),
     };
     return new Response(JSON.stringify(out), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
