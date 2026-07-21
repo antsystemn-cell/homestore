@@ -454,6 +454,15 @@ const ProductPage = () => {
 
   const liked = isInWishlist(product.id);
 
+  const galleryItems: GalleryItem[] = useMemo(() => {
+    const imgs: GalleryItem[] = (allImages.length > 0 ? allImages : [product.image]).map((u) => ({ type: "image", url: u }));
+    const videos: GalleryItem[] = (product.detailMedia || [])
+      .filter((m) => m.type === "video" && m.url)
+      .map((m) => ({ type: "video", url: m.url, thumbnail: m.thumbnail, caption: m.caption }));
+    return [...imgs, ...videos];
+  }, [allImages, product.image, product.detailMedia]);
+  const totalGallery = galleryItems.length;
+
   return (
     <div className="min-h-screen bg-background pb-32 md:pb-12 relative">
       <div className="hidden md:block"><Header /></div>
