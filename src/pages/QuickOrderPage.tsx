@@ -56,12 +56,14 @@ const money = (n: number) => `${(n || 0).toLocaleString("mn-MN")}₮`;
 
 export default function QuickOrderPage() {
   const [tab, setTab] = useState<"new" | "list">("new");
-  const [text, setText] = useState("");
+  const [contactText, setContactText] = useState("");
+  const [productText, setProductText] = useState("");
   const [loading, setLoading] = useState(false);
   const [parsed, setParsed] = useState<Parsed | null>(null);
   const [saving, setSaving] = useState(false);
-  const [listening, setListening] = useState(false);
+  const [listeningField, setListeningField] = useState<"contact" | "product" | null>(null);
   const recRef = useRef<any>(null);
+
 
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
