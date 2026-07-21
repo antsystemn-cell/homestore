@@ -125,17 +125,30 @@ const GalleryVideo = ({ item, active }: { item: Extract<GalleryItem, { type: "vi
   const isYoutube = item.url.includes("youtube.com") || item.url.includes("youtu.be");
   const isFacebook = item.url.includes("facebook.com") || item.url.includes("fb.watch");
 
+  const attemptPlay = () => {
+    const v = videoRef.current;
+    if (!v || !active) return;
+    v.muted = true;
+    v.playsInline = true;
+    const p = v.play();
+    if (p && typeof p.catch === "function") p.catch(() => {});
+  };
+
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
     if (active) {
+      setMuted(true);
       v.muted = true;
-      const p = v.play();
-      if (p && typeof p.catch === "function") p.catch(() => {});
+      v.playsInline = true;
+      v.load();
+      attemptPlay();
+      const retryId = window.setTimeout(attemptPlay, 350);
+      return () => window.clearTimeout(retryId);
     } else {
       v.pause();
     }
-  }, [active]);
+  }, [active, item.url]);
 
   if (isYoutube) {
     const base = item.url.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/");
@@ -174,13 +187,17 @@ const GalleryVideo = ({ item, active }: { item: Extract<GalleryItem, { type: "vi
   return (
     <div className="w-full h-full flex-shrink-0 snap-start bg-black flex items-center justify-center relative" style={{ minWidth: "100%" }}>
       <video
+        key={item.url}
         ref={videoRef}
         src={item.url}
         autoPlay
         muted={muted}
         loop
         playsInline
+        preload="auto"
         controls
+        onLoadedMetadata={attemptPlay}
+        onCanPlay={attemptPlay}
         className="w-full h-full object-contain"
         controlsList="nodownload"
       />
@@ -447,6 +464,23 @@ const ProductPage = () => {
     void fetchProduct();
   }, [slug]);
 
+  const galleryItems: GalleryItem[] = useMemo(() => {
+    if (!product) return [];
+    const isVideoUrl = (u: string) =>
+      u.startsWith("data:video/") || /\.(mp4|webm|mov|m4v|ogv)(\?|$)/i.test(u);
+    const media: GalleryItem[] = (allImages.length > 0 ? allImages : [product.image]).map((u) =>
+      isVideoUrl(u) ? { type: "video", url: u } : { type: "image", url: u }
+    );
+    const detailVideos: GalleryItem[] = (product.detailMedia || [])
+      .filter((m) => m.type === "video" && m.url)
+      .map((m) => ({ type: "video", url: m.url, thumbnail: m.thumbnail, caption: m.caption }));
+    // Put videos first so autoplay kicks in on entry
+    const inlineVideos = media.filter((m) => m.type === "video");
+    const inlineImages = media.filter((m) => m.type === "image");
+    return [...detailVideos, ...inlineVideos, ...inlineImages];
+  }, [allImages, product]);
+  const totalGallery = galleryItems.length;
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Уншиж байна...</div>;
   }
@@ -464,22 +498,6 @@ const ProductPage = () => {
   }
 
   const liked = isInWishlist(product.id);
-
-  const galleryItems: GalleryItem[] = useMemo(() => {
-    const isVideoUrl = (u: string) =>
-      u.startsWith("data:video/") || /\.(mp4|webm|mov|m4v|ogv)(\?|$)/i.test(u);
-    const media: GalleryItem[] = (allImages.length > 0 ? allImages : [product.image]).map((u) =>
-      isVideoUrl(u) ? { type: "video", url: u } : { type: "image", url: u }
-    );
-    const detailVideos: GalleryItem[] = (product.detailMedia || [])
-      .filter((m) => m.type === "video" && m.url)
-      .map((m) => ({ type: "video", url: m.url, thumbnail: m.thumbnail, caption: m.caption }));
-    // Put videos first so autoplay kicks in on entry
-    const inlineVideos = media.filter((m) => m.type === "video");
-    const inlineImages = media.filter((m) => m.type === "image");
-    return [...detailVideos, ...inlineVideos, ...inlineImages];
-  }, [allImages, product.image, product.detailMedia]);
-  const totalGallery = galleryItems.length;
 
   return (
     <div className="min-h-screen bg-background pb-32 md:pb-12 relative">
