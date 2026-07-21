@@ -115,7 +115,9 @@ const Index = () => {
       // STAGE 2: Background fetch full catalog for grid + sale carousel + featured.
       const prodRes = await fetchPublicProducts();
       const allMapped = (prodRes || []).map(mapWithBrand);
-      const mappedProducts = shuffle(allMapped);
+      const shuffled = shuffle(allMapped);
+      // Trim to a multiple of 4 so every row (incl. last page) is fully filled on all breakpoints.
+      const mappedProducts = shuffled.slice(0, Math.floor(shuffled.length / 4) * 4);
       const mappedSale = allMapped
         .filter((p) => p.isOnSale)
         .sort((a, b) => (b.discount || 0) - (a.discount || 0));
