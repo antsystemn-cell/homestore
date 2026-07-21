@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Trash2, Eye, EyeOff, Plus } from "lucide-react";
+import { Trash2, Eye, EyeOff, Plus, Film } from "lucide-react";
 
 type Reel = {
   id: string;
@@ -17,10 +17,19 @@ type Reel = {
 };
 
 type ProductLite = { id: string; name: string };
+type ProductVideo = { url: string; label: string };
+
+const isVideoUrl = (u: string) => {
+  if (!u) return false;
+  if (u.startsWith("storage://product-videos/")) return true;
+  return /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(u);
+};
 
 const ReelsManager = () => {
   const [reels, setReels] = useState<Reel[]>([]);
   const [products, setProducts] = useState<ProductLite[]>([]);
+  const [productVideos, setProductVideos] = useState<ProductVideo[]>([]);
+  const [loadingVideos, setLoadingVideos] = useState(false);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
     facebook_embed_url: "",
@@ -45,9 +54,34 @@ const ReelsManager = () => {
     void load();
   }, []);
 
+  // Load videos of a selected product (detail_media videos + product_images video urls)
+  useEffect(() => {
+    if (!form.product_id) {
+      setProductVideos([]);
+      return;
+    }
+    (async () => {
+      setLoadingVideos(true);
+      const [{ data: prod }, { data: extras }] = await Promise.all([
+        supabase.from("products").select("detail_media").eq("id", form.product_id).maybeSingle(),
+        supabase.from("product_images").select("image_url, position").eq("product_id", form.product_id).order("position"),
+      ]);
+      const list: ProductVideo[] = [];
+      const dm = Array.isArray((prod as any)?.detail_media) ? (prod as any).detail_media : [];
+      dm.forEach((m: any, i: number) => {
+        if (m?.type === "video" && m?.url) list.push({ url: m.url, label: `Дэлгэрэнгүй видео #${i + 1}` });
+      });
+      (extras || []).forEach((row: any, i: number) => {
+        if (isVideoUrl(row.image_url)) list.push({ url: row.image_url, label: `Галерей видео #${i + 1}` });
+      });
+      setProductVideos(list);
+      setLoadingVideos(false);
+    })();
+  }, [form.product_id]);
+
   const add = async () => {
     if (!form.facebook_embed_url.trim()) {
-      toast.error("Facebook Reels/Video URL шаардлагатай");
+      toast.error("Видео URL шаардлагатай");
       return;
     }
     const { error } = await supabase.from("reels").insert({
@@ -85,16 +119,58 @@ const ReelsManager = () => {
       <div className="bg-card border border-border rounded-xl p-4 space-y-3">
         <h3 className="font-semibold flex items-center gap-2"><Plus className="h-4 w-4" /> Шинэ Reel нэмэх</h3>
         <div className="grid gap-3 md:grid-cols-2">
-          <div>
-            <label className="text-xs text-muted-foreground">Facebook Reels/Video URL *</label>
+          <div className="md:col-span-2">
+            <label className="text-xs text-muted-foreground">Холбогдох бараа</label>
+            <select
+              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+              value={form.product_id}
+              onChange={(e) => setForm({ ...form, product_id: e.target.value, facebook_embed_url: "" })}
+            >
+              <option value="">— Байхгүй —</option>
+              {products.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {form.product_id && (
+            <div className="md:col-span-2 rounded-lg border border-dashed border-primary/40 bg-primary/5 p-3 space-y-2">
+              <p className="text-xs font-medium flex items-center gap-1.5"><Film className="h-3.5 w-3.5" /> Барааны оруулсан видео сонгох</p>
+              {loadingVideos ? (
+                <p className="text-xs text-muted-foreground">Ачааллаж байна...</p>
+              ) : productVideos.length === 0 ? (
+                <p className="text-xs text-muted-foreground">Энэ бараанд оруулсан видео олдсонгүй. Доор URL шууд бичнэ үү.</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {productVideos.map((v) => (
+                    <button
+                      key={v.url}
+                      type="button"
+                      onClick={() => setForm({ ...form, facebook_embed_url: v.url })}
+                      className={`text-xs px-3 py-1.5 rounded-full border transition ${
+                        form.facebook_embed_url === v.url
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background border-border hover:border-primary"
+                      }`}
+                    >
+                      {v.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="md:col-span-2">
+            <label className="text-xs text-muted-foreground">Видео URL * <span className="text-[10px] opacity-70">(Барааны видео эсвэл Facebook Reels/Video линк)</span></label>
             <Input
-              placeholder="https://www.facebook.com/[page]/videos/[id]"
+              placeholder="storage://product-videos/... эсвэл https://www.facebook.com/[page]/videos/[id]"
               value={form.facebook_embed_url}
               onChange={(e) => setForm({ ...form, facebook_embed_url: e.target.value })}
             />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground">Facebook Page URL</label>
+            <label className="text-xs text-muted-foreground">Facebook Page URL (заавал биш)</label>
             <Input
               placeholder="https://www.facebook.com/[page]"
               value={form.facebook_page_url}
@@ -107,19 +183,6 @@ const ReelsManager = () => {
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
             />
-          </div>
-          <div>
-            <label className="text-xs text-muted-foreground">Холбогдох бараа</label>
-            <select
-              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
-              value={form.product_id}
-              onChange={(e) => setForm({ ...form, product_id: e.target.value })}
-            >
-              <option value="">— Байхгүй —</option>
-              {products.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
           </div>
           <div>
             <label className="text-xs text-muted-foreground">Дараалал</label>
@@ -141,10 +204,14 @@ const ReelsManager = () => {
         ) : (
           reels.map((r) => {
             const prod = products.find((p) => p.id === r.product_id);
+            const isNative = !r.facebook_embed_url.includes("facebook.com") && !r.facebook_embed_url.includes("fb.watch");
             return (
               <div key={r.id} className="bg-card border border-border rounded-lg p-3 flex items-center gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{r.title || r.facebook_embed_url}</p>
+                  <p className="text-sm font-medium truncate flex items-center gap-2">
+                    {isNative && <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">Барааны видео</span>}
+                    {r.title || r.facebook_embed_url}
+                  </p>
                   <p className="text-xs text-muted-foreground truncate">{r.facebook_embed_url}</p>
                   {prod && <p className="text-xs text-primary">🛒 {prod.name}</p>}
                 </div>
