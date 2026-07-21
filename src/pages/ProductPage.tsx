@@ -449,10 +449,8 @@ const ProductPage = () => {
                   >
                     <ChevronRight className="h-4 w-4 text-foreground" />
                   </button>
-                  {/* Counter badge (like 1/3) */}
-                  <span className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/55 text-white text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm">
-                    {activeImg + 1}/{allImages.length}
-                  </span>
+
+
                   {/* Pagination dots at bottom */}
                   <div className="md:hidden absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 pointer-events-none">
                     {allImages.map((_, i) => (
