@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Mic, MicOff, Send, Check, Pencil, List, Plus, Trash2, Loader2 } from "lucide-react";
+import { Mic, MicOff, Send, Check, Pencil, List, Plus, Trash2, Loader2, CheckCircle2 } from "lucide-react";
 
 interface ParsedItem { name: string; quantity: number }
 interface Parsed {
