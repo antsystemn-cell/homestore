@@ -688,11 +688,26 @@ export default function QuickOrderPage() {
                     autoFocus
                     value={pickerQuery}
                     onChange={(e) => setPickerQuery(e.target.value)}
-                    placeholder="Барааны нэрээр хайх"
+                    placeholder="Бичих эсвэл ярих..."
                     className="flex-1 bg-transparent text-sm focus:outline-none"
                   />
-                  <button onClick={() => setPickerIdx(null)}><X className="h-4 w-4" /></button>
+                  <button
+                    onClick={pickerListening ? stopPickerMic : startPickerMic}
+                    className={`h-8 w-8 rounded-full flex items-center justify-center transition ${
+                      pickerListening ? "bg-red-500 text-white animate-pulse" : "bg-primary text-primary-foreground"
+                    }`}
+                    aria-label="Дуугаар хайх"
+                    type="button"
+                  >
+                    {pickerListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  </button>
+                  <button onClick={() => { stopPickerMic(); setPickerIdx(null); }}><X className="h-4 w-4" /></button>
                 </div>
+                {pickerListening && (
+                  <div className="px-3 py-2 bg-red-50 text-red-700 text-[10px] font-bold border-b border-red-100 flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" /> Сонсож байна... барааны нэрээ хэлнэ үү
+                  </div>
+                )}
                 <div className="flex-1 overflow-y-auto">
                   {pickerResults.length === 0 ? (
                     <p className="p-6 text-center text-xs text-muted-foreground">Илэрц олдсонгүй</p>
