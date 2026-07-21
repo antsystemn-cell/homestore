@@ -38,7 +38,7 @@
     --accent: 0 0% 94%;
     --accent-foreground: 0 0% 18%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 220 88% 52%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 220 14% 91%;
@@ -47,7 +47,7 @@
 
     --radius: 0.75rem;
 
-    --sale: 0 84% 55%;
+    --sale: 220 88% 52%;
     --sale-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
