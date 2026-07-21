@@ -2849,29 +2849,47 @@ const AdminPage = () => {
                     </div>
                   </div>
 
-                  {/* Extra images */}
+                  {/* Extra images & videos */}
                   <div>
-                    <label className="text-[11px] text-muted-foreground mb-2 block">Нэмэлт зургууд ({extraImages.length})</label>
+                    <label className="text-[11px] text-muted-foreground mb-2 block">Нэмэлт зураг / бичлэг ({extraImages.length})</label>
                     <div className="flex flex-wrap gap-2">
-                      {extraImages.map((img, idx) => (
-                        <div key={idx} className="relative h-16 w-16 rounded-lg bg-secondary overflow-hidden group">
-                          <img src={img} alt="" className="h-full w-full object-cover" />
-                          <button
-                            type="button"
-                            onClick={() => setExtraImages((prev) => prev.filter((_, i) => i !== idx))}
-                            className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                          >
-                            <X className="h-4 w-4 text-white" />
-                          </button>
-                        </div>
-                      ))}
+                      {extraImages.map((url, idx) => {
+                        const isVideo = url.startsWith("data:video/") || /\.(mp4|webm|mov|m4v|ogv)(\?|$)/i.test(url);
+                        return (
+                          <div key={idx} className="relative h-16 w-16 rounded-lg bg-secondary overflow-hidden group">
+                            {isVideo ? (
+                              <>
+                                <video src={url} className="h-full w-full object-cover" muted playsInline />
+                                <span className="absolute bottom-0.5 left-0.5 bg-black/70 text-white text-[8px] px-1 rounded">▶ Видео</span>
+                              </>
+                            ) : (
+                              <img src={url} alt="" className="h-full w-full object-cover" />
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => setExtraImages((prev) => prev.filter((_, i) => i !== idx))}
+                              className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                            >
+                              <X className="h-4 w-4 text-white" />
+                            </button>
+                          </div>
+                        );
+                      })}
                       <button
                         type="button"
                         onClick={() => extraFileInputRef.current?.click()}
                         className="h-16 w-16 rounded-lg border-2 border-dashed border-border bg-secondary flex flex-col items-center justify-center hover:border-primary/40 transition-colors"
                       >
                         <Plus className="h-4 w-4 text-muted-foreground/60" />
-                        <span className="text-[8px] text-muted-foreground/60">Нэмэх</span>
+                        <span className="text-[8px] text-muted-foreground/60">Зураг</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => extraVideoInputRef.current?.click()}
+                        className="h-16 w-16 rounded-lg border-2 border-dashed border-border bg-secondary flex flex-col items-center justify-center hover:border-primary/40 transition-colors"
+                      >
+                        <Plus className="h-4 w-4 text-muted-foreground/60" />
+                        <span className="text-[8px] text-muted-foreground/60">Видео</span>
                       </button>
                       <input
                         ref={extraFileInputRef}
@@ -2880,6 +2898,14 @@ const AdminPage = () => {
                         multiple
                         className="hidden"
                         onChange={handleExtraImageUpload}
+                      />
+                      <input
+                        ref={extraVideoInputRef}
+                        type="file"
+                        accept="video/*,.mp4,.mov,.webm,.m4v,.ogv"
+                        multiple
+                        className="hidden"
+                        onChange={handleExtraVideoUpload}
                       />
                     </div>
                   </div>
