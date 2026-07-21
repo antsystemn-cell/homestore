@@ -461,28 +461,38 @@ export default function QuickOrderPage() {
                 </div>
                 {parsed.items.map((it, i) => {
                   const matched = !!it.matched_product_id;
+                  const matchedProduct = matched ? products.find((p) => p.id === it.matched_product_id) : null;
+                  // Auto-suggest top 3 alternatives based on the current item name
+                  const suggestions = !matched && it.name.trim()
+                    ? products
+                        .map((p) => ({ p, s: scoreCandidate(p.name, it.name) }))
+                        .filter((x) => x.s > 30)
+                        .sort((a, b) => b.s - a.s)
+                        .slice(0, 3)
+                        .map((x) => x.p)
+                    : [];
                   return (
                     <div key={i} className={`rounded-xl border p-2.5 ${matched ? "border-emerald-200 bg-emerald-50/50" : "border-amber-200 bg-amber-50/40"}`}>
                       <div className="flex items-start gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            {matched ? (
-                              <Package className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                            ) : (
-                              <AlertCircle className="h-3.5 w-3.5 text-amber-600 shrink-0" />
-                            )}
-                            <input
-                              value={it.name}
-                              onChange={(e) => setItem(i, { name: e.target.value })}
-                              className="flex-1 bg-transparent text-sm font-medium focus:outline-none min-w-0"
-                            />
+                        {matched && matchedProduct?.thumbnail_url ? (
+                          <img src={matchedProduct.thumbnail_url} alt="" className="h-11 w-11 rounded-lg object-cover border border-emerald-200 shrink-0" />
+                        ) : (
+                          <div className={`h-11 w-11 rounded-lg border shrink-0 flex items-center justify-center ${matched ? "border-emerald-200 bg-white" : "border-amber-200 bg-white"}`}>
+                            {matched ? <Package className="h-5 w-5 text-emerald-600" /> : <AlertCircle className="h-5 w-5 text-amber-600" />}
                           </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <input
+                            value={it.name}
+                            onChange={(e) => setItem(i, { name: e.target.value })}
+                            className="w-full bg-transparent text-sm font-medium focus:outline-none"
+                          />
                           {matched ? (
-                            <div className="text-[10px] text-emerald-700 pl-5 truncate">
+                            <div className="text-[10px] text-emerald-700 truncate">
                               → {it.matched_product_name} • {money(it.price)}
                             </div>
                           ) : (
-                            <div className="text-[10px] text-amber-700 pl-5">Тохирох бараа олдоогүй — сонгоно уу</div>
+                            <div className="text-[10px] text-amber-700">Тохирох бараа олдоогүй — сонгоно уу</div>
                           )}
                         </div>
                         <input
@@ -494,12 +504,35 @@ export default function QuickOrderPage() {
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
-                      <div className="mt-2 flex items-center justify-between gap-2 pl-5">
+
+                      {/* Inline suggestions for unmatched items */}
+                      {suggestions.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          <p className="text-[10px] font-bold text-amber-800">Санал болгож буй:</p>
+                          {suggestions.map((p) => (
+                            <button
+                              key={p.id}
+                              onClick={() => chooseProduct(i, p)}
+                              className="w-full flex items-center gap-2 rounded-lg bg-white border border-amber-200 hover:border-primary hover:bg-primary/5 p-1.5 text-left transition"
+                            >
+                              {p.thumbnail_url ? (
+                                <img src={p.thumbnail_url} alt="" className="h-8 w-8 rounded object-cover shrink-0" />
+                              ) : (
+                                <div className="h-8 w-8 rounded bg-secondary shrink-0" />
+                              )}
+                              <span className="flex-1 text-[11px] truncate">{p.name}</span>
+                              <span className="text-[11px] font-bold text-primary shrink-0">{money(p.price)}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="mt-2 flex items-center justify-between gap-2">
                         <button
                           onClick={() => { setPickerIdx(i); setPickerQuery(it.name); }}
-                          className="text-[11px] text-primary font-bold hover:underline"
+                          className={`text-[11px] font-bold rounded-lg px-2.5 py-1.5 flex items-center gap-1 ${matched ? "text-primary hover:bg-primary/10" : "bg-primary text-primary-foreground"}`}
                         >
-                          {matched ? "Барааг солих" : "Бараа сонгох"}
+                          <Search className="h-3 w-3" /> {matched ? "Барааг солих" : "Бараа хайж сонгох"}
                         </button>
                         {matched && (
                           <span className="text-xs font-bold">{money(it.price * it.quantity)}</span>
