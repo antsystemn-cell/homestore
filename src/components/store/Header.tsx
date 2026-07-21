@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Product, mapDbProduct } from "@/data/products";
 import { searchPublicProducts } from "@/lib/publicStoreApi";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
+import easyshopLogo from "@/assets/easyshop-logo.png.asset.json";
 
 const DEBOUNCE_MS = 300;
 const SUGGEST_DEBOUNCE_MS = 150;
