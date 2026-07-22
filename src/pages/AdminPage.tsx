@@ -1955,18 +1955,19 @@ const AdminPage = () => {
 
       {/* Manual External Order Modal */}
       {showManualOrder && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto" onClick={() => !manualSubmitting && setShowManualOrder(false)}>
-          <div className="bg-card rounded-2xl border border-border w-full max-w-3xl my-8 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="sticky top-0 z-10 bg-card border-b border-border px-5 py-4 flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold">Захиалга оруулах</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">Гадны сувгаар (Facebook, утас, дэлгүүр) ирсэн захиалгыг гараар бүртгэнэ</p>
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm md:flex md:items-center md:justify-center md:p-4 md:overflow-y-auto" onClick={() => !manualSubmitting && setShowManualOrder(false)}>
+          <div className="bg-card w-full h-full md:h-auto md:rounded-2xl md:border md:border-border md:max-w-3xl md:my-8 md:max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 z-10 bg-card border-b border-border px-4 md:px-5 py-3 md:py-4 flex items-center justify-between">
+              <div className="min-w-0">
+                <h2 className="text-base md:text-lg font-bold truncate">Захиалга оруулах</h2>
+                <p className="hidden md:block text-xs text-muted-foreground mt-0.5">Гадны сувгаар (Facebook, утас, дэлгүүр) ирсэн захиалгыг гараар бүртгэнэ</p>
               </div>
-              <button onClick={() => !manualSubmitting && setShowManualOrder(false)} className="p-1 rounded-lg hover:bg-secondary">
+              <button onClick={() => !manualSubmitting && setShowManualOrder(false)} className="p-2 -mr-2 rounded-lg hover:bg-secondary shrink-0">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="p-5 space-y-4 bg-muted/30">
+            <div className="flex-1 overflow-y-auto p-3 md:p-5 space-y-3 md:space-y-4 bg-muted/30 pb-24 md:pb-5">
+
 
               {/* SECTION 1 — Sale meta */}
               <section className="bg-card rounded-2xl border border-border overflow-hidden">
