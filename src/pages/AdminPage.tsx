@@ -2048,34 +2048,18 @@ const AdminPage = () => {
                               .filter((s) => s.length === 8)
                           )
                         ).slice(0, 2);
-                        // 2) Parse the rest for structured address parts
-                        const parsed = parseAddressBlob(raw);
-                        const codeToName: Record<string, string> = {
-                          "ХУД": "Хан-Уул", "БЗД": "Баянзүрх", "БГД": "Баянгол",
-                          "СХД": "Сонгинохайрхан", "СБД": "Сүхбаатар", "ЧД": "Чингэлтэй",
-                        };
-                        const districtName = parsed.district ? codeToName[parsed.district] : "";
-                        const detailBits: string[] = [];
-                        if (parsed.khotkhon) detailBits.push(`${parsed.khotkhon} хотхон`);
-                        if (parsed.building) detailBits.push(`${parsed.building} байр`);
-                        if (parsed.entrance) detailBits.push(`${parsed.entrance} орц`);
-                        if (parsed.apt) detailBits.push(`${parsed.apt} тоот`);
-                        if (parsed.doorCode) detailBits.push(`код ${parsed.doorCode}`);
-                        if (parsed.landmark) detailBits.push(parsed.landmark);
-                        let composed = "";
-                        if (districtName) {
-                          composed = districtName;
-                          if (parsed.khoroo) composed += `, ${parsed.khoroo}-р хороо`;
-                          if (detailBits.length) composed += `, ${detailBits.join(" ")}`;
-                        } else {
-                          composed = detailBits.join(" ") || raw.replace(/(?:\+?976[\s-]?)?[6789](?:[\s-]?\d){7}/g, "").replace(/[,;|]+/g, " ").replace(/\s+/g, " ").trim();
-                        }
+                        // 2) Use raw text (minus phones) as the address — user can edit freely
+                        const addressText = raw
+                          .replace(/(?:\+?976[\s-]?)?[6789](?:[\s-]?\d){7}/g, " ")
+                          .replace(/[,;|]+/g, " ")
+                          .replace(/\s+/g, " ")
+                          .trim();
                         setManualForm((f) => ({
                           ...f,
                           phone: phones.join(", ") || f.phone,
-                          addr_landmark: composed || f.addr_landmark,
+                          addr_landmark: addressText || f.addr_landmark,
                         }));
-                        if (phones.length || composed) {
+                        if (phones.length || addressText) {
                           toast.success(`Автоматаар бөглөгдлөө${phones.length ? ` · ${phones.length} утас` : ""}`);
                         }
                         e.target.value = "";
@@ -2105,20 +2089,12 @@ const AdminPage = () => {
                     <label className="text-xs font-bold text-muted-foreground mb-1 flex items-center gap-1">
                       <MapPin className="h-3.5 w-3.5" /> Хүргэлтийн хаяг *
                     </label>
-                    {/* Mobile: guided district+хороо+дэлгэрэнгүй selector */}
-                    <div className="md:hidden">
-                      <AddressSelector
-                        value={manualForm.addr_landmark}
-                        onChange={(composed) => setManualForm((f) => ({ ...f, addr_landmark: composed.slice(0, 500) }))}
-                      />
-                    </div>
-                    {/* Desktop: free-form textarea */}
                     <textarea
                       rows={3}
                       value={manualForm.addr_landmark}
                       onChange={(e) => setManualForm((f) => ({ ...f, addr_landmark: e.target.value.slice(0, 500) }))}
                       placeholder="Дүүрэг, хороо, хотхон, байр, орц, тоот, орцны код гэх мэт дэлгэрэнгүй хаягаа бичнэ үү"
-                      className="hidden md:block w-full rounded-xl bg-secondary px-3 py-3 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      className="w-full rounded-xl bg-secondary px-3 py-3 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
 
