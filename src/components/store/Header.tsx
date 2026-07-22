@@ -296,7 +296,7 @@ const Header = () => {
             <button
               onClick={() => navigate("/profile")}
               aria-label="Профайл"
-              className="hidden md:inline-flex items-center justify-center h-9 w-9 rounded-full bg-secondary hover:bg-secondary/80 transition-colors"
+              className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-secondary hover:bg-secondary/80 transition-colors"
             >
               <UserIcon className="h-4 w-4 text-foreground" />
             </button>
