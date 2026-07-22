@@ -2117,7 +2117,7 @@ const AdminPage = () => {
                         value={manualProductSearch}
                         onChange={(e) => setManualProductSearch(e.target.value)}
                         placeholder="Бараа хайх (нэр / SKU)..."
-                        className="w-full rounded-xl bg-secondary pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="w-full rounded-xl bg-secondary pl-10 pr-3 py-3 md:py-2 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
                     {(isAdmin || isModerator) && (
