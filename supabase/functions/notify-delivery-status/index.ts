@@ -13,7 +13,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { order_id, payment_status, fulfillment_status, note } = await req.json();
+    const { order_id, payment_status, fulfillment_status, note, driver_id, driver_phone, event_id } = await req.json();
 
     if (!order_id) {
       return new Response(JSON.stringify({ error: "Missing order_id" }), {
