@@ -441,6 +441,7 @@ const AdminPage = () => {
   const [filterCategory, setFilterCategory] = useState("all");
   const [orderSearchPhone, setOrderSearchPhone] = useState("");
   const [ordersSubTab, setOrdersSubTab] = useState<"active" | "delivered" | "unpaid_delivery">("active");
+  const [deliveredSourceTab, setDeliveredSourceTab] = useState<"all" | "web" | "manual">("all");
   const [showCancelledRecent, setShowCancelledRecent] = useState(false);
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
   const [productSelected, setProductSelected] = useState<Set<string>>(new Set());
