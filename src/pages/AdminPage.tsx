@@ -117,6 +117,9 @@ const AdminPage = () => {
   const [drivers, setDrivers] = useState<{ id: string; full_name: string; phone: string | null; note: string | null; is_active: boolean }[]>([]);
   const [deliveryDraft, setDeliveryDraft] = useState<Record<string, { driverId: string; courierName: string }>>({});
   const [deliverDialog, setDeliverDialog] = useState<{ orderId: string; driverId: string; courierName: string; courierPhone: string } | null>(null);
+  const [partnerDrivers, setPartnerDrivers] = useState<{ driver_id: string; name: string; phone: string }[]>([]);
+  const [partnerDriversLoading, setPartnerDriversLoading] = useState(false);
+  const [partnerDriversFetchedAt, setPartnerDriversFetchedAt] = useState<number>(0);
   const [savingDeliverDialog, setSavingDeliverDialog] = useState(false);
   const [savingDelivery, setSavingDelivery] = useState<string | null>(null);
   
