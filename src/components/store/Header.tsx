@@ -288,8 +288,27 @@ const Header = () => {
           )}
         </div>
 
-        <div className="hidden md:flex items-center gap-3">
-          <NotificationsBell />
+        <div className="flex items-center gap-2 md:gap-3 shrink-0">
+          <div className="hidden md:block">
+            <NotificationsBell />
+          </div>
+          {user ? (
+            <button
+              onClick={() => navigate("/profile")}
+              aria-label="Профайл"
+              className="hidden md:inline-flex items-center justify-center h-9 w-9 rounded-full bg-secondary hover:bg-secondary/80 transition-colors"
+            >
+              <UserIcon className="h-4 w-4 text-foreground" />
+            </button>
+          ) : (
+            <button
+              onClick={() => navigate("/auth")}
+              className="inline-flex items-center gap-1.5 h-9 px-3 md:px-4 rounded-full bg-primary text-primary-foreground text-xs md:text-sm font-semibold hover:opacity-90 transition-opacity"
+            >
+              <LogIn className="h-4 w-4" />
+              <span>Нэвтрэх</span>
+            </button>
+          )}
         </div>
       </div>
     </header>
