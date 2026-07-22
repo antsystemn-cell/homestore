@@ -37,8 +37,29 @@ const BottomNav = () => {
           const active = isActive(t.path);
           const Icon = t.icon;
           const isReels = t.path === "/reels";
+          const isProductPage = pathname.startsWith("/product/");
 
           if (isReels) {
+            // On product detail pages, render a flat inline variant so the
+            // protruding FAB doesn't collide with the sticky action bar above.
+            if (isProductPage) {
+              return (
+                <button
+                  key={t.path}
+                  onClick={() => navigate(t.path)}
+                  className="relative flex flex-col items-center justify-center gap-0.5 flex-1"
+                  aria-label="Reels"
+                >
+                  <div className="relative flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-tr from-fuchsia-600 via-rose-500 to-amber-400 shadow-sm">
+                    <Icon className="h-4 w-4 text-white" strokeWidth={2.25} />
+                    <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-card" />
+                  </div>
+                  <span className="text-[10px] font-bold bg-gradient-to-r from-fuchsia-600 via-rose-500 to-amber-500 bg-clip-text text-transparent">
+                    Reels
+                  </span>
+                </button>
+              );
+            }
             return (
               <button
                 key={t.path}
