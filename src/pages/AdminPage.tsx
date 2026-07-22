@@ -1804,7 +1804,7 @@ const AdminPage = () => {
     { id: "tracking", label: "Хяналт", icon: Activity },
     { id: "products", label: "Бараа", icon: Package },
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
-    { id: "delivery-portal", label: "Хүргэлт удирдах", icon: Truck },
+    // { id: "delivery-portal", ... } — removed: use per-order block instead
     { id: "users", label: "Хэрэглэгч", icon: Users },
     { id: "chatbot", label: "AI Чатбот", icon: MessageCircle },
     { id: "settings", label: "Ерөнхий тохиргоо", icon: Settings },
