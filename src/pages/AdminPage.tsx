@@ -1975,7 +1975,7 @@ const AdminPage = () => {
                   <Calendar className="h-4 w-4 text-primary" />
                   <h3 className="text-sm font-bold">Үндсэн мэдээлэл</h3>
                 </header>
-                <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="p-3 md:p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
                     <label className="text-xs font-bold text-muted-foreground mb-1 block">Борлуулсан огноо, цаг *</label>
                     <input
@@ -1983,11 +1983,11 @@ const AdminPage = () => {
                       value={manualForm.sale_date}
                       max={(() => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); })()}
                       onChange={(e) => setManualForm((f) => ({ ...f, sale_date: e.target.value }))}
-                      className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      className="w-full rounded-xl bg-secondary px-3 py-3 md:py-2 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
-                    <p className="text-[10px] text-muted-foreground mt-1">Захиалга үүссэн он/сар/өдөр, цаг минутыг бүртгэнэ</p>
+                    <p className="hidden md:block text-[10px] text-muted-foreground mt-1">Захиалга үүссэн он/сар/өдөр, цаг минутыг бүртгэнэ</p>
                   </div>
-                  <div>
+                  <div className="hidden md:block">
                     <label className="text-xs font-bold text-muted-foreground mb-1 block">Дэс дугаар</label>
                     <input
                       type="text"
@@ -2004,13 +2004,13 @@ const AdminPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-muted-foreground mb-1 block flex items-center gap-1">
+                    <label className="text-xs font-bold text-muted-foreground mb-1 flex items-center gap-1">
                       <Store className="h-3.5 w-3.5" /> Бараа гарах байршил *
                     </label>
                     <select
                       value={manualForm.branch}
                       onChange={(e) => setManualForm((f) => ({ ...f, branch: e.target.value }))}
-                      className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      className="w-full rounded-xl bg-secondary px-3 py-3 md:py-2 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     >
                       <option value="Лавай">Лавай</option>
                       <option value="Онлайн">Онлайн</option>
@@ -2019,6 +2019,7 @@ const AdminPage = () => {
                     </select>
                   </div>
                 </div>
+
               </section>
 
               {/* SECTION 2 — Customer */}
