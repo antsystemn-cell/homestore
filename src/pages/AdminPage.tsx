@@ -917,18 +917,16 @@ const AdminPage = () => {
   };
 
   const notifyDeliveryFulfillment = async (orderId: string, status: string, note?: string) => {
-    const order = orders.find((o) => o.id === orderId);
-    if (!order?.delivery_order_id) return;
     const { data, error } = await supabase.functions.invoke("notify-delivery-status", {
       body: {
         order_id: orderId,
         fulfillment_status: mapOrderStatusToDeliveryFulfillment(status),
+        event_id: `easyshop-status-${orderId}-${Date.now()}`,
         note,
       },
     });
     if (error || data?.success === false) {
       console.error("Delivery fulfillment sync failed:", error || data);
-      toast.error("EasyShop төлөв хадгалагдсан ч хүргэлтийн систем рүү илгээхэд алдаа гарлаа");
     }
   };
 
