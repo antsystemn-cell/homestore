@@ -4110,7 +4110,7 @@ const AdminPage = () => {
                           className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${ordersSubTab === "delivered" ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/25" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}
                         >
                           <Truck className="h-3.5 w-3.5" />
-                          Хүргэгдсэн <span className="ml-0.5 opacity-80">({deliveredCount})</span>
+                          Дууссан <span className="ml-0.5 opacity-80">({deliveredCount})</span>
                         </button>
                       </div>
                     </div>
