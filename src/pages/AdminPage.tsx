@@ -2324,6 +2324,29 @@ const AdminPage = () => {
                       const isEditing = editingItemIdx === idx;
                       const updateItem = (patch: Partial<typeof it>) =>
                         setManualItems((prev) => prev.map((p, i) => i === idx ? { ...p, ...patch } : p));
+                      const prod = it.product_id ? products.find((pp) => pp.id === it.product_id) : null;
+                      const prodColors: any[] = prod && Array.isArray((prod as any).colors) ? (prod as any).colors : [];
+                      const prodSizes: any[] = prod && Array.isArray((prod as any).sizes) ? (prod as any).sizes : [];
+                      const prodVs: Record<string, any> = prod && (prod as any).variant_stock && typeof (prod as any).variant_stock === 'object' ? (prod as any).variant_stock : {};
+                      const stockFor = (colorName: string, sizeName: string) => {
+                        const key = `${(colorName || '').trim()}|${(sizeName || '').trim()}`;
+                        return prodVs[key] !== undefined ? Number(prodVs[key]) || 0 : undefined;
+                      };
+                      const pickColor = (c: any) => {
+                        const cn = (c?.name || '').trim();
+                        const stock = stockFor(cn, it.size || '');
+                        updateItem({
+                          color: cn,
+                          image: c?.image || it.image,
+                          sku: c?.sku || it.sku,
+                          variant_stock: stock,
+                        });
+                      };
+                      const pickSize = (s: any) => {
+                        const sn = (typeof s === 'string' ? s : (s?.name || '')).trim();
+                        const stock = stockFor(it.color || '', sn);
+                        updateItem({ size: sn, variant_stock: stock });
+                      };
                       return (
                       <div key={idx} className="bg-secondary/40 rounded-xl p-2">
                         <div className="flex items-center gap-2">
@@ -2370,6 +2393,61 @@ const AdminPage = () => {
                             <X className="h-3.5 w-3.5" />
                           </button>
                         </div>
+                        {(prodColors.length > 0 || prodSizes.length > 0) && (
+                          <div className="mt-2 pt-2 border-t border-border/60 space-y-1.5">
+                            {prodColors.length > 0 && (
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="text-[10px] font-semibold text-muted-foreground shrink-0">Өнгө:</span>
+                                {prodColors.map((c: any, ci: number) => {
+                                  const cn = (c?.name || '').trim();
+                                  if (!cn) return null;
+                                  const active = (it.color || '').trim() === cn;
+                                  const stock = prodSizes.length === 0 ? stockFor(cn, '') : undefined;
+                                  const oos = stock !== undefined && stock <= 0;
+                                  return (
+                                    <button
+                                      key={ci}
+                                      type="button"
+                                      onClick={() => pickColor(c)}
+                                      className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full border transition-colors ${
+                                        active ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border hover:bg-secondary'
+                                      } ${oos ? 'opacity-50' : ''}`}
+                                      title={oos ? 'Дууссан' : cn}
+                                    >
+                                      {c?.image && <img src={c.image} alt="" className="w-3.5 h-3.5 rounded-full object-cover" />}
+                                      <span>{cn}</span>
+                                      {stock !== undefined && <span className="opacity-70">({stock})</span>}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                            {prodSizes.length > 0 && (
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="text-[10px] font-semibold text-muted-foreground shrink-0">Хэмжээ:</span>
+                                {prodSizes.map((s: any, si: number) => {
+                                  const sn = (typeof s === 'string' ? s : (s?.name || '')).trim();
+                                  if (!sn) return null;
+                                  const active = (it.size || '').trim() === sn;
+                                  const stock = stockFor(it.color || '', sn);
+                                  const oos = stock !== undefined && stock <= 0;
+                                  return (
+                                    <button
+                                      key={si}
+                                      type="button"
+                                      onClick={() => pickSize(s)}
+                                      className={`text-[10px] px-2 py-0.5 rounded-full border transition-colors ${
+                                        active ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border hover:bg-secondary'
+                                      } ${oos ? 'opacity-50' : ''}`}
+                                    >
+                                      {sn}{stock !== undefined ? ` (${stock})` : ''}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        )}
                         {isEditing && (
                           <div className="mt-2 grid grid-cols-2 gap-2 pt-2 border-t border-border">
                             <div className="col-span-2">
