@@ -4059,11 +4059,15 @@ const AdminPage = () => {
                 const deliveredCount = orders.filter((o) => isDeliveredOrder(o) && !isUnpaidDelivery(o)).length;
                 const unpaidDeliveryCount = orders.filter(isUnpaidDelivery).length;
                 const activeCount = orders.length - deliveredCount - unpaidDeliveryCount;
+                const isWebOrder = (o: any) => !o.source || o.source === "web";
                 const baseList = ordersSubTab === "delivered"
-                  ? orders.filter((o) => isDeliveredOrder(o) && !isUnpaidDelivery(o))
+                  ? orders.filter((o) => isDeliveredOrder(o) && !isUnpaidDelivery(o) && (deliveredSourceTab === "all" || (deliveredSourceTab === "web" ? isWebOrder(o) : !isWebOrder(o))))
                   : ordersSubTab === "unpaid_delivery"
                     ? orders.filter(isUnpaidDelivery)
                     : orders.filter((o) => !isDeliveredOrder(o) && !isUnpaidDelivery(o));
+                const deliveredAll = orders.filter((o) => isDeliveredOrder(o) && !isUnpaidDelivery(o));
+                const deliveredWebCount = deliveredAll.filter(isWebOrder).length;
+                const deliveredManualCount = deliveredAll.length - deliveredWebCount;
                 const filteredOrders = orderSearchPhone
                   ? baseList.filter(o => o.phone?.includes(orderSearchPhone) || o.order_ref?.toLowerCase().includes(orderSearchPhone.toLowerCase()))
                   : baseList;
