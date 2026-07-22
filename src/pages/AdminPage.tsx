@@ -2028,45 +2028,55 @@ const AdminPage = () => {
                   <User className="h-4 w-4 text-primary" />
                   <h3 className="text-sm font-bold">Үйлчлүүлэгч</h3>
                 </header>
-                <div className="p-4 space-y-3">
+                <div className="p-3 md:p-4 space-y-3">
                   <div>
-                    <label className="text-xs font-bold text-muted-foreground mb-1 block flex items-center gap-1">
+                    <label className="text-xs font-bold text-muted-foreground mb-1 flex items-center gap-1">
                       <Phone className="h-3.5 w-3.5" /> Утас *
                     </label>
                     <input
                       type="tel"
+                      inputMode="numeric"
                       value={manualForm.phone}
                       onChange={(e) => setManualForm((f) => ({ ...f, phone: e.target.value }))}
                       placeholder="9911XXXX"
-                      className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      className="w-full rounded-xl bg-secondary px-4 py-3 text-base font-medium tracking-wide focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-muted-foreground mb-1 block flex items-center gap-1">
+                    <label className="text-xs font-bold text-muted-foreground mb-1 flex items-center gap-1">
                       <MapPin className="h-3.5 w-3.5" /> Хүргэлтийн хаяг *
                     </label>
+                    {/* Mobile: guided district+хороо+дэлгэрэнгүй selector */}
+                    <div className="md:hidden">
+                      <AddressSelector
+                        value={manualForm.addr_landmark}
+                        onChange={(composed) => setManualForm((f) => ({ ...f, addr_landmark: composed.slice(0, 500) }))}
+                      />
+                    </div>
+                    {/* Desktop: free-form textarea */}
                     <textarea
                       rows={3}
                       value={manualForm.addr_landmark}
                       onChange={(e) => setManualForm((f) => ({ ...f, addr_landmark: e.target.value.slice(0, 500) }))}
                       placeholder="Дүүрэг, хороо, хотхон, байр, орц, тоот, орцны код гэх мэт дэлгэрэнгүй хаягаа бичнэ үү"
-                      className="w-full rounded-xl bg-secondary px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      className="hidden md:block w-full rounded-xl bg-secondary px-3 py-3 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
 
-                  <label className="flex items-center gap-2 w-full rounded-xl bg-secondary/60 px-3 py-2.5 text-sm cursor-pointer hover:bg-secondary transition-colors">
+                  <label className="flex items-center gap-3 w-full rounded-xl bg-secondary/60 px-3 py-3 md:py-2.5 text-sm cursor-pointer hover:bg-secondary transition-colors">
                     <input
                       type="checkbox"
                       checked={Number(manualForm.delivery_fee) > 0}
                       onChange={(e) => setManualForm((f) => ({ ...f, delivery_fee: e.target.checked ? 8000 : 0 }))}
-                      className="h-4 w-4 rounded"
+                      className="h-5 w-5 md:h-4 md:w-4 rounded"
                     />
                     <Truck className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium">Хүргэлтийн төлбөр авах</span>
                     <span className="ml-auto text-primary font-bold">8,000₮</span>
                   </label>
                 </div>
+
               </section>
 
               {/* SECTION 3 — Products */}
