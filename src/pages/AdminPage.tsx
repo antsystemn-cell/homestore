@@ -954,9 +954,27 @@ const AdminPage = () => {
   };
 
 
+  const loadPartnerDrivers = async (force = false) => {
+    const CACHE_MS = 5 * 60 * 1000;
+    if (!force && partnerDrivers.length > 0 && Date.now() - partnerDriversFetchedAt < CACHE_MS) return;
+    setPartnerDriversLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("partner-drivers", { body: {} });
+      if (error) throw error;
+      const list = Array.isArray((data as any)?.drivers) ? (data as any).drivers : [];
+      setPartnerDrivers(list);
+      setPartnerDriversFetchedAt(Date.now());
+    } catch (e: any) {
+      toast.error("Жолоочдын жагсаалт татаж чадсангүй: " + (e?.message || e));
+    } finally {
+      setPartnerDriversLoading(false);
+    }
+  };
+
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     const order = orders.find((o) => o.id === orderId);
     if (newStatus === "delivering") {
+      loadPartnerDrivers();
       setDeliverDialog({
         orderId,
         driverId: order?.driver_id || "",
