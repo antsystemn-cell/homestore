@@ -117,6 +117,9 @@ const AdminPage = () => {
   const [drivers, setDrivers] = useState<{ id: string; full_name: string; phone: string | null; note: string | null; is_active: boolean }[]>([]);
   const [deliveryDraft, setDeliveryDraft] = useState<Record<string, { driverId: string; courierName: string }>>({});
   const [deliverDialog, setDeliverDialog] = useState<{ orderId: string; driverId: string; courierName: string; courierPhone: string } | null>(null);
+  const [partnerDrivers, setPartnerDrivers] = useState<{ driver_id: string; name: string; phone: string }[]>([]);
+  const [partnerDriversLoading, setPartnerDriversLoading] = useState(false);
+  const [partnerDriversFetchedAt, setPartnerDriversFetchedAt] = useState<number>(0);
   const [savingDeliverDialog, setSavingDeliverDialog] = useState(false);
   const [savingDelivery, setSavingDelivery] = useState<string | null>(null);
   
@@ -914,18 +917,16 @@ const AdminPage = () => {
   };
 
   const notifyDeliveryFulfillment = async (orderId: string, status: string, note?: string) => {
-    const order = orders.find((o) => o.id === orderId);
-    if (!order?.delivery_order_id) return;
     const { data, error } = await supabase.functions.invoke("notify-delivery-status", {
       body: {
         order_id: orderId,
         fulfillment_status: mapOrderStatusToDeliveryFulfillment(status),
+        event_id: `easyshop-status-${orderId}-${Date.now()}`,
         note,
       },
     });
     if (error || data?.success === false) {
       console.error("Delivery fulfillment sync failed:", error || data);
-      toast.error("EasyShop төлөв хадгалагдсан ч хүргэлтийн систем рүү илгээхэд алдаа гарлаа");
     }
   };
 
@@ -951,9 +952,27 @@ const AdminPage = () => {
   };
 
 
+  const loadPartnerDrivers = async (force = false) => {
+    const CACHE_MS = 5 * 60 * 1000;
+    if (!force && partnerDrivers.length > 0 && Date.now() - partnerDriversFetchedAt < CACHE_MS) return;
+    setPartnerDriversLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("partner-drivers", { body: {} });
+      if (error) throw error;
+      const list = Array.isArray((data as any)?.drivers) ? (data as any).drivers : [];
+      setPartnerDrivers(list);
+      setPartnerDriversFetchedAt(Date.now());
+    } catch (e: any) {
+      toast.error("Жолоочдын жагсаалт татаж чадсангүй: " + (e?.message || e));
+    } finally {
+      setPartnerDriversLoading(false);
+    }
+  };
+
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     const order = orders.find((o) => o.id === orderId);
     if (newStatus === "delivering") {
+      loadPartnerDrivers();
       setDeliverDialog({
         orderId,
         driverId: order?.driver_id || "",
@@ -996,21 +1015,15 @@ const AdminPage = () => {
 
   const confirmDeliverDispatch = async () => {
     if (!deliverDialog) return;
-    const { orderId, driverId, courierName, courierPhone } = deliverDialog;
-    const driver = drivers.find((d) => d.id === driverId);
-    const manualName = courierName.trim();
-    const manualPhone = courierPhone.trim();
-    const finalName = driver?.full_name || manualName;
-    if (!driver && !manualName) {
-      toast.error("Жолооч сонгох эсвэл шинэ жолоочийн нэр оруулна уу");
+    const { orderId, driverId } = deliverDialog;
+    const partnerDriver = partnerDrivers.find((d) => d.driver_id === driverId);
+    if (!partnerDriver) {
+      toast.error("Жолооч сонгоно уу");
       return;
     }
     setSavingDeliverDialog(true);
     const nowIso = new Date().toISOString();
-    const signature = driver
-      ? (driver.full_name || "") + (driver.phone ? ` · ${driver.phone}` : "")
-      : manualPhone ? `${manualName} · ${manualPhone}` : manualName;
-    const currentOrder = orders.find((o) => o.id === orderId);
+    const signature = partnerDriver.name + (partnerDriver.phone ? ` · ${partnerDriver.phone}` : "");
     const patch: Record<string, any> = {
       status: "delivering",
       delivery_status: "out_for_delivery",
@@ -1021,20 +1034,34 @@ const AdminPage = () => {
       picked_up_at: nowIso,
       updated_at: nowIso,
     };
-    if (driver) patch.driver_id = driver.id;
     const { error } = await supabase.from("orders").update(patch).eq("id", orderId);
-    setSavingDeliverDialog(false);
     if (error) {
+      setSavingDeliverDialog(false);
       toast.error("Хадгалахад алдаа: " + error.message);
       return;
     }
-    toast.success(`Хүргэлтэнд гарлаа${finalName ? ` · ${finalName}` : ""}`);
+    // Send to Swift Delivery Hub with driver assignment
+    const { data: notifyData, error: notifyErr } = await supabase.functions.invoke("notify-delivery-status", {
+      body: {
+        order_id: orderId,
+        fulfillment_status: "out_for_delivery",
+        driver_id: partnerDriver.driver_id,
+        driver_phone: partnerDriver.phone,
+        event_id: `easyshop-dispatch-${orderId}-${Date.now()}`,
+        note: `Жолооч оноогдлоо: ${signature}`,
+      },
+    });
+    setSavingDeliverDialog(false);
+    if (notifyErr || (notifyData as any)?.success === false) {
+      console.error("Swift Hub notify failed:", notifyErr || notifyData);
+      toast.error("Хүргэлтийн систем рүү илгээхэд алдаа гарлаа");
+    } else {
+      toast.success(`Хүргэлтэнд гарлаа · ${partnerDriver.name}`);
+    }
     setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, ...patch } : o)));
     setDeliverDialog(null);
-    if (currentOrder?.delivery_order_id) {
-      await notifyDeliveryFulfillment(orderId, "delivering", "Easyshop дээр цуцлагдсан/дууссан төлвөөс хүргэлтэнд буцааж гаргасан");
-    }
   };
+
 
 
 
@@ -1804,7 +1831,7 @@ const AdminPage = () => {
     { id: "tracking", label: "Хяналт", icon: Activity },
     { id: "products", label: "Бараа", icon: Package },
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
-    { id: "delivery-portal", label: "Хүргэлт удирдах", icon: Truck },
+    // { id: "delivery-portal", ... } — removed: use per-order block instead
     { id: "users", label: "Хэрэглэгч", icon: Users },
     { id: "chatbot", label: "AI Чатбот", icon: MessageCircle },
     { id: "settings", label: "Ерөнхий тохиргоо", icon: Settings },
@@ -5989,42 +6016,38 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
               <h3 className="text-base font-bold flex items-center gap-2">
                 <Truck className="h-4 w-4 text-violet-600" /> Хүргэлтэнд гаргах
               </h3>
-              <p className="text-xs text-muted-foreground mt-1">Энэ захиалгыг авч явах жолоочийг сонгоно уу. Бүртгэлгүй бол шинээр оруулах боломжтой.</p>
+              <p className="text-xs text-muted-foreground mt-1">Swift Delivery Hub-д бүртгэлтэй жолоочоос сонгоно уу.</p>
             </div>
 
             <div>
-              <label className="text-[11px] font-semibold text-muted-foreground">Жолооч (системд бүртгэлтэй)</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-[11px] font-semibold text-muted-foreground">Жолооч</label>
+                <button
+                  type="button"
+                  onClick={() => loadPartnerDrivers(true)}
+                  disabled={partnerDriversLoading}
+                  className="text-[11px] text-violet-600 hover:underline disabled:opacity-50"
+                >
+                  {partnerDriversLoading ? "Ачаалж байна..." : "Шинэчлэх"}
+                </button>
+              </div>
               <select
                 value={deliverDialog.driverId}
-                onChange={(e) => setDeliverDialog((p) => p ? { ...p, driverId: e.target.value, courierName: e.target.value ? "" : p.courierName, courierPhone: e.target.value ? "" : p.courierPhone } : p)}
-                className="w-full mt-1 rounded-lg bg-background border border-border px-3 py-2 text-sm"
+                onChange={(e) => setDeliverDialog((p) => p ? { ...p, driverId: e.target.value } : p)}
+                className="w-full rounded-lg bg-background border border-border px-3 py-2 text-sm"
+                disabled={partnerDriversLoading}
               >
-                <option value="">— Сонгох —</option>
-                {drivers.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.full_name}{d.phone ? ` · ${d.phone}` : ""}
+                <option value="">— {partnerDriversLoading ? "Ачаалж байна..." : "Сонгох"} —</option>
+                {partnerDrivers.map((d) => (
+                  <option key={d.driver_id} value={d.driver_id}>
+                    {d.name}{d.phone ? ` · ${d.phone}` : ""}
                   </option>
                 ))}
               </select>
+              {!partnerDriversLoading && partnerDrivers.length === 0 && (
+                <p className="text-[11px] text-muted-foreground mt-1">Жолооч олдсонгүй. "Шинэчлэх" дарж дахин оролдоно уу.</p>
+              )}
             </div>
-
-            <div className="relative flex items-center gap-2 text-[10px] text-muted-foreground">
-              <div className="flex-1 h-px bg-border" />
-              <span>ЭСВЭЛ ШИНЭ ЖОЛООЧ</span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-
-            <div>
-              <label className="text-[11px] font-semibold text-muted-foreground">Нэр</label>
-              <input
-                type="text"
-                value={deliverDialog.courierName}
-                onChange={(e) => setDeliverDialog((p) => p ? { ...p, courierName: e.target.value, driverId: e.target.value ? "" : p.driverId } : p)}
-                placeholder="Жнь: Болд"
-                className="w-full mt-1 rounded-lg bg-background border border-border px-3 py-2 text-sm"
-              />
-            </div>
-
 
             <div className="flex justify-end gap-2 pt-2">
               <button
@@ -6038,11 +6061,11 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
               <button
                 type="button"
                 onClick={confirmDeliverDispatch}
-                disabled={savingDeliverDialog || (!deliverDialog.driverId && !deliverDialog.courierName.trim())}
+                disabled={savingDeliverDialog || !deliverDialog.driverId}
                 className="px-4 py-2 rounded-lg text-sm font-bold bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-50 inline-flex items-center gap-2"
               >
                 {savingDeliverDialog ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Truck className="h-3.5 w-3.5" />}
-                Баталгаажуулах
+                Хүргэлтэнд гаргах
               </button>
             </div>
           </div>

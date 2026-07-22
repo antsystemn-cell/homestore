@@ -13,7 +13,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { order_id, payment_status, fulfillment_status, note } = await req.json();
+    const { order_id, payment_status, fulfillment_status, note, driver_id, driver_phone, event_id } = await req.json();
 
     if (!order_id) {
       return new Response(JSON.stringify({ error: "Missing order_id" }), {
@@ -81,6 +81,9 @@ Deno.serve(async (req: Request) => {
       payload.allow_terminal_reopen = true;
     }
     if (note) payload.note = note;
+    if (driver_id) payload.driver_id = driver_id;
+    if (driver_phone) payload.driver_phone = driver_phone;
+    payload.event_id = event_id || `easyshop-evt-${order.id}-${Date.now()}`;
 
     const res = await fetch(DELIVERY_STATUS_URL, {
       method: "POST",
