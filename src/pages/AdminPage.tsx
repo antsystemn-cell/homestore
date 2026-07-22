@@ -4119,8 +4119,36 @@ const AdminPage = () => {
                         </button>
                       </div>
                     </div>
+                    {ordersSubTab === "delivered" && (
+                      <div className="bg-card rounded-xl border border-border p-2 overflow-x-auto no-scrollbar">
+                        <div className="flex items-center gap-2 min-w-max">
+                          <button
+                            type="button"
+                            onClick={() => { setDeliveredSourceTab("all"); setBulkSelected(new Set()); }}
+                            className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${deliveredSourceTab === "all" ? "bg-primary text-primary-foreground shadow" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}
+                          >
+                            Бүгд <span className="ml-0.5 opacity-80">({deliveredAll.length})</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setDeliveredSourceTab("web"); setBulkSelected(new Set()); }}
+                            className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${deliveredSourceTab === "web" ? "bg-blue-500 text-white shadow" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}
+                          >
+                            🌐 Вэб сайтаас <span className="ml-0.5 opacity-80">({deliveredWebCount})</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setDeliveredSourceTab("manual"); setBulkSelected(new Set()); }}
+                            className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${deliveredSourceTab === "manual" ? "bg-purple-500 text-white shadow" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}
+                          >
+                            ✍️ Гараар оруулсан <span className="ml-0.5 opacity-80">({deliveredManualCount})</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
                     {/* Bulk action bar */}
                     <div className="bg-card rounded-xl border border-border p-3 md:p-4 space-y-2">
+
 
                       <div className="flex items-center justify-between gap-3 flex-wrap">
                         <div className="flex items-center gap-3">
