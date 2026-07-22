@@ -4245,8 +4245,11 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                     {/* Expanded details */}
                     {isExpanded && (
                       <div className="border-t border-border p-4 space-y-4">
+                        {/* Status timeline */}
+                        <OrderStatusTimeline orderId={o.id} currentStatus={o.status} />
                         {/* Order items */}
                         <div>
+
                           <div className="flex items-center justify-between mb-2">
                             <h4 className="text-xs font-bold text-muted-foreground">Захиалсан бараанууд</h4>
                             {isAdmin && (
