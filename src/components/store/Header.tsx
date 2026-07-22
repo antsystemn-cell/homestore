@@ -40,6 +40,7 @@ const Header = () => {
   const [history, setHistory] = useState<string[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const suggestDebounceRef = useRef<ReturnType<typeof setTimeout>>();
   const searchBoxRef = useRef<HTMLDivElement>(null);
