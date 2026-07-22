@@ -2277,7 +2277,7 @@ const AdminPage = () => {
                                   <span className="text-[10px] text-muted-foreground">· {formatPrice(p.price)}</span>
                                 </div>
                               </div>
-                              {isVariant && (
+                              {isVariant && r.stock !== undefined && (
                                 <span className={`text-[10px] font-bold px-2 py-1 rounded shrink-0 ${outOfStock ? 'bg-destructive/10 text-destructive' : (r.stock! <= 3 ? 'bg-amber-500/15 text-amber-600' : 'bg-green-500/10 text-green-600')}`}>
                                   {r.stock} ш
                                 </span>
