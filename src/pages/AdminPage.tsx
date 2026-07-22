@@ -1017,21 +1017,15 @@ const AdminPage = () => {
 
   const confirmDeliverDispatch = async () => {
     if (!deliverDialog) return;
-    const { orderId, driverId, courierName, courierPhone } = deliverDialog;
-    const driver = drivers.find((d) => d.id === driverId);
-    const manualName = courierName.trim();
-    const manualPhone = courierPhone.trim();
-    const finalName = driver?.full_name || manualName;
-    if (!driver && !manualName) {
-      toast.error("Жолооч сонгох эсвэл шинэ жолоочийн нэр оруулна уу");
+    const { orderId, driverId } = deliverDialog;
+    const partnerDriver = partnerDrivers.find((d) => d.driver_id === driverId);
+    if (!partnerDriver) {
+      toast.error("Жолооч сонгоно уу");
       return;
     }
     setSavingDeliverDialog(true);
     const nowIso = new Date().toISOString();
-    const signature = driver
-      ? (driver.full_name || "") + (driver.phone ? ` · ${driver.phone}` : "")
-      : manualPhone ? `${manualName} · ${manualPhone}` : manualName;
-    const currentOrder = orders.find((o) => o.id === orderId);
+    const signature = partnerDriver.name + (partnerDriver.phone ? ` · ${partnerDriver.phone}` : "");
     const patch: Record<string, any> = {
       status: "delivering",
       delivery_status: "out_for_delivery",
@@ -1042,20 +1036,34 @@ const AdminPage = () => {
       picked_up_at: nowIso,
       updated_at: nowIso,
     };
-    if (driver) patch.driver_id = driver.id;
     const { error } = await supabase.from("orders").update(patch).eq("id", orderId);
-    setSavingDeliverDialog(false);
     if (error) {
+      setSavingDeliverDialog(false);
       toast.error("Хадгалахад алдаа: " + error.message);
       return;
     }
-    toast.success(`Хүргэлтэнд гарлаа${finalName ? ` · ${finalName}` : ""}`);
+    // Send to Swift Delivery Hub with driver assignment
+    const { data: notifyData, error: notifyErr } = await supabase.functions.invoke("notify-delivery-status", {
+      body: {
+        order_id: orderId,
+        fulfillment_status: "out_for_delivery",
+        driver_id: partnerDriver.driver_id,
+        driver_phone: partnerDriver.phone,
+        event_id: `easyshop-dispatch-${orderId}-${Date.now()}`,
+        note: `Жолооч оноогдлоо: ${signature}`,
+      },
+    });
+    setSavingDeliverDialog(false);
+    if (notifyErr || (notifyData as any)?.success === false) {
+      console.error("Swift Hub notify failed:", notifyErr || notifyData);
+      toast.error("Хүргэлтийн систем рүү илгээхэд алдаа гарлаа");
+    } else {
+      toast.success(`Хүргэлтэнд гарлаа · ${partnerDriver.name}`);
+    }
     setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, ...patch } : o)));
     setDeliverDialog(null);
-    if (currentOrder?.delivery_order_id) {
-      await notifyDeliveryFulfillment(orderId, "delivering", "Easyshop дээр цуцлагдсан/дууссан төлвөөс хүргэлтэнд буцааж гаргасан");
-    }
   };
+
 
 
 
