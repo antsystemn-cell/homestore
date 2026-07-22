@@ -2476,23 +2476,24 @@ const AdminPage = () => {
               </section>
             </div>
 
-            <div className="sticky bottom-0 bg-card border-t border-border px-5 py-3 flex items-center justify-end gap-2">
+            <div className="sticky bottom-0 bg-card border-t border-border px-4 md:px-5 py-3 flex items-center justify-end gap-2 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] md:pb-3">
               <button
                 onClick={() => setShowManualOrder(false)}
                 disabled={manualSubmitting}
-                className="px-4 py-2 rounded-xl bg-secondary text-sm font-medium hover:bg-secondary/80 disabled:opacity-50"
+                className="flex-1 md:flex-none px-4 py-3 md:py-2 rounded-xl bg-secondary text-sm font-medium hover:bg-secondary/80 disabled:opacity-50"
               >
                 Болих
               </button>
               <button
                 onClick={handleCreateManualOrder}
                 disabled={manualSubmitting}
-                className="px-5 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow hover:opacity-90 disabled:opacity-50 inline-flex items-center gap-2"
+                className="flex-[2] md:flex-none px-5 py-3 md:py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow hover:opacity-90 disabled:opacity-50 inline-flex items-center justify-center gap-2"
               >
                 {manualSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
                 Бүртгэх
               </button>
             </div>
+
           </div>
         </div>
       )}
