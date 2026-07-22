@@ -31,6 +31,7 @@ import TrackingDashboard from "@/components/admin/TrackingDashboard";
 import DeliveryPortal from "@/components/admin/DeliveryPortal";
 import BranchesManager from "@/components/admin/BranchesManager";
 import AdminSkeleton from "@/components/admin/AdminSkeleton";
+import AddressSelector from "@/components/store/AddressSelector";
 
 
 import { useRef } from "react";
@@ -1954,18 +1955,19 @@ const AdminPage = () => {
 
       {/* Manual External Order Modal */}
       {showManualOrder && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto" onClick={() => !manualSubmitting && setShowManualOrder(false)}>
-          <div className="bg-card rounded-2xl border border-border w-full max-w-3xl my-8 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="sticky top-0 z-10 bg-card border-b border-border px-5 py-4 flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold">Захиалга оруулах</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">Гадны сувгаар (Facebook, утас, дэлгүүр) ирсэн захиалгыг гараар бүртгэнэ</p>
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm md:flex md:items-center md:justify-center md:p-4 md:overflow-y-auto" onClick={() => !manualSubmitting && setShowManualOrder(false)}>
+          <div className="bg-card w-full h-full md:h-auto md:rounded-2xl md:border md:border-border md:max-w-3xl md:my-8 md:max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 z-10 bg-card border-b border-border px-4 md:px-5 py-3 md:py-4 flex items-center justify-between">
+              <div className="min-w-0">
+                <h2 className="text-base md:text-lg font-bold truncate">Захиалга оруулах</h2>
+                <p className="hidden md:block text-xs text-muted-foreground mt-0.5">Гадны сувгаар (Facebook, утас, дэлгүүр) ирсэн захиалгыг гараар бүртгэнэ</p>
               </div>
-              <button onClick={() => !manualSubmitting && setShowManualOrder(false)} className="p-1 rounded-lg hover:bg-secondary">
+              <button onClick={() => !manualSubmitting && setShowManualOrder(false)} className="p-2 -mr-2 rounded-lg hover:bg-secondary shrink-0">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="p-5 space-y-4 bg-muted/30">
+            <div className="flex-1 overflow-y-auto p-3 md:p-5 space-y-3 md:space-y-4 bg-muted/30 pb-24 md:pb-5">
+
 
               {/* SECTION 1 — Sale meta */}
               <section className="bg-card rounded-2xl border border-border overflow-hidden">
@@ -1973,7 +1975,7 @@ const AdminPage = () => {
                   <Calendar className="h-4 w-4 text-primary" />
                   <h3 className="text-sm font-bold">Үндсэн мэдээлэл</h3>
                 </header>
-                <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="p-3 md:p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
                     <label className="text-xs font-bold text-muted-foreground mb-1 block">Борлуулсан огноо, цаг *</label>
                     <input
@@ -1981,11 +1983,11 @@ const AdminPage = () => {
                       value={manualForm.sale_date}
                       max={(() => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); })()}
                       onChange={(e) => setManualForm((f) => ({ ...f, sale_date: e.target.value }))}
-                      className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      className="w-full rounded-xl bg-secondary px-3 py-3 md:py-2 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
-                    <p className="text-[10px] text-muted-foreground mt-1">Захиалга үүссэн он/сар/өдөр, цаг минутыг бүртгэнэ</p>
+                    <p className="hidden md:block text-[10px] text-muted-foreground mt-1">Захиалга үүссэн он/сар/өдөр, цаг минутыг бүртгэнэ</p>
                   </div>
-                  <div>
+                  <div className="hidden md:block">
                     <label className="text-xs font-bold text-muted-foreground mb-1 block">Дэс дугаар</label>
                     <input
                       type="text"
@@ -2002,13 +2004,13 @@ const AdminPage = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-muted-foreground mb-1 block flex items-center gap-1">
+                    <label className="text-xs font-bold text-muted-foreground mb-1 flex items-center gap-1">
                       <Store className="h-3.5 w-3.5" /> Бараа гарах байршил *
                     </label>
                     <select
                       value={manualForm.branch}
                       onChange={(e) => setManualForm((f) => ({ ...f, branch: e.target.value }))}
-                      className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      className="w-full rounded-xl bg-secondary px-3 py-3 md:py-2 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     >
                       <option value="Лавай">Лавай</option>
                       <option value="Онлайн">Онлайн</option>
@@ -2017,6 +2019,7 @@ const AdminPage = () => {
                     </select>
                   </div>
                 </div>
+
               </section>
 
               {/* SECTION 2 — Customer */}
@@ -2025,45 +2028,55 @@ const AdminPage = () => {
                   <User className="h-4 w-4 text-primary" />
                   <h3 className="text-sm font-bold">Үйлчлүүлэгч</h3>
                 </header>
-                <div className="p-4 space-y-3">
+                <div className="p-3 md:p-4 space-y-3">
                   <div>
-                    <label className="text-xs font-bold text-muted-foreground mb-1 block flex items-center gap-1">
+                    <label className="text-xs font-bold text-muted-foreground mb-1 flex items-center gap-1">
                       <Phone className="h-3.5 w-3.5" /> Утас *
                     </label>
                     <input
                       type="tel"
+                      inputMode="numeric"
                       value={manualForm.phone}
                       onChange={(e) => setManualForm((f) => ({ ...f, phone: e.target.value }))}
                       placeholder="9911XXXX"
-                      className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      className="w-full rounded-xl bg-secondary px-4 py-3 text-base font-medium tracking-wide focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-muted-foreground mb-1 block flex items-center gap-1">
+                    <label className="text-xs font-bold text-muted-foreground mb-1 flex items-center gap-1">
                       <MapPin className="h-3.5 w-3.5" /> Хүргэлтийн хаяг *
                     </label>
+                    {/* Mobile: guided district+хороо+дэлгэрэнгүй selector */}
+                    <div className="md:hidden">
+                      <AddressSelector
+                        value={manualForm.addr_landmark}
+                        onChange={(composed) => setManualForm((f) => ({ ...f, addr_landmark: composed.slice(0, 500) }))}
+                      />
+                    </div>
+                    {/* Desktop: free-form textarea */}
                     <textarea
                       rows={3}
                       value={manualForm.addr_landmark}
                       onChange={(e) => setManualForm((f) => ({ ...f, addr_landmark: e.target.value.slice(0, 500) }))}
                       placeholder="Дүүрэг, хороо, хотхон, байр, орц, тоот, орцны код гэх мэт дэлгэрэнгүй хаягаа бичнэ үү"
-                      className="w-full rounded-xl bg-secondary px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      className="hidden md:block w-full rounded-xl bg-secondary px-3 py-3 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
 
-                  <label className="flex items-center gap-2 w-full rounded-xl bg-secondary/60 px-3 py-2.5 text-sm cursor-pointer hover:bg-secondary transition-colors">
+                  <label className="flex items-center gap-3 w-full rounded-xl bg-secondary/60 px-3 py-3 md:py-2.5 text-sm cursor-pointer hover:bg-secondary transition-colors">
                     <input
                       type="checkbox"
                       checked={Number(manualForm.delivery_fee) > 0}
                       onChange={(e) => setManualForm((f) => ({ ...f, delivery_fee: e.target.checked ? 8000 : 0 }))}
-                      className="h-4 w-4 rounded"
+                      className="h-5 w-5 md:h-4 md:w-4 rounded"
                     />
                     <Truck className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium">Хүргэлтийн төлбөр авах</span>
                     <span className="ml-auto text-primary font-bold">8,000₮</span>
                   </label>
                 </div>
+
               </section>
 
               {/* SECTION 3 — Products */}
@@ -2104,7 +2117,7 @@ const AdminPage = () => {
                         value={manualProductSearch}
                         onChange={(e) => setManualProductSearch(e.target.value)}
                         placeholder="Бараа хайх (нэр / SKU)..."
-                        className="w-full rounded-xl bg-secondary pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="w-full rounded-xl bg-secondary pl-10 pr-3 py-3 md:py-2 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
                     {(isAdmin || isModerator) && (
@@ -2463,23 +2476,24 @@ const AdminPage = () => {
               </section>
             </div>
 
-            <div className="sticky bottom-0 bg-card border-t border-border px-5 py-3 flex items-center justify-end gap-2">
+            <div className="sticky bottom-0 bg-card border-t border-border px-4 md:px-5 py-3 flex items-center justify-end gap-2 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] md:pb-3">
               <button
                 onClick={() => setShowManualOrder(false)}
                 disabled={manualSubmitting}
-                className="px-4 py-2 rounded-xl bg-secondary text-sm font-medium hover:bg-secondary/80 disabled:opacity-50"
+                className="flex-1 md:flex-none px-4 py-3 md:py-2 rounded-xl bg-secondary text-sm font-medium hover:bg-secondary/80 disabled:opacity-50"
               >
                 Болих
               </button>
               <button
                 onClick={handleCreateManualOrder}
                 disabled={manualSubmitting}
-                className="px-5 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow hover:opacity-90 disabled:opacity-50 inline-flex items-center gap-2"
+                className="flex-[2] md:flex-none px-5 py-3 md:py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow hover:opacity-90 disabled:opacity-50 inline-flex items-center justify-center gap-2"
               >
                 {manualSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
                 Бүртгэх
               </button>
             </div>
+
           </div>
         </div>
       )}
