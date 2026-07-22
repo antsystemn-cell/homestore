@@ -2029,6 +2029,64 @@ const AdminPage = () => {
                   <h3 className="text-sm font-bold">Үйлчлүүлэгч</h3>
                 </header>
                 <div className="p-3 md:p-4 space-y-3">
+                  {/* Mobile-only: paste blob to auto-fill phone + address */}
+                  <div className="md:hidden">
+                    <label className="text-xs font-bold text-muted-foreground mb-1 flex items-center gap-1">
+                      <Sparkles className="h-3.5 w-3.5 text-primary" /> Хурдан бөглөх — хуулж тавих
+                    </label>
+                    <textarea
+                      rows={3}
+                      placeholder="Жишээ: ХУД 11-р хороо нархан хотхон 1 байр 34 орц 8 тоот код 1234, 99119911"
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        if (!raw.trim()) return;
+                        // 1) Extract up to 2 unique 8-digit Mongolian phone numbers
+                        const phones = Array.from(
+                          new Set(
+                            (raw.match(/(?:\+?976[\s-]?)?[6789](?:[\s-]?\d){7}/g) || [])
+                              .map((s) => s.replace(/\D/g, "").slice(-8))
+                              .filter((s) => s.length === 8)
+                          )
+                        ).slice(0, 2);
+                        // 2) Parse the rest for structured address parts
+                        const parsed = parseAddressBlob(raw);
+                        const codeToName: Record<string, string> = {
+                          "ХУД": "Хан-Уул", "БЗД": "Баянзүрх", "БГД": "Баянгол",
+                          "СХД": "Сонгинохайрхан", "СБД": "Сүхбаатар", "ЧД": "Чингэлтэй",
+                        };
+                        const districtName = parsed.district ? codeToName[parsed.district] : "";
+                        const detailBits: string[] = [];
+                        if (parsed.khotkhon) detailBits.push(`${parsed.khotkhon} хотхон`);
+                        if (parsed.building) detailBits.push(`${parsed.building} байр`);
+                        if (parsed.entrance) detailBits.push(`${parsed.entrance} орц`);
+                        if (parsed.apt) detailBits.push(`${parsed.apt} тоот`);
+                        if (parsed.doorCode) detailBits.push(`код ${parsed.doorCode}`);
+                        if (parsed.landmark) detailBits.push(parsed.landmark);
+                        let composed = "";
+                        if (districtName) {
+                          composed = districtName;
+                          if (parsed.khoroo) composed += `, ${parsed.khoroo}-р хороо`;
+                          if (detailBits.length) composed += `, ${detailBits.join(" ")}`;
+                        } else {
+                          composed = detailBits.join(" ") || raw.replace(/(?:\+?976[\s-]?)?[6789](?:[\s-]?\d){7}/g, "").replace(/[,;|]+/g, " ").replace(/\s+/g, " ").trim();
+                        }
+                        setManualForm((f) => ({
+                          ...f,
+                          phone: phones.join(", ") || f.phone,
+                          addr_landmark: composed || f.addr_landmark,
+                        }));
+                        if (phones.length || composed) {
+                          toast.success(`Автоматаар бөглөгдлөө${phones.length ? ` · ${phones.length} утас` : ""}`);
+                        }
+                        e.target.value = "";
+                      }}
+                      className="w-full rounded-xl bg-primary/5 border border-primary/20 px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground/70"
+                    />
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      Утас, дүүрэг, хороо, хаягтай текстээ энд хуулбал автоматаар доорх талбарууд бөглөгдөнө.
+                    </p>
+                  </div>
+
                   <div>
                     <label className="text-xs font-bold text-muted-foreground mb-1 flex items-center gap-1">
                       <Phone className="h-3.5 w-3.5" /> Утас *
