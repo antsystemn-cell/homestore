@@ -2105,20 +2105,12 @@ const AdminPage = () => {
                     <label className="text-xs font-bold text-muted-foreground mb-1 flex items-center gap-1">
                       <MapPin className="h-3.5 w-3.5" /> Хүргэлтийн хаяг *
                     </label>
-                    {/* Mobile: guided district+хороо+дэлгэрэнгүй selector */}
-                    <div className="md:hidden">
-                      <AddressSelector
-                        value={manualForm.addr_landmark}
-                        onChange={(composed) => setManualForm((f) => ({ ...f, addr_landmark: composed.slice(0, 500) }))}
-                      />
-                    </div>
-                    {/* Desktop: free-form textarea */}
                     <textarea
                       rows={3}
                       value={manualForm.addr_landmark}
                       onChange={(e) => setManualForm((f) => ({ ...f, addr_landmark: e.target.value.slice(0, 500) }))}
                       placeholder="Дүүрэг, хороо, хотхон, байр, орц, тоот, орцны код гэх мэт дэлгэрэнгүй хаягаа бичнэ үү"
-                      className="hidden md:block w-full rounded-xl bg-secondary px-3 py-3 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      className="w-full rounded-xl bg-secondary px-3 py-3 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
 
