@@ -6016,42 +6016,38 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
               <h3 className="text-base font-bold flex items-center gap-2">
                 <Truck className="h-4 w-4 text-violet-600" /> Хүргэлтэнд гаргах
               </h3>
-              <p className="text-xs text-muted-foreground mt-1">Энэ захиалгыг авч явах жолоочийг сонгоно уу. Бүртгэлгүй бол шинээр оруулах боломжтой.</p>
+              <p className="text-xs text-muted-foreground mt-1">Swift Delivery Hub-д бүртгэлтэй жолоочоос сонгоно уу.</p>
             </div>
 
             <div>
-              <label className="text-[11px] font-semibold text-muted-foreground">Жолооч (системд бүртгэлтэй)</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-[11px] font-semibold text-muted-foreground">Жолооч</label>
+                <button
+                  type="button"
+                  onClick={() => loadPartnerDrivers(true)}
+                  disabled={partnerDriversLoading}
+                  className="text-[11px] text-violet-600 hover:underline disabled:opacity-50"
+                >
+                  {partnerDriversLoading ? "Ачаалж байна..." : "Шинэчлэх"}
+                </button>
+              </div>
               <select
                 value={deliverDialog.driverId}
-                onChange={(e) => setDeliverDialog((p) => p ? { ...p, driverId: e.target.value, courierName: e.target.value ? "" : p.courierName, courierPhone: e.target.value ? "" : p.courierPhone } : p)}
-                className="w-full mt-1 rounded-lg bg-background border border-border px-3 py-2 text-sm"
+                onChange={(e) => setDeliverDialog((p) => p ? { ...p, driverId: e.target.value } : p)}
+                className="w-full rounded-lg bg-background border border-border px-3 py-2 text-sm"
+                disabled={partnerDriversLoading}
               >
-                <option value="">— Сонгох —</option>
-                {drivers.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.full_name}{d.phone ? ` · ${d.phone}` : ""}
+                <option value="">— {partnerDriversLoading ? "Ачаалж байна..." : "Сонгох"} —</option>
+                {partnerDrivers.map((d) => (
+                  <option key={d.driver_id} value={d.driver_id}>
+                    {d.name}{d.phone ? ` · ${d.phone}` : ""}
                   </option>
                 ))}
               </select>
+              {!partnerDriversLoading && partnerDrivers.length === 0 && (
+                <p className="text-[11px] text-muted-foreground mt-1">Жолооч олдсонгүй. "Шинэчлэх" дарж дахин оролдоно уу.</p>
+              )}
             </div>
-
-            <div className="relative flex items-center gap-2 text-[10px] text-muted-foreground">
-              <div className="flex-1 h-px bg-border" />
-              <span>ЭСВЭЛ ШИНЭ ЖОЛООЧ</span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-
-            <div>
-              <label className="text-[11px] font-semibold text-muted-foreground">Нэр</label>
-              <input
-                type="text"
-                value={deliverDialog.courierName}
-                onChange={(e) => setDeliverDialog((p) => p ? { ...p, courierName: e.target.value, driverId: e.target.value ? "" : p.driverId } : p)}
-                placeholder="Жнь: Болд"
-                className="w-full mt-1 rounded-lg bg-background border border-border px-3 py-2 text-sm"
-              />
-            </div>
-
 
             <div className="flex justify-end gap-2 pt-2">
               <button
@@ -6065,11 +6061,11 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
               <button
                 type="button"
                 onClick={confirmDeliverDispatch}
-                disabled={savingDeliverDialog || (!deliverDialog.driverId && !deliverDialog.courierName.trim())}
+                disabled={savingDeliverDialog || !deliverDialog.driverId}
                 className="px-4 py-2 rounded-lg text-sm font-bold bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-50 inline-flex items-center gap-2"
               >
                 {savingDeliverDialog ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Truck className="h-3.5 w-3.5" />}
-                Баталгаажуулах
+                Хүргэлтэнд гаргах
               </button>
             </div>
           </div>
