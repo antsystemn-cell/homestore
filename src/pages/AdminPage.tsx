@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import OrderStatusTimeline from "@/components/admin/OrderStatusTimeline";
+
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
   BarChart3, LayoutDashboard, Search, X, AlertTriangle, AlertCircle, BadgeCheck, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, FileSpreadsheet, Sparkles,
@@ -4245,8 +4247,11 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                     {/* Expanded details */}
                     {isExpanded && (
                       <div className="border-t border-border p-4 space-y-4">
+                        {/* Status timeline */}
+                        <OrderStatusTimeline orderId={o.id} currentStatus={o.status} />
                         {/* Order items */}
                         <div>
+
                           <div className="flex items-center justify-between mb-2">
                             <h4 className="text-xs font-bold text-muted-foreground">Захиалсан бараанууд</h4>
                             {isAdmin && (
