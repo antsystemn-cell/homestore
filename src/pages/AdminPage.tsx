@@ -2192,14 +2192,35 @@ const AdminPage = () => {
                     for (const p of products) {
                       const vs = (p.variant_stock && typeof p.variant_stock === 'object') ? p.variant_stock : {};
                       const colors: any[] = Array.isArray(p.colors) ? p.colors : [];
+                      const sizes: any[] = Array.isArray(p.sizes) ? p.sizes : [];
                       const variantKeys = Object.keys(vs);
-                      if (variantKeys.length > 0) {
-                        for (const key of variantKeys) {
+                      // Build the union of variant combos so every configured color/size shows up
+                      // even when variant_stock has not been filled in yet.
+                      const comboSet = new Set<string>(variantKeys);
+                      if (colors.length > 0 && sizes.length > 0) {
+                        for (const c of colors) for (const s of sizes) {
+                          const cn = (c?.name || '').trim();
+                          const sn = (typeof s === 'string' ? s : (s?.name || '')).trim();
+                          if (cn || sn) comboSet.add(`${cn}|${sn}`);
+                        }
+                      } else if (colors.length > 0) {
+                        for (const c of colors) {
+                          const cn = (c?.name || '').trim();
+                          if (cn) comboSet.add(`${cn}|`);
+                        }
+                      } else if (sizes.length > 0) {
+                        for (const s of sizes) {
+                          const sn = (typeof s === 'string' ? s : (s?.name || '')).trim();
+                          if (sn) comboSet.add(`|${sn}`);
+                        }
+                      }
+                      if (comboSet.size > 0) {
+                        for (const key of comboSet) {
                           const [color, size] = key.split('|');
                           const cmeta = colors.find((c: any) => (c?.name || '').trim() === (color || '').trim());
                           const sku = cmeta?.sku || p.product_code || '';
                           const image = cmeta?.image || p.thumbnail_url || p.image_url;
-                          const stock = Number(vs[key]) || 0;
+                          const stock = vs[key] !== undefined ? Number(vs[key]) || 0 : undefined;
                           rows.push({ key: `${p.id}|${key}`, product: p, color, size, sku, image, stock });
                         }
                       } else {
