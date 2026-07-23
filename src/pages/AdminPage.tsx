@@ -488,21 +488,21 @@ const AdminPage = () => {
   const [editingItemIdx, setEditingItemIdx] = useState<number | null>(null);
 
   // Auto-open manual order modal when on dedicated /admin/manual-order route
+  const manualRouteOpenedRef = useRef(false);
   useEffect(() => {
-    if (isManualOrderRoute && hasAdminAccess && !showManualOrder && !manualSubmitting) {
+    if (isManualOrderRoute && hasAdminAccess && !manualRouteOpenedRef.current) {
+      manualRouteOpenedRef.current = true;
       setShowManualOrder(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isManualOrderRoute, hasAdminAccess]);
 
   // When user closes modal on the dedicated route, navigate back to admin orders
   useEffect(() => {
-    if (isManualOrderRoute && !showManualOrder && !manualSubmitting && hasAdminAccess) {
+    if (isManualOrderRoute && manualRouteOpenedRef.current && !showManualOrder && !manualSubmitting) {
       const t = setTimeout(() => navigate("/admin?tab=orders"), 50);
       return () => clearTimeout(t);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showManualOrder, isManualOrderRoute, manualSubmitting]);
+  }, [showManualOrder, isManualOrderRoute, manualSubmitting, navigate]);
 
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
