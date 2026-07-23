@@ -97,6 +97,8 @@ const DeviceBadge = ({ info }: { info: DeviceInfo }) => {
 
 const AdminPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isManualOrderRoute = location.pathname === "/admin/manual-order";
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAdmin, isModerator, isSeller, loading: authLoading, authError } = useAuth();
   const hasAdminAccess = isAdmin || isModerator || isSeller;
