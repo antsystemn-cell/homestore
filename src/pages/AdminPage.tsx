@@ -4845,13 +4845,38 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                           </div>
                         )}
 
-                        {/* Shipping address */}
-                        {o.shipping_address && (
-                          <div>
-                            <h4 className="text-xs font-bold text-muted-foreground mb-1">Хүлээн авагчийн хаяг</h4>
-                            <p className="text-xs">{o.shipping_address}</p>
+                        {/* Customer info + edit */}
+                        <div className="rounded-xl border border-border bg-secondary/20 p-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-xs font-bold text-muted-foreground">Хэрэглэгчийн мэдээлэл</h4>
+                            {(isAdmin || isModerator) && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingOrderInfo({
+                                    id: o.id,
+                                    order_ref: o.order_ref,
+                                    guest_name: o.guest_name || "",
+                                    phone: o.phone || "",
+                                    shipping_address: o.shipping_address || "",
+                                    source: o.source || "web",
+                                    source_note: o.source_note || "",
+                                  });
+                                }}
+                                className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                              >
+                                <Pencil className="h-3 w-3" /> Засах
+                              </button>
+                            )}
                           </div>
-                        )}
+                          <div className="space-y-1 text-xs">
+                            <p><span className="text-muted-foreground">Нэр:</span> <span className="font-medium">{o.guest_name || "—"}</span></p>
+                            <p><span className="text-muted-foreground">Утас:</span> <span className="font-medium">{o.phone || "—"}</span></p>
+                            <p><span className="text-muted-foreground">Хаяг:</span> <span className="font-medium">{o.shipping_address || "—"}</span></p>
+                            {o.source_note && <p><span className="text-muted-foreground">Тэмдэглэл:</span> <span className="font-medium">{o.source_note}</span></p>}
+                          </div>
+                        </div>
+
 
                         {/* Status change */}
                         {(isAdmin || isModerator) && (
