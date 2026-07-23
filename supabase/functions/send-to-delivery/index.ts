@@ -80,13 +80,24 @@ Deno.serve(async (req: Request) => {
     const items = Array.isArray(order.items) ? order.items : [];
     const externalOrderId = `EASY-${order.order_ref || order.id}`;
 
+    const rawMethod = (order.payment_method || "cash").toLowerCase();
+    const rawStatus = (order.payment_status || "unpaid").toLowerCase();
+    const mappedMethod = mapPaymentMethod(rawMethod);
+    // If the order is not fully paid online, treat it as cash-on-delivery so the
+    // delivery partner collects the money from the customer on hand-off.
+    const isPaid = rawStatus === "paid" || rawStatus === "confirmed" || rawStatus === "completed";
+    const finalPaymentStatus = isPaid ? "paid" : "cash_on_delivery";
+    const finalPaymentMethod = isPaid ? mappedMethod : "cash_on_delivery";
+    const codAmount = isPaid ? 0 : (order.total || 0);
+
     const payload = {
       external_order_id: externalOrderId,
       customer_name: order.guest_name || "Хэрэглэгч",
       phone: order.phone || "",
       address_text: order.shipping_address || undefined,
-      payment_method: mapPaymentMethod(order.payment_method || "cash"),
-      payment_status: mapPaymentStatus(order.payment_status || "unpaid"),
+      payment_method: finalPaymentMethod,
+      payment_status: finalPaymentStatus,
+      cod_amount: codAmount,
       delivery_fee: order.delivery_fee || 0,
       subtotal: (order.total || 0) - (order.delivery_fee || 0),
       total_amount: order.total || 0,
