@@ -898,6 +898,7 @@ export type Database = {
           delivery_return_reason: string | null
           delivery_signature_name: string | null
           delivery_status: string | null
+          delivery_surcharge: number
           driver_id: string | null
           external_ref: string | null
           gift_redemption_id: string | null
@@ -942,6 +943,7 @@ export type Database = {
           delivery_return_reason?: string | null
           delivery_signature_name?: string | null
           delivery_status?: string | null
+          delivery_surcharge?: number
           driver_id?: string | null
           external_ref?: string | null
           gift_redemption_id?: string | null
@@ -986,6 +988,7 @@ export type Database = {
           delivery_return_reason?: string | null
           delivery_signature_name?: string | null
           delivery_status?: string | null
+          delivery_surcharge?: number
           driver_id?: string | null
           external_ref?: string | null
           gift_redemption_id?: string | null
@@ -2237,6 +2240,7 @@ export type Database = {
           delivery_return_reason: string | null
           delivery_signature_name: string | null
           delivery_status: string | null
+          delivery_surcharge: number
           driver_id: string | null
           external_ref: string | null
           gift_redemption_id: string | null
@@ -2439,6 +2443,7 @@ export type Database = {
           delivery_return_reason: string | null
           delivery_signature_name: string | null
           delivery_status: string | null
+          delivery_surcharge: number
           driver_id: string | null
           external_ref: string | null
           gift_redemption_id: string | null
