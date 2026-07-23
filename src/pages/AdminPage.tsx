@@ -4767,11 +4767,78 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                             <h4 className="text-xs font-bold text-muted-foreground mb-2">Хүргэлтийн мэдээлэл</h4>
                             <div className="bg-secondary/50 rounded-lg p-3 text-xs space-y-1">
                               <p><span className="text-muted-foreground">Хүргэлт:</span> <span className="font-medium">{delOpt.name}</span></p>
-                              <p><span className="text-muted-foreground">Төлбөр:</span> <span className="font-medium">{o.delivery_fee > 0 ? formatPrice(o.delivery_fee) : "Үнэгүй"}</span></p>
+                              <p><span className="text-muted-foreground">Үндсэн төлбөр:</span> <span className="font-medium">{o.delivery_fee > 0 ? formatPrice(o.delivery_fee) : "Үнэгүй"}</span></p>
+                              {Number(o.delivery_surcharge) > 0 && (
+                                <p><span className="text-muted-foreground">Нэмэлт төлбөр:</span> <span className="font-medium text-amber-600">+{formatPrice(Number(o.delivery_surcharge))}</span></p>
+                              )}
                               <p><span className="text-muted-foreground">Хугацаа:</span> <span className="font-medium">{delOpt.estimated_days_min}-{delOpt.estimated_days_max} хоног</span></p>
                               {delOpt.address && <p><span className="text-muted-foreground">Хаяг:</span> <span className="font-medium">{delOpt.address}</span></p>}
                               {delOpt.phone && <p><span className="text-muted-foreground">Утас:</span> <span className="font-medium">{delOpt.phone}</span></p>}
                               {delOpt.payment_terms && <p><span className="text-muted-foreground">Төлбөрийн нөхцөл:</span> <span className="font-medium">{delOpt.payment_terms}</span></p>}
+                            </div>
+                          </div>
+                        )}
+
+                        {(isAdmin || isModerator) && (
+                          <div>
+                            <h4 className="text-xs font-bold text-muted-foreground mb-2 flex items-center gap-1">
+                              <Truck className="h-3.5 w-3.5" /> Нэмэлт хүргэлтийн төлбөр
+                            </h4>
+                            <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-3 space-y-2">
+                              <p className="text-[11px] text-muted-foreground">
+                                Хол зай эсвэл овор ихтэй захиалгын үед нэмэлт төлбөр оруулна уу. Нийт дүнд автоматаар нэмэгдэнэ.
+                              </p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {[0, 3000, 5000, 10000, 15000, 20000].map((amt) => (
+                                  <button
+                                    key={amt}
+                                    type="button"
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+                                      const oldSur = Number(o.delivery_surcharge) || 0;
+                                      const newTotal = (Number(o.total) || 0) - oldSur + amt;
+                                      const { error } = await supabase.from("orders").update({ delivery_surcharge: amt, total: newTotal }).eq("id", o.id);
+                                      if (error) { toast.error("Алдаа: " + error.message); return; }
+                                      setOrders((prev) => prev.map((x) => x.id === o.id ? { ...x, delivery_surcharge: amt, total: newTotal } : x));
+                                      toast.success(amt > 0 ? `Нэмэлт төлбөр ${formatPrice(amt)}` : "Нэмэлт төлбөр цуцлагдлаа");
+                                    }}
+                                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border-2 transition ${
+                                      Number(o.delivery_surcharge) === amt
+                                        ? "border-amber-500 bg-amber-500 text-white"
+                                        : "border-transparent bg-secondary text-foreground/70 hover:bg-secondary/70"
+                                    }`}
+                                  >
+                                    {amt === 0 ? "Байхгүй" : `+${(amt / 1000)}к`}
+                                  </button>
+                                ))}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[11px] text-muted-foreground shrink-0">Өөр дүн:</span>
+                                <input
+                                  type="number"
+                                  min={0}
+                                  step={500}
+                                  defaultValue={Number(o.delivery_surcharge) || 0}
+                                  onClick={(e) => e.stopPropagation()}
+                                  onBlur={async (e) => {
+                                    const amt = Math.max(0, Math.round(Number(e.target.value) || 0));
+                                    if (amt === (Number(o.delivery_surcharge) || 0)) return;
+                                    const oldSur = Number(o.delivery_surcharge) || 0;
+                                    const newTotal = (Number(o.total) || 0) - oldSur + amt;
+                                    const { error } = await supabase.from("orders").update({ delivery_surcharge: amt, total: newTotal }).eq("id", o.id);
+                                    if (error) { toast.error("Алдаа: " + error.message); return; }
+                                    setOrders((prev) => prev.map((x) => x.id === o.id ? { ...x, delivery_surcharge: amt, total: newTotal } : x));
+                                    toast.success("Нэмэлт төлбөр шинэчлэгдлээ");
+                                  }}
+                                  className="flex-1 rounded-lg bg-background border border-border px-2 py-1 text-xs"
+                                  placeholder="0"
+                                />
+                                <span className="text-[11px] text-muted-foreground">₮</span>
+                              </div>
+                              <div className="flex justify-between items-center pt-1.5 border-t border-amber-500/20 text-xs">
+                                <span className="text-muted-foreground">Нийт дүн:</span>
+                                <span className="font-bold">{formatPrice(Number(o.total) || 0)}</span>
+                              </div>
                             </div>
                           </div>
                         )}
