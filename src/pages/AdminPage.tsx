@@ -215,6 +215,8 @@ const AdminPage = () => {
   const [editDeliveryId, setEditDeliveryId] = useState<string | null>(null);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [editingOrderItem, setEditingOrderItem] = useState<{ orderId: string; idx: number } | null>(null);
+  const [editingOrderInfo, setEditingOrderInfo] = useState<any | null>(null);
+  const [savingOrderInfo, setSavingOrderInfo] = useState(false);
   const [orderItemSearch, setOrderItemSearch] = useState("");
   const [addingItemToOrderId, setAddingItemToOrderId] = useState<string | null>(null);
   const [addItemSearch, setAddItemSearch] = useState("");
