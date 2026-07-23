@@ -3925,6 +3925,18 @@ const AdminPage = () => {
                     Хурдан захиалга
                   </button>
                   <button
+                    onClick={() => {
+                      const url = `${window.location.origin}/admin/manual-order`;
+                      navigator.clipboard?.writeText(url).catch(() => {});
+                      toast.success("Гар утасны линк хуулагдлаа: " + url);
+                    }}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary text-sm font-medium hover:bg-secondary/80 transition-colors"
+                    title="Гар утсаар нээх линк хуулах (/admin/manual-order)"
+                  >
+                    <Smartphone className="h-4 w-4" />
+                    <span className="hidden sm:inline">Утасны линк</span>
+                  </button>
+                  <button
                     onClick={() => { resetManualForm(); setShowManualOrder(true); }}
                     className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow hover:opacity-90 transition-opacity"
                   >
