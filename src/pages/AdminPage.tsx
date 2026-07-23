@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import OrderStatusTimeline from "@/components/admin/OrderStatusTimeline";
@@ -97,6 +97,8 @@ const DeviceBadge = ({ info }: { info: DeviceInfo }) => {
 
 const AdminPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isManualOrderRoute = location.pathname === "/admin/manual-order";
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAdmin, isModerator, isSeller, loading: authLoading, authError } = useAuth();
   const hasAdminAccess = isAdmin || isModerator || isSeller;
@@ -484,6 +486,23 @@ const AdminPage = () => {
   const [manualItems, setManualItems] = useState<{ product_id: string | null; name: string; price: number; quantity: number; product_code?: string; image?: string; color?: string; size?: string; sku?: string; variant_stock?: number; }[]>([]);
   const [manualProductSearch, setManualProductSearch] = useState("");
   const [editingItemIdx, setEditingItemIdx] = useState<number | null>(null);
+
+  // Auto-open manual order modal when on dedicated /admin/manual-order route
+  const manualRouteOpenedRef = useRef(false);
+  useEffect(() => {
+    if (isManualOrderRoute && hasAdminAccess && !manualRouteOpenedRef.current) {
+      manualRouteOpenedRef.current = true;
+      setShowManualOrder(true);
+    }
+  }, [isManualOrderRoute, hasAdminAccess]);
+
+  // When user closes modal on the dedicated route, navigate back to admin orders
+  useEffect(() => {
+    if (isManualOrderRoute && manualRouteOpenedRef.current && !showManualOrder && !manualSubmitting) {
+      const t = setTimeout(() => navigate("/admin?tab=orders"), 50);
+      return () => clearTimeout(t);
+    }
+  }, [showManualOrder, isManualOrderRoute, manualSubmitting, navigate]);
 
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
@@ -3904,6 +3923,18 @@ const AdminPage = () => {
                   >
                     <Zap className="h-4 w-4" />
                     Хурдан захиалга
+                  </button>
+                  <button
+                    onClick={() => {
+                      const url = `${window.location.origin}/admin/manual-order`;
+                      navigator.clipboard?.writeText(url).catch(() => {});
+                      toast.success("Гар утасны линк хуулагдлаа: " + url);
+                    }}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary text-sm font-medium hover:bg-secondary/80 transition-colors"
+                    title="Гар утсаар нээх линк хуулах (/admin/manual-order)"
+                  >
+                    <Smartphone className="h-4 w-4" />
+                    <span className="hidden sm:inline">Утасны линк</span>
                   </button>
                   <button
                     onClick={() => { resetManualForm(); setShowManualOrder(true); }}
