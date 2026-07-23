@@ -1,0 +1,2 @@
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS delivery_surcharge NUMERIC NOT NULL DEFAULT 0;
+COMMENT ON COLUMN public.orders.delivery_surcharge IS 'Additional delivery fee for far/bulky orders, added on top of base delivery_fee.';
