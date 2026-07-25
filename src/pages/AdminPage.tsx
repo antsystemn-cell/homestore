@@ -377,7 +377,7 @@ const AdminPage = () => {
     gift_packages: [] as { id: string; name: string; items: { product_id: string; name: string; image?: string }[] }[],
     is_active: true,
     product_code: "", slug: "", specifications: [] as { key: string; value: string }[],
-    detail_media: [] as { type: "image" | "video"; url: string; caption: string; thumbnail?: string }[],
+    detail_media: [] as { type: "image" | "video" | "text"; url: string; caption: string; thumbnail?: string }[],
     brand_id: "",
     colors: [] as { name: string; image: string; sku: string }[],
     sizes: [] as string[],
