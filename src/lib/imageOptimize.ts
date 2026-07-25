@@ -146,6 +146,25 @@ export async function optimizeImage(
   maxWidth = MAX_IMAGE_WIDTH,
   quality = WEBP_QUALITY
 ): Promise<string> {
+  // Animated formats (WebP/GIF) lose animation when re-encoded via canvas.
+  // Upload the original file so animations still play in the browser.
+  const isAnimated =
+    file.type === "image/webp" ||
+    file.type === "image/gif" ||
+    /\.(webp|gif)$/i.test(file.name);
+  if (isAnimated) {
+    const ext = file.type === "image/gif" || /\.gif$/i.test(file.name) ? "gif" : "webp";
+    const filename = `full/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`;
+    const { error } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(filename, file, {
+        contentType: file.type || (ext === "gif" ? "image/gif" : "image/webp"),
+        cacheControl: "31536000",
+        upsert: false,
+      });
+    if (error) throw error;
+    return supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filename).data.publicUrl;
+  }
   const img = await loadImage(file);
   const blob = await imageToWebpBlob(img, maxWidth, quality);
   return uploadWebp(blob, "full");
