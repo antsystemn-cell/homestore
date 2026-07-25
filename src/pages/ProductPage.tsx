@@ -947,7 +947,7 @@ const ProductPage = () => {
                       {media.type === "image" ? (
                         <img src={media.url} alt={media.caption || ""} className="w-full rounded-xl object-cover" />
                       ) : media.type === "text" ? (
-                        <div className="w-full rounded-xl bg-secondary/40 px-4 py-3 text-sm text-foreground whitespace-pre-wrap leading-relaxed">
+                        <div className="w-full rounded-xl bg-secondary/40 px-5 py-4 text-foreground whitespace-pre-wrap leading-relaxed font-sans text-[17px] md:text-lg" style={{ fontFamily: "'Montserrat', sans-serif" }}>
                           {media.caption}
                         </div>
                       ) : (
