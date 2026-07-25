@@ -1600,7 +1600,7 @@ const AdminPage = () => {
       product_code: form.product_code || null,
       slug: form.slug.trim() || cyrillicToLatinSlug(form.name),
       specifications: form.specifications.filter(s => s.key.trim() && s.value.trim()),
-      detail_media: form.detail_media.filter(m => m.url.trim()),
+      detail_media: form.detail_media.filter(m => m.type === "text" ? (m.caption || "").trim() : m.url.trim()),
       brand_id: form.brand_id || null,
       colors: form.colors.filter(c => c.name.trim()),
       sizes: form.sizes.filter(s => s.trim()),
