@@ -946,14 +946,19 @@ const ProductPage = () => {
                     <div key={idx} className="space-y-1.5">
                       {media.type === "image" ? (
                         <img src={media.url} alt={media.caption || ""} className="w-full rounded-xl object-cover" />
+                      ) : media.type === "text" ? (
+                        <div className="w-full rounded-xl bg-secondary/40 px-4 py-3 text-sm text-foreground whitespace-pre-wrap leading-relaxed">
+                          {media.caption}
+                        </div>
                       ) : (
                         <VideoWithThumbnail media={media} />
                       )}
-                      {media.caption && (
+                      {media.type !== "text" && media.caption && (
                         <p className="text-xs text-muted-foreground px-1">{media.caption}</p>
                       )}
                     </div>
                   ))}
+
               </div>
             )}
 
