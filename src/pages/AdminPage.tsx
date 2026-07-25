@@ -3623,10 +3623,35 @@ const AdminPage = () => {
                                 className="w-full rounded-lg bg-secondary px-3 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-primary/20" />
                             )}
                           </div>
+                          <div className="flex flex-col gap-1 shrink-0">
+                            <button type="button"
+                              disabled={idx === 0}
+                              onClick={() => {
+                                const dm = [...form.detail_media];
+                                [dm[idx - 1], dm[idx]] = [dm[idx], dm[idx - 1]];
+                                setForm({ ...form, detail_media: dm });
+                              }}
+                              className="p-1 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                              title="Дээш">
+                              <ChevronDown className="h-4 w-4 rotate-180" />
+                            </button>
+                            <button type="button"
+                              disabled={idx === form.detail_media.length - 1}
+                              onClick={() => {
+                                const dm = [...form.detail_media];
+                                [dm[idx + 1], dm[idx]] = [dm[idx], dm[idx + 1]];
+                                setForm({ ...form, detail_media: dm });
+                              }}
+                              className="p-1 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                              title="Доош">
+                              <ChevronDown className="h-4 w-4" />
+                            </button>
+                          </div>
                           <button type="button" onClick={() => setForm({ ...form, detail_media: form.detail_media.filter((_, i) => i !== idx) })}
                             className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors shrink-0">
                             <X className="h-4 w-4" />
                           </button>
+
                         </div>
                       ))}
                       <div className="flex flex-wrap gap-2">
