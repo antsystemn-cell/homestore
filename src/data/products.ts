@@ -10,11 +10,12 @@ export interface ProductSpec {
 }
 
 export interface DetailMedia {
-  type: "image" | "video";
+  type: "image" | "video" | "text";
   url: string;
   caption?: string;
   thumbnail?: string;
 }
+
 
 export interface ProductGift {
   product_id: string;
