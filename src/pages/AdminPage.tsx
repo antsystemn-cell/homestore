@@ -3510,7 +3510,9 @@ const AdminPage = () => {
                                   input.onchange = async (ev: any) => {
                                     const file = ev.target.files?.[0];
                                     if (!file) return;
-                                    if (file.size > 5 * 1024 * 1024) { toast.error("5MB-ээс бага байх ёстой"); return; }
+                                    const isAnimated = /\.(webp|gif)$/i.test(file.name) || file.type === "image/webp" || file.type === "image/gif";
+                                    const maxSize = isAnimated ? 20 * 1024 * 1024 : 5 * 1024 * 1024;
+                                    if (file.size > maxSize) { toast.error(`${isAnimated ? "20MB" : "5MB"}-ээс бага байх ёстой`); return; }
                                     try {
                                       const webpUrl = await optimizeImage(file);
                                       const dm = [...form.detail_media];
