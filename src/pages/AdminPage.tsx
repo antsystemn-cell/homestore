@@ -399,7 +399,9 @@ const AdminPage = () => {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (!file.type.startsWith("image/") && !/\.(png|jpe?g|gif|webp|bmp|svg|heic|heif|avif|tiff?)$/i.test(file.name)) continue;
-      if (file.size > 5 * 1024 * 1024) continue;
+      const isAnimated = /\.(webp|gif)$/i.test(file.name) || file.type === "image/webp" || file.type === "image/gif";
+      const maxSize = isAnimated ? 20 * 1024 * 1024 : 5 * 1024 * 1024;
+      if (file.size > maxSize) { toast.error(`${file.name}: ${isAnimated ? "20MB" : "5MB"}-ээс бага байх ёстой`); continue; }
       try {
         const webpUrl = await optimizeImage(file);
         newMedia.push({ type: "image", url: webpUrl, caption: "" });
