@@ -3501,24 +3501,41 @@ const AdminPage = () => {
                           {media.type !== "text" && (
                             <div className="h-14 w-14 rounded-lg bg-secondary overflow-hidden shrink-0 cursor-pointer relative group"
                               onClick={() => {
-                                if (media.type !== "video") return;
                                 const input = document.createElement("input");
-                                input.type = "file";
-                                input.accept = "image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff";
-                                input.onchange = async (ev: any) => {
-                                  const file = ev.target.files?.[0];
-                                  if (!file) return;
-                                  if (file.size > 5 * 1024 * 1024) { toast.error("5MB-ээс бага байх ёстой"); return; }
-                                  try {
-                                    const webpUrl = await optimizeImage(file);
-                                    const dm = [...form.detail_media];
-                                    dm[idx] = { ...dm[idx], thumbnail: webpUrl };
-                                    setForm({ ...form, detail_media: dm });
-                                  } catch { toast.error("Зураг оновчлоход алдаа"); }
-                                };
+                                if (media.type === "image") {
+                                  input.type = "file";
+                                  input.accept = "image/*,.png,.jpg,.jpeg,.jfif,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff";
+                                  input.onchange = async (ev: any) => {
+                                    const file = ev.target.files?.[0];
+                                    if (!file) return;
+                                    if (file.size > 5 * 1024 * 1024) { toast.error("5MB-ээс бага байх ёстой"); return; }
+                                    try {
+                                      const webpUrl = await optimizeImage(file);
+                                      const dm = [...form.detail_media];
+                                      dm[idx] = { ...dm[idx], url: webpUrl };
+                                      setForm({ ...form, detail_media: dm });
+                                      toast.success("Зураг солигдлоо");
+                                    } catch { toast.error("Зураг оновчлоход алдаа"); }
+                                  };
+                                } else {
+                                  input.type = "file";
+                                  input.accept = "video/*,.mp4,.mov,.avi,.webm,.mkv";
+                                  input.onchange = async (ev: any) => {
+                                    const file = ev.target.files?.[0];
+                                    if (!file) return;
+                                    if (file.size > 50 * 1024 * 1024) { toast.error("50MB-ээс бага байх ёстой"); return; }
+                                    try {
+                                      const videoUrl = await uploadVideo(file, "detail");
+                                      const dm = [...form.detail_media];
+                                      dm[idx] = { ...dm[idx], url: videoUrl };
+                                      setForm({ ...form, detail_media: dm });
+                                      toast.success("Бичлэг солигдлоо");
+                                    } catch { toast.error("Видео хадгалахад алдаа"); }
+                                  };
+                                }
                                 input.click();
                               }}
-                              title={media.type === "video" ? "Thumbnail зураг оруулах" : ""}
+                              title={media.type === "video" ? "Бичлэг солих" : "Зураг солих"}
                             >
                               {media.type === "image" ? (
                                 <img src={media.url} alt="" className="h-full w-full object-cover" />
@@ -3529,13 +3546,40 @@ const AdminPage = () => {
                                   <Eye className="h-5 w-5" />
                                 </div>
                               )}
+                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <ImageIcon className="h-4 w-4 text-white" />
+                              </div>
                               {media.type === "video" && (
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                  <ImageIcon className="h-4 w-4 text-white" />
-                                </div>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const input = document.createElement("input");
+                                    input.type = "file";
+                                    input.accept = "image/*,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg,.heic,.heif,.avif,.tiff";
+                                    input.onchange = async (ev: any) => {
+                                      const file = ev.target.files?.[0];
+                                      if (!file) return;
+                                      if (file.size > 5 * 1024 * 1024) { toast.error("5MB-ээс бага байх ёстой"); return; }
+                                      try {
+                                        const webpUrl = await optimizeImage(file);
+                                        const dm = [...form.detail_media];
+                                        dm[idx] = { ...dm[idx], thumbnail: webpUrl };
+                                        setForm({ ...form, detail_media: dm });
+                                        toast.success("Thumbnail солигдлоо");
+                                      } catch { toast.error("Зураг оновчлоход алдаа"); }
+                                    };
+                                    input.click();
+                                  }}
+                                  className="absolute bottom-0 right-0 bg-black/70 hover:bg-black text-white text-[9px] px-1 py-0.5 rounded-tl-md"
+                                  title="Thumbnail солих"
+                                >
+                                  Thumb
+                                </button>
                               )}
                             </div>
                           )}
+
                           <div className="flex-1 space-y-1.5">
                             <div className="flex items-center gap-2">
                               <select value={media.type}
