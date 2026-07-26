@@ -683,6 +683,11 @@ const ProductPage = () => {
 
             {/* Color chooser below main image (mirrors buy-sheet styling) */}
             {product.colors && product.colors.length > 0 && (
+              <div className="md:hidden">
+              {/* mobile color chooser wrapper */}
+              </div>
+            )}
+            {product.colors && product.colors.length > 0 && (
               <div className="px-4 md:px-0 pt-1">
                 <div className="flex items-end justify-between mb-2 px-0.5">
                   <div className="space-y-0.5">
