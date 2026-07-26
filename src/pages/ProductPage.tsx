@@ -683,7 +683,12 @@ const ProductPage = () => {
 
             {/* Color chooser below main image (mirrors buy-sheet styling) */}
             {product.colors && product.colors.length > 0 && (
-              <div className="px-4 md:px-0 pt-1">
+              <div className="md:hidden">
+              {/* mobile color chooser wrapper */}
+              </div>
+            )}
+            {product.colors && product.colors.length > 0 && (
+              <div className="px-4 md:px-0 pt-1 md:hidden">
                 <div className="flex items-end justify-between mb-2 px-0.5">
                   <div className="space-y-0.5">
                     <h3 className="text-sm font-bold text-foreground leading-none">Өнгө</h3>
@@ -733,7 +738,7 @@ const ProductPage = () => {
 
             {/* Size chips — Elle Sport clothing, directly under color */}
             {isElleSportBrand && product.sizes && product.sizes.length > 0 && (
-              <div className="px-4 md:px-0 pt-2">
+              <div className="px-4 md:px-0 pt-2 md:hidden">
                 <div className="flex items-end justify-between mb-2 px-0.5">
                   <div className="space-y-0.5">
                     <h3 className="text-sm font-bold text-foreground leading-none">Хэмжээ</h3>
@@ -879,6 +884,102 @@ const ProductPage = () => {
 
 
 
+
+            {/* Desktop color/size selectors */}
+            {product.colors && product.colors.length > 0 && (
+              <div className="hidden md:block">
+                <div className="flex items-end justify-between mb-2">
+                  <div className="space-y-0.5">
+                    <h3 className="text-sm font-bold text-foreground leading-none">Өнгө</h3>
+                    <p className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">
+                      {selectedColor ? `Сонгосон: ${selectedColor}` : `${product.colors.length} сонголт`}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {product.colors.map((color) => {
+                    const active = selectedColor === color.name;
+                    return (
+                      <button
+                        key={color.name}
+                        type="button"
+                        onClick={() => {
+                          userInteractedRef.current = true;
+                          setSelectedColor(active ? null : color.name);
+                        }}
+                        className={`flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-2xl transition-all duration-200 active:scale-[0.97] ${
+                          active ? "bg-background border-2 border-foreground shadow-md" : "bg-secondary/70 border-2 border-transparent hover:border-foreground/30"
+                        }`}
+                      >
+                        {color.image ? (
+                          <img src={color.image} alt={color.name} className="h-9 w-9 rounded-xl object-cover ring-1 ring-black/5 bg-background" />
+                        ) : (
+                          <span className="h-9 w-9 rounded-xl ring-1 ring-black/10" style={{ backgroundColor: getColorHex(color.name, (product as any).productCode || product.id) }} />
+                        )}
+                        <span className={`text-[13px] leading-tight whitespace-nowrap ${active ? "font-bold text-foreground" : "font-semibold text-muted-foreground"}`}>
+                          {color.name}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {isElleSportBrand && product.sizes && product.sizes.length > 0 && (
+              <div className="hidden md:block">
+                <div className="flex items-end justify-between mb-2">
+                  <div className="space-y-0.5">
+                    <h3 className="text-sm font-bold text-foreground leading-none">Хэмжээ</h3>
+                    <p className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">
+                      {selectedSize ? `Сонгосон: ${selectedSize}` : `${product.sizes.length} сонголт`}
+                    </p>
+                  </div>
+                  {!selectedSize && (
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-destructive/80">Заавал</span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {product.sizes.map((size) => {
+                    let sizeQty: number | null = null;
+                    if (variantStock) {
+                      if (hasColors && selectedColor) {
+                        sizeQty = Number(variantStock[`${selectedColor}|${size}`]) || 0;
+                      } else if (hasColors) {
+                        sizeQty = (product.colors || []).reduce((sum, c) => sum + (Number(variantStock[`${c.name}|${size}`]) || 0), 0);
+                      } else {
+                        sizeQty = Number(variantStock[`|${size}`]) || 0;
+                      }
+                    }
+                    const isSoldOut = sizeQty !== null && sizeQty <= 0;
+                    return (
+                      <button
+                        key={size}
+                        onClick={() => {
+                          userInteractedRef.current = true;
+                          if (!isSoldOut) setSelectedSize(selectedSize === size ? null : size);
+                        }}
+                        disabled={isSoldOut}
+                        className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-colors flex flex-col items-center leading-tight min-w-[64px] ${
+                          selectedSize === size
+                            ? "border-primary bg-primary/10 text-foreground"
+                            : isSoldOut
+                            ? "border-border bg-secondary/50 text-muted-foreground/50 line-through cursor-not-allowed"
+                            : "border-border bg-secondary text-muted-foreground hover:border-foreground/40"
+                        }`}
+                      >
+                        <span>{size}</span>
+                        {sizeQty !== null && (
+                          <span className={`text-[10px] font-normal mt-0.5 ${isSoldOut ? "text-destructive/70" : sizeQty <= 3 ? "text-destructive" : "text-muted-foreground/70"}`}>
+                            {isSoldOut ? "Дууссан" : `${sizeQty} ширхэг`}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="hidden md:flex flex-col gap-2">
               <Button variant="outline" size="lg" disabled={isOutOfStock} className="flex-1 gap-2 rounded-xl h-12" onClick={() => openPurchase("cart")}>
