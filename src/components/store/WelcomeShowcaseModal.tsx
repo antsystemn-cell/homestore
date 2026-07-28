@@ -1,27 +1,61 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { X, Sparkles, Flame } from "lucide-react";
-import { Product, formatPrice } from "@/data/products";
+import { X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-interface Props {
-  featured: Product[];
-  sale: Product[];
+interface Item {
+  id: string;
+  image_url: string;
+  title: string | null;
+  subtitle: string | null;
+  link_url: string | null;
+}
+
+interface Settings {
+  is_enabled: boolean;
+  title: string;
+  subtitle: string | null;
+  image_size: number;
+  columns: number;
+  show_delay_ms: number;
 }
 
 const STORAGE_KEY = "welcome_showcase_seen";
 
-const WelcomeShowcaseModal = ({ featured, sale }: Props) => {
+const WelcomeShowcaseModal = () => {
   const [open, setOpen] = useState(false);
+  const [items, setItems] = useState<Item[]>([]);
+  const [settings, setSettings] = useState<Settings | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (featured.length === 0 && sale.length === 0) return;
     try {
       if (sessionStorage.getItem(STORAGE_KEY)) return;
     } catch {}
-    const t = setTimeout(() => setOpen(true), 600);
-    return () => clearTimeout(t);
-  }, [featured.length, sale.length]);
+
+    let cancelled = false;
+    (async () => {
+      const [s, i] = await Promise.all([
+        supabase.from("welcome_showcase_settings" as any).select("*").eq("id", 1).maybeSingle(),
+        supabase
+          .from("welcome_showcase_items" as any)
+          .select("id,image_url,title,subtitle,link_url")
+          .eq("is_active", true)
+          .order("position", { ascending: true }),
+      ]);
+      if (cancelled) return;
+      const st = (s.data as any) as Settings | null;
+      const list = ((i.data as any) || []) as Item[];
+      if (!st || !st.is_enabled || list.length === 0) return;
+      setSettings(st);
+      setItems(list);
+      setTimeout(() => setOpen(true), Math.max(0, st.show_delay_ms || 0));
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const close = () => {
     setOpen(false);
@@ -30,52 +64,15 @@ const WelcomeShowcaseModal = ({ featured, sale }: Props) => {
     } catch {}
   };
 
-  if (!open) return null;
+  if (!open || !settings) return null;
 
-  const go = (p: Product) => {
+  const go = (link: string | null) => {
     close();
-    navigate(`/product/${p.slug || p.id}`);
+    if (link) navigate(link);
   };
 
-  const renderCard = (p: Product) => {
-    const discountPct =
-      p.originalPrice && p.originalPrice > p.price
-        ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100)
-        : p.discount || 0;
-    return (
-      <button
-        key={p.id}
-        onClick={() => go(p)}
-        className="group flex-shrink-0 w-[130px] text-left snap-start"
-      >
-        <div className="relative aspect-square rounded-xl overflow-hidden bg-secondary border border-border/60 group-hover:border-primary/40 transition-colors">
-          <img
-            src={p.thumbnail || p.image}
-            alt={p.name}
-            loading="lazy"
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-          {discountPct > 0 && (
-            <span className="absolute top-1.5 left-1.5 bg-destructive text-destructive-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
-              -{discountPct}%
-            </span>
-          )}
-        </div>
-        <h4 className="mt-1.5 text-[11px] font-medium text-foreground line-clamp-2 leading-snug">
-          {p.name}
-        </h4>
-        <div className="flex items-baseline gap-1.5 mt-0.5">
-          <span className="text-xs font-bold text-foreground">
-            {formatPrice(p.price)}
-          </span>
-          {p.originalPrice != null && p.originalPrice > p.price && (
-            <span className="text-[10px] text-muted-foreground line-through">
-              {formatPrice(p.originalPrice)}
-            </span>
-          )}
-        </div>
-      </button>
-    );
+  const gridStyle = {
+    gridTemplateColumns: `repeat(${settings.columns}, minmax(0, 1fr))`,
   };
 
   return (
@@ -96,49 +93,48 @@ const WelcomeShowcaseModal = ({ featured, sale }: Props) => {
         </button>
 
         <div className="p-5 pb-4 border-b border-border">
-          <h2 className="text-lg font-bold text-foreground">Тавтай морил! 👋</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Онцлох болон хямдралтай бараануудаас сонгоно уу
-          </p>
+          <h2 className="text-lg font-bold text-foreground">{settings.title}</h2>
+          {settings.subtitle && (
+            <p className="text-xs text-muted-foreground mt-0.5">{settings.subtitle}</p>
+          )}
         </div>
 
-        <div className="p-5 space-y-5">
-          {featured.length > 0 && (
-            <section>
-              <div className="flex items-center gap-2 mb-2.5">
-                <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Sparkles className="h-3.5 w-3.5 text-primary" />
-                </div>
-                <h3 className="text-sm font-bold text-foreground">Онцлох бараа</h3>
-              </div>
-              <div className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x snap-mandatory -mx-1 px-1 pb-1">
-                {featured.slice(0, 8).map(renderCard)}
-              </div>
-            </section>
-          )}
-
-          {sale.length > 0 && (
-            <section>
-              <div className="flex items-center gap-2 mb-2.5">
-                <div className="h-7 w-7 rounded-lg bg-destructive/10 flex items-center justify-center">
-                  <Flame className="h-3.5 w-3.5 text-destructive" />
-                </div>
-                <h3 className="text-sm font-bold text-foreground">Хямдралтай</h3>
-                <button
-                  onClick={() => {
-                    close();
-                    navigate("/sales");
-                  }}
-                  className="ml-auto text-xs font-medium text-destructive hover:underline"
+        <div className="p-5">
+          <div className="grid gap-3" style={gridStyle}>
+            {items.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => go(item.link_url)}
+                className="group text-left"
+              >
+                <div
+                  className="relative w-full rounded-xl overflow-hidden bg-secondary border border-border/60 group-hover:border-primary/40 transition-colors"
+                  style={{ height: settings.image_size }}
                 >
-                  Бүгдийг →
-                </button>
-              </div>
-              <div className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x snap-mandatory -mx-1 px-1 pb-1">
-                {sale.slice(0, 8).map(renderCard)}
-              </div>
-            </section>
-          )}
+                  <img
+                    src={item.image_url}
+                    alt={item.title || ""}
+                    loading="lazy"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                {(item.title || item.subtitle) && (
+                  <div className="mt-1.5">
+                    {item.title && (
+                      <h4 className="text-xs font-semibold text-foreground line-clamp-2 leading-snug">
+                        {item.title}
+                      </h4>
+                    )}
+                    {item.subtitle && (
+                      <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
+                        {item.subtitle}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="p-4 pt-0">
