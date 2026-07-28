@@ -822,6 +822,7 @@ const CheckoutPage = () => {
                   <WalletCreditsSection
                     subtotal={cartTotal}
                     hasFlashSaleItems={hasFlashSaleItems}
+                    hasSaleItems={hasSaleItems}
                     selectedCreditId={walletCreditId}
                     onSelect={(id, credit, discount) => {
                       setWalletCreditId(id);
