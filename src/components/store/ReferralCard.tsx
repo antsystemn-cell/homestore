@@ -8,6 +8,7 @@ type Stats = { invited_count: number; completed_count: number; pending_count: nu
 const ReferralCard = () => {
   const [stats, setStats] = useState<Stats | null>(null);
   const [copied, setCopied] = useState(false);
+  const [rulesOpen, setRulesOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
