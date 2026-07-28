@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Copy, Share2, Users, Gift, Check } from "lucide-react";
+import { Copy, Share2, Users, Gift, Check, Info, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
 type Stats = { invited_count: number; completed_count: number; pending_count: number; referral_code: string | null };
@@ -8,6 +8,7 @@ type Stats = { invited_count: number; completed_count: number; pending_count: nu
 const ReferralCard = () => {
   const [stats, setStats] = useState<Stats | null>(null);
   const [copied, setCopied] = useState(false);
+  const [rulesOpen, setRulesOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -112,6 +113,54 @@ const ReferralCard = () => {
           <div className="text-lg font-bold">{stats?.completed_count ?? 0}</div>
         </div>
       </div>
+
+      {/* Rules / Terms */}
+      <button
+        onClick={() => setRulesOpen((v) => !v)}
+        className="mt-4 w-full inline-flex items-center justify-between rounded-xl border border-border px-3 py-2 text-xs font-medium hover:bg-secondary/60 transition-colors"
+      >
+        <span className="inline-flex items-center gap-1.5">
+          <Info className="h-3.5 w-3.5 text-primary" />
+          Урамшууллын дүрэм
+        </span>
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${rulesOpen ? "rotate-180" : ""}`} />
+      </button>
+
+      {rulesOpen && (
+        <div className="mt-2 rounded-xl bg-secondary/40 border border-border p-3 space-y-3">
+          <div>
+            <div className="text-[11px] font-semibold text-foreground mb-1.5 inline-flex items-center gap-1">
+              <Users className="h-3 w-3" /> Уригчид (танд)
+            </div>
+            <ul className="text-[11px] text-muted-foreground space-y-1 pl-4 list-disc">
+              <li>Урьсан найз тань <b className="text-foreground">эхний захиалгаа</b> амжилттай хийж, төлөв нь <b className="text-foreground">"Дууссан"</b> болоход <b className="text-foreground">10,000₮ купон</b> танд автоматаар олгогдоно.</li>
+              <li>Урьж болох найзын тоо <b className="text-foreground">хязгааргүй</b> — найз бүрийн эхний захиалгад 10,000₮ давхарлан цуглуулна.</li>
+              <li>Купоныг <b className="text-foreground">100,000₮-с дээш</b> захиалгад ашиглана.</li>
+              <li>Ашиглах хугацаа: олгосон өдрөөс <b className="text-foreground">30 хоног</b>.</li>
+            </ul>
+          </div>
+
+          <div className="pt-2 border-t border-border/60">
+            <div className="text-[11px] font-semibold text-foreground mb-1.5 inline-flex items-center gap-1">
+              <Gift className="h-3 w-3" /> Уригдсан найзад
+            </div>
+            <ul className="text-[11px] text-muted-foreground space-y-1 pl-4 list-disc">
+              <li>Таны линкээр орж <b className="text-foreground">шинээр бүртгүүлсэн</b> найз эхний захиалгадаа <b className="text-foreground">10% хямдрал</b> автоматаар авна.</li>
+              <li>10% хямдралыг <b className="text-foreground">Тавтай морил 10,000₮</b> купонтой давхардуулан ашиглах боломжтой.</li>
+              <li>Зөвхөн <b className="text-foreground">эхний захиалгад</b> нэг удаа хүчинтэй.</li>
+            </ul>
+          </div>
+
+          <div className="pt-2 border-t border-border/60">
+            <div className="text-[11px] font-semibold text-foreground mb-1.5">Анхаарах зүйл</div>
+            <ul className="text-[11px] text-muted-foreground space-y-1 pl-4 list-disc">
+              <li>Захиалга <b className="text-foreground">цуцлагдвал</b> уригчийн урамшуулал олгогдохгүй.</li>
+              <li>Өөрийгөө өөрийн кодоор бүртгэх, олон бүртгэл үүсгэх зэрэг зүй бус үйлдлийг илрүүлбэл урамшууллыг цуцлана.</li>
+              <li>EasyShop дүрмийг урьдчилан мэдэгдэлгүйгээр өөрчлөх эрхтэй.</li>
+            </ul>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
