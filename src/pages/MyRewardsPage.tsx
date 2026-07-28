@@ -77,6 +77,7 @@ export default function MyRewardsPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [welcomeCoupon, setWelcomeCoupon] = useState<WelcomeCoupon | null>(null);
   const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
@@ -88,12 +89,17 @@ export default function MyRewardsPage() {
     if (loading) return;
     (async () => {
       if (user) {
-        const { data } = await supabase
-          .from("spin_coupons")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
-        setCoupons((data as Coupon[]) || []);
+        const [{ data: spinData }, { data: welcomeData }] = await Promise.all([
+          supabase
+            .from("spin_coupons")
+            .select("*")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false }),
+          supabase.rpc("get_my_welcome_coupon" as any),
+        ]);
+        setCoupons((spinData as Coupon[]) || []);
+        const row = Array.isArray(welcomeData) ? welcomeData[0] : welcomeData;
+        setWelcomeCoupon(row ? (row as WelcomeCoupon) : null);
       } else {
         const { getDeviceFingerprint } = await import("@/lib/deviceFingerprint");
         const fp = getDeviceFingerprint();
@@ -103,6 +109,7 @@ export default function MyRewardsPage() {
           .eq("guest_fingerprint", fp)
           .order("created_at", { ascending: false });
         setCoupons((data as Coupon[]) || []);
+        setWelcomeCoupon(null);
       }
     })();
   }, [user, loading]);
