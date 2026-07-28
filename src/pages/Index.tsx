@@ -12,6 +12,7 @@ import NewArrivals from "@/components/store/NewArrivals";
 import AdBanners, { useAdImages } from "@/components/store/AdBanners";
 import ForYou from "@/components/store/ForYou";
 import FlashSaleSection from "@/components/store/FlashSaleSection";
+import ElleSportSlideshow from "@/components/store/ElleSportSlideshow";
 
 
 
@@ -220,6 +221,10 @@ const Index = () => {
           {/* Flash sale — "Өнөөдрийн хямдрал" */}
           <ErrorBoundary>
             <FlashSaleSection />
+          </ErrorBoundary>
+
+          <ErrorBoundary>
+            <ElleSportSlideshow />
           </ErrorBoundary>
 
           {/* New arrivals - between brands and sale (hidden on mobile) */}
