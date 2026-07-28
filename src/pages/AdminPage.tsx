@@ -1887,6 +1887,7 @@ const AdminPage = () => {
     // { id: "delivery-portal", ... } — removed: use per-order block instead
     { id: "users", label: "Хэрэглэгч", icon: Users },
     { id: "chatbot", label: "AI Чатбот", icon: MessageCircle },
+    { id: "bonus", label: "Бонус", icon: Gift },
     { id: "settings", label: "Ерөнхий тохиргоо", icon: Settings },
   ];
 
@@ -1902,22 +1903,22 @@ const AdminPage = () => {
     { id: "diagnostics", label: "Оношлогоо", icon: AlertTriangle },
     { id: "stocklog", label: "Нөөцийн хасалт", icon: Package },
     { id: "recommendations", label: "Зөвлөмжийн жинлүүр", icon: Sparkles },
-    { id: "loyalty", label: "Лоялти оноо", icon: Sparkles },
     { id: "reminders", label: "Санамжийн SMS", icon: MessageCircle },
     { id: "reviews", label: "Сэтгэгдэл", icon: Star },
+    { id: "flash-sales", label: "Flash Sale", icon: Sparkles },
+    { id: "reels", label: "Reels удирдах", icon: PlayCircle },
+    { id: "drivers", label: "Жолоочид", icon: Truck },
+    { id: "branches", label: "Салбар & шивэгч", icon: Store },
+  ];
+
+  const bonusSubItems: { id: Tab; label: string; icon: any }[] = [
+    { id: "loyalty", label: "Лоялти оноо", icon: Sparkles },
     { id: "spin", label: "Хүрд тоглоом", icon: Sparkles },
     { id: "referral", label: "Referral", icon: Users },
     { id: "promotions", label: "Урамшуулал", icon: Gift },
     { id: "coupon-usage", label: "Купон/Хожил", icon: Gift },
-    { id: "flash-sales", label: "Flash Sale", icon: Sparkles },
-    { id: "reels", label: "Reels удирдах", icon: PlayCircle },
-
-
-
-
-    { id: "drivers", label: "Жолоочид", icon: Truck },
-    { id: "branches", label: "Салбар & шивэгч", icon: Store },
   ];
+
 
   const sidebarItems = isAdmin
     ? allSidebarItems
