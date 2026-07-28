@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Copy, Share2, Users, Gift, Check } from "lucide-react";
+import { Copy, Share2, Users, Gift, Check, Info, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
 type Stats = { invited_count: number; completed_count: number; pending_count: number; referral_code: string | null };
