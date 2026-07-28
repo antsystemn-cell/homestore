@@ -12,6 +12,7 @@ import {
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
 import AnnouncementsManager from "@/components/admin/AnnouncementsManager";
+import WelcomeShowcaseManager from "@/components/admin/WelcomeShowcaseManager";
 import ChatbotSettingsManager from "@/components/admin/ChatbotSettingsManager";
 import RecommendationSettingsManager from "@/components/admin/RecommendationSettingsManager";
 import LoyaltySettingsManager from "@/components/admin/LoyaltySettingsManager";
@@ -55,9 +56,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
 
-type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "coupon-usage" | "flash-sales" | "reels" | "settings" | "bonus" | "branches";
+type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "welcome-showcase" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "coupon-usage" | "flash-sales" | "reels" | "settings" | "bonus" | "branches";
 
-const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "announcements", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "reminders", "reviews", "flash-sales", "reels", "drivers", "branches"];
+const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "announcements", "welcome-showcase", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "reminders", "reviews", "flash-sales", "reels", "drivers", "branches"];
 const BONUS_TABS: Tab[] = ["loyalty", "spin", "referral", "promotions", "coupon-usage"];
 
 
@@ -105,7 +106,7 @@ const AdminPage = () => {
   const hasAdminAccess = isAdmin || isModerator || isSeller;
   const [tab, setTab] = useState<Tab>(() => {
     const t = searchParams.get("tab") as Tab | null;
-    const valid: Tab[] = ["stats","tracking","products","orders","users","drivers","categories","brands","delivery","delivery-portal","payments","banner","announcements","collections","chatbot","analytics","diagnostics","stocklog","recommendations","loyalty","reminders","reviews","spin","referral","promotions","coupon-usage","flash-sales","reels","settings","bonus","branches"];
+    const valid: Tab[] = ["stats","tracking","products","orders","users","drivers","categories","brands","delivery","delivery-portal","payments","banner","announcements","welcome-showcase","collections","chatbot","analytics","diagnostics","stocklog","recommendations","loyalty","reminders","reviews","spin","referral","promotions","coupon-usage","flash-sales","reels","settings","bonus","branches"];
     return t && valid.includes(t) ? t : "stats";
   });
   const [products, setProducts] = useState<any[]>([]);
@@ -1898,6 +1899,7 @@ const AdminPage = () => {
     { id: "payments", label: "Төлбөр", icon: CreditCard },
     { id: "banner", label: "Баннер", icon: Megaphone },
     { id: "announcements", label: "Popup мэдэгдэл", icon: Megaphone },
+    { id: "welcome-showcase", label: "Тавтай морил цонх", icon: Sparkles },
     { id: "collections", label: "Багц линк", icon: Link2 },
     { id: "analytics", label: "Хандалт", icon: Globe },
     { id: "diagnostics", label: "Оношлогоо", icon: AlertTriangle },
@@ -5456,6 +5458,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
 
           {/* Announcements / Popup мэдэгдэл */}
           {tab === "announcements" && <AnnouncementsManager />}
+          {tab === "welcome-showcase" && <WelcomeShowcaseManager />}
 
           {/* Chatbot settings */}
           {tab === "chatbot" && <ChatbotSettingsManager />}

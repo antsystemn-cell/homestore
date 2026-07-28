@@ -193,7 +193,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
       <Header />
-      <WelcomeShowcaseModal featured={featuredProducts} sale={saleProducts} />
+      <WelcomeShowcaseModal />
       {loading ? (
         <ProductGridSkeleton count={PAGE_SIZE} />
       ) : error ? (
