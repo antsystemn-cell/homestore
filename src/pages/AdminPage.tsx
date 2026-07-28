@@ -5458,6 +5458,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
 
           {/* Announcements / Popup мэдэгдэл */}
           {tab === "announcements" && <AnnouncementsManager />}
+          {tab === "welcome-showcase" && <WelcomeShowcaseManager />}
 
           {/* Chatbot settings */}
           {tab === "chatbot" && <ChatbotSettingsManager />}
