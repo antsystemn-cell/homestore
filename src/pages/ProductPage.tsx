@@ -1074,6 +1074,20 @@ const ProductPage = () => {
           <ProductReviews productId={product.id} />
         </div>
 
+        {/* Similar products (grouped by brand + category) */}
+        <div className="px-4 md:px-0">
+          <SimilarProducts
+            seed={{
+              id: product.id,
+              category: product.category,
+              brand_id: (product as any).brand_id ?? null,
+              price: product.price,
+              name: product.name,
+            }}
+            brandName={brandName}
+          />
+        </div>
+
       </div>
 
       <div className="fixed bottom-16 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border p-3 safe-bottom flex gap-2 md:hidden z-50">
