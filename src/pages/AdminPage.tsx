@@ -2899,7 +2899,7 @@ const AdminPage = () => {
             >
               <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
             </button>
-            <span className="text-[10px] text-muted-foreground bg-secondary px-2 py-1 rounded-full">{SETTINGS_TABS.includes(tab) ? settingsSubItems.find(s => s.id === tab)?.label : sidebarItems.find(s => s.id === tab)?.label}</span>
+            <span className="text-[10px] text-muted-foreground bg-secondary px-2 py-1 rounded-full">{SETTINGS_TABS.includes(tab) ? settingsSubItems.find(s => s.id === tab)?.label : BONUS_TABS.includes(tab) ? bonusSubItems.find(s => s.id === tab)?.label : sidebarItems.find(s => s.id === tab)?.label}</span>
           </div>
         </header>
         <div className="sticky top-[52px] z-40 bg-background/95 backdrop-blur-md border-b border-border">
@@ -2908,9 +2908,16 @@ const AdminPage = () => {
               const Icon = t.icon;
               const active = t.id === "settings"
                 ? (tab === "settings" || SETTINGS_TABS.includes(tab))
-                : tab === t.id;
+                : t.id === "bonus"
+                  ? (tab === "bonus" || BONUS_TABS.includes(tab))
+                  : tab === t.id;
+              const onClick = () => setTab(
+                t.id === "settings" ? "categories" :
+                t.id === "bonus" ? "loyalty" :
+                t.id
+              );
               return (
-                <button key={t.id} onClick={() => setTab(t.id === "settings" ? "categories" : t.id)}
+                <button key={t.id} onClick={onClick}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all shrink-0 ${
                     active 
                       ? "bg-primary text-primary-foreground shadow-sm" 
