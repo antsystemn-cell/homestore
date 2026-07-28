@@ -2180,6 +2180,75 @@ export type Database = {
         }
         Relationships: []
       }
+      welcome_showcase_items: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          is_active: boolean
+          link_url: string | null
+          position: number
+          subtitle: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          is_active?: boolean
+          link_url?: string | null
+          position?: number
+          subtitle?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          link_url?: string | null
+          position?: number
+          subtitle?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      welcome_showcase_settings: {
+        Row: {
+          columns: number
+          id: number
+          image_size: number
+          is_enabled: boolean
+          show_delay_ms: number
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          columns?: number
+          id?: number
+          image_size?: number
+          is_enabled?: boolean
+          show_delay_ms?: number
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          columns?: number
+          id?: number
+          image_size?: number
+          is_enabled?: boolean
+          show_delay_ms?: number
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
