@@ -55,9 +55,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
 
-type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "coupon-usage" | "flash-sales" | "reels" | "settings" | "branches";
+type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "coupon-usage" | "flash-sales" | "reels" | "settings" | "bonus" | "branches";
 
-const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "announcements", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "referral", "promotions", "coupon-usage", "flash-sales", "reels", "drivers", "branches"];
+const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "announcements", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "reminders", "reviews", "flash-sales", "reels", "drivers", "branches"];
+const BONUS_TABS: Tab[] = ["loyalty", "spin", "referral", "promotions", "coupon-usage"];
 
 
 
@@ -104,7 +105,7 @@ const AdminPage = () => {
   const hasAdminAccess = isAdmin || isModerator || isSeller;
   const [tab, setTab] = useState<Tab>(() => {
     const t = searchParams.get("tab") as Tab | null;
-    const valid: Tab[] = ["stats","tracking","products","orders","users","drivers","categories","brands","delivery","delivery-portal","payments","banner","announcements","collections","chatbot","analytics","diagnostics","stocklog","recommendations","loyalty","reminders","reviews","spin","referral","promotions","coupon-usage","flash-sales","reels","settings","branches"];
+    const valid: Tab[] = ["stats","tracking","products","orders","users","drivers","categories","brands","delivery","delivery-portal","payments","banner","announcements","collections","chatbot","analytics","diagnostics","stocklog","recommendations","loyalty","reminders","reviews","spin","referral","promotions","coupon-usage","flash-sales","reels","settings","bonus","branches"];
     return t && valid.includes(t) ? t : "stats";
   });
   const [products, setProducts] = useState<any[]>([]);
@@ -1886,6 +1887,7 @@ const AdminPage = () => {
     // { id: "delivery-portal", ... } — removed: use per-order block instead
     { id: "users", label: "Хэрэглэгч", icon: Users },
     { id: "chatbot", label: "AI Чатбот", icon: MessageCircle },
+    { id: "bonus", label: "Бонус", icon: Gift },
     { id: "settings", label: "Ерөнхий тохиргоо", icon: Settings },
   ];
 
@@ -1901,22 +1903,22 @@ const AdminPage = () => {
     { id: "diagnostics", label: "Оношлогоо", icon: AlertTriangle },
     { id: "stocklog", label: "Нөөцийн хасалт", icon: Package },
     { id: "recommendations", label: "Зөвлөмжийн жинлүүр", icon: Sparkles },
-    { id: "loyalty", label: "Лоялти оноо", icon: Sparkles },
     { id: "reminders", label: "Санамжийн SMS", icon: MessageCircle },
     { id: "reviews", label: "Сэтгэгдэл", icon: Star },
+    { id: "flash-sales", label: "Flash Sale", icon: Sparkles },
+    { id: "reels", label: "Reels удирдах", icon: PlayCircle },
+    { id: "drivers", label: "Жолоочид", icon: Truck },
+    { id: "branches", label: "Салбар & шивэгч", icon: Store },
+  ];
+
+  const bonusSubItems: { id: Tab; label: string; icon: any }[] = [
+    { id: "loyalty", label: "Лоялти оноо", icon: Sparkles },
     { id: "spin", label: "Хүрд тоглоом", icon: Sparkles },
     { id: "referral", label: "Referral", icon: Users },
     { id: "promotions", label: "Урамшуулал", icon: Gift },
     { id: "coupon-usage", label: "Купон/Хожил", icon: Gift },
-    { id: "flash-sales", label: "Flash Sale", icon: Sparkles },
-    { id: "reels", label: "Reels удирдах", icon: PlayCircle },
-
-
-
-
-    { id: "drivers", label: "Жолоочид", icon: Truck },
-    { id: "branches", label: "Салбар & шивэгч", icon: Store },
   ];
+
 
   const sidebarItems = isAdmin
     ? allSidebarItems
@@ -2852,9 +2854,16 @@ const AdminPage = () => {
             const Icon = item.icon;
             const active = item.id === "settings"
               ? (tab === "settings" || SETTINGS_TABS.includes(tab))
-              : tab === item.id;
+              : item.id === "bonus"
+                ? (tab === "bonus" || BONUS_TABS.includes(tab))
+                : tab === item.id;
+            const onClick = () => setTab(
+              item.id === "settings" ? "categories" :
+              item.id === "bonus" ? "loyalty" :
+              item.id
+            );
             return (
-              <button key={item.id} onClick={() => setTab(item.id === "settings" ? "categories" : item.id)}
+              <button key={item.id} onClick={onClick}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                   active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                 }`}>
@@ -2890,7 +2899,7 @@ const AdminPage = () => {
             >
               <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
             </button>
-            <span className="text-[10px] text-muted-foreground bg-secondary px-2 py-1 rounded-full">{SETTINGS_TABS.includes(tab) ? settingsSubItems.find(s => s.id === tab)?.label : sidebarItems.find(s => s.id === tab)?.label}</span>
+            <span className="text-[10px] text-muted-foreground bg-secondary px-2 py-1 rounded-full">{SETTINGS_TABS.includes(tab) ? settingsSubItems.find(s => s.id === tab)?.label : BONUS_TABS.includes(tab) ? bonusSubItems.find(s => s.id === tab)?.label : sidebarItems.find(s => s.id === tab)?.label}</span>
           </div>
         </header>
         <div className="sticky top-[52px] z-40 bg-background/95 backdrop-blur-md border-b border-border">
@@ -2899,9 +2908,16 @@ const AdminPage = () => {
               const Icon = t.icon;
               const active = t.id === "settings"
                 ? (tab === "settings" || SETTINGS_TABS.includes(tab))
-                : tab === t.id;
+                : t.id === "bonus"
+                  ? (tab === "bonus" || BONUS_TABS.includes(tab))
+                  : tab === t.id;
+              const onClick = () => setTab(
+                t.id === "settings" ? "categories" :
+                t.id === "bonus" ? "loyalty" :
+                t.id
+              );
               return (
-                <button key={t.id} onClick={() => setTab(t.id === "settings" ? "categories" : t.id)}
+                <button key={t.id} onClick={onClick}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all shrink-0 ${
                     active 
                       ? "bg-primary text-primary-foreground shadow-sm" 
@@ -2929,7 +2945,9 @@ const AdminPage = () => {
             <h2 className="text-xl font-bold">
               {SETTINGS_TABS.includes(tab)
                 ? `Ерөнхий тохиргоо · ${settingsSubItems.find(s => s.id === tab)?.label}`
-                : sidebarItems.find(s => s.id === tab)?.label}
+                : BONUS_TABS.includes(tab)
+                  ? `Бонус · ${bonusSubItems.find(s => s.id === tab)?.label}`
+                  : sidebarItems.find(s => s.id === tab)?.label}
             </h2>
             <p className="text-sm text-muted-foreground mt-0.5">
               {tab === "stats" && "Дэлгүүрийн ерөнхий мэдээлэл"}
@@ -2970,11 +2988,11 @@ const AdminPage = () => {
           </div>
         </div>
 
-        {/* Settings sub-tab bar */}
-        {SETTINGS_TABS.includes(tab) && (
+        {/* Settings / Bonus sub-tab bar */}
+        {(SETTINGS_TABS.includes(tab) || BONUS_TABS.includes(tab)) && (
           <div className="sticky top-0 md:top-0 z-30 bg-background/95 backdrop-blur-md border-b border-border">
             <div className="flex overflow-x-auto no-scrollbar gap-1 px-3 md:px-8 py-2">
-              {settingsSubItems.map((s) => {
+              {(BONUS_TABS.includes(tab) ? bonusSubItems : settingsSubItems).map((s) => {
                 const Icon = s.icon;
                 const active = tab === s.id;
                 return (
