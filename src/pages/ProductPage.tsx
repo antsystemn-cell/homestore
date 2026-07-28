@@ -981,15 +981,15 @@ const ProductPage = () => {
               </div>
             )}
 
-            <div className="hidden md:flex flex-col gap-2">
-              <Button variant="outline" size="lg" disabled={isOutOfStock} className="flex-1 gap-2 rounded-xl h-12" onClick={() => openPurchase("cart")}>
-                <ShoppingCart className="h-4 w-4" />
+            <div className="hidden md:flex flex-col gap-3">
+              <Button variant="outline" size="lg" disabled={isOutOfStock} className="flex-1 gap-2 rounded-xl h-14 text-base font-semibold" onClick={() => openPurchase("cart")}>
+                <ShoppingCart className="h-5 w-5" />
                 {isOutOfStock ? "Дууссан" : "Сагсанд нэмэх"}
               </Button>
               <Button
                 size="lg"
                 disabled={isOutOfStock}
-                className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl h-12"
+                className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl h-14 text-base font-semibold"
                 onClick={() => openPurchase("buy")}
               >
                 {isOutOfStock ? "Дууссан" : "Худалдаж авах"}
@@ -1079,19 +1079,19 @@ const ProductPage = () => {
       <div className="fixed bottom-16 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border p-3 safe-bottom flex gap-2 md:hidden z-50">
         <button
           onClick={() => toggleWishlist(product)}
-          className={`flex items-center justify-center w-12 h-12 rounded-2xl border-2 transition-all ${
+          className={`flex items-center justify-center w-12 h-14 rounded-2xl border-2 transition-all ${
             liked ? "border-sale bg-sale/10" : "border-border bg-secondary hover:border-primary/40"
           }`}
         >
           <Heart className={`h-5 w-5 ${liked ? "fill-sale text-sale" : "text-muted-foreground"}`} />
         </button>
-        <Button variant="outline" disabled={isOutOfStock} className="flex-1 gap-2 rounded-2xl h-12 font-bold text-xs border-2" onClick={() => openPurchase("cart")}>
-          <ShoppingCart className="h-4 w-4" />
+        <Button variant="outline" disabled={isOutOfStock} className="flex-1 gap-2 rounded-2xl h-14 font-bold text-sm border-2" onClick={() => openPurchase("cart")}>
+          <ShoppingCart className="h-5 w-5" />
           {isOutOfStock ? "Дууссан" : "Сагсанд"}
         </Button>
         <Button
           disabled={isOutOfStock}
-          className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl h-12 font-bold text-xs shadow-lg"
+          className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl h-14 font-bold text-sm shadow-lg"
           onClick={() => openPurchase("buy")}
         >
           {isOutOfStock ? "Дууссан" : "Шууд авах"}
@@ -1313,7 +1313,7 @@ const ProductPage = () => {
 
             <Button
               size="lg"
-              className="w-full h-12 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-base font-bold"
+              className="w-full h-14 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-base font-bold"
               onClick={confirmSheet}
               disabled={isOutOfStock}
             >
