@@ -37,7 +37,9 @@ export default function SpinWheelPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [balance, setBalance] = useState<number>(0);
   const [nextExpiry, setNextExpiry] = useState<string | null>(null);
-  
+  const [rulesOpen, setRulesOpen] = useState(false);
+  const [spinConfig, setSpinConfig] = useState<SpinConfig | null>(null);
+
   const [now, setNow] = useState(Date.now());
   const spinningRef = useRef(false);
 
