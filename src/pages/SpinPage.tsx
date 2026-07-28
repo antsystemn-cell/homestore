@@ -319,6 +319,71 @@ export default function SpinWheelPage() {
           </Link>
         </div>
 
+        {/* Rules */}
+        <div className="w-full max-w-xs">
+          <button
+            onClick={() => setRulesOpen((v) => !v)}
+            className="w-full inline-flex items-center justify-between rounded-2xl border border-white/20 bg-white/10 backdrop-blur-sm px-4 py-3 text-sm font-semibold text-white/90 hover:bg-white/15 transition-colors"
+          >
+            <span className="inline-flex items-center gap-2">
+              <Info className="h-4 w-4 text-amber-300" />
+              Тоглоомын дүрэм
+            </span>
+            <ChevronDown className={`h-4 w-4 transition-transform ${rulesOpen ? "rotate-180" : ""}`} />
+          </button>
+
+          {rulesOpen && (
+            <div className="mt-2 rounded-2xl border border-white/10 bg-white/10 backdrop-blur-md p-4 space-y-4 text-white/90">
+              <div>
+                <div className="text-xs font-bold text-amber-200 mb-2 inline-flex items-center gap-1.5">
+                  <RotateCcw className="h-3.5 w-3.5" /> Эргүүлэг хэрхэн цуглуулах вэ?
+                </div>
+                <ul className="text-xs space-y-1.5 pl-4 list-disc text-white/80">
+                  <li>Шинээр бүртгүүлсэн үед <b className="text-white">{spinConfig?.signup_spins ?? 2} эргүүлэг</b> бэлэглэнэ.</li>
+                  <li>Найзаа урихад уригчид <b className="text-white">{spinConfig?.referral_spins ?? 1} эргүүлэг</b>, уригдсан хүнд <b className="text-white">{spinConfig?.invitee_referral_spins ?? 1} эргүүлэг</b> нэмэгдэнэ.</li>
+                  <li>Захиалга бүрээр лоялти оноо цуглуулж, хүрд эргүүлэх эрх нээгдэнэ.</li>
+                  <li>"Дахин эрх" хожвол шууд нэмэгдэнэ.</li>
+                </ul>
+              </div>
+
+              <div className="pt-3 border-t border-white/10">
+                <div className="text-xs font-bold text-amber-200 mb-2 inline-flex items-center gap-1.5">
+                  <Gift className="h-3.5 w-3.5" /> Хожлын төрөл
+                </div>
+                <ul className="text-xs space-y-1.5 pl-4 list-disc text-white/80">
+                  <li><b className="text-white">5,000₮ / 10,000₮ / 50,000₮</b> хөнгөлөлтийн купон.</li>
+                  <li><b className="text-white">Бэлэг сонгох эрх</b> — жагсаалтаас бэлэг сонгоно.</li>
+                  <li><b className="text-white">Сүүүүүүпэр бэлэг</b> — тодорхой бараа автоматаар бэлэглэнэ.</li>
+                  <li><b className="text-white">Дахин эргүүлэх эрх</b> — шууд нэмэгдэж, дахин тоглоно.</li>
+                </ul>
+              </div>
+
+              <div className="pt-3 border-t border-white/10">
+                <div className="text-xs font-bold text-amber-200 mb-2 inline-flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5" /> Хугацаа ба хязгаарлалт
+                </div>
+                <ul className="text-xs space-y-1.5 pl-4 list-disc text-white/80">
+                  <li>Эргүүлэг <b className="text-white">{spinConfig?.spin_expiry_hours ?? 48} цагийн</b> дотор ашиглана.</li>
+                  <li>Хожсон шагнал <b className="text-white">{spinConfig?.reward_expiry_hours ?? 24} цагийн</b> дотор хүчинтэй.</li>
+                  <li>Нэг дор хадгалагдах эргүүлэг <b className="text-white">{spinConfig?.max_active_spins ?? 10}-аас</b> хэтэрвэл хуучин нь дуусгавар болно.</li>
+                  <li>Купон зарим хямдралтай бараа болон бусад урамшуулалтай давхардаж болохгүй.</li>
+                </ul>
+              </div>
+
+              <div className="pt-3 border-t border-white/10">
+                <div className="text-xs font-bold text-amber-200 mb-2 inline-flex items-center gap-1.5">
+                  <AlertCircle className="h-3.5 w-3.5" /> Анхааруулга
+                </div>
+                <ul className="text-xs space-y-1.5 pl-4 list-disc text-white/80">
+                  <li>Хугацаа дууссан эргүүлэг ба шагнал автоматаар хүчингүй болно.</li>
+                  <li>Зөвхөн админ удирдсан өдөр төрөл, магадлалыг өөрчлөх эрхтэй.</li>
+                  <li>EasyShop тоглоомын дүрмийг урьдчилан мэдэгдэлгүйгээр өөрчлөх эрхтэй.</li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
+
       </div>
       <SpinRewardModal open={modalOpen} onClose={() => setModalOpen(false)} result={result} />
     </div>
