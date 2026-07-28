@@ -2945,7 +2945,9 @@ const AdminPage = () => {
             <h2 className="text-xl font-bold">
               {SETTINGS_TABS.includes(tab)
                 ? `Ерөнхий тохиргоо · ${settingsSubItems.find(s => s.id === tab)?.label}`
-                : sidebarItems.find(s => s.id === tab)?.label}
+                : BONUS_TABS.includes(tab)
+                  ? `Бонус · ${bonusSubItems.find(s => s.id === tab)?.label}`
+                  : sidebarItems.find(s => s.id === tab)?.label}
             </h2>
             <p className="text-sm text-muted-foreground mt-0.5">
               {tab === "stats" && "Дэлгүүрийн ерөнхий мэдээлэл"}
