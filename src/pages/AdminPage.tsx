@@ -2988,11 +2988,11 @@ const AdminPage = () => {
           </div>
         </div>
 
-        {/* Settings sub-tab bar */}
-        {SETTINGS_TABS.includes(tab) && (
+        {/* Settings / Bonus sub-tab bar */}
+        {(SETTINGS_TABS.includes(tab) || BONUS_TABS.includes(tab)) && (
           <div className="sticky top-0 md:top-0 z-30 bg-background/95 backdrop-blur-md border-b border-border">
             <div className="flex overflow-x-auto no-scrollbar gap-1 px-3 md:px-8 py-2">
-              {settingsSubItems.map((s) => {
+              {(BONUS_TABS.includes(tab) ? bonusSubItems : settingsSubItems).map((s) => {
                 const Icon = s.icon;
                 const active = tab === s.id;
                 return (
