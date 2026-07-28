@@ -174,15 +174,17 @@ const CheckoutPage = () => {
   // Sum discount of selected coupons (only those whose min_order ≤ cartTotal).
   // Mutual exclusion: if a wallet credit is selected, ignore stacked coupons
   // entirely to prevent any double-application of promotions.
-  const walletActive = !hasFlashSaleItems && !!walletCreditId && walletCreditDiscount > 0;
+  // Welcome bonus cannot be used together with any sale items.
+  const welcomeBlocked = hasSaleItems && walletCredit?.credit_type === "welcome";
+  const walletActive = !hasFlashSaleItems && !welcomeBlocked && !!walletCreditId && walletCreditDiscount > 0;
   const validSelectedCoupons = walletActive ? [] : availableCoupons.filter(
     (c) => selectedCouponIds.includes(c.id) && (!c.minimum_order_amount || cartTotal >= Number(c.minimum_order_amount))
   );
   const rawCouponDiscount = validSelectedCoupons.reduce((s, c) => s + Number(c.reward_value || 0), 0);
   const couponDiscount = Math.max(0, Math.min(rawCouponDiscount, cartTotal));
 
-  // Wallet credit discount (only applies when no flash sale items)
-  const effectiveWalletDiscount = hasFlashSaleItems ? 0 : walletCreditDiscount;
+  // Wallet credit discount (only applies when no flash sale items and not a blocked welcome)
+  const effectiveWalletDiscount = (hasFlashSaleItems || welcomeBlocked) ? 0 : walletCreditDiscount;
 
   // Loyalty points discount (1 point = 1₮)
   const totalBeforePoints = Math.max(0, cartTotal + totalDeliveryFee - couponDiscount - effectiveWalletDiscount);
@@ -822,6 +824,7 @@ const CheckoutPage = () => {
                   <WalletCreditsSection
                     subtotal={cartTotal}
                     hasFlashSaleItems={hasFlashSaleItems}
+                    hasSaleItems={hasSaleItems}
                     selectedCreditId={walletCreditId}
                     onSelect={(id, credit, discount) => {
                       setWalletCreditId(id);
