@@ -12,6 +12,7 @@ import {
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
 import AnnouncementsManager from "@/components/admin/AnnouncementsManager";
+import WelcomeShowcaseManager from "@/components/admin/WelcomeShowcaseManager";
 import ChatbotSettingsManager from "@/components/admin/ChatbotSettingsManager";
 import RecommendationSettingsManager from "@/components/admin/RecommendationSettingsManager";
 import LoyaltySettingsManager from "@/components/admin/LoyaltySettingsManager";
