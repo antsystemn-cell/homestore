@@ -85,6 +85,16 @@ export default function SpinWheelPage() {
     refresh();
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    (async () => {
+      const { data } = await (supabase.from("spin_config" as any) as any)
+        .select("signup_spins, referral_spins, invitee_referral_spins, spin_expiry_hours, reward_expiry_hours, max_active_spins")
+        .eq("id", 1)
+        .maybeSingle();
+      if (data) setSpinConfig(data as SpinConfig);
+    })();
+  }, []);
+
   const expiryText = useMemo(() => {
     if (!nextExpiry) return "";
     const ms = new Date(nextExpiry).getTime() - now;
