@@ -95,7 +95,7 @@ const PageFallback = () => (
 );
 
 const App = () => {
-  const SPIN_ENABLED = useSpinEnabled();
+  const SPIN_ENABLED = true; // useSpinEnabled();
   return (
 
   <QueryClientProvider client={queryClient}>
