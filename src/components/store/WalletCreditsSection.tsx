@@ -6,6 +6,7 @@ import { WalletCredit, computeCreditDiscount, pickBestCredit, useMyWalletCredits
 interface Props {
   subtotal: number;
   hasFlashSaleItems: boolean;
+  hasSaleItems?: boolean;
   selectedCreditId: string | null;
   onSelect: (id: string | null, credit: WalletCredit | null, discount: number) => void;
 }
@@ -17,7 +18,7 @@ const labelForType: Record<WalletCredit["credit_type"], string> = {
   manual: "Тусгай урамшуулал",
 };
 
-export default function WalletCreditsSection({ subtotal, hasFlashSaleItems, selectedCreditId, onSelect }: Props) {
+export default function WalletCreditsSection({ subtotal, hasFlashSaleItems, hasSaleItems = false, selectedCreditId, onSelect }: Props) {
   const { credits, loading } = useMyWalletCredits();
 
   const activeCredits = useMemo(
@@ -25,22 +26,28 @@ export default function WalletCreditsSection({ subtotal, hasFlashSaleItems, sele
     [credits]
   );
 
-  // Auto-suggest best credit once when list loads
+  const isBlockedCredit = (c: WalletCredit) =>
+    hasFlashSaleItems || (c.credit_type === "welcome" && hasSaleItems);
+
+  // Auto-suggest best credit once when list loads (skip blocked ones)
   useEffect(() => {
-    if (loading || hasFlashSaleItems || selectedCreditId !== null) return;
-    const best = pickBestCredit(activeCredits, subtotal);
+    if (loading || selectedCreditId !== null) return;
+    const eligible = activeCredits.filter((c) => !isBlockedCredit(c));
+    const best = pickBestCredit(eligible, subtotal);
     if (best) {
       const d = computeCreditDiscount(best, subtotal);
       if (d > 0) onSelect(best.id, best, d);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, hasFlashSaleItems]);
+  }, [loading, hasFlashSaleItems, hasSaleItems]);
 
-  // If flash sale items present, clear any selection
+  // If the currently selected credit becomes blocked, clear it
   useEffect(() => {
-    if (hasFlashSaleItems && selectedCreditId) onSelect(null, null, 0);
+    if (!selectedCreditId) return;
+    const sel = activeCredits.find((c) => c.id === selectedCreditId);
+    if (sel && isBlockedCredit(sel)) onSelect(null, null, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasFlashSaleItems]);
+  }, [hasFlashSaleItems, hasSaleItems, activeCredits]);
 
   if (loading || activeCredits.length === 0) return null;
 
@@ -58,6 +65,12 @@ export default function WalletCreditsSection({ subtotal, hasFlashSaleItems, sele
         </div>
       ) : (
         <div className="space-y-1.5 max-h-48 overflow-y-auto">
+          {hasSaleItems && activeCredits.some((c) => c.credit_type === "welcome") && (
+            <div className="flex items-start gap-2 rounded-lg bg-muted/50 border border-border p-2 text-[11px] text-muted-foreground">
+              <AlertCircle className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
+              <span>Тавтай морил купоныг хямдралтай бараанд ашиглах боломжгүй.</span>
+            </div>
+          )}
           <label className="flex items-center gap-2 text-xs p-1.5 rounded border border-border cursor-pointer hover:bg-accent/30">
             <input
               type="radio"
@@ -68,8 +81,9 @@ export default function WalletCreditsSection({ subtotal, hasFlashSaleItems, sele
             <span className="flex-1 text-muted-foreground">Ашиглахгүй</span>
           </label>
           {activeCredits.map((c) => {
-            const d = computeCreditDiscount(c, subtotal);
-            const eligible = d > 0;
+            const blocked = isBlockedCredit(c);
+            const d = blocked ? 0 : computeCreditDiscount(c, subtotal);
+            const eligible = !blocked && d > 0;
             const checked = selectedCreditId === c.id;
             return (
               <label
@@ -92,6 +106,7 @@ export default function WalletCreditsSection({ subtotal, hasFlashSaleItems, sele
                       ? `${c.value}% хямдрал${c.max_discount_amount ? ` (дээд ${formatPrice(Number(c.max_discount_amount))})` : ""}`
                       : `${formatPrice(Number(c.value))}`}
                     {c.min_order_amount ? ` · Мин: ${formatPrice(Number(c.min_order_amount))}` : ""}
+                    {blocked && c.credit_type === "welcome" ? " · Хямдралтай бараанд боломжгүй" : ""}
                   </span>
                 </span>
                 <span className="font-semibold text-primary">-{formatPrice(d)}</span>
