@@ -223,6 +223,10 @@ const Index = () => {
             <FlashSaleSection />
           </ErrorBoundary>
 
+          <ErrorBoundary>
+            <ElleSportSlideshow />
+          </ErrorBoundary>
+
           {/* New arrivals - between brands and sale (hidden on mobile) */}
           {newProducts.length > 0 && (
             <ErrorBoundary>
