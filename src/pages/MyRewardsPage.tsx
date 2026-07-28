@@ -292,11 +292,11 @@ function WelcomeBonusCard({ coupon, now }: { coupon: WelcomeCoupon | null; now: 
           <div>
             <p className="font-bold text-foreground">Тавтай морил урамшуулал</p>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Шинээр бүртгүүлсэн хэрэглэгч бүрт <span className="font-bold text-foreground">15,000₮</span> купон бэлэглэнэ.
+              Шинээр бүртгүүлсэн хэрэглэгч бүрт <span className="font-bold text-foreground">10,000₮</span> купон бэлэглэнэ.
             </p>
             <ul className="mt-2 text-xs text-muted-foreground space-y-1">
               <li className="flex gap-2"><span className="text-primary">•</span>100,000₮-с дээш захиалгад хүчинтэй</li>
-              <li className="flex gap-2"><span className="text-primary">•</span>Бүртгүүлснээс хойш 48 цагийн дотор ашиглана</li>
+              <li className="flex gap-2"><span className="text-primary">•</span>Бүртгүүлснээс хойш 14 хоногийн дотор ашиглана</li>
               <li className="flex gap-2"><span className="text-primary">•</span>Захиалга хийхдээ купон кодоо оруулна уу</li>
             </ul>
           </div>
@@ -334,7 +334,7 @@ function WelcomeBonusCard({ coupon, now }: { coupon: WelcomeCoupon | null; now: 
             </p>
             <ul className="mt-2 text-xs text-muted-foreground space-y-1">
               <li className="flex gap-2"><span className="text-primary">•</span>{coupon.minimum_order_amount.toLocaleString()}₮-с дээш захиалгад хүчинтэй</li>
-              <li className="flex gap-2"><span className="text-primary">•</span>Бүртгүүлснээс хойш 48 цагийн дотор ашиглана</li>
+              <li className="flex gap-2"><span className="text-primary">•</span>Бүртгүүлснээс хойш 14 хоногийн дотор ашиглана</li>
               <li className="flex gap-2"><span className="text-primary">•</span>Захиалга хийхдээ купон кодоо оруулна уу</li>
             </ul>
           </div>
