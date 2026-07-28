@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Zap, Clock } from "lucide-react";
 import { formatPrice } from "@/data/products";
-import { useFlashSales } from "@/hooks/useFlashSales";
-import FlashSaleCountdown from "./FlashSaleCountdown";
+import { useFlashSales, FlashSaleRow } from "@/hooks/useFlashSales";
+import { fetchPublicBrands } from "@/lib/publicStoreApi";
+import { supabase } from "@/integrations/supabase/client";
 import { transformImage } from "@/lib/imageUrl";
 
 function pad(n: number) {
@@ -58,25 +59,104 @@ const HeaderCountdown = ({ endsAt }: { endsAt: string }) => {
       <Box v={t.s} pulse />
     </div>
   );
-
 };
 
+const AUTOPLAY_MS = 4000;
 
 const FlashSaleSection = React.memo(() => {
-  const rows = useFlashSales();
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const allRows = useFlashSales();
   const navigate = useNavigate();
+  const [productBrandMap, setProductBrandMap] = useState<Record<string, string | null>>({});
+  const [elleBrandId, setElleBrandId] = useState<string | null>(null);
+  const [index, setIndex] = useState(0);
 
-  const scroll = useCallback((dir: "left" | "right") => {
-    if (!scrollRef.current) return;
-    const amount = scrollRef.current.clientWidth * 0.7;
-    scrollRef.current.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
+  // Resolve Elle Sport brand id
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const brands = await fetchPublicBrands();
+      if (cancelled) return;
+      const elle = (brands || []).find((b: any) =>
+        String(b?.name || "").toLowerCase().includes("elle")
+      );
+      setElleBrandId(elle?.id || null);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  // Fetch brand_id for the flash-sale product ids we don't yet know about
+  useEffect(() => {
+    const missing = allRows
+      .map((r) => r.product_id)
+      .filter((id) => !(id in productBrandMap));
+    if (missing.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id,brand_id")
+        .in("id", missing);
+      if (cancelled || error || !data) return;
+      setProductBrandMap((prev) => {
+        const next = { ...prev };
+        data.forEach((p: any) => {
+          next[p.id] = p.brand_id ?? null;
+        });
+        missing.forEach((id) => {
+          if (!(id in next)) next[id] = null;
+        });
+        return next;
+      });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [allRows, productBrandMap]);
+
+  // Elle Sport + 50% off only
+  const rows = useMemo<FlashSaleRow[]>(() => {
+    if (!elleBrandId) return [];
+    return allRows.filter(
+      (r) =>
+        productBrandMap[r.product_id] === elleBrandId &&
+        Number(r.discount_percent) === 50
+    );
+  }, [allRows, productBrandMap, elleBrandId]);
+
+  // Reset index when list changes
+  useEffect(() => {
+    setIndex((i) => (rows.length === 0 ? 0 : i % rows.length));
+  }, [rows.length]);
+
+  // Autoplay
+  useEffect(() => {
+    if (rows.length <= 1) return;
+    const id = window.setInterval(
+      () => setIndex((i) => (i + 1) % rows.length),
+      AUTOPLAY_MS
+    );
+    return () => window.clearInterval(id);
+  }, [rows.length]);
+
+  const go = useCallback(
+    (dir: "left" | "right") => {
+      setIndex((i) => {
+        const n = rows.length;
+        if (n === 0) return 0;
+        return dir === "left" ? (i - 1 + n) % n : (i + 1) % n;
+      });
+    },
+    [rows.length]
+  );
 
   if (!rows.length) return null;
 
-  // Soonest-ending active flash sale drives the header countdown
-  const soonestEndsAt = rows
+  const current = rows[index];
+  const productUrl = `/product/${current.product_slug || current.product_id}`;
+  const img = current.product_thumbnail || current.product_image || "/placeholder.svg";
+  const soonestEndsAt = [...rows]
     .map((r) => r.ends_at)
     .filter(Boolean)
     .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0];
@@ -90,7 +170,7 @@ const FlashSaleSection = React.memo(() => {
               <Zap className="h-4 w-4 md:h-5 md:w-5 text-destructive fill-destructive" />
             </div>
             <h2 className="text-sm md:text-base font-bold text-foreground tracking-tight whitespace-nowrap">
-              Flash Sales
+              Elle Sport Woman · 50%
             </h2>
             {soonestEndsAt && (
               <>
@@ -99,84 +179,89 @@ const FlashSaleSection = React.memo(() => {
               </>
             )}
           </div>
-          <div className="hidden md:flex items-center gap-1.5 flex-shrink-0">
-            <button
-              onClick={() => scroll("left")}
-              className="p-1.5 rounded-full border border-border hover:border-destructive/40 hover:bg-destructive/5 transition-colors text-muted-foreground hover:text-destructive"
-              aria-label="Өмнөх"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => scroll("right")}
-              className="p-1.5 rounded-full border border-border hover:border-destructive/40 hover:bg-destructive/5 transition-colors text-muted-foreground hover:text-destructive"
-              aria-label="Дараах"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
         </div>
 
-
-        <div
-          ref={scrollRef}
-          className="flex gap-2 md:gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1"
-        >
-          {rows.map((r, index) => {
-            const productUrl = `/product/${r.product_slug || r.product_id}`;
-            const img = r.product_thumbnail || r.product_image || "/placeholder.svg";
-            return (
-              <a
-                key={r.id}
-                href={productUrl}
-                onClick={(e) => {
-                  if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
-                    e.preventDefault();
-                    navigate(productUrl);
-                  }
-                }}
-                className="flex-shrink-0 w-[42vw] md:w-[200px] snap-start group animate-fade-in block no-underline text-inherit"
-                style={{ animationDelay: `${index * 50}ms` }}
+        <div className="relative rounded-2xl overflow-hidden bg-card border border-destructive/30 shadow-sm">
+          <a
+            href={productUrl}
+            onClick={(e) => {
+              if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                e.preventDefault();
+                navigate(productUrl);
+              }
+            }}
+            className="grid grid-cols-1 md:grid-cols-2 group no-underline text-inherit"
+          >
+            <div className="relative aspect-square md:aspect-[4/5] bg-secondary overflow-hidden">
+              <img
+                key={current.id}
+                src={transformImage(img, 800)}
+                alt={current.product_name}
+                className="w-full h-full object-cover animate-fade-in group-hover:scale-105 transition-transform duration-700"
+                loading="lazy"
+                decoding="async"
+              />
+              <span className="absolute top-3 left-3 bg-destructive text-destructive-foreground text-xs font-bold px-2 py-1 rounded-md shadow">
+                -50%
+              </span>
+            </div>
+            <div className="p-4 md:p-6 flex flex-col justify-center gap-3">
+              <p className="text-[11px] md:text-xs uppercase tracking-wider text-destructive font-semibold">
+                Flash Sale
+              </p>
+              <h3
+                key={`t-${current.id}`}
+                className="text-base md:text-2xl font-bold text-foreground leading-snug animate-fade-in"
               >
-                <div className="relative rounded-xl overflow-hidden bg-card border border-destructive/30 shadow-sm hover:shadow-md transition-all duration-300">
-                  <div className="relative aspect-square bg-secondary overflow-hidden">
-                    <img
-                      src={transformImage(img, 400)}
-                      alt={r.product_name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
-                      decoding="async"
-                      width={200}
-                      height={200}
-                    />
-                    {r.discount_percent > 0 && (
-                      <span className="absolute top-1.5 left-1.5 bg-destructive text-destructive-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-md">
-                        -{r.discount_percent}%
-                      </span>
-                    )}
-                    <div className="absolute bottom-1.5 left-1.5 right-1.5">
-                      <FlashSaleCountdown endsAt={r.ends_at} compact />
-                    </div>
-                  </div>
-                  <div className="px-2 py-2 space-y-0.5">
-                    <h3 className="text-[11px] md:text-xs text-foreground font-medium line-clamp-2 leading-snug min-h-[2.2em]">
-                      {r.product_name}
-                    </h3>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-xs md:text-sm font-bold text-destructive">
-                        {formatPrice(r.sale_price)}
-                      </span>
-                      {Number(r.product_price) > Number(r.sale_price) && (
-                        <span className="text-[10px] md:text-xs text-muted-foreground line-through">
-                          {formatPrice(r.product_price)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </a>
-            );
-          })}
+                {current.product_name}
+              </h3>
+              <div className="flex items-baseline gap-2">
+                <span className="text-xl md:text-3xl font-extrabold text-destructive">
+                  {formatPrice(current.sale_price)}
+                </span>
+                {Number(current.product_price) > Number(current.sale_price) && (
+                  <span className="text-sm md:text-base text-muted-foreground line-through">
+                    {formatPrice(current.product_price)}
+                  </span>
+                )}
+              </div>
+              <span className="mt-2 inline-flex items-center justify-center text-xs md:text-sm font-semibold bg-destructive text-destructive-foreground rounded-full px-4 py-2 w-fit">
+                Худалдан авах →
+              </span>
+            </div>
+          </a>
+
+          {rows.length > 1 && (
+            <>
+              <button
+                onClick={() => go("left")}
+                className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 md:h-10 md:w-10 rounded-full bg-background/80 backdrop-blur border border-border hover:bg-background flex items-center justify-center text-foreground shadow"
+                aria-label="Өмнөх"
+              >
+                <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
+              </button>
+              <button
+                onClick={() => go("right")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 md:h-10 md:w-10 rounded-full bg-background/80 backdrop-blur border border-border hover:bg-background flex items-center justify-center text-foreground shadow"
+                aria-label="Дараах"
+              >
+                <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
+              </button>
+
+              <div className="absolute bottom-2 left-0 right-0 flex items-center justify-center gap-1.5">
+                {rows.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setIndex(i)}
+                    aria-label={`Slide ${i + 1}`}
+                    className={`h-1.5 rounded-full transition-all ${
+                      i === index ? "w-6 bg-destructive" : "w-1.5 bg-foreground/30"
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </section>
