@@ -11,8 +11,6 @@ import BrandLogos from "@/components/store/BrandLogos";
 import NewArrivals from "@/components/store/NewArrivals";
 import AdBanners, { useAdImages } from "@/components/store/AdBanners";
 import ForYou from "@/components/store/ForYou";
-import FlashSaleSection from "@/components/store/FlashSaleSection";
-import ElleSportSlideshow from "@/components/store/ElleSportSlideshow";
 
 
 
@@ -218,14 +216,6 @@ const Index = () => {
 
           {/* Brand logos are now interspersed randomly inside the product grid below */}
 
-          {/* Flash sale — "Өнөөдрийн хямдрал" */}
-          <ErrorBoundary>
-            <FlashSaleSection />
-          </ErrorBoundary>
-
-          <ErrorBoundary>
-            <ElleSportSlideshow />
-          </ErrorBoundary>
 
           {/* New arrivals - between brands and sale (hidden on mobile) */}
           {newProducts.length > 0 && (
