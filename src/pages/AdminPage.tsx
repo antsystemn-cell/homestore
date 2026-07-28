@@ -2854,9 +2854,16 @@ const AdminPage = () => {
             const Icon = item.icon;
             const active = item.id === "settings"
               ? (tab === "settings" || SETTINGS_TABS.includes(tab))
-              : tab === item.id;
+              : item.id === "bonus"
+                ? (tab === "bonus" || BONUS_TABS.includes(tab))
+                : tab === item.id;
+            const onClick = () => setTab(
+              item.id === "settings" ? "categories" :
+              item.id === "bonus" ? "loyalty" :
+              item.id
+            );
             return (
-              <button key={item.id} onClick={() => setTab(item.id === "settings" ? "categories" : item.id)}
+              <button key={item.id} onClick={onClick}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                   active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                 }`}>
