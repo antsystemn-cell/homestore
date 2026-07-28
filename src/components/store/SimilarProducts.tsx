@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import ProductCard from "@/components/store/ProductCard";
 import { fetchSimilarProductsGrouped } from "@/lib/publicStoreApi";
-import { mapDbProduct, type Product } from "@/lib/products";
+import { mapDbProduct, type Product } from "@/data/products";
 import { Sparkles, Tag as TagIcon, Store } from "lucide-react";
 
 type Tab = "brandCategory" | "brand" | "category";
