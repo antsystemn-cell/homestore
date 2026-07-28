@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Copy, Ticket, Gift, ArrowLeft, ChevronDown } from "lucide-react";
+import { Copy, Ticket, Gift, ArrowLeft, ChevronDown, Sparkles, Clock } from "lucide-react";
 import { toast } from "sonner";
 
 type Coupon = {
@@ -17,6 +17,14 @@ type Coupon = {
   used_at: string | null;
   invalidated_at: string | null;
   created_at: string;
+};
+
+type WelcomeCoupon = {
+  code: string;
+  reward_value: number;
+  minimum_order_amount: number;
+  expires_at: string;
+  is_used: boolean;
 };
 
 type CouponGroup = {
