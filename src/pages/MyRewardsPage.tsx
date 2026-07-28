@@ -135,7 +135,9 @@ export default function MyRewardsPage() {
           <h1 className="text-xl font-bold">Миний шагнал</h1>
         </div>
 
-        {activeCount === 0 && inactiveCount === 0 && (
+        <WelcomeBonusCard coupon={welcomeCoupon} now={now} />
+
+        {activeCount === 0 && inactiveCount === 0 && !welcomeCoupon && (
           <div className="text-center py-16">
             <Gift className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
             <p className="text-muted-foreground mb-4">Танд шагнал алга байна</p>
