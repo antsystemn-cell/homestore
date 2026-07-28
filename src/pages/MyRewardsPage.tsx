@@ -278,3 +278,99 @@ function CouponGroupCard({ group, now, active = false }: { group: CouponGroup; n
     </div>
   );
 }
+
+function WelcomeBonusCard({ coupon, now }: { coupon: WelcomeCoupon | null; now: number }) {
+  const [copied, setCopied] = useState(false);
+
+  if (!coupon) {
+    return (
+      <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 to-primary/5 p-4 mb-4">
+        <div className="flex items-start gap-3">
+          <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+            <Sparkles className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <p className="font-bold text-foreground">Тавтай морил урамшуулал</p>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Шинээр бүртгүүлсэн хэрэглэгч бүрт <span className="font-bold text-foreground">15,000₮</span> купон бэлэглэнэ.
+            </p>
+            <ul className="mt-2 text-xs text-muted-foreground space-y-1">
+              <li className="flex gap-2"><span className="text-primary">•</span>100,000₮-с дээш захиалгад хүчинтэй</li>
+              <li className="flex gap-2"><span className="text-primary">•</span>Бүртгүүлснээс хойш 48 цагийн дотор ашиглана</li>
+              <li className="flex gap-2"><span className="text-primary">•</span>Захиалга хийхдээ купон кодоо оруулна уу</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const remaining = new Date(coupon.expires_at).getTime() - now;
+  const expired = remaining <= 0;
+  const used = coupon.is_used;
+
+  const copyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(coupon.code);
+      setCopied(true);
+      toast.success("Купон код хуулагдлаа");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Хуулж чадсангүй");
+    }
+  };
+
+  return (
+    <div className={`rounded-2xl border p-4 mb-4 ${used || expired ? "bg-muted/40 border-border opacity-80" : "border-primary/30 bg-gradient-to-br from-primary/10 to-primary/5"}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3 flex-1 min-w-0">
+          <div className={`h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 ${used || expired ? "bg-muted" : "bg-primary/20"}`}>
+            <Sparkles className={`h-5 w-5 ${used || expired ? "text-muted-foreground" : "text-primary"}`} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-foreground">Тавтай морил урамшуулал</p>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Шинэ бүртгэлийн <span className="font-bold text-foreground">{coupon.reward_value.toLocaleString()}₮</span> купон
+            </p>
+            <ul className="mt-2 text-xs text-muted-foreground space-y-1">
+              <li className="flex gap-2"><span className="text-primary">•</span>{coupon.minimum_order_amount.toLocaleString()}₮-с дээш захиалгад хүчинтэй</li>
+              <li className="flex gap-2"><span className="text-primary">•</span>Бүртгүүлснээс хойш 48 цагийн дотор ашиглана</li>
+              <li className="flex gap-2"><span className="text-primary">•</span>Захиалга хийхдээ купон кодоо оруулна уу</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-xl border-2 border-dashed border-primary/30 bg-background/60 p-3 flex items-center justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">Купон код</p>
+          <p className="font-mono text-base font-extrabold text-foreground truncate">{coupon.code}</p>
+        </div>
+        {!used && !expired && (
+          <Button size="sm" variant="outline" onClick={copyCode} className="flex-shrink-0">
+            {copied ? "Хуулагдлаа" : "Хуулах"}
+          </Button>
+        )}
+      </div>
+
+      <div className="mt-3 flex items-center gap-1.5 text-xs">
+        <Clock className={`h-3.5 w-3.5 ${used || expired ? "text-muted-foreground" : "text-primary"}`} />
+        {used ? (
+          <span className="text-muted-foreground">Ашигласан</span>
+        ) : expired ? (
+          <span className="text-muted-foreground">Хугацаа дууссан</span>
+        ) : (
+          <span className="text-foreground font-medium">Хүчинтэй хугацаа: {fmtCountdownFull(remaining)}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function fmtCountdownFull(ms: number) {
+  if (ms <= 0) return "дууссан";
+  const h = Math.floor(ms / 3_600_000);
+  const m = Math.floor((ms % 3_600_000) / 60_000);
+  const s = Math.floor((ms % 60_000) / 1000);
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
