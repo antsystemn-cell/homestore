@@ -1295,6 +1295,34 @@ const AdminPage = () => {
       setOrders((prev) => [data, ...prev]);
       setShowManualOrder(false);
       resetManualForm();
+      // Гараар оруулсан захиалга нь аль хэдийн баталгаажсан гэж үзэн шууд
+      // хүргэлтийн систем рүү автоматаар илгээнэ.
+      (async () => {
+        try {
+          const { data: sendRes, error: sendErr } = await supabase.functions.invoke(
+            "send-to-delivery",
+            { body: { order_id: data.id } }
+          );
+          if (sendErr || !sendRes?.success) {
+            console.error("auto send-to-delivery failed", sendErr, sendRes);
+            toast.error("Хүргэлт рүү автоматаар илгээж чадсангүй. Гараар илгээнэ үү.");
+            return;
+          }
+          toast.success("Хүргэлт рүү автоматаар илгээгдлээ");
+          if (sendRes.delivery_order_id) {
+            setOrders((prev) =>
+              prev.map((o) =>
+                o.id === data.id
+                  ? { ...o, delivery_order_id: sendRes.delivery_order_id, delivery_status: "processing" }
+                  : o
+              )
+            );
+          }
+        } catch (err) {
+          console.error("auto send-to-delivery exception", err);
+          toast.error("Хүргэлт рүү илгээхэд алдаа гарлаа");
+        }
+      })();
     } catch (e: any) {
       console.error("Manual order create error", e);
       toast.error("Захиалга үүсгэхэд алдаа: " + (e?.message || "тодорхойгүй"));
