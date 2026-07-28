@@ -7,6 +7,7 @@ import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import ProductCard from "@/components/store/ProductCard";
+import SimilarProducts from "@/components/store/SimilarProducts";
 import ProductReviews from "@/components/store/ProductReviews";
 import FrequentlyBoughtTogether from "@/components/store/FrequentlyBoughtTogether";
 import LoadError from "@/components/store/LoadError";
@@ -1072,6 +1073,20 @@ const ProductPage = () => {
         {/* Reviews */}
         <div className="mt-10 md:mt-16 px-4 md:px-0">
           <ProductReviews productId={product.id} />
+        </div>
+
+        {/* Similar products (grouped by brand + category) */}
+        <div className="px-4 md:px-0">
+          <SimilarProducts
+            seed={{
+              id: product.id,
+              category: product.category,
+              brand_id: (product as any).brand_id ?? null,
+              price: product.price,
+              name: product.name,
+            }}
+            brandName={brandName}
+          />
         </div>
 
       </div>

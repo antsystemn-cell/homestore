@@ -229,6 +229,60 @@ export const fetchRelatedPublicProducts = async (
   }
 };
 
+// Grouped similar products: returns products grouped by "same brand" and
+// "same category" so the UI can show tabs like "Ижил брэнд" / "Ижил төрөл".
+// Same brand+category is the strongest signal (e.g. чихэвч + Sony → other Sony чихэвч).
+export const fetchSimilarProductsGrouped = async (
+  seedProduct: { id: string; category?: string | null; brand_id?: string | null; price?: number | null; name?: string | null },
+  opts?: { limit?: number; weights?: Partial<ScoreWeights> },
+): Promise<{ sameBrand: any[]; sameCategory: any[]; brandAndCategory: any[] }> => {
+  try {
+    const { rankCandidates } = await import("./recommendations");
+    const limit = opts?.limit ?? 12;
+    const exclude = new Set([seedProduct.id]);
+    const seeds = [{ id: seedProduct.id, category: seedProduct.category ?? null, brand_id: seedProduct.brand_id ?? null, price: seedProduct.price ?? null, name: seedProduct.name ?? null }];
+
+    const brandPromise: Promise<any[]> = seedProduct.brand_id
+      ? fetchPublic<any[]>("products", {
+          select: LIST_SELECT,
+          is_active: "eq.true",
+          id: `neq.${seedProduct.id}`,
+          brand_id: `eq.${seedProduct.brand_id}`,
+          limit: 40,
+        }).catch(() => [])
+      : Promise.resolve([]);
+    const catPromise: Promise<any[]> = seedProduct.category
+      ? fetchPublic<any[]>("products", {
+          select: LIST_SELECT,
+          is_active: "eq.true",
+          id: `neq.${seedProduct.id}`,
+          category: `eq.${seedProduct.category}`,
+          limit: 40,
+        }).catch(() => [])
+      : Promise.resolve([]);
+
+    const [brandRows, catRows] = await Promise.all([brandPromise, catPromise]);
+
+    const brandAndCategoryRows = (brandRows || []).filter(
+      (r: any) => r.category && r.category === seedProduct.category,
+    );
+    const brandAndCategory = stripColorImages(
+      rankCandidates(brandAndCategoryRows, seeds, exclude, limit, opts?.weights),
+    );
+    const sameBrand = stripColorImages(
+      rankCandidates(brandRows || [], seeds, exclude, limit, opts?.weights),
+    );
+    const sameCategory = stripColorImages(
+      rankCandidates(catRows || [], seeds, exclude, limit, opts?.weights),
+    );
+
+    return { sameBrand, sameCategory, brandAndCategory };
+  } catch (error) {
+    logError("similarProductsGrouped", error);
+    return { sameBrand: [], sameCategory: [], brandAndCategory: [] };
+  }
+};
+
 // Smart recommendations for the cart page. Combines categories + brands from
 // all cart items, then ranks against the cart as a multi-seed signal.
 export const fetchCartRecommendations = async (
