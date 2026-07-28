@@ -1,12 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { X } from "lucide-react";
+import { X, Info, ChevronDown, Sparkles, Gift, Ticket, RotateCcw, Clock, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { executeSpin, REWARD_LABEL, type SpinResult } from "@/lib/spinApi";
 import SpinRewardModal from "@/components/spin/SpinRewardModal";
+
+type SpinConfig = {
+  signup_spins: number;
+  referral_spins: number;
+  invitee_referral_spins: number;
+  spin_expiry_hours: number;
+  reward_expiry_hours: number;
+  max_active_spins: number;
+};
 
 const SEGMENTS: { key: SpinResult["reward_type"]; label: string; from: string; to: string }[] = [
   { key: "coupon_5k",  label: "5,000₮",  from: "#FFB547", to: "#F97316" },
