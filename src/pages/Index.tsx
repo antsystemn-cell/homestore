@@ -12,6 +12,7 @@ import NewArrivals from "@/components/store/NewArrivals";
 import AdBanners, { useAdImages } from "@/components/store/AdBanners";
 import ForYou from "@/components/store/ForYou";
 import FlashSaleSection from "@/components/store/FlashSaleSection";
+import ElleSportSlideshow from "@/components/store/ElleSportSlideshow";
 
 
 
