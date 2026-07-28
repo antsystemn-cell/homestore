@@ -11,6 +11,7 @@ import BrandLogos from "@/components/store/BrandLogos";
 import NewArrivals from "@/components/store/NewArrivals";
 import AdBanners, { useAdImages } from "@/components/store/AdBanners";
 import ForYou from "@/components/store/ForYou";
+import WelcomeShowcaseModal from "@/components/store/WelcomeShowcaseModal";
 
 
 
@@ -192,6 +193,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
       <Header />
+      <WelcomeShowcaseModal featured={featuredProducts} sale={saleProducts} />
       {loading ? (
         <ProductGridSkeleton count={PAGE_SIZE} />
       ) : error ? (
