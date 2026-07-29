@@ -1350,6 +1350,7 @@ const AdminPage = () => {
     sono: { label: "Соно", color: "bg-rose-500/10 text-rose-600" },
     transfer: { label: "Шилжүүлэг", color: "bg-cyan-500/10 text-cyan-600" },
     pocket: { label: "Pocket", color: "bg-green-500/10 text-green-600" },
+    exchange: { label: "Бараа солих", color: "bg-slate-500/10 text-slate-600" },
   };
 
   const handleDeliveryPhotoUpload = async (orderId: string, field: "delivery_pickup_photo" | "delivery_completed_photo", file: File) => {
