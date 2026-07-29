@@ -1218,6 +1218,15 @@ const AdminPage = () => {
     setManualProductSearch("");
   };
 
+  // "Бараа солих" (exchange): force all item prices to 0 automatically.
+  useEffect(() => {
+    if (manualForm.payment_method !== "exchange") return;
+    setManualItems((prev) => {
+      if (!prev.some((it) => (Number(it.price) || 0) !== 0)) return prev;
+      return prev.map((it) => ({ ...it, price: 0 }));
+    });
+  }, [manualForm.payment_method, manualItems.length]);
+
   const manualSubtotal = manualItems.reduce((s, it) => s + (it.price * it.quantity), 0);
   const manualTotal = manualSubtotal + (Number(manualForm.delivery_fee) || 0);
 
