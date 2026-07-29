@@ -322,6 +322,36 @@ export type Database = {
         }
         Relationships: []
       }
+      deleted_orders: {
+        Row: {
+          deleted_at: string
+          deleted_by: string | null
+          deleted_by_email: string | null
+          id: string
+          order_id: string
+          order_ref: string | null
+          snapshot: Json
+        }
+        Insert: {
+          deleted_at?: string
+          deleted_by?: string | null
+          deleted_by_email?: string | null
+          id?: string
+          order_id: string
+          order_ref?: string | null
+          snapshot: Json
+        }
+        Update: {
+          deleted_at?: string
+          deleted_by?: string | null
+          deleted_by_email?: string | null
+          id?: string
+          order_id?: string
+          order_ref?: string | null
+          snapshot?: Json
+        }
+        Relationships: []
+      }
       delivery_options: {
         Row: {
           address: string | null
@@ -2348,6 +2378,18 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_list_deleted_orders: {
+        Args: { _limit?: number }
+        Returns: {
+          deleted_at: string
+          deleted_by: string
+          deleted_by_email: string
+          id: string
+          order_id: string
+          order_ref: string
+          snapshot: Json
+        }[]
+      }
       admin_list_orders_light: {
         Args: never
         Returns: {
@@ -2511,6 +2553,10 @@ export type Database = {
           total_invites: number
           total_reward_amount: number
         }[]
+      }
+      admin_restore_deleted_order: {
+        Args: { _archive_id: string }
+        Returns: string
       }
       apply_referral_code: { Args: { _code: string }; Returns: Json }
       attach_lead_contact: {
