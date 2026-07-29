@@ -108,13 +108,7 @@ const BottomNav = () => {
               <div className="relative">
                 <Icon
                   className={`h-5 w-5 transition-transform ${
-                    active ? "scale-110" : ""
-                  } ${
-                    t.path === "/wishlist" && wishlist.length > 0
-                      ? "fill-sale text-sale"
-                      : active
-                      ? "fill-sale/15"
-                      : ""
+                    active ? "scale-110 fill-sale/15" : ""
                   }`}
                 />
                 {t.badge !== undefined && t.badge > 0 && (
