@@ -4285,7 +4285,14 @@ const AdminPage = () => {
                     Захиалга оруулах
                   </button>
 
-                </div>
+              </div>
+
+              <RecentlyDeletedOrders
+                refreshKey={deletedRefreshKey}
+                onRestored={handleRefresh}
+              />
+
+
               </div>
 
               {/* Delivery integration summary */}
