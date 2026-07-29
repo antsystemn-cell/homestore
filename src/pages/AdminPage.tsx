@@ -1922,6 +1922,7 @@ const AdminPage = () => {
     { id: "reels", label: "Reels удирдах", icon: PlayCircle },
     { id: "drivers", label: "Жолоочид", icon: Truck },
     { id: "branches", label: "Салбар & шивэгч", icon: Store },
+    { id: "returns", label: "Бараа буцаалт", icon: RotateCcw },
   ];
 
   const bonusSubItems: { id: Tab; label: string; icon: any }[] = [
@@ -5770,6 +5771,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
 
           {/* Stock Deduction Log Tab */}
           {tab === "stocklog" && <StockDeductionLog />}
+          {tab === "returns" && <ReturnsManager />}
 
           {/* Drivers Tab */}
           {tab === "drivers" && (
