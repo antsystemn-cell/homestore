@@ -1229,6 +1229,7 @@ const AdminPage = () => {
 
   const [deleteOrderTarget, setDeleteOrderTarget] = useState<{ id: string } | null>(null);
   const [deletingOrder, setDeletingOrder] = useState(false);
+  const [deletedRefreshKey, setDeletedRefreshKey] = useState(0);
 
   const handleDeleteOrder = async (orderId: string) => {
     setDeletingOrder(true);
@@ -1238,6 +1239,7 @@ const AdminPage = () => {
     } else {
       toast.success("Захиалга устгагдлаа");
       setOrders((prev) => prev.filter((o) => o.id !== orderId));
+      setDeletedRefreshKey((k) => k + 1);
     }
     setDeleteOrderTarget(null);
     setDeletingOrder(false);
