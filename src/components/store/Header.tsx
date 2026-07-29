@@ -1,4 +1,4 @@
-import { Search, Clock, X, ArrowUpRight, User as UserIcon, LogIn } from "lucide-react";
+import { Search, Clock, X, ArrowUpRight, LogIn } from "lucide-react";
 import NotificationsBell from "./NotificationsBell";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
