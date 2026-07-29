@@ -4636,16 +4636,6 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                         >
                           📋
                         </button>
-                        {!o.delivery_order_id && o.status !== "cancelled" && (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); sendToDelivery(o.id); }}
-                            disabled={sendingDelivery === o.id}
-                            className="p-2 rounded-lg hover:bg-primary/10 text-primary transition-colors disabled:opacity-50"
-                            title="Хүргэлтэнд илгээх"
-                          >
-                            {sendingDelivery === o.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Truck className="h-4 w-4" />}
-                          </button>
-                        )}
                         {o.delivery_order_id && (
                           <button
                             onClick={(e) => { e.stopPropagation(); openOrderInPortal(o); }}
