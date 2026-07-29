@@ -2728,6 +2728,7 @@ const AdminPage = () => {
                       <option value="pocket">Pocket</option>
                       <option value="organization">Байгууллага</option>
                       <option value="sono">Соно</option>
+                      <option value="exchange">🔄 Бараа солих (үнэ 0₮)</option>
                     </select>
                   </div>
                   <div>
