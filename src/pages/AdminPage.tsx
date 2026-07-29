@@ -4573,10 +4573,51 @@ const AdminPage = () => {
                             <FileSpreadsheet className="h-4 w-4" />
                             PDF татах ({bulkSelected.size})
                           </Button>
-                          
+
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
+                              const todayIds = filteredOrders
+                                .filter((o: any) => new Date(o.created_at).getTime() >= startOfDay.getTime())
+                                .map((o: any) => o.id);
+                              if (todayIds.length === 0) { toast.error("Өнөөдрийн захиалга алга"); return; }
+                              setBulkSelected(new Set(todayIds));
+                              toast.success(`Өнөөдрийн ${todayIds.length} захиалга сонгогдлоо`);
+                            }}
+                            className="gap-1.5"
+                            title="Өнөөдөр үүсгэсэн бүх захиалгыг сонгох"
+                          >
+                            <Calendar className="h-4 w-4" />
+                            Өнөөдрийг сонгох
+                          </Button>
+
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => {
+                              const chosen = orders.filter((o: any) => bulkSelected.has(o.id));
+                              if (chosen.length === 0) { toast.error("Захиалга сонгоно уу"); return; }
+                              const invalid = chosen.filter((o: any) => o.status === "delivering" || o.status === "completed" || o.status === "cancelled" || o.delivery_status === "out_for_delivery" || o.delivery_status === "delivered" || o.delivery_status === "cancelled");
+                              if (invalid.length === chosen.length) { toast.error("Сонгосон захиалгууд аль хэдийн хүргэлтэнд гарсан эсвэл дууссан байна"); return; }
+                              const validIds = chosen.filter((o: any) => !(o.status === "delivering" || o.status === "completed" || o.status === "cancelled" || o.delivery_status === "out_for_delivery" || o.delivery_status === "delivered" || o.delivery_status === "cancelled")).map((o: any) => o.id);
+                              if (invalid.length > 0) toast.message(`${invalid.length} захиалга алгасагдана (аль хэдийн хүргэгдсэн/цуцлагдсан)`);
+                              loadPartnerDrivers();
+                              setBulkDeliverDialog({ orderIds: validIds, driverId: "" });
+                            }}
+                            disabled={bulkSelected.size === 0}
+                            className="gap-1.5 bg-violet-600 hover:bg-violet-700 text-white"
+                            title="Сонгосон бүх захиалгыг нэг жолоочид өгөх"
+                          >
+                            <Truck className="h-4 w-4" />
+                            Жолоочид өгөх ({bulkSelected.size})
+                          </Button>
                         </div>
                       </div>
                     </div>
+
 
                     {filteredOrders.map((o: any) => {
                       const delOpt = deliveryOptions.find((d: any) => d.id === o.delivery_option_id);
