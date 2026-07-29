@@ -1218,6 +1218,15 @@ const AdminPage = () => {
     setManualProductSearch("");
   };
 
+  // "Бараа солих" (exchange): force all item prices to 0 automatically.
+  useEffect(() => {
+    if (manualForm.payment_method !== "exchange") return;
+    setManualItems((prev) => {
+      if (!prev.some((it) => (Number(it.price) || 0) !== 0)) return prev;
+      return prev.map((it) => ({ ...it, price: 0 }));
+    });
+  }, [manualForm.payment_method, manualItems.length]);
+
   const manualSubtotal = manualItems.reduce((s, it) => s + (it.price * it.quantity), 0);
   const manualTotal = manualSubtotal + (Number(manualForm.delivery_fee) || 0);
 
@@ -1341,6 +1350,7 @@ const AdminPage = () => {
     sono: { label: "Соно", color: "bg-rose-500/10 text-rose-600" },
     transfer: { label: "Шилжүүлэг", color: "bg-cyan-500/10 text-cyan-600" },
     pocket: { label: "Pocket", color: "bg-green-500/10 text-green-600" },
+    exchange: { label: "Бараа солих", color: "bg-slate-500/10 text-slate-600" },
   };
 
   const handleDeliveryPhotoUpload = async (orderId: string, field: "delivery_pickup_photo" | "delivery_completed_photo", file: File) => {
@@ -2718,7 +2728,13 @@ const AdminPage = () => {
                       <option value="pocket">Pocket</option>
                       <option value="organization">Байгууллага</option>
                       <option value="sono">Соно</option>
+                      <option value="exchange">🔄 Бараа солих (үнэ 0₮)</option>
                     </select>
+                    {manualForm.payment_method === "exchange" && (
+                      <p className="mt-1.5 text-[11px] text-slate-600 bg-slate-500/10 rounded-lg px-2 py-1.5 leading-snug">
+                        🔄 Бараа солих горим: сонгосон бүх барааны үнэ автоматаар 0₮ болно.
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs font-bold text-muted-foreground mb-1 block">
