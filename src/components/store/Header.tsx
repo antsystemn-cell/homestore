@@ -1,4 +1,4 @@
-import { Search, Clock, X, ArrowUpRight, User as UserIcon, LogIn } from "lucide-react";
+import { Search, Clock, X, ArrowUpRight, LogIn } from "lucide-react";
 import NotificationsBell from "./NotificationsBell";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -161,9 +161,7 @@ const Header = () => {
 
         {/* Desktop nav links */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-          
           <button onClick={() => navigate("/shop")} className="hover:text-foreground transition-colors">Брэндүүд</button>
-          <button onClick={() => navigate("/wishlist")} className="hover:text-foreground transition-colors">Таалагдсан</button>
           <button onClick={() => navigate("/cart")} className="hover:text-foreground transition-colors">Сагс</button>
         </nav>
 
@@ -292,15 +290,7 @@ const Header = () => {
           <div className="hidden md:block">
             <NotificationsBell />
           </div>
-          {user ? (
-            <button
-              onClick={() => navigate("/profile")}
-              aria-label="Профайл"
-              className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-secondary hover:bg-secondary/80 transition-colors"
-            >
-              <UserIcon className="h-4 w-4 text-foreground" />
-            </button>
-          ) : (
+          {!user && (
             <button
               onClick={() => navigate("/auth")}
               className="inline-flex items-center gap-1.5 h-9 px-3 md:px-4 rounded-full bg-primary text-primary-foreground text-xs md:text-sm font-semibold hover:opacity-90 transition-opacity"
