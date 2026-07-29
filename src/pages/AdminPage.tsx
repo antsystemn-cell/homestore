@@ -1091,6 +1091,57 @@ const AdminPage = () => {
     setDeliverDialog(null);
   };
 
+  const confirmBulkDispatch = async () => {
+    if (!bulkDeliverDialog) return;
+    const { orderIds, driverId } = bulkDeliverDialog;
+    const partnerDriver = partnerDrivers.find((d) => d.driver_id === driverId);
+    if (!partnerDriver) { toast.error("Жолооч сонгоно уу"); return; }
+    if (orderIds.length === 0) { toast.error("Захиалга сонгоно уу"); return; }
+    const signature = partnerDriver.name + (partnerDriver.phone ? ` · ${partnerDriver.phone}` : "");
+    setBulkDispatchProgress({ done: 0, total: orderIds.length, failed: 0 });
+    const tId = toast.loading(`0 / ${orderIds.length} захиалга илгээж байна…`);
+    let done = 0, failed = 0;
+    const nowIso = () => new Date().toISOString();
+    const patchBase = {
+      status: "delivering",
+      delivery_status: "out_for_delivery",
+      delivered_at: null,
+      delivery_failed_at: null,
+      delivery_return_reason: null,
+      delivery_signature_name: signature,
+    };
+    for (const orderId of orderIds) {
+      try {
+        const now = nowIso();
+        const { error } = await supabase.from("orders").update({ ...patchBase, picked_up_at: now, updated_at: now }).eq("id", orderId);
+        if (error) throw error;
+        const { error: notifyErr } = await supabase.functions.invoke("notify-delivery-status", {
+          body: {
+            order_id: orderId,
+            fulfillment_status: "out_for_delivery",
+            driver_id: partnerDriver.driver_id,
+            driver_phone: partnerDriver.phone,
+            event_id: `easyshop-bulk-${orderId}-${Date.now()}`,
+            note: `Багц хүргэлт: ${signature}`,
+          },
+        });
+        if (notifyErr) throw notifyErr;
+        setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, ...patchBase, picked_up_at: now } : o)));
+        done++;
+      } catch (e) {
+        console.error("bulk dispatch failed for", orderId, e);
+        failed++;
+      }
+      setBulkDispatchProgress({ done: done + failed, total: orderIds.length, failed });
+      toast.loading(`${done + failed} / ${orderIds.length} захиалга${failed > 0 ? ` · ${failed} алдаа` : ""}`, { id: tId });
+    }
+    toast.success(`Багц дуусав · ${done} амжилттай${failed > 0 ? ` · ${failed} алдаа` : ""} · ${partnerDriver.name}`, { id: tId });
+    setBulkDispatchProgress(null);
+    setBulkDeliverDialog(null);
+    setBulkSelected(new Set());
+  };
+
+
 
 
 
