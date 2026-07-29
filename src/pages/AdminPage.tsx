@@ -7,7 +7,7 @@ import OrderStatusTimeline from "@/components/admin/OrderStatusTimeline";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
   BarChart3, LayoutDashboard, Search, X, AlertTriangle, AlertCircle, BadgeCheck, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, FileSpreadsheet, Sparkles,
-  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw, Star, Gift, Smartphone, Monitor, Tablet, PlayCircle, ExternalLink, Zap
+  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw, Star, Gift, Smartphone, Monitor, Tablet, PlayCircle, ExternalLink, Zap, RotateCcw
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
@@ -34,6 +34,7 @@ import TrackingDashboard from "@/components/admin/TrackingDashboard";
 import DeliveryPortal from "@/components/admin/DeliveryPortal";
 import BranchesManager from "@/components/admin/BranchesManager";
 import AdminSkeleton from "@/components/admin/AdminSkeleton";
+import ReturnsManager from "@/components/admin/ReturnsManager";
 import AddressSelector from "@/components/store/AddressSelector";
 
 
@@ -56,9 +57,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
 
-type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "welcome-showcase" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "coupon-usage" | "flash-sales" | "reels" | "settings" | "bonus" | "branches";
+type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "welcome-showcase" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "coupon-usage" | "flash-sales" | "reels" | "settings" | "bonus" | "branches" | "returns";
 
-const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "announcements", "welcome-showcase", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "reminders", "reviews", "flash-sales", "reels", "drivers", "branches"];
+const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "announcements", "welcome-showcase", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "reminders", "reviews", "flash-sales", "reels", "drivers", "branches", "returns"];
 const BONUS_TABS: Tab[] = ["loyalty", "spin", "referral", "promotions", "coupon-usage"];
 
 
@@ -1921,6 +1922,7 @@ const AdminPage = () => {
     { id: "reels", label: "Reels удирдах", icon: PlayCircle },
     { id: "drivers", label: "Жолоочид", icon: Truck },
     { id: "branches", label: "Салбар & шивэгч", icon: Store },
+    { id: "returns", label: "Бараа буцаалт", icon: RotateCcw },
   ];
 
   const bonusSubItems: { id: Tab; label: string; icon: any }[] = [
@@ -5769,6 +5771,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
 
           {/* Stock Deduction Log Tab */}
           {tab === "stocklog" && <StockDeductionLog />}
+          {tab === "returns" && <ReturnsManager />}
 
           {/* Drivers Tab */}
           {tab === "drivers" && (

@@ -1201,6 +1201,66 @@ export type Database = {
           },
         ]
       }
+      product_returns: {
+        Row: {
+          condition: string
+          created_at: string
+          created_by: string | null
+          customer_name: string | null
+          id: string
+          images: Json | null
+          note: string | null
+          order_id: string | null
+          order_ref: string | null
+          phone: string
+          product_name: string
+          quantity: number
+          reason: string
+          refund_amount: number
+          refunded_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          condition?: string
+          created_at?: string
+          created_by?: string | null
+          customer_name?: string | null
+          id?: string
+          images?: Json | null
+          note?: string | null
+          order_id?: string | null
+          order_ref?: string | null
+          phone: string
+          product_name: string
+          quantity?: number
+          reason: string
+          refund_amount?: number
+          refunded_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          condition?: string
+          created_at?: string
+          created_by?: string | null
+          customer_name?: string | null
+          id?: string
+          images?: Json | null
+          note?: string | null
+          order_id?: string | null
+          order_ref?: string | null
+          phone?: string
+          product_name?: string
+          quantity?: number
+          reason?: string
+          refund_amount?: number
+          refunded_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           average_reorder_days: number | null
