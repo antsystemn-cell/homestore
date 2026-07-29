@@ -2730,6 +2730,11 @@ const AdminPage = () => {
                       <option value="sono">Соно</option>
                       <option value="exchange">🔄 Бараа солих (үнэ 0₮)</option>
                     </select>
+                    {manualForm.payment_method === "exchange" && (
+                      <p className="mt-1.5 text-[11px] text-slate-600 bg-slate-500/10 rounded-lg px-2 py-1.5 leading-snug">
+                        🔄 Бараа солих горим: сонгосон бүх барааны үнэ автоматаар 0₮ болно.
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="text-xs font-bold text-muted-foreground mb-1 block">
