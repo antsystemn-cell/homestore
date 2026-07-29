@@ -34,6 +34,7 @@ import TrackingDashboard from "@/components/admin/TrackingDashboard";
 import DeliveryPortal from "@/components/admin/DeliveryPortal";
 import BranchesManager from "@/components/admin/BranchesManager";
 import AdminSkeleton from "@/components/admin/AdminSkeleton";
+import ReturnsManager from "@/components/admin/ReturnsManager";
 import AddressSelector from "@/components/store/AddressSelector";
 
 
