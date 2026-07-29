@@ -35,6 +35,7 @@ import DeliveryPortal from "@/components/admin/DeliveryPortal";
 import BranchesManager from "@/components/admin/BranchesManager";
 import AdminSkeleton from "@/components/admin/AdminSkeleton";
 import ReturnsManager from "@/components/admin/ReturnsManager";
+import RecentlyDeletedOrders from "@/components/admin/RecentlyDeletedOrders";
 import AddressSelector from "@/components/store/AddressSelector";
 
 
@@ -1228,6 +1229,7 @@ const AdminPage = () => {
 
   const [deleteOrderTarget, setDeleteOrderTarget] = useState<{ id: string } | null>(null);
   const [deletingOrder, setDeletingOrder] = useState(false);
+  const [deletedRefreshKey, setDeletedRefreshKey] = useState(0);
 
   const handleDeleteOrder = async (orderId: string) => {
     setDeletingOrder(true);
@@ -1237,6 +1239,7 @@ const AdminPage = () => {
     } else {
       toast.success("Захиалга устгагдлаа");
       setOrders((prev) => prev.filter((o) => o.id !== orderId));
+      setDeletedRefreshKey((k) => k + 1);
     }
     setDeleteOrderTarget(null);
     setDeletingOrder(false);
@@ -4282,7 +4285,14 @@ const AdminPage = () => {
                     Захиалга оруулах
                   </button>
 
-                </div>
+              </div>
+
+              <RecentlyDeletedOrders
+                refreshKey={deletedRefreshKey}
+                onRestored={handleRefresh}
+              />
+
+
               </div>
 
               {/* Delivery integration summary */}
