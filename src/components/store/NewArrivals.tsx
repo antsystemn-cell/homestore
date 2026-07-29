@@ -85,7 +85,7 @@ const NewArrivals = React.memo(({ products }: Props) => {
               >
                 <div className="relative rounded-2xl overflow-hidden bg-card border border-border/60 hover:border-primary/40 shadow-sm hover:shadow-lg transition-all duration-300">
                   {/* Image */}
-                  <div className="relative aspect-square bg-secondary overflow-hidden flex items-center justify-center">
+                  <div className="relative aspect-square bg-white overflow-hidden flex items-center justify-center">
                     <img
                       src={imgErrors[p.id] ? "/placeholder.svg" : transformImage(p.thumbnail || p.image, 200)}
                       srcSet={imgErrors[p.id] ? undefined : buildSrcSet(p.thumbnail || p.image, [200, 400])}
