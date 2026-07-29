@@ -122,6 +122,8 @@ const AdminPage = () => {
   const [drivers, setDrivers] = useState<{ id: string; full_name: string; phone: string | null; note: string | null; is_active: boolean }[]>([]);
   const [deliveryDraft, setDeliveryDraft] = useState<Record<string, { driverId: string; courierName: string }>>({});
   const [deliverDialog, setDeliverDialog] = useState<{ orderId: string; driverId: string; courierName: string; courierPhone: string } | null>(null);
+  const [bulkDeliverDialog, setBulkDeliverDialog] = useState<{ orderIds: string[]; driverId: string } | null>(null);
+  const [bulkDispatchProgress, setBulkDispatchProgress] = useState<{ done: number; total: number; failed: number } | null>(null);
   const [partnerDrivers, setPartnerDrivers] = useState<{ driver_id: string; name: string; phone: string }[]>([]);
   const [partnerDriversLoading, setPartnerDriversLoading] = useState(false);
   const [partnerDriversFetchedAt, setPartnerDriversFetchedAt] = useState<number>(0);
@@ -1088,6 +1090,57 @@ const AdminPage = () => {
     setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, ...patch } : o)));
     setDeliverDialog(null);
   };
+
+  const confirmBulkDispatch = async () => {
+    if (!bulkDeliverDialog) return;
+    const { orderIds, driverId } = bulkDeliverDialog;
+    const partnerDriver = partnerDrivers.find((d) => d.driver_id === driverId);
+    if (!partnerDriver) { toast.error("Жолооч сонгоно уу"); return; }
+    if (orderIds.length === 0) { toast.error("Захиалга сонгоно уу"); return; }
+    const signature = partnerDriver.name + (partnerDriver.phone ? ` · ${partnerDriver.phone}` : "");
+    setBulkDispatchProgress({ done: 0, total: orderIds.length, failed: 0 });
+    const tId = toast.loading(`0 / ${orderIds.length} захиалга илгээж байна…`);
+    let done = 0, failed = 0;
+    const nowIso = () => new Date().toISOString();
+    const patchBase = {
+      status: "delivering",
+      delivery_status: "out_for_delivery",
+      delivered_at: null,
+      delivery_failed_at: null,
+      delivery_return_reason: null,
+      delivery_signature_name: signature,
+    };
+    for (const orderId of orderIds) {
+      try {
+        const now = nowIso();
+        const { error } = await supabase.from("orders").update({ ...patchBase, picked_up_at: now, updated_at: now }).eq("id", orderId);
+        if (error) throw error;
+        const { error: notifyErr } = await supabase.functions.invoke("notify-delivery-status", {
+          body: {
+            order_id: orderId,
+            fulfillment_status: "out_for_delivery",
+            driver_id: partnerDriver.driver_id,
+            driver_phone: partnerDriver.phone,
+            event_id: `easyshop-bulk-${orderId}-${Date.now()}`,
+            note: `Багц хүргэлт: ${signature}`,
+          },
+        });
+        if (notifyErr) throw notifyErr;
+        setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, ...patchBase, picked_up_at: now } : o)));
+        done++;
+      } catch (e) {
+        console.error("bulk dispatch failed for", orderId, e);
+        failed++;
+      }
+      setBulkDispatchProgress({ done: done + failed, total: orderIds.length, failed });
+      toast.loading(`${done + failed} / ${orderIds.length} захиалга${failed > 0 ? ` · ${failed} алдаа` : ""}`, { id: tId });
+    }
+    toast.success(`Багц дуусав · ${done} амжилттай${failed > 0 ? ` · ${failed} алдаа` : ""} · ${partnerDriver.name}`, { id: tId });
+    setBulkDispatchProgress(null);
+    setBulkDeliverDialog(null);
+    setBulkSelected(new Set());
+  };
+
 
 
 
@@ -4520,10 +4573,51 @@ const AdminPage = () => {
                             <FileSpreadsheet className="h-4 w-4" />
                             PDF татах ({bulkSelected.size})
                           </Button>
-                          
+
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
+                              const todayIds = filteredOrders
+                                .filter((o: any) => new Date(o.created_at).getTime() >= startOfDay.getTime())
+                                .map((o: any) => o.id);
+                              if (todayIds.length === 0) { toast.error("Өнөөдрийн захиалга алга"); return; }
+                              setBulkSelected(new Set(todayIds));
+                              toast.success(`Өнөөдрийн ${todayIds.length} захиалга сонгогдлоо`);
+                            }}
+                            className="gap-1.5"
+                            title="Өнөөдөр үүсгэсэн бүх захиалгыг сонгох"
+                          >
+                            <Calendar className="h-4 w-4" />
+                            Өнөөдрийг сонгох
+                          </Button>
+
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => {
+                              const chosen = orders.filter((o: any) => bulkSelected.has(o.id));
+                              if (chosen.length === 0) { toast.error("Захиалга сонгоно уу"); return; }
+                              const invalid = chosen.filter((o: any) => o.status === "delivering" || o.status === "completed" || o.status === "cancelled" || o.delivery_status === "out_for_delivery" || o.delivery_status === "delivered" || o.delivery_status === "cancelled");
+                              if (invalid.length === chosen.length) { toast.error("Сонгосон захиалгууд аль хэдийн хүргэлтэнд гарсан эсвэл дууссан байна"); return; }
+                              const validIds = chosen.filter((o: any) => !(o.status === "delivering" || o.status === "completed" || o.status === "cancelled" || o.delivery_status === "out_for_delivery" || o.delivery_status === "delivered" || o.delivery_status === "cancelled")).map((o: any) => o.id);
+                              if (invalid.length > 0) toast.message(`${invalid.length} захиалга алгасагдана (аль хэдийн хүргэгдсэн/цуцлагдсан)`);
+                              loadPartnerDrivers();
+                              setBulkDeliverDialog({ orderIds: validIds, driverId: "" });
+                            }}
+                            disabled={bulkSelected.size === 0}
+                            className="gap-1.5 bg-violet-600 hover:bg-violet-700 text-white"
+                            title="Сонгосон бүх захиалгыг нэг жолоочид өгөх"
+                          >
+                            <Truck className="h-4 w-4" />
+                            Жолоочид өгөх ({bulkSelected.size})
+                          </Button>
                         </div>
                       </div>
                     </div>
+
 
                     {filteredOrders.map((o: any) => {
                       const delOpt = deliveryOptions.find((d: any) => d.id === o.delivery_option_id);
@@ -6577,6 +6671,85 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
               >
                 {savingDeliverDialog ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Truck className="h-3.5 w-3.5" />}
                 Хүргэлтэнд гаргах
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {bulkDeliverDialog && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => !bulkDispatchProgress && setBulkDeliverDialog(null)}>
+          <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-md p-5 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div>
+              <h3 className="text-base font-bold flex items-center gap-2">
+                <Truck className="h-4 w-4 text-violet-600" /> Багц хүргэлт
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                <b className="text-foreground">{bulkDeliverDialog.orderIds.length}</b> захиалгыг нэг жолоочид өгнө.
+              </p>
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-[11px] font-semibold text-muted-foreground">Жолооч</label>
+                <button
+                  type="button"
+                  onClick={() => loadPartnerDrivers(true)}
+                  disabled={partnerDriversLoading}
+                  className="text-[11px] text-violet-600 hover:underline disabled:opacity-50"
+                >
+                  {partnerDriversLoading ? "Ачаалж байна..." : "Шинэчлэх"}
+                </button>
+              </div>
+              <select
+                value={bulkDeliverDialog.driverId}
+                onChange={(e) => setBulkDeliverDialog((p) => p ? { ...p, driverId: e.target.value } : p)}
+                className="w-full rounded-lg bg-background border border-border px-3 py-2 text-sm"
+                disabled={partnerDriversLoading || !!bulkDispatchProgress}
+              >
+                <option value="">— {partnerDriversLoading ? "Ачаалж байна..." : "Сонгох"} —</option>
+                {partnerDrivers.map((d) => (
+                  <option key={d.driver_id} value={d.driver_id}>
+                    {d.name}{d.phone ? ` · ${d.phone}` : ""}
+                  </option>
+                ))}
+              </select>
+              {!partnerDriversLoading && partnerDrivers.length === 0 && (
+                <p className="text-[11px] text-muted-foreground mt-1">Жолооч олдсонгүй. "Шинэчлэх" дарж дахин оролдоно уу.</p>
+              )}
+            </div>
+
+            {bulkDispatchProgress && (
+              <div className="space-y-1">
+                <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-violet-600 transition-all"
+                    style={{ width: `${(bulkDispatchProgress.done / Math.max(1, bulkDispatchProgress.total)) * 100}%` }}
+                  />
+                </div>
+                <p className="text-[11px] text-muted-foreground text-center">
+                  {bulkDispatchProgress.done} / {bulkDispatchProgress.total}
+                  {bulkDispatchProgress.failed > 0 && ` · ${bulkDispatchProgress.failed} алдаа`}
+                </p>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setBulkDeliverDialog(null)}
+                disabled={!!bulkDispatchProgress}
+                className="px-4 py-2 rounded-lg text-sm font-semibold bg-secondary hover:bg-secondary/70 disabled:opacity-50"
+              >
+                Болих
+              </button>
+              <button
+                type="button"
+                onClick={confirmBulkDispatch}
+                disabled={!!bulkDispatchProgress || !bulkDeliverDialog.driverId}
+                className="px-4 py-2 rounded-lg text-sm font-bold bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-50 inline-flex items-center gap-2"
+              >
+                {bulkDispatchProgress ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Truck className="h-3.5 w-3.5" />}
+                {bulkDispatchProgress ? "Илгээж байна..." : `${bulkDeliverDialog.orderIds.length} захиалга илгээх`}
               </button>
             </div>
           </div>
