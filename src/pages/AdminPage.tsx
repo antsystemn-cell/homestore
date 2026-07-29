@@ -6676,6 +6676,85 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
           </div>
         </div>
       )}
+
+      {bulkDeliverDialog && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => !bulkDispatchProgress && setBulkDeliverDialog(null)}>
+          <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-md p-5 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div>
+              <h3 className="text-base font-bold flex items-center gap-2">
+                <Truck className="h-4 w-4 text-violet-600" /> Багц хүргэлт
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                <b className="text-foreground">{bulkDeliverDialog.orderIds.length}</b> захиалгыг нэг жолоочид өгнө.
+              </p>
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-[11px] font-semibold text-muted-foreground">Жолооч</label>
+                <button
+                  type="button"
+                  onClick={() => loadPartnerDrivers(true)}
+                  disabled={partnerDriversLoading}
+                  className="text-[11px] text-violet-600 hover:underline disabled:opacity-50"
+                >
+                  {partnerDriversLoading ? "Ачаалж байна..." : "Шинэчлэх"}
+                </button>
+              </div>
+              <select
+                value={bulkDeliverDialog.driverId}
+                onChange={(e) => setBulkDeliverDialog((p) => p ? { ...p, driverId: e.target.value } : p)}
+                className="w-full rounded-lg bg-background border border-border px-3 py-2 text-sm"
+                disabled={partnerDriversLoading || !!bulkDispatchProgress}
+              >
+                <option value="">— {partnerDriversLoading ? "Ачаалж байна..." : "Сонгох"} —</option>
+                {partnerDrivers.map((d) => (
+                  <option key={d.driver_id} value={d.driver_id}>
+                    {d.name}{d.phone ? ` · ${d.phone}` : ""}
+                  </option>
+                ))}
+              </select>
+              {!partnerDriversLoading && partnerDrivers.length === 0 && (
+                <p className="text-[11px] text-muted-foreground mt-1">Жолооч олдсонгүй. "Шинэчлэх" дарж дахин оролдоно уу.</p>
+              )}
+            </div>
+
+            {bulkDispatchProgress && (
+              <div className="space-y-1">
+                <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-violet-600 transition-all"
+                    style={{ width: `${(bulkDispatchProgress.done / Math.max(1, bulkDispatchProgress.total)) * 100}%` }}
+                  />
+                </div>
+                <p className="text-[11px] text-muted-foreground text-center">
+                  {bulkDispatchProgress.done} / {bulkDispatchProgress.total}
+                  {bulkDispatchProgress.failed > 0 && ` · ${bulkDispatchProgress.failed} алдаа`}
+                </p>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setBulkDeliverDialog(null)}
+                disabled={!!bulkDispatchProgress}
+                className="px-4 py-2 rounded-lg text-sm font-semibold bg-secondary hover:bg-secondary/70 disabled:opacity-50"
+              >
+                Болих
+              </button>
+              <button
+                type="button"
+                onClick={confirmBulkDispatch}
+                disabled={!!bulkDispatchProgress || !bulkDeliverDialog.driverId}
+                className="px-4 py-2 rounded-lg text-sm font-bold bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-50 inline-flex items-center gap-2"
+              >
+                {bulkDispatchProgress ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Truck className="h-3.5 w-3.5" />}
+                {bulkDispatchProgress ? "Илгээж байна..." : `${bulkDeliverDialog.orderIds.length} захиалга илгээх`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
