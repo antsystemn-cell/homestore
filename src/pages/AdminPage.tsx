@@ -4183,9 +4183,9 @@ const AdminPage = () => {
                                 className="p-2 rounded-lg hover:bg-secondary transition-colors inline-flex" title="Засах">
                                 <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                               </a>
-                              <button onClick={() => handleDuplicateProduct(p)}
-                                className="p-2 rounded-lg hover:bg-secondary transition-colors" title="Хуулбарлах">
-                                <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                              <button onClick={() => handleEditProductSize(p)}
+                                className="p-2 rounded-lg hover:bg-orange-500/10 text-orange-600 transition-colors" title="Хэмжээ удирдах">
+                                <Ruler className="h-3.5 w-3.5" />
                               </button>
                               <button onClick={() => setDeleteTarget({ id: p.id, name: p.name })}
                                 className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors" title="Устгах">
@@ -4254,6 +4254,22 @@ const AdminPage = () => {
                     {searchQuery || filterCategory !== "all" ? "Хайлтад тохирох бараа олдсонгүй" : "Бараа байхгүй"}
                   </p>
                 )}
+              </div>
+            </div>
+          )}
+
+          {activeProductForSize && (
+            <div className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setActiveProductForSize(null)}>
+              <div className="bg-card w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl border border-border" onClick={e => e.stopPropagation()}>
+                <div className="p-4 border-b border-border flex items-center justify-between sticky top-0 bg-card z-10">
+                    <h2 className="font-bold">{activeProductForSize.name} — Хэмжээ</h2>
+                    <button onClick={() => setActiveProductForSize(null)} className="p-2 hover:bg-secondary rounded-lg">
+                        <X className="h-5 w-5" />
+                    </button>
+                </div>
+                <div className="p-4 pt-0">
+                    <ProductSizeManager product={activeProductForSize} onUpdate={fetchProducts} />
+                </div>
               </div>
             </div>
           )}
