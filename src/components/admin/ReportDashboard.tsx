@@ -79,11 +79,12 @@ const ReportDashboard = () => {
   if (loading) return <div className="flex justify-center p-10"><Loader2 className="animate-spin" /></div>;
 
   const stats = [
-    { title: "Борлуулалт (₮)", value: formatPrice(data.totalSales), icon: TrendingUp },
-    { title: "Захиалгын тоо", value: data.salesCount, icon: Package },
+    { title: "Өнөөдрийн борлуулалт", value: formatPrice(data.todaySales), count: data.todayCount, icon: TrendingUp, color: "text-green-600" },
+    { title: "Энэ сарын борлуулалт", value: formatPrice(data.monthlySales), count: data.monthlyCount, icon: TrendingUp, color: "text-blue-600" },
+    { title: "Нийт борлуулалт (₮)", value: formatPrice(data.totalSales), count: data.totalSalesCount, icon: TrendingUp },
     { title: "Буцаалт", value: data.returnsCount, icon: RotateCcw },
     { title: "Хүргэгдээгүй", value: data.pendingDeliveries, icon: Truck },
-    { title: "Барааны нөөц бага", value: data.lowStock, icon: AlertTriangle },
+    { title: "Барааны нөөц бага", value: data.lowStock, icon: AlertTriangle, color: "text-amber-500" },
   ];
 
   return (
