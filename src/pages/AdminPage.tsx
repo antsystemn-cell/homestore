@@ -1824,13 +1824,7 @@ const AdminPage = () => {
     });
     setEditId(p.id);
     setShowForm(true);
-  };
-
-  const [activeProductForSize, setActiveProductForSize] = useState<any>(null);
-
-  const handleEditProductSize = (p: any) => {
-    setActiveProductForSize(p);
-  };
+    // Load extra images
     const { data } = await supabase
       .from("product_images")
       .select("image_url")
