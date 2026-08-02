@@ -24,11 +24,12 @@ import WalletCreditsManager from "@/components/admin/WalletCreditsManager";
 import CouponUsageManager from "@/components/admin/CouponUsageManager";
 import FlashSalesManager from "@/components/admin/FlashSalesManager";
 import ReelsManager from "@/components/admin/ReelsManager";
-
+import ReportDashboard from "@/components/admin/ReportDashboard";
 
 
 
 import StockDeductionLog from "@/components/admin/StockDeductionLog";
+
 import DriversManager from "@/components/admin/DriversManager";
 import TrackingDashboard from "@/components/admin/TrackingDashboard";
 import DeliveryPortal from "@/components/admin/DeliveryPortal";
@@ -58,10 +59,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
 
-type Tab = "stats" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "welcome-showcase" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "coupon-usage" | "flash-sales" | "reels" | "settings" | "bonus" | "branches" | "returns";
+type Tab = "stats" | "report" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "welcome-showcase" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "coupon-usage" | "flash-sales" | "reels" | "settings" | "bonus" | "branches" | "returns";
 
 const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "announcements", "welcome-showcase", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "reminders", "reviews", "flash-sales", "reels", "drivers", "branches", "returns"];
 const BONUS_TABS: Tab[] = ["loyalty", "spin", "referral", "promotions", "coupon-usage"];
+
 
 
 
@@ -108,9 +110,10 @@ const AdminPage = () => {
   const hasAdminAccess = isAdmin || isModerator || isSeller;
   const [tab, setTab] = useState<Tab>(() => {
     const t = searchParams.get("tab") as Tab | null;
-    const valid: Tab[] = ["stats","tracking","products","orders","users","drivers","categories","brands","delivery","delivery-portal","payments","banner","announcements","welcome-showcase","collections","chatbot","analytics","diagnostics","stocklog","recommendations","loyalty","reminders","reviews","spin","referral","promotions","coupon-usage","flash-sales","reels","settings","bonus","branches"];
+    const valid: Tab[] = ["stats", "report", "tracking", "products", "orders", "users", "drivers", "categories", "brands", "delivery", "delivery-portal", "payments", "banner", "announcements", "welcome-showcase", "collections", "chatbot", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "referral", "promotions", "coupon-usage", "flash-sales", "reels", "settings", "bonus", "branches", "returns"];
     return t && valid.includes(t) ? t : "stats";
   });
+
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
@@ -1933,8 +1936,9 @@ const AdminPage = () => {
 
   const categories = [...new Set(products.map((p) => p.category))];
 
-  const moderatorTabs: Tab[] = ["orders"];
-  const sellerTabs: Tab[] = ["orders"];
+  const moderatorTabs: Tab[] = ["stats", "report", "orders", "delivery", "drivers", "diagnostics", "reminders", "returns"];
+  const sellerTabs: Tab[] = ["orders", "report"];
+
 
   // Moderator/Seller only see orders — auto-switch if they land on a non-allowed tab
   useEffect(() => {
@@ -1949,6 +1953,7 @@ const AdminPage = () => {
 
   const allSidebarItems: { id: Tab; label: string; icon: any }[] = [
     { id: "stats", label: "Статистик", icon: BarChart3 },
+    { id: "report", label: "Тайлан", icon: LayoutDashboard },
     { id: "tracking", label: "Хяналт", icon: Activity },
     { id: "products", label: "Бараа", icon: Package },
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
@@ -1958,6 +1963,7 @@ const AdminPage = () => {
     { id: "bonus", label: "Бонус", icon: Gift },
     { id: "settings", label: "Ерөнхий тохиргоо", icon: Settings },
   ];
+
 
   const settingsSubItems: { id: Tab; label: string; icon: any }[] = [
     { id: "categories", label: "Ангилал", icon: Layers },
@@ -3093,8 +3099,12 @@ const AdminPage = () => {
               <AdminSkeleton tab={tab} />
             </div>
           )}
+          {/* Report Dashboard */}
+          {tab === "report" && <ReportDashboard />}
+
           {/* Stats */}
           {tab === "stats" && (
+
             <div className="space-y-6">
               {/* Орлого */}
               <section>
