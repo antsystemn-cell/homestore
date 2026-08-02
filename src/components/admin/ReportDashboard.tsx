@@ -12,27 +12,45 @@ const ReportDashboard = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Sales total and count
-        const { data: sales } = await supabase
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+
+        // Total Sales (All time)
+        const { data: allSales } = await supabase
           .from("orders")
-          .select("total, status")
+          .select("total")
           .eq("status", "completed");
 
-        const totalSales = sales?.reduce((s, o) => s + (o.total || 0), 0) || 0;
-        const salesCount = sales?.length || 0;
+        const totalSales = allSales?.reduce((s, o) => s + (o.total || 0), 0) || 0;
+        const totalSalesCount = allSales?.length || 0;
+
+        // Fetch orders for today and this month specifically for breakdown
+        const { data: monthSales } = await supabase
+          .from("orders")
+          .select("total, created_at")
+          .eq("status", "completed")
+          .gte("created_at", startOfMonth);
+
+        const monthlySales = monthSales?.reduce((s, o) => s + (o.total || 0), 0) || 0;
+        const monthlyCount = monthSales?.length || 0;
+        
+        const todaySalesData = monthSales?.filter(o => o.created_at >= startOfToday) || [];
+        const todaySales = todaySalesData.reduce((s, o) => s + (o.total || 0), 0) || 0;
+        const todayCount = todaySalesData.length || 0;
 
         // Returns
         const { count: returnsCount } = await supabase
           .from("product_returns")
           .select("*", { count: "exact", head: true });
 
-        // Pending deliveries (not delivered)
+        // Pending deliveries
         const { count: pendingDeliveries } = await supabase
           .from("orders")
           .select("*", { count: "exact", head: true })
           .in("status", ["processing", "ready", "out_for_delivery"]);
 
-        // Stock levels (Low stock < 5)
+        // Stock levels
         const { data: lowStock } = await supabase
           .from("products")
           .select("id")
@@ -40,7 +58,11 @@ const ReportDashboard = () => {
 
         setData({
           totalSales,
-          salesCount,
+          totalSalesCount,
+          monthlySales,
+          monthlyCount,
+          todaySales,
+          todayCount,
           returnsCount: returnsCount || 0,
           pendingDeliveries: pendingDeliveries || 0,
           lowStock: lowStock?.length || 0,
