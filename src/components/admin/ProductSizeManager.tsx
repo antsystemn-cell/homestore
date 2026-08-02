@@ -34,9 +34,9 @@ export const ProductSizeManager = ({ product, onUpdate }: { product: Product, on
     const { error } = await supabase
       .from("products")
       .update({
-        size_chart: sizeChart,
-        stretch_level: stretchLevel,
-        fit_type: fitType
+        size_chart: sizeChart as any,
+        stretch_level: stretchLevel as any,
+        fit_type: fitType as any
       })
       .eq("id", product.id);
 
@@ -96,7 +96,7 @@ export const ProductSizeManager = ({ product, onUpdate }: { product: Product, on
                     Хэмжээний хүснэгт
                     <Info className="h-3.5 w-3.5 text-muted-foreground" />
                 </Label>
-                <Button onClick={addSizeRow} variant="outline" size="xs" className="h-7">
+                <Button onClick={addSizeRow} variant="outline" size="sm" className="h-7">
                     <Plus className="h-3.5 w-3.5 mr-1" /> Мөр нэмэх
                 </Button>
             </div>
