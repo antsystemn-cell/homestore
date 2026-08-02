@@ -4183,6 +4183,10 @@ const AdminPage = () => {
                                 className="p-2 rounded-lg hover:bg-secondary transition-colors inline-flex" title="Засах">
                                 <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                               </a>
+                              <button onClick={() => handleDuplicateProduct(p)}
+                                className="p-2 rounded-lg hover:bg-secondary transition-colors" title="Хуулбарлах">
+                                <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                              </button>
                               <button onClick={() => handleEditProductSize(p)}
                                 className="p-2 rounded-lg hover:bg-orange-500/10 text-orange-600 transition-colors" title="Хэмжээ удирдах">
                                 <Ruler className="h-3.5 w-3.5" />
