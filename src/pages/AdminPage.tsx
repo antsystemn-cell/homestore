@@ -3096,8 +3096,12 @@ const AdminPage = () => {
               <AdminSkeleton tab={tab} />
             </div>
           )}
+          {/* Report Dashboard */}
+          {tab === "report" && <ReportDashboard />}
+
           {/* Stats */}
           {tab === "stats" && (
+
             <div className="space-y-6">
               {/* Орлого */}
               <section>
