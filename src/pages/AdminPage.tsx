@@ -105,10 +105,12 @@ const AdminPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isManualOrderRoute = location.pathname === "/admin/manual-order";
+  const isReportRoute = location.pathname === "/admin/report";
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAdmin, isModerator, isSeller, loading: authLoading, authError } = useAuth();
   const hasAdminAccess = isAdmin || isModerator || isSeller;
   const [tab, setTab] = useState<Tab>(() => {
+    if (isReportRoute) return "report";
     const t = searchParams.get("tab") as Tab | null;
     const valid: Tab[] = ["stats", "report", "tracking", "products", "orders", "users", "drivers", "categories", "brands", "delivery", "delivery-portal", "payments", "banner", "announcements", "welcome-showcase", "collections", "chatbot", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "referral", "promotions", "coupon-usage", "flash-sales", "reels", "settings", "bonus", "branches", "returns"];
     return t && valid.includes(t) ? t : "stats";
