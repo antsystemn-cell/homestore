@@ -1953,6 +1953,7 @@ const AdminPage = () => {
 
   const allSidebarItems: { id: Tab; label: string; icon: any }[] = [
     { id: "stats", label: "Статистик", icon: BarChart3 },
+    { id: "report", label: "Тайлан", icon: LayoutDashboard },
     { id: "tracking", label: "Хяналт", icon: Activity },
     { id: "products", label: "Бараа", icon: Package },
     { id: "orders", label: "Захиалга", icon: ShoppingBag },
@@ -1962,6 +1963,7 @@ const AdminPage = () => {
     { id: "bonus", label: "Бонус", icon: Gift },
     { id: "settings", label: "Ерөнхий тохиргоо", icon: Settings },
   ];
+
 
   const settingsSubItems: { id: Tab; label: string; icon: any }[] = [
     { id: "categories", label: "Ангилал", icon: Layers },
