@@ -4307,55 +4307,6 @@ const AdminPage = () => {
 
               </div>
 
-              {/* Delivery integration summary */}
-              <div className="rounded-2xl border border-border bg-card p-3 sm:p-4 space-y-3">
-                <div className="flex items-center justify-between gap-3 flex-wrap">
-                  <div className="flex items-center gap-2">
-                    <Truck className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-bold">Хүргэлт удирдах уяалдаа</span>
-                  </div>
-                  <button
-                    onClick={() => setTab("delivery-portal")}
-                    className="text-xs font-medium text-primary hover:underline inline-flex items-center gap-1"
-                  >
-                    Порталыг нээх →
-                  </button>
-                </div>
-                <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-                  <span className="px-2 py-1 rounded-lg bg-blue-500/10 text-blue-700 font-semibold">
-                    Боловсруулж: {deliveryStatusCounts.processing || 0}
-                  </span>
-                  <span className="px-2 py-1 rounded-lg bg-sky-500/10 text-sky-700 font-semibold">
-                    Баталгаажсан: {deliveryStatusCounts.confirmed || 0}
-                  </span>
-                  <span className="px-2 py-1 rounded-lg bg-violet-500/10 text-violet-700 font-semibold">
-                    Хүргэлтэнд: {deliveryStatusCounts.out_for_delivery || 0}
-                  </span>
-                  <span className="px-2 py-1 rounded-lg bg-green-500/10 text-green-700 font-semibold">
-                    Хүргэгдсэн: {deliveryStatusCounts.delivered || 0}
-                  </span>
-                  {(deliveryStatusCounts.cancelled || 0) > 0 && (
-                    <span className="px-2 py-1 rounded-lg bg-red-500/10 text-red-700 font-semibold">
-                      Цуцлагдсан: {deliveryStatusCounts.cancelled}
-                    </span>
-                  )}
-                </div>
-                {unsentOrders.length > 0 && (
-                  <div className="flex items-center justify-between gap-3 flex-wrap rounded-xl bg-amber-500/10 border border-amber-500/30 px-3 py-2">
-                    <div className="text-xs text-amber-800 font-semibold">
-                      ⚠️ {unsentOrders.length} захиалга хүргэлтэнд илгээгдээгүй байна
-                    </div>
-                    <button
-                      onClick={bulkResendUnsent}
-                      disabled={bulkSending}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-50"
-                    >
-                      {bulkSending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Truck className="h-3.5 w-3.5" />}
-                      Бүгдийг илгээх
-                    </button>
-                  </div>
-                )}
-              </div>
 
               {/* Phone search */}
               <div className="relative">
