@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import ProductCard from "@/components/store/ProductCard";
 import SimilarProducts from "@/components/store/SimilarProducts";
 import ProductReviews from "@/components/store/ProductReviews";
+import { ProductSizeFit } from "@/components/store/ProductSizeFit";
 import FrequentlyBoughtTogether from "@/components/store/FrequentlyBoughtTogether";
 import LoadError from "@/components/store/LoadError";
 import { fetchPublicProductBySlug, fetchPublicProductById, fetchPublicProductImages, fetchRelatedPublicProducts, fetchPublicBrands } from "@/lib/publicStoreApi";
