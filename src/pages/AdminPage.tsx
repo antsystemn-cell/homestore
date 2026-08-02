@@ -117,6 +117,12 @@ const AdminPage = () => {
     return t && valid.includes(t) ? t : "stats";
   });
 
+  const [activeProductForSize, setActiveProductForSize] = useState<any>(null);
+
+  const handleEditProductSize = (p: any) => {
+    setActiveProductForSize(p);
+  };
+
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
