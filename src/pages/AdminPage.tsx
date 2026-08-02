@@ -4319,16 +4319,13 @@ const AdminPage = () => {
                     <Plus className="h-4 w-4" />
                     Захиалга оруулах
                   </button>
-
+                </div>
               </div>
 
               <RecentlyDeletedOrders
                 refreshKey={deletedRefreshKey}
                 onRestored={handleRefresh}
               />
-
-
-              </div>
 
 
               {/* Phone search */}
