@@ -127,22 +127,23 @@ const ReportDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {stats.map((s, i) => (
-        <Card key={i}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">{s.title}</CardTitle>
-            <s.icon className={`h-4 w-4 ${s.color || "text-muted-foreground"}`} />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{s.value}</div>
-            {s.count !== undefined && (
-              <p className="text-xs text-muted-foreground mt-1">
-                {s.count} захиалга
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      ))}
+        {stats.map((s, i) => (
+          <Card key={i}>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">{s.title}</CardTitle>
+              <s.icon className={`h-4 w-4 ${s.color || "text-muted-foreground"}`} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{s.value}</div>
+              {s.count !== undefined && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {s.count} захиалга
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 };
