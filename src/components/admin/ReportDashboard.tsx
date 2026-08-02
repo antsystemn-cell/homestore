@@ -9,6 +9,16 @@ import { toast } from "sonner";
 const ReportDashboard = () => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const reportUrl = `${window.location.origin}/admin/report`;
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(reportUrl);
+    setCopied(true);
+    toast.success("URL хууллаа");
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
