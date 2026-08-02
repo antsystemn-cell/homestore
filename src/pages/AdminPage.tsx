@@ -1936,8 +1936,9 @@ const AdminPage = () => {
 
   const categories = [...new Set(products.map((p) => p.category))];
 
-  const moderatorTabs: Tab[] = ["orders"];
-  const sellerTabs: Tab[] = ["orders"];
+  const moderatorTabs: Tab[] = ["stats", "report", "orders", "delivery", "drivers", "diagnostics", "reminders", "returns"];
+  const sellerTabs: Tab[] = ["orders", "report"];
+
 
   // Moderator/Seller only see orders — auto-switch if they land on a non-allowed tab
   useEffect(() => {
