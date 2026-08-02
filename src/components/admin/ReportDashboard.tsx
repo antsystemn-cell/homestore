@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, TrendingUp, Package, RotateCcw, Truck, AlertTriangle } from "lucide-react";
+import { Loader2, TrendingUp, Package, RotateCcw, Truck, AlertTriangle, Link2, Copy, Check } from "lucide-react";
 import { formatPrice } from "@/data/products";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const ReportDashboard = () => {
   const [data, setData] = useState<any>(null);
