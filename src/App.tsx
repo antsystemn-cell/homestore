@@ -140,6 +140,7 @@ const App = () => {
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="/admin/manual-order" element={<AdminPage />} />
+                    <Route path="/admin/report" element={<AdminPage />} />
                     {SPIN_ENABLED && <Route path="/admin/spin" element={<AdminSpinPage />} />}
                     <Route path="/warehouse" element={<WarehousePage />} />
                     <Route path="/driver" element={<DriverPage />} />

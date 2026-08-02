@@ -1,12 +1,24 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, TrendingUp, Package, RotateCcw, Truck, AlertTriangle } from "lucide-react";
+import { Loader2, TrendingUp, Package, RotateCcw, Truck, AlertTriangle, Link2, Copy, Check } from "lucide-react";
 import { formatPrice } from "@/data/products";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const ReportDashboard = () => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const reportUrl = `${window.location.origin}/admin/report`;
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(reportUrl);
+    setCopied(true);
+    toast.success("URL хууллаа");
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -88,23 +100,50 @@ const ReportDashboard = () => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {stats.map((s, i) => (
-        <Card key={i}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">{s.title}</CardTitle>
-            <s.icon className={`h-4 w-4 ${s.color || "text-muted-foreground"}`} />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{s.value}</div>
-            {s.count !== undefined && (
-              <p className="text-xs text-muted-foreground mt-1">
-                {s.count} захиалга
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      ))}
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/30 p-4 rounded-xl border border-border">
+        <div className="space-y-1">
+          <h3 className="text-sm font-medium flex items-center gap-2">
+            <Link2 className="h-4 w-4" />
+            Тайлангийн шууд холбоос
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            Энэ холбоосоор шууд тайлангийн хэсэг рүү нэвтрэх боломжтой
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <code className="text-xs bg-background border px-3 py-2 rounded-lg flex-1 sm:flex-none truncate max-w-[240px]">
+            {reportUrl}
+          </code>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={copyToClipboard}
+            className="shrink-0"
+          >
+            {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {stats.map((s, i) => (
+          <Card key={i}>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">{s.title}</CardTitle>
+              <s.icon className={`h-4 w-4 ${s.color || "text-muted-foreground"}`} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{s.value}</div>
+              {s.count !== undefined && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {s.count} захиалга
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 };
