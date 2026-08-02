@@ -29,6 +29,16 @@ export interface GiftPackage {
   items: ProductGift[];
 }
 
+export interface SizeMeasurement {
+  size: string;
+  bust_width?: number;
+  waist_width?: number;
+  hip_width?: number;
+  garment_length?: number;
+  sleeve_length?: number;
+  leg_length?: number;
+}
+
 export interface Product {
   id: string;
   slug?: string;
@@ -57,6 +67,12 @@ export interface Product {
   hasGift?: boolean | null;
   gifts?: ProductGift[];
   giftPackages?: GiftPackage[];
+  size_chart?: SizeMeasurement[];
+  stretch_level?: 'Low' | 'Medium' | 'High';
+  fit_type?: 'Slim Fit' | 'Regular Fit' | 'Oversized';
+  fabric_material?: string;
+  shrinkage_percent?: number;
+  compression_level?: string;
 }
 
 export const categories = [
@@ -108,5 +124,11 @@ export function mapDbProduct(row: any): Product {
             : [],
         }))
       : [],
+    size_chart: Array.isArray(row.size_chart) ? row.size_chart : [],
+    stretch_level: row.stretch_level || 'Medium',
+    fit_type: row.fit_type || 'Regular Fit',
+    fabric_material: row.fabric_material || '',
+    shrinkage_percent: row.shrinkage_percent || 0,
+    compression_level: row.compression_level || '',
   };
 }

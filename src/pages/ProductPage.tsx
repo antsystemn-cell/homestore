@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import ProductCard from "@/components/store/ProductCard";
 import SimilarProducts from "@/components/store/SimilarProducts";
 import ProductReviews from "@/components/store/ProductReviews";
+import { ProductSizeFit } from "@/components/store/ProductSizeFit";
 import FrequentlyBoughtTogether from "@/components/store/FrequentlyBoughtTogether";
 import LoadError from "@/components/store/LoadError";
 import { fetchPublicProductBySlug, fetchPublicProductById, fetchPublicProductImages, fetchRelatedPublicProducts, fetchPublicBrands } from "@/lib/publicStoreApi";
@@ -806,6 +807,7 @@ const ProductPage = () => {
           <div className="p-4 md:p-0 space-y-6 md:col-start-2 md:row-start-1">
 
             <div>
+              <ProductSizeFit product={product} />
               <h1 className="text-xl md:text-2xl font-bold text-foreground leading-tight">{product.name}</h1>
               <div className="flex items-center gap-3 mt-1 flex-wrap">
                 {product.productCode ? (

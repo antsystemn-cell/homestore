@@ -223,6 +223,48 @@ export type Database = {
         }
         Relationships: []
       }
+      body_profiles: {
+        Row: {
+          body_shape: string | null
+          bust_cm: number | null
+          created_at: string
+          height_cm: number | null
+          hip_cm: number | null
+          id: string
+          preferred_fit: string | null
+          updated_at: string
+          user_id: string
+          waist_cm: number | null
+          weight_kg: number | null
+        }
+        Insert: {
+          body_shape?: string | null
+          bust_cm?: number | null
+          created_at?: string
+          height_cm?: number | null
+          hip_cm?: number | null
+          id?: string
+          preferred_fit?: string | null
+          updated_at?: string
+          user_id: string
+          waist_cm?: number | null
+          weight_kg?: number | null
+        }
+        Update: {
+          body_shape?: string | null
+          bust_cm?: number | null
+          created_at?: string
+          height_cm?: number | null
+          hip_cm?: number | null
+          id?: string
+          preferred_fit?: string | null
+          updated_at?: string
+          user_id?: string
+          waist_cm?: number | null
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
       branches: {
         Row: {
           code: string | null
@@ -1199,6 +1241,51 @@ export type Database = {
         }
         Relationships: []
       }
+      product_fit_feedback: {
+        Row: {
+          created_at: string
+          fit_feedback: string | null
+          id: string
+          order_id: string | null
+          product_id: string
+          purchased_size: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          fit_feedback?: string | null
+          id?: string
+          order_id?: string | null
+          product_id: string
+          purchased_size: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          fit_feedback?: string | null
+          id?: string
+          order_id?: string | null
+          product_id?: string
+          purchased_size?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_fit_feedback_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_fit_feedback_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_images: {
         Row: {
           created_at: string
@@ -1298,10 +1385,13 @@ export type Database = {
           brand_position: number | null
           category: string
           colors: Json | null
+          compression_level: string | null
           created_at: string
           description: string | null
           detail_media: Json | null
           discount: number | null
+          fabric_material: string | null
+          fit_type: string | null
           gift_name: string | null
           gift_packages: Json
           gifts: Json
@@ -1317,10 +1407,13 @@ export type Database = {
           price: number
           product_code: string | null
           sales: number | null
+          shrinkage_percent: number | null
+          size_chart: Json | null
           sizes: Json | null
           slug: string
           specifications: Json | null
           stock_quantity: number
+          stretch_level: string | null
           thumbnail_url: string | null
           updated_at: string
           variant_stock: Json
@@ -1331,10 +1424,13 @@ export type Database = {
           brand_position?: number | null
           category?: string
           colors?: Json | null
+          compression_level?: string | null
           created_at?: string
           description?: string | null
           detail_media?: Json | null
           discount?: number | null
+          fabric_material?: string | null
+          fit_type?: string | null
           gift_name?: string | null
           gift_packages?: Json
           gifts?: Json
@@ -1350,10 +1446,13 @@ export type Database = {
           price: number
           product_code?: string | null
           sales?: number | null
+          shrinkage_percent?: number | null
+          size_chart?: Json | null
           sizes?: Json | null
           slug: string
           specifications?: Json | null
           stock_quantity?: number
+          stretch_level?: string | null
           thumbnail_url?: string | null
           updated_at?: string
           variant_stock?: Json
@@ -1364,10 +1463,13 @@ export type Database = {
           brand_position?: number | null
           category?: string
           colors?: Json | null
+          compression_level?: string | null
           created_at?: string
           description?: string | null
           detail_media?: Json | null
           discount?: number | null
+          fabric_material?: string | null
+          fit_type?: string | null
           gift_name?: string | null
           gift_packages?: Json
           gifts?: Json
@@ -1383,10 +1485,13 @@ export type Database = {
           price?: number
           product_code?: string | null
           sales?: number | null
+          shrinkage_percent?: number | null
+          size_chart?: Json | null
           sizes?: Json | null
           slug?: string
           specifications?: Json | null
           stock_quantity?: number
+          stretch_level?: string | null
           thumbnail_url?: string | null
           updated_at?: string
           variant_stock?: Json

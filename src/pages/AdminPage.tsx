@@ -7,7 +7,7 @@ import OrderStatusTimeline from "@/components/admin/OrderStatusTimeline";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
   BarChart3, LayoutDashboard, Search, X, AlertTriangle, AlertCircle, BadgeCheck, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, FileSpreadsheet, Sparkles,
-  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw, Star, Gift, Smartphone, Monitor, Tablet, PlayCircle, ExternalLink, Zap, RotateCcw
+  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw, Star, Gift, Smartphone, Monitor, Tablet, PlayCircle, ExternalLink, Zap, RotateCcw, Ruler
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
@@ -35,6 +35,7 @@ import TrackingDashboard from "@/components/admin/TrackingDashboard";
 import DeliveryPortal from "@/components/admin/DeliveryPortal";
 import BranchesManager from "@/components/admin/BranchesManager";
 import AdminSkeleton from "@/components/admin/AdminSkeleton";
+import { ProductSizeManager } from "@/components/admin/ProductSizeManager";
 import ReturnsManager from "@/components/admin/ReturnsManager";
 import RecentlyDeletedOrders from "@/components/admin/RecentlyDeletedOrders";
 import AddressSelector from "@/components/store/AddressSelector";
@@ -115,6 +116,12 @@ const AdminPage = () => {
     const valid: Tab[] = ["stats", "report", "tracking", "products", "orders", "users", "drivers", "categories", "brands", "delivery", "delivery-portal", "payments", "banner", "announcements", "welcome-showcase", "collections", "chatbot", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "referral", "promotions", "coupon-usage", "flash-sales", "reels", "settings", "bonus", "branches", "returns"];
     return t && valid.includes(t) ? t : "stats";
   });
+
+  const [activeProductForSize, setActiveProductForSize] = useState<any>(null);
+
+  const handleEditProductSize = (p: any) => {
+    setActiveProductForSize(p);
+  };
 
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
@@ -4180,6 +4187,10 @@ const AdminPage = () => {
                                 className="p-2 rounded-lg hover:bg-secondary transition-colors" title="Хуулбарлах">
                                 <Copy className="h-3.5 w-3.5 text-muted-foreground" />
                               </button>
+                              <button onClick={() => handleEditProductSize(p)}
+                                className="p-2 rounded-lg hover:bg-orange-500/10 text-orange-600 transition-colors" title="Хэмжээ удирдах">
+                                <Ruler className="h-3.5 w-3.5" />
+                              </button>
                               <button onClick={() => setDeleteTarget({ id: p.id, name: p.name })}
                                 className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors" title="Устгах">
                                 <Trash2 className="h-3.5 w-3.5" />
@@ -4239,6 +4250,7 @@ const AdminPage = () => {
                       }}
                       className="p-2 rounded-lg bg-secondary inline-flex" title="Засах"><Pencil className="h-3.5 w-3.5" /></a>
                     <button onClick={() => handleDuplicateProduct(p)} className="p-2 rounded-lg bg-secondary" title="Хуулбарлах"><Copy className="h-3.5 w-3.5" /></button>
+                    <button onClick={() => handleEditProductSize(p)} className="p-2 rounded-lg bg-orange-500/10 text-orange-600" title="Хэмжээ удирдах"><Ruler className="h-3.5 w-3.5" /></button>
                     <button onClick={() => setDeleteTarget({ id: p.id, name: p.name })} className="p-2 rounded-lg bg-destructive/10 text-destructive" title="Устгах"><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
                 ))}
@@ -4247,6 +4259,22 @@ const AdminPage = () => {
                     {searchQuery || filterCategory !== "all" ? "Хайлтад тохирох бараа олдсонгүй" : "Бараа байхгүй"}
                   </p>
                 )}
+              </div>
+            </div>
+          )}
+
+          {activeProductForSize && (
+            <div className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setActiveProductForSize(null)}>
+              <div className="bg-card w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl border border-border" onClick={e => e.stopPropagation()}>
+                <div className="p-4 border-b border-border flex items-center justify-between sticky top-0 bg-card z-10">
+                    <h2 className="font-bold">{activeProductForSize.name} — Хэмжээ</h2>
+                    <button onClick={() => setActiveProductForSize(null)} className="p-2 hover:bg-secondary rounded-lg">
+                        <X className="h-5 w-5" />
+                    </button>
+                </div>
+                <div className="p-4 pt-0">
+                    <ProductSizeManager product={activeProductForSize} onUpdate={fetchProducts} />
+                </div>
               </div>
             </div>
           )}
@@ -4296,16 +4324,13 @@ const AdminPage = () => {
                     <Plus className="h-4 w-4" />
                     Захиалга оруулах
                   </button>
-
+                </div>
               </div>
 
               <RecentlyDeletedOrders
                 refreshKey={deletedRefreshKey}
                 onRestored={handleRefresh}
               />
-
-
-              </div>
 
 
               {/* Phone search */}
