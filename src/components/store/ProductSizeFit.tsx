@@ -300,13 +300,21 @@ export const ProductSizeFit = ({ product }: { product: Product }) => {
                     className="w-full h-auto opacity-80 group-hover:opacity-100 transition-opacity" 
                 />
                 <div className={getOverlayStyle(activeField)} />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-white/90 to-transparent p-2">
-                    <p className="text-[9px] text-center text-muted-foreground font-medium uppercase tracking-tighter">
-                        {activeField === 'bust' ? 'Цээжний тойрог хэмжих' : 
-                         activeField === 'waist' ? 'Бэлхүүсний тойрог хэмжих' : 
-                         activeField === 'hip' ? 'Түнхний тойрог хэмжих' : 
-                         'Зураг дээрх шиг хэмжинэ үү'}
-                    </p>
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-white/95 to-transparent p-3 pt-6">
+                    <div className="flex flex-col gap-1">
+                        <p className="text-[10px] font-bold text-orange-600 uppercase tracking-tight">
+                            {activeField === 'bust' ? 'Цээжний тойрог хэмжих' : 
+                             activeField === 'waist' ? 'Бэлхүүсний тойрог хэмжих' : 
+                             activeField === 'hip' ? 'Түнхний тойрог хэмжих' : 
+                             'Хэрхэн хэмжих вэ?'}
+                        </p>
+                        <p className="text-[9px] leading-tight text-muted-foreground font-medium">
+                            {activeField === 'bust' ? 'Цээжний хамгийн товгор хэсгээр тойруулж хэмжинэ. Хэт чанга биш, чөлөөтэй байхаар бодно.' : 
+                             activeField === 'waist' ? 'Их биеийн хамгийн нарийн хэсэг буюу хүйсний дээхнэ талаар хэмжинэ.' : 
+                             activeField === 'hip' ? 'Өгзөгний хамгийн өргөн хэсгээр тойруулж хэмжинэ.' : 
+                             'Зураг дээрх улаан хэсгүүдэд заасан шиг биеийн тойргийн хэмжээг оруулна уу.'}
+                        </p>
+                    </div>
                 </div>
             </div>
           </div>
