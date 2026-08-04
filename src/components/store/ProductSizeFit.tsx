@@ -359,7 +359,7 @@ export const ProductSizeFit = ({ product }: { product: Product }) => {
                     <AlertCircle className="h-5 w-5 text-orange-400" />
                     <div className="flex-1">
                         <p className="text-[11px] font-medium leading-tight">Энэ бараанд хэмжээний дэлгэрэнгүй мэдээлэл ороогүй байна.</p>
-                        <p className="text-[10px] opacity-70">Админ хэмжээний хүснэгт оруулсны дараа тооцоолох боломжтой.</p>
+                        <p className="text-[10px] opacity-70">Админ хэмжээний хүснэгт оруулсны дараа тооцоолох боломжтой. Энэ асуудлыг шийдэхийн тулд Админ хэсэгт барааны хэмжээний хүснэгтийг (Size Chart) бөглөх шаардлагатай.</p>
                     </div>
                 </div>
             )}
