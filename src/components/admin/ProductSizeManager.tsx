@@ -176,10 +176,15 @@ export const ProductSizeManager = ({ product, onUpdate }: { product: Product, on
             </div>
         </div>
 
-        <div className="bg-blue-50/50 p-3 rounded-lg border border-blue-100 flex items-start gap-2.5">
-            <Layers className="h-4 w-4 text-blue-500 mt-0.5" />
-            <div className="text-[10px] text-blue-700 leading-normal">
-                <span className="font-bold">Санамж:</span> Барааны өргөнийг (Flat measurement) оруулаарай. Хэмжээ авах алгоритм үүнийг 2-оор үржүүлж тойргийн хэмжээг бодож гаргадаг. Жишээ: Өмдний түнхний өргөн 45см бол алгоритм 90см-ийн түнхний тойрогтой хэрэглэгчид санал болгоно.
+        <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100 flex items-start gap-3">
+            <Layers className="h-5 w-5 text-blue-500 mt-0.5" />
+            <div className="text-[11px] text-blue-700 leading-relaxed">
+                <p className="font-bold mb-1 text-xs">АНХААРУУЛГА: Хэмжээг хэрхэн оруулах вэ?</p>
+                <ul className="list-disc pl-4 space-y-1">
+                    <li>Барааны <span className="font-bold">нэг талын өргөнийг (Flat measurement)</span> см-ээр оруулаарай.</li>
+                    <li>Алгоритм үүнийг автоматаар 2-оор үржүүлж биеийн тойргийг тооцоолдог.</li>
+                    <li><span className="font-bold text-blue-800">Жишээ:</span> Хэрэв өмдний түнхний өргөн 45см бол энд 45 гэж бичнэ. Ухаалаг систем 90см-ийн түнхний тойрогтой хүнд тохирно гэж үзнэ.</li>
+                </ul>
             </div>
         </div>
       </CardContent>
