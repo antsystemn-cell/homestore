@@ -1356,7 +1356,7 @@ const AdminPage = () => {
         delivery_option_id: manualForm.delivery_option_id || null,
         delivery_fee: Number(manualForm.delivery_fee) || 0,
         payment_method: manualForm.payment_method,
-        payment_status: manualForm.payment_status,
+        payment_status: manualForm.payment_method === "exchange" ? "confirmed" : manualForm.payment_status,
         is_guest: true,
         guest_name: manualForm.customer_name.trim(),
         source: manualForm.source,
