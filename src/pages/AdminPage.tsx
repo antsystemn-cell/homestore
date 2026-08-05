@@ -497,7 +497,7 @@ const AdminPage = () => {
     addr_landmark: "",
     delivery_option_id: "",
     delivery_fee: 0,
-    payment_method: "cash",
+    payment_method: "bank_personal",
     payment_status: "confirmed" as "unpaid" | "confirmed",
     status: "confirmed" as "pending" | "confirmed" | "preparing" | "delivering" | "completed" | "cancelled",
     note: "",
