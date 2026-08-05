@@ -4343,21 +4343,21 @@ const AdminPage = () => {
               <div className="bg-muted/30 p-4 rounded-xl border border-border flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="space-y-1">
                   <h3 className="text-sm font-bold flex items-center gap-2">
-                    <LayoutDashboard className="h-4 w-4" />
-                    Өнөөдрийн борлуулалт
+                    <Truck className="h-4 w-4" />
+                    Хүргэлтээр таслах
                   </h3>
                   <p className="text-xs text-muted-foreground">
-                    Тайлангийн хэсэг рүү орохгүйгээр эндээс шууд борлуулалтаа хааж болно
+                    Борлуулалт хаахдаа жолоочийн хүргэж дууссан захиалгаар тасалж тайлан гаргана
                   </p>
                 </div>
                 <Button 
-                  onClick={() => setTab("report")}
+                  onClick={() => setTab("drivers")}
                   variant="outline"
                   size="sm"
                   className="gap-2 rounded-xl"
                 >
-                  <Lock className="h-3.5 w-3.5" />
-                  Борлуулалт хаах
+                  <ChevronDown className="h-3.5 w-3.5" />
+                  Хүргэлтээр таслах
                 </Button>
               </div>
 
