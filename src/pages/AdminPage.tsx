@@ -5351,6 +5351,17 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                                   </span>
                                 </p>
                               )}
+                              {o.delivery_completed_photo && (
+                                <div className="mt-2 pt-2 border-t border-emerald-500/20">
+                                  <p className="text-[10px] text-muted-foreground mb-1 font-semibold uppercase">Баталгаажуулах зураг:</p>
+                                  <img 
+                                    src={o.delivery_completed_photo} 
+                                    alt="Delivery Proof" 
+                                    className="w-full h-32 object-cover rounded-lg border border-emerald-500/20 cursor-pointer hover:opacity-90 transition-opacity" 
+                                    onClick={() => window.open(o.delivery_completed_photo, '_blank')}
+                                  />
+                                </div>
+                              )}
                               {o.delivered_at && (
                                 <p>
                                   <span className="text-muted-foreground">Хүргэгдсэн:</span>{" "}
