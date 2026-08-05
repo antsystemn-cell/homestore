@@ -1210,7 +1210,7 @@ const AdminPage = () => {
     () => orders.filter((o: any) =>
       !o.delivery_order_id
       && o.status !== "cancelled"
-      && (o.status === "confirmed" || o.status === "delivering" || o.payment_status === "confirmed" || o.payment_status === "paid")
+      && (o.status === "confirmed" || o.status === "delivering" || o.payment_status === "confirmed" || o.payment_status === "paid" || o.payment_status === "paid")
     ),
     [orders]
   );
@@ -4657,7 +4657,7 @@ const AdminPage = () => {
                       const orderItems = Array.isArray(o.items) ? o.items : [];
                       const isChecked = bulkSelected.has(o.id);
                       return (
-                        <div key={o.id} className={`bg-card rounded-xl border overflow-hidden ${o.payment_status !== "confirmed" ? "border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.2)]" : "border-border"}`}>
+                        <div key={o.id} className={`bg-card rounded-xl border overflow-hidden ${(o.payment_status !== "confirmed" && o.payment_status !== "paid") ? "border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.2)]" : "border-border"}`}>
                           {/* Order header - clickable */}
                           <div className="flex items-stretch">
                             <div className="flex items-center pl-3" onClick={(e) => e.stopPropagation()}>
@@ -4696,7 +4696,7 @@ const AdminPage = () => {
                               </span>
                             );
                           })()}
-                          {o.payment_status === "confirmed" && (
+                          {(o.payment_status === "confirmed" || o.payment_status === "paid") && (
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">
                               💰 Төлбөр орсон
                             </span>
@@ -4794,7 +4794,8 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                           <button
                             onClick={async (e) => {
                               e.stopPropagation();
-                              const newStatus = o.payment_status === "confirmed" ? "unpaid" : "confirmed";
+                              const isPaid = o.payment_status === "confirmed" || o.payment_status === "paid";
+                              const newStatus = isPaid ? "unpaid" : "confirmed";
                               const updates: any = { payment_status: newStatus };
                               if (newStatus === "confirmed" && o.status !== "confirmed" && o.status !== "completed" && o.status !== "cancelled") {
                                 updates.status = "confirmed";
@@ -4815,8 +4816,8 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                                 }).catch(console.error);
                               }
                             }}
-                            className={`p-2 rounded-lg transition-colors ${o.payment_status === "confirmed" ? "hover:bg-amber-500/10 text-amber-600" : "hover:bg-emerald-500/10 text-emerald-600"}`}
-                            title={o.payment_status === "confirmed" ? "Төлөгдөөгүй гэж тэмдэглэх" : "Төлбөр орсон гэж тэмдэглэх"}
+                            className={`p-2 rounded-lg transition-colors ${(o.payment_status === "confirmed" || o.payment_status === "paid") ? "hover:bg-amber-500/10 text-amber-600" : "hover:bg-emerald-500/10 text-emerald-600"}`}
+                            title={(o.payment_status === "confirmed" || o.payment_status === "paid") ? "Төлөгдөөгүй гэж тэмдэглэх" : "Төлбөр орсон гэж тэмдэглэх"}
                           >
                             <BadgeCheck className="h-4 w-4" />
                           </button>
@@ -5123,8 +5124,8 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                               </label>
                               <div className="grid grid-cols-2 gap-2">
                                 {[
-                                  { value: "confirmed", title: "Төлбөр авсан", desc: "Бэлэн / шилжүүлэг хүлээн авсан", active: o.payment_status === "confirmed", accent: "text-emerald-600 border-emerald-500/40 bg-emerald-500/5" },
-                                  { value: "unpaid", title: "Төлбөр аваагүй", desc: "Хүргэлт дээр төлнө", active: o.payment_status !== "confirmed", accent: "text-amber-600 border-amber-500/40 bg-amber-500/5" },
+                                  { value: "confirmed", title: "Төлбөр авсан", desc: "Бэлэн / шилжүүлэг хүлээн авсан", active: o.payment_status === "confirmed" || o.payment_status === "paid", accent: "text-emerald-600 border-emerald-500/40 bg-emerald-500/5" },
+                                  { value: "unpaid", title: "Төлбөр аваагүй", desc: "Хүргэлт дээр төлнө", active: o.payment_status !== "confirmed" && o.payment_status !== "paid", accent: "text-amber-600 border-amber-500/40 bg-amber-500/5" },
                                 ].map((opt) => (
                                   <button
                                     key={opt.value}
@@ -5132,7 +5133,8 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                                     onClick={async (e) => {
                                       e.stopPropagation();
                                       const newStatus = opt.value;
-                                      if ((o.payment_status === "confirmed") === (newStatus === "confirmed")) return;
+                                      const isCurrentlyPaid = o.payment_status === "confirmed" || o.payment_status === "paid";
+                                      if (isCurrentlyPaid === (newStatus === "confirmed")) return;
                                       const updates: any = { payment_status: newStatus };
                                       if (newStatus === "confirmed" && o.status !== "confirmed" && o.status !== "completed" && o.status !== "cancelled") {
                                         updates.status = "confirmed";
