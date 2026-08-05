@@ -56,14 +56,14 @@ const ReportDashboard = () => {
       // Check if already settled today
       const todayStr = now.toISOString().split('T')[0];
       const { data: settlement } = await supabase
-        .from("daily_settlements")
+        .from("daily_settlements" as any)
         .select("*")
         .eq("settlement_date", todayStr)
         .single();
 
       // History
       const { data: history } = await supabase
-        .from("daily_settlements")
+        .from("daily_settlements" as any)
         .select("*")
         .order("settlement_date", { ascending: false })
         .limit(10);
@@ -110,13 +110,13 @@ const ReportDashboard = () => {
     try {
       const { data: userData } = await supabase.auth.getUser();
       const { error } = await supabase
-        .from("daily_settlements")
+        .from("daily_settlements" as any)
         .insert({
           settlement_date: data.todayStr,
           total_sales: data.todaySales,
           order_count: data.todayCount,
           closed_by: userData.user?.id
-        });
+        } as any);
 
       if (error) throw error;
       toast.success("Өнөөдрийн борлуулалтыг амжилттай хаалаа");
