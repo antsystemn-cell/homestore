@@ -4658,7 +4658,7 @@ const AdminPage = () => {
                       const orderItems = Array.isArray(o.items) ? o.items : [];
                       const isChecked = bulkSelected.has(o.id);
                       return (
-                        <div key={o.id} className={`bg-card rounded-xl border overflow-hidden ${(o.payment_status !== "confirmed" && o.payment_status !== "paid") ? "border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.2)]" : "border-border"}`}>
+                        <div key={o.id} className={`bg-card rounded-xl border overflow-hidden ${(o.payment_status !== "confirmed" && o.payment_status !== "paid" && o.payment_method !== "exchange") ? "border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.2)]" : "border-border"}`}>
                           {/* Order header - clickable */}
                           <div className="flex items-stretch">
                             <div className="flex items-center pl-3" onClick={(e) => e.stopPropagation()}>
