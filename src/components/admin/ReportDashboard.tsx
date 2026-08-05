@@ -28,9 +28,18 @@ const ReportDashboard = () => {
     try {
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+      
+      // History (get latest to determine the start of current period)
+      const { data: history } = await supabase
+        .from("daily_settlements" as any)
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(10);
 
-      // Total Sales
+      const latestSettlement = history && history.length > 0 ? history[0] : null;
+      const periodStart = latestSettlement ? latestSettlement.created_at : new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+
+      // Total Sales (All time completed)
       const { data: allSales } = await supabase
         .from("orders")
         .select("total")
@@ -49,24 +58,19 @@ const ReportDashboard = () => {
       const monthlySales = monthSales?.reduce((s, o) => s + (o.total || 0), 0) || 0;
       const monthlyCount = monthSales?.length || 0;
       
-      const todaySalesData = monthSales?.filter(o => o.created_at >= startOfToday) || [];
-      const todaySales = todaySalesData.reduce((s, o) => s + (o.total || 0), 0) || 0;
-      const todayCount = todaySalesData.length || 0;
+      // Current Period Sales (since last settlement)
+      const { data: periodSalesData } = await supabase
+        .from("orders")
+        .select("total, created_at")
+        .eq("status", "completed")
+        .gt("created_at", periodStart);
 
-      // Check if already settled today
+      const todaySales = periodSalesData?.reduce((s, o) => s + (o.total || 0), 0) || 0;
+      const todayCount = periodSalesData?.length || 0;
+
+      // Check if already settled today (calendar date check for the button state)
       const todayStr = now.toISOString().split('T')[0];
-      const { data: settlement } = await supabase
-        .from("daily_settlements" as any)
-        .select("*")
-        .eq("settlement_date", todayStr)
-        .single();
-
-      // History
-      const { data: history } = await supabase
-        .from("daily_settlements" as any)
-        .select("*")
-        .order("settlement_date", { ascending: false })
-        .limit(10);
+      const isSettledToday = latestSettlement && latestSettlement.settlement_date === todayStr;
 
       // Returns & Pending & Stock
       const [
