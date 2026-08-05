@@ -95,6 +95,18 @@ export const fetchPublicBrands = async () => {
   }
 };
 
+export const fetchPublicCategories = async () => {
+  try {
+    return await fetchPublic<any[]>("categories", {
+      select: "id,name,icon,position,parent_id,slug,image_url",
+      order: "position.asc,name.asc",
+    });
+  } catch (error) {
+    logError("categories", error);
+    return [];
+  }
+};
+
 export const searchPublicProducts = async (query: string) => {
   try {
     const { tokenize, tokenVariants, scoreCandidate } = await import("./searchNormalize");
