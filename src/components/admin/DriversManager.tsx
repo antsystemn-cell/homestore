@@ -642,6 +642,16 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1 sm:flex-none">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Дугаар, утас, хаягаар хайх..."
+              value={driverSearch}
+              onChange={(e) => setDriverSearch(e.target.value)}
+              className="w-full sm:w-64 rounded-xl bg-secondary pl-9 pr-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
