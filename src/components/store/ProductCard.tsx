@@ -266,8 +266,11 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
 
         {/* Color swatches disabled on cards — colors chosen on product detail page */}
       </div>
-      <div className="px-3 py-3 md:px-4 md:py-3">
-        <h3 className="text-sm md:text-sm text-foreground line-clamp-2 leading-snug font-medium min-h-[2.6em]">
+      <div className="px-3 py-3 md:px-4 md:py-3 flex flex-col h-full">
+        {product.brandName && (
+          <p className="text-[10px] text-primary font-bold uppercase tracking-wider mb-1">{product.brandName}</p>
+        )}
+        <h3 className="text-sm md:text-sm text-foreground line-clamp-2 leading-snug font-medium min-h-[2.6em] flex-grow">
           {product.name}
         </h3>
         <RatingRow productId={product.id} />

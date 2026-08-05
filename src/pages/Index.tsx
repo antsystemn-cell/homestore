@@ -12,6 +12,7 @@ import NewArrivals from "@/components/store/NewArrivals";
 import AdBanners, { useAdImages } from "@/components/store/AdBanners";
 import ForYou from "@/components/store/ForYou";
 import WelcomeShowcaseModal from "@/components/store/WelcomeShowcaseModal";
+import CategoryNav from "@/components/store/CategoryNav";
 
 
 
@@ -193,6 +194,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
       <Header />
+      <CategoryNav />
       <WelcomeShowcaseModal />
       {loading ? (
         <ProductGridSkeleton count={PAGE_SIZE} />
