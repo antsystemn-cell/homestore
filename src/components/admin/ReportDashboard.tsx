@@ -28,9 +28,19 @@ const ReportDashboard = () => {
     try {
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+      
+      // History (get latest to determine the start of current period)
+      const { data: historyData } = await supabase
+        .from("daily_settlements" as any)
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(10);
 
-      // Total Sales
+      const history = (historyData as any[]) || [];
+      const latestSettlement = history.length > 0 ? history[0] : null;
+      const periodStart = latestSettlement ? latestSettlement.created_at : new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+
+      // Total Sales (All time completed)
       const { data: allSales } = await supabase
         .from("orders")
         .select("total")
@@ -49,24 +59,19 @@ const ReportDashboard = () => {
       const monthlySales = monthSales?.reduce((s, o) => s + (o.total || 0), 0) || 0;
       const monthlyCount = monthSales?.length || 0;
       
-      const todaySalesData = monthSales?.filter(o => o.created_at >= startOfToday) || [];
-      const todaySales = todaySalesData.reduce((s, o) => s + (o.total || 0), 0) || 0;
-      const todayCount = todaySalesData.length || 0;
+      // Current Period Sales (since last settlement)
+      const { data: periodSalesData } = await supabase
+        .from("orders")
+        .select("total, created_at")
+        .eq("status", "completed")
+        .gt("created_at", periodStart);
 
-      // Check if already settled today
+      const todaySales = periodSalesData?.reduce((s, o) => s + (o.total || 0), 0) || 0;
+      const todayCount = periodSalesData?.length || 0;
+
+      // Check if already settled today (calendar date check for the button state)
       const todayStr = now.toISOString().split('T')[0];
-      const { data: settlement } = await supabase
-        .from("daily_settlements" as any)
-        .select("*")
-        .eq("settlement_date", todayStr)
-        .single();
-
-      // History
-      const { data: history } = await supabase
-        .from("daily_settlements" as any)
-        .select("*")
-        .order("settlement_date", { ascending: false })
-        .limit(10);
+      const isSettledToday = latestSettlement && (latestSettlement as any).settlement_date === todayStr;
 
       // Returns & Pending & Stock
       const [
@@ -89,7 +94,7 @@ const ReportDashboard = () => {
         returnsCount: returnsCount || 0,
         pendingDeliveries: pendingDeliveries || 0,
         lowStock: lowStock?.length || 0,
-        isSettled: !!settlement,
+        isSettled: !!isSettledToday,
         todayStr
       });
       setLastSettlements(history || []);
@@ -145,6 +150,9 @@ const ReportDashboard = () => {
         <div className="space-y-1">
           <h2 className="text-2xl font-bold tracking-tight">Тайлан & Статистик</h2>
           <p className="text-muted-foreground text-sm">Борлуулалт болон хүргэлтийн нэгдсэн мэдээлэл</p>
+          <p className="text-[10px] text-muted-foreground/80 mt-1 max-w-md">
+            Өнөөдрийн хаасан гүйлгээ, маргаашийн хаасан гүйлгээ хүртэл бүх борлуулалтыг тооцож нэг өдрийн борлуулалтанд тооцно
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-2">
