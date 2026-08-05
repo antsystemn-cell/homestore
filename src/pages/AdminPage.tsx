@@ -2648,8 +2648,17 @@ const AdminPage = () => {
                           </button>
                           <button
                             type="button"
+                            onClick={() => setEditingItemIdx(isEditing ? null : idx)}
+                            className={`p-1.5 rounded-lg transition-colors ${isEditing ? 'bg-primary/10 text-primary' : 'hover:bg-secondary text-muted-foreground'}`}
+                            title="Засах"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => { setManualItems((prev) => prev.filter((_, i) => i !== idx)); if (isEditing) setEditingItemIdx(null); }}
                             className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive"
+                            title="Устгах"
                           >
                             <X className="h-3.5 w-3.5" />
                           </button>
