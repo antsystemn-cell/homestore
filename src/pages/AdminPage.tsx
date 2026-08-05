@@ -4697,7 +4697,7 @@ const AdminPage = () => {
                               </span>
                             );
                           })()}
-                          {(o.payment_status === "confirmed" || o.payment_status === "paid") && (
+                          {(o.payment_status === "confirmed" || o.payment_status === "paid" || o.payment_method === "exchange") && (
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">
                               💰 Төлбөр орсон
                             </span>
