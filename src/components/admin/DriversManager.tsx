@@ -190,15 +190,28 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
 
   const filteredDeliveries = useMemo(() => {
     return deliveries.filter((r) => {
+      // Search filter (Ref, Phone, Address, Driver Name)
+      if (driverSearch.trim()) {
+        const s = driverSearch.toLowerCase();
+        const matches = 
+          (r.order_ref || "").toLowerCase().includes(s) ||
+          (r.phone || "").toLowerCase().includes(s) ||
+          (r.shipping_address || "").toLowerCase().includes(s) ||
+          (r.delivery_signature_name || "").toLowerCase().includes(s);
+        if (!matches) return false;
+      }
+
+      // Status filter
       if (statusFilter === "delivered") {
         if (!(r.status === "completed" || r.delivered_at)) return false;
       } else if (statusFilter === "out_for_delivery") {
         if (r.delivered_at || r.status === "completed") return false;
         if (!(r.status === "delivering" || r.delivery_status === "out_for_delivery")) return false;
       }
+
       return true;
     });
-  }, [deliveries, statusFilter]);
+  }, [deliveries, statusFilter, driverSearch]);
 
   const statsByDriver = useMemo(() => {
     const map = new Map<string, DeliveryRow[]>();
@@ -642,6 +655,16 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1 sm:flex-none">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Дугаар, утас, хаягаар хайх..."
+              value={driverSearch}
+              onChange={(e) => setDriverSearch(e.target.value)}
+              className="w-full sm:w-64 rounded-xl bg-secondary pl-9 pr-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
