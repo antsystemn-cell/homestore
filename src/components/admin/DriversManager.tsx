@@ -190,14 +190,6 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
 
   const filteredDeliveries = useMemo(() => {
     return deliveries.filter((r) => {
-      // Status filter
-      if (statusFilter === "delivered") {
-        if (!(r.status === "completed" || r.delivered_at)) return false;
-      } else if (statusFilter === "out_for_delivery") {
-        if (r.delivered_at || r.status === "completed") return false;
-        if (!(r.status === "delivering" || r.delivery_status === "out_for_delivery")) return false;
-      }
-
       // Search filter (Ref, Phone, Address, Driver Name)
       if (driverSearch.trim()) {
         const s = driverSearch.toLowerCase();
@@ -207,6 +199,14 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
           (r.shipping_address || "").toLowerCase().includes(s) ||
           (r.delivery_signature_name || "").toLowerCase().includes(s);
         if (!matches) return false;
+      }
+
+      // Status filter
+      if (statusFilter === "delivered") {
+        if (!(r.status === "completed" || r.delivered_at)) return false;
+      } else if (statusFilter === "out_for_delivery") {
+        if (r.delivered_at || r.status === "completed") return false;
+        if (!(r.status === "delivering" || r.delivery_status === "out_for_delivery")) return false;
       }
 
       return true;
