@@ -185,7 +185,7 @@ const ReportDashboard = () => {
             size="sm"
           >
             <Lock className="h-4 w-4" />
-            {data.isSettled ? "Өнөөдөр хаагдсан" : "Өнөөдрийн борлуулалт хаах"}
+            {data.isSettled ? "Өнөөдөр хаагдсан" : "Борлуулалт хаах"}
           </Button>
         </div>
       </div>
