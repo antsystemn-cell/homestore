@@ -145,6 +145,9 @@ const ReportDashboard = () => {
         <div className="space-y-1">
           <h2 className="text-2xl font-bold tracking-tight">Тайлан & Статистик</h2>
           <p className="text-muted-foreground text-sm">Борлуулалт болон хүргэлтийн нэгдсэн мэдээлэл</p>
+          <p className="text-[10px] text-muted-foreground/80 mt-1 max-w-md">
+            Өнөөдрийн хаасан гүйлгээ, маргаашийн хаасан гүйлгээ хүртэл бүх борлуулалтыг тооцож нэг өдрийн борлуулалтанд тооцно
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-2">
