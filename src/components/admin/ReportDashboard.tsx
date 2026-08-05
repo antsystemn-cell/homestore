@@ -30,13 +30,14 @@ const ReportDashboard = () => {
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
       
       // History (get latest to determine the start of current period)
-      const { data: history } = await supabase
+      const { data: historyData } = await supabase
         .from("daily_settlements" as any)
         .select("*")
         .order("created_at", { ascending: false })
         .limit(10);
 
-      const latestSettlement = history && history.length > 0 ? history[0] : null;
+      const history = (historyData as any[]) || [];
+      const latestSettlement = history.length > 0 ? history[0] : null;
       const periodStart = latestSettlement ? latestSettlement.created_at : new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
 
       // Total Sales (All time completed)
