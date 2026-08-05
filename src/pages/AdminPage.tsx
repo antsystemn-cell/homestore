@@ -1356,7 +1356,7 @@ const AdminPage = () => {
         delivery_option_id: manualForm.delivery_option_id || null,
         delivery_fee: Number(manualForm.delivery_fee) || 0,
         payment_method: manualForm.payment_method,
-        payment_status: manualForm.payment_status,
+        payment_status: manualForm.payment_method === "exchange" ? "confirmed" : manualForm.payment_status,
         is_guest: true,
         guest_name: manualForm.customer_name.trim(),
         source: manualForm.source,
@@ -4456,6 +4456,7 @@ const AdminPage = () => {
                 const isUnpaidDelivery = (o: any) =>
                   isDeliveredOrder(o)
                   && o.payment_status !== "confirmed"
+                  && o.payment_method !== "exchange"
                   && new Date(o.created_at).getTime() >= UNPAID_TRACKING_START;
                 const deliveredCount = orders.filter((o) => isDeliveredOrder(o) && !isUnpaidDelivery(o)).length;
                 const unpaidDeliveryCount = orders.filter(isUnpaidDelivery).length;
@@ -4657,7 +4658,7 @@ const AdminPage = () => {
                       const orderItems = Array.isArray(o.items) ? o.items : [];
                       const isChecked = bulkSelected.has(o.id);
                       return (
-                        <div key={o.id} className={`bg-card rounded-xl border overflow-hidden ${(o.payment_status !== "confirmed" && o.payment_status !== "paid") ? "border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.2)]" : "border-border"}`}>
+                        <div key={o.id} className={`bg-card rounded-xl border overflow-hidden ${(o.payment_status !== "confirmed" && o.payment_status !== "paid" && o.payment_method !== "exchange") ? "border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.2)]" : "border-border"}`}>
                           {/* Order header - clickable */}
                           <div className="flex items-stretch">
                             <div className="flex items-center pl-3" onClick={(e) => e.stopPropagation()}>
@@ -4696,7 +4697,7 @@ const AdminPage = () => {
                               </span>
                             );
                           })()}
-                          {(o.payment_status === "confirmed" || o.payment_status === "paid") && (
+                          {(o.payment_status === "confirmed" || o.payment_status === "paid" || o.payment_method === "exchange") && (
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">
                               💰 Төлбөр орсон
                             </span>
