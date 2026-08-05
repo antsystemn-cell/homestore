@@ -2794,12 +2794,11 @@ const AdminPage = () => {
                       onChange={(e) => setManualForm((f) => ({ ...f, payment_method: e.target.value }))}
                       className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                     >
-                      <option value="cash">Бэлнээр</option>
+                      <option value="bank_personal">Данс / Хувь</option>
+                      <option value="bank_organization">Данс / Байгууллага</option>
                       <option value="qpay">QPay</option>
                       <option value="storepay">Storepay</option>
-                      <option value="transfer">Шилжүүлэг</option>
                       <option value="pocket">Pocket</option>
-                      <option value="organization">Байгууллага</option>
                       <option value="sono">Соно</option>
                       <option value="exchange">🔄 Бараа солих (үнэ 0₮)</option>
                     </select>
@@ -5097,12 +5096,11 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                                 }}
                                 className="w-full rounded-xl bg-secondary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                               >
-                                <option value="cash">Бэлнээр</option>
+                                <option value="bank_personal">Данс / Хувь</option>
+                                <option value="bank_organization">Данс / Байгууллага</option>
                                 <option value="qpay">QPay</option>
                                 <option value="storepay">Storepay</option>
-                                <option value="transfer">Шилжүүлэг</option>
                                 <option value="pocket">Pocket</option>
-                                <option value="organization">Байгууллага</option>
                                 <option value="sono">Соно</option>
                               </select>
                             </div>
