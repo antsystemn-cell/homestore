@@ -71,7 +71,7 @@ const ReportDashboard = () => {
 
       // Check if already settled today (calendar date check for the button state)
       const todayStr = now.toISOString().split('T')[0];
-      const isSettledToday = latestSettlement && latestSettlement.settlement_date === todayStr;
+      const isSettledToday = latestSettlement && (latestSettlement as any).settlement_date === todayStr;
 
       // Returns & Pending & Stock
       const [
