@@ -93,7 +93,7 @@ const ReportDashboard = () => {
         returnsCount: returnsCount || 0,
         pendingDeliveries: pendingDeliveries || 0,
         lowStock: lowStock?.length || 0,
-        isSettled: !!settlement,
+        isSettled: !!isSettledToday,
         todayStr
       });
       setLastSettlements(history || []);
