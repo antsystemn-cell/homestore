@@ -7,7 +7,7 @@ import OrderStatusTimeline from "@/components/admin/OrderStatusTimeline";
 import {
   ArrowLeft, Plus, Pencil, Trash2, Users, ShoppingBag, Package,
   BarChart3, LayoutDashboard, Search, X, AlertTriangle, AlertCircle, BadgeCheck, Image as ImageIcon, Eye, Upload, Loader2, ChevronDown, Tag, Layers, Video, Truck, CreditCard, Megaphone, Globe, Copy, Link2, MessageCircle, Settings, FileSpreadsheet, Sparkles,
-  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw, Star, Gift, Smartphone, Monitor, Tablet, PlayCircle, ExternalLink, Zap, RotateCcw, Ruler
+  Calendar, MapPin, Phone, User, FileText, Wallet, Receipt, Store, Activity, RefreshCw, Star, Gift, Smartphone, Monitor, Tablet, PlayCircle, ExternalLink, Zap, RotateCcw, Ruler, Lock
 } from "lucide-react";
 import WebAnalytics from "@/components/admin/WebAnalytics";
 import CollectionsManager from "@/components/admin/CollectionsManager";
