@@ -151,6 +151,7 @@ const AdminPage = () => {
   const [bannerForm, setBannerForm] = useState({ title: "", subtitle: "", button_text: "Бүтээгдхүүн үзэх", button_link: "/shop", banner_image: "" });
   const [editBannerId, setEditBannerId] = useState<string | null>(null);
   const bannerImageFileRef = useRef<HTMLInputElement>(null);
+  const catImageFileRef = useRef<HTMLInputElement>(null);
 
   // ADS image form state
   const [adForm, setAdForm] = useState<{ image_url: string; link_url: string; placement: "top" | "middle"; aspect: string; device: "all" | "mobile" | "tablet" | "desktop" }>({ image_url: "", link_url: "", placement: "top", aspect: "21:9", device: "all" });
@@ -161,6 +162,9 @@ const AdminPage = () => {
   // Category/Brand form state
   const [catName, setCatName] = useState("");
   const [catIcon, setCatIcon] = useState("");
+  const [catSlug, setCatSlug] = useState("");
+  const [catParent, setCatParent] = useState<string>("none");
+  const [catImage, setCatImage] = useState("");
   const [editCatId, setEditCatId] = useState<string | null>(null);
   const [brandName, setBrandName] = useState("");
   const [brandLogo, setBrandLogo] = useState("");
@@ -5908,39 +5912,109 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
             <div className="space-y-4">
               <div className="bg-card rounded-2xl p-4 md:p-6 border border-border space-y-4">
                 <h3 className="font-bold text-sm">{editCatId ? "Ангилал засах" : "Шинэ ангилал нэмэх"}</h3>
-                <div className="flex gap-2">
-                  <input placeholder="Ангилалын нэр *" value={catName} onChange={(e) => setCatName(e.target.value)}
-                    className="flex-1 rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                  <input placeholder="Icon нэр (жишээ: Zap)" value={catIcon} onChange={(e) => setCatIcon(e.target.value)}
-                    className="w-40 rounded-xl bg-secondary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Нэр *</label>
+                    <input placeholder="Ангилалын нэр" value={catName} onChange={(e) => setCatName(e.target.value)}
+                      className="w-full rounded-xl bg-secondary px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Slug (URL)</label>
+                    <input placeholder="category-slug" value={catSlug} onChange={(e) => setCatSlug(e.target.value)}
+                      className="w-full rounded-xl bg-secondary px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Эх ангилал</label>
+                    <select value={catParent} onChange={(e) => setCatParent(e.target.value)}
+                      className="w-full rounded-xl bg-secondary px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
+                      <option value="none">Үндсэн ангилал (Main)</option>
+                      {dbCategories.filter(c => c.id !== editCatId && !c.parent_id).map(c => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Icon нэр</label>
+                    <input placeholder="Жишээ: Zap, Sofa, Utensils" value={catIcon} onChange={(e) => setCatIcon(e.target.value)}
+                      className="w-full rounded-xl bg-secondary px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  </div>
                 </div>
-                <div className="flex gap-2">
+
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Зураг</label>
+                  <div className="flex items-center gap-3">
+                    <input ref={catImageFileRef} type="file" accept="image/*" className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          const webpUrl = await optimizeImage(file);
+                          setCatImage(webpUrl);
+                        } catch { toast.error("Зураг оновчлоход алдаа"); }
+                      }}
+                    />
+                    <button type="button" onClick={() => catImageFileRef.current?.click()}
+                      className="flex items-center gap-2 bg-secondary rounded-xl px-4 py-2 text-sm font-medium hover:bg-accent transition-colors">
+                      <ImageIcon className="h-4 w-4" /> Оруулах
+                    </button>
+                    {catImage && (
+                      <div className="relative group h-12 w-12 rounded-lg border border-border overflow-hidden">
+                        <img src={catImage} alt="" className="h-full w-full object-cover" />
+                        <button onClick={() => setCatImage("")} className="absolute inset-0 bg-black/40 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-2">
                   <button onClick={handleSaveCategory}
                     className="bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-bold hover:bg-primary/90 transition-colors">
                     {editCatId ? "Шинэчлэх" : "Нэмэх"}
                   </button>
                   {editCatId && (
-                    <button onClick={() => { setCatName(""); setCatIcon(""); setEditCatId(null); }}
+                    <button onClick={() => { setCatName(""); setCatIcon(""); setCatSlug(""); setCatParent("none"); setCatImage(""); setEditCatId(null); }}
                       className="bg-secondary rounded-xl px-5 py-2.5 text-sm font-medium hover:bg-secondary/80 transition-colors">
                       Болих
                     </button>
                   )}
                 </div>
               </div>
+
               <div className="space-y-2">
                 {dbCategories.map((c) => (
                   <div key={c.id} className="flex items-center justify-between bg-card rounded-xl p-4 border border-border">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center">
-                        <Layers className="h-5 w-5 text-muted-foreground" />
+                      <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center overflow-hidden">
+                        {c.image_url ? (
+                          <img src={c.image_url} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <Layers className="h-5 w-5 text-muted-foreground" />
+                        )}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold">{c.name}</p>
-                        {c.icon && <p className="text-[10px] text-muted-foreground">Icon: {c.icon}</p>}
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold">{c.name}</p>
+                          {c.parent_id && (
+                            <span className="text-[10px] bg-secondary px-1.5 py-0.5 rounded-full font-medium">Дэд</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {c.icon && <span className="text-[10px] text-muted-foreground">Icon: {c.icon}</span>}
+                          <span className="text-[10px] text-muted-foreground">Slug: {c.slug}</span>
+                        </div>
                       </div>
                     </div>
                     <div className="flex gap-1">
-                      <button onClick={() => { setCatName(c.name); setCatIcon(c.icon || ""); setEditCatId(c.id); }}
+                      <button onClick={() => { 
+                        setCatName(c.name); 
+                        setCatIcon(c.icon || ""); 
+                        setCatSlug(c.slug || "");
+                        setCatParent(c.parent_id || "none");
+                        setCatImage(c.image_url || "");
+                        setEditCatId(c.id); 
+                      }}
                         className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
                         <Pencil className="h-4 w-4" />
                       </button>

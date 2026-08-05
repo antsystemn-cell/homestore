@@ -51,6 +51,7 @@ const AdminPage = lazy(() => lazyRetry(() => import("./pages/AdminPage")));
 const WarehousePage = lazy(() => lazyRetry(() => import("./pages/WarehousePage")));
 const DriverPage = lazy(() => lazyRetry(() => import("./pages/DriverPage")));
 const DeliveryEntryPage = lazy(() => lazyRetry(() => import("./pages/DeliveryEntryPage")));
+const CategoryPage = lazy(() => lazyRetry(() => import("./pages/CategoryPage")));
 const NotFound = lazy(() => lazyRetry(() => import("./pages/NotFound")));
 const CollectionPage = lazy(() => lazyRetry(() => import("./pages/CollectionPage")));
 const SpinPage = lazy(() => lazyRetry(() => import("./pages/SpinPage")));
@@ -123,6 +124,7 @@ const App = () => {
                     <Route path="/" element={<Index />} />
                     <Route path="/shop" element={<ShopPage />} />
                     <Route path="/c/:code" element={<CollectionPage />} />
+                    <Route path="/category/:slug" element={<CategoryPage />} />
                     <Route path="/:brandName" element={<ShopPage />} />
                     <Route path="/sales" element={<SalesPage />} />
                     <Route path="/sellers" element={<SalesPortalPage />} />

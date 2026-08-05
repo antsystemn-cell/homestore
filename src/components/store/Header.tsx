@@ -1,12 +1,13 @@
-import { Search, Clock, X, ArrowUpRight, LogIn } from "lucide-react";
+import { Search, Clock, X, ArrowUpRight, LogIn, ChevronDown, LayoutGrid, Tag, Layers, Star, Store, Sparkles, User, Menu } from "lucide-react";
 import NotificationsBell from "./NotificationsBell";
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Product, mapDbProduct } from "@/data/products";
-import { searchPublicProducts } from "@/lib/publicStoreApi";
+import { searchPublicProducts, fetchPublicCategories, fetchPublicBrands } from "@/lib/publicStoreApi";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useAuth } from "@/context/AuthContext";
 import easyshopLogo from "@/assets/easyshop-logo.png.asset.json";
+import * as Icons from "lucide-react";
 
 const DEBOUNCE_MS = 300;
 const SUGGEST_DEBOUNCE_MS = 150;
@@ -45,8 +46,15 @@ const Header = () => {
   const suggestDebounceRef = useRef<ReturnType<typeof setTimeout>>();
   const searchBoxRef = useRef<HTMLDivElement>(null);
 
+  const [categories, setCategories] = useState<any[]>([]);
+  const [brands, setBrands] = useState<any[]>([]);
+  const [showMenu, setShowMenu] = useState(false);
+  const [activeMenuTab, setActiveMenuTab] = useState<"cats" | "brands">("cats");
+
   useEffect(() => {
     setHistory(loadHistory());
+    fetchPublicCategories().then(setCategories);
+    fetchPublicBrands().then(setBrands);
   }, []);
 
   // Close dropdown when clicking outside
@@ -161,8 +169,106 @@ const Header = () => {
 
         {/* Desktop nav links */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-          <button onClick={() => navigate("/shop")} className="hover:text-foreground transition-colors">Брэндүүд</button>
-          <button onClick={() => navigate("/cart")} className="hover:text-foreground transition-colors">Сагс</button>
+          <div className="relative group">
+            <button 
+              onMouseEnter={() => setShowMenu(true)}
+              className="flex items-center gap-1.5 hover:text-foreground transition-colors py-2"
+            >
+              <LayoutGrid className="h-4 w-4" />
+              <span>Ангилал</span>
+              <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${showMenu ? "rotate-180" : ""}`} />
+            </button>
+            
+            {showMenu && (
+              <div 
+                onMouseLeave={() => setShowMenu(false)}
+                className="absolute top-full left-0 w-[600px] bg-card rounded-2xl border border-border shadow-2xl z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+              >
+                <div className="flex h-[400px]">
+                  {/* Menu Sidebar */}
+                  <div className="w-48 bg-secondary/30 border-r border-border p-2 space-y-1">
+                    <button 
+                      onMouseEnter={() => setActiveMenuTab("cats")}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all ${activeMenuTab === 'cats' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground hover:bg-background/50'}`}
+                    >
+                      <Layers className="h-4 w-4" /> Ангилал
+                    </button>
+                    <button 
+                      onMouseEnter={() => setActiveMenuTab("brands")}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all ${activeMenuTab === 'brands' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground hover:bg-background/50'}`}
+                    >
+                      <Store className="h-4 w-4" /> Брэндүүд
+                    </button>
+                    <div className="pt-4 px-4">
+                      <button 
+                        onClick={() => { navigate("/sales"); setShowMenu(false); }}
+                        className="w-full flex items-center gap-3 py-2 text-xs font-bold text-destructive hover:opacity-80 transition-opacity"
+                      >
+                        <Tag className="h-4 w-4" /> Хямдралтай
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Menu Content */}
+                  <div className="flex-1 p-6 overflow-y-auto custom-scrollbar bg-background">
+                    {activeMenuTab === "cats" ? (
+                      <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                        {categories.filter(c => !c.parent_id).map(parent => (
+                          <div key={parent.id} className="space-y-3">
+                            <button 
+                              onClick={() => { navigate(`/category/${parent.slug}`); setShowMenu(false); }}
+                              className="text-sm font-bold text-foreground hover:text-primary transition-colors flex items-center gap-2"
+                            >
+                              {parent.icon && (() => {
+                                const Icon = (Icons as any)[parent.icon] || LayoutGrid;
+                                return <Icon className="h-4 w-4 text-primary" />;
+                              })()}
+                              {parent.name}
+                            </button>
+                            <div className="space-y-2 pl-6">
+                              {categories.filter(c => c.parent_id === parent.id).map(child => (
+                                <button 
+                                  key={child.id}
+                                  onClick={() => { navigate(`/category/${child.slug}`); setShowMenu(false); }}
+                                  className="block text-xs text-muted-foreground hover:text-foreground hover:translate-x-1 transition-all"
+                                >
+                                  {child.name}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-4">
+                        {brands.map(b => (
+                          <button 
+                            key={b.id}
+                            onClick={() => { navigate(`/${b.name.replace(/\s+/g, '')}`); setShowMenu(false); }}
+                            className="flex flex-col items-center gap-2 p-3 rounded-xl border border-transparent hover:border-border hover:bg-secondary/20 transition-all group"
+                          >
+                            <div className="h-12 w-12 rounded-lg bg-secondary/50 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform">
+                              {b.logo_url ? <img src={b.logo_url} alt="" className="h-full w-full object-contain" /> : <Store className="h-5 w-5 text-muted-foreground" />}
+                            </div>
+                            <span className="text-[10px] font-bold text-center truncate w-full">{b.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="bg-secondary/20 border-t border-border p-3 flex justify-end">
+                  <button 
+                    onClick={() => { navigate("/shop"); setShowMenu(false); }}
+                    className="text-xs font-bold text-primary flex items-center gap-1 hover:underline"
+                  >
+                    Бүх барааг үзэх <ArrowUpRight className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          <button onClick={() => navigate("/shop")} className="hover:text-foreground transition-colors">Бүх бараа</button>
         </nav>
 
         <div ref={searchBoxRef} className="relative flex-1 max-w-md ml-auto transition-all duration-300 ease-out">
@@ -287,8 +393,15 @@ const Header = () => {
         </div>
 
         <div className="flex items-center gap-2 md:gap-3 shrink-0">
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-center gap-2">
             <NotificationsBell />
+            <button 
+              onClick={() => navigate("/profile")}
+              className="p-2 rounded-full hover:bg-secondary transition-colors"
+              title="Профайл"
+            >
+              <User className="h-5 w-5" />
+            </button>
           </div>
           {!user && (
             <button
@@ -296,9 +409,12 @@ const Header = () => {
               className="inline-flex items-center gap-1.5 h-9 px-3 md:px-4 rounded-full bg-primary text-primary-foreground text-xs md:text-sm font-semibold hover:opacity-90 transition-opacity"
             >
               <LogIn className="h-4 w-4" />
-              <span>Нэвтрэх</span>
+              <span className="hidden sm:inline">Нэвтрэх</span>
             </button>
           )}
+          <button className="md:hidden p-2 rounded-full hover:bg-secondary">
+             <Menu className="h-5 w-5" />
+          </button>
         </div>
       </div>
     </header>
