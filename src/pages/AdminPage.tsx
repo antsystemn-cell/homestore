@@ -4456,6 +4456,7 @@ const AdminPage = () => {
                 const isUnpaidDelivery = (o: any) =>
                   isDeliveredOrder(o)
                   && o.payment_status !== "confirmed"
+                  && o.payment_method !== "exchange"
                   && new Date(o.created_at).getTime() >= UNPAID_TRACKING_START;
                 const deliveredCount = orders.filter((o) => isDeliveredOrder(o) && !isUnpaidDelivery(o)).length;
                 const unpaidDeliveryCount = orders.filter(isUnpaidDelivery).length;
