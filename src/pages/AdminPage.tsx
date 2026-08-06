@@ -4345,27 +4345,6 @@ const AdminPage = () => {
                 </div>
               </div>
 
-              {/* Quick Report Settlement Button */}
-              <div className="bg-muted/30 p-4 rounded-xl border border-border flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <h3 className="text-sm font-bold flex items-center gap-2">
-                    <Truck className="h-4 w-4" />
-                    Хүргэлтээр таслах
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Борлуулалт хаахдаа жолоочийн хүргэж дууссан захиалгаар тасалж тайлан гаргана
-                  </p>
-                </div>
-                <Button 
-                  onClick={() => setTab("drivers")}
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 rounded-xl"
-                >
-                  <ChevronDown className="h-3.5 w-3.5" />
-                  Хүргэлтээр таслах
-                </Button>
-              </div>
 
               <RecentlyDeletedOrders
                 refreshKey={deletedRefreshKey}
@@ -5356,15 +5335,6 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                                 <p className="flex items-center gap-1.5 text-emerald-600 font-bold">
                                   <Truck className="h-3.5 w-3.5" /> Хүргэгдсэн
                                 </p>
-                                <button
-                                  type="button"
-                                  onClick={() => navigate("/admin/report")}
-                                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-colors shadow-sm font-bold text-[10px]"
-                                  title="Борлуулалт хаах хуудас руу очих"
-                                >
-                                  <Lock className="h-3 w-3" />
-                                  Борлуулалт хаах
-                                </button>
                               </div>
                               {(assignedDriver || o.delivery_signature_name) && (
                                 <p>
