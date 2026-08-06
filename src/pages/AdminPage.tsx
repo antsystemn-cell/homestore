@@ -5335,13 +5335,6 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                                 <p className="flex items-center gap-1.5 text-emerald-600 font-bold">
                                   <Truck className="h-3.5 w-3.5" /> Хүргэгдсэн
                                 </p>
-                                <div 
-                                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 shadow-sm font-bold text-[10px]"
-                                  title="Энэ захиалгаар тухайн өдрийн борлуулалтыг хаасан байна"
-                                >
-                                  <Lock className="h-3 w-3" />
-                                  Борлуулалт хаагдсан
-                                </div>
                               </div>
                               {(assignedDriver || o.delivery_signature_name) && (
                                 <p>
