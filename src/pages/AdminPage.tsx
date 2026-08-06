@@ -145,6 +145,7 @@ const AdminPage = () => {
   
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [settlingOrderId, setSettlingOrderId] = useState<string | null>(null);
 
 
   // Promo banner form state
