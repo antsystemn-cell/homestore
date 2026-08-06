@@ -1108,7 +1108,15 @@ const AdminPage = () => {
     setDeliverDialog(null);
   };
 
-  const confirmBulkDispatch = async () => {
+  const [showPrintChecklist, setShowPrintChecklist] = useState(false);
+  const [checklistTarget, setChecklistTarget] = useState<any[]>([]);
+
+  const handlePrintRequest = (orders: any[]) => {
+    setChecklistTarget(orders);
+    setShowPrintChecklist(true);
+  };
+
+
     if (!bulkDeliverDialog) return;
     const { orderIds, driverId } = bulkDeliverDialog;
     const partnerDriver = partnerDrivers.find((d) => d.driver_id === driverId);
@@ -4630,6 +4638,22 @@ const AdminPage = () => {
                           <Button
                             type="button"
                             size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              const chosen = orders.filter((o: any) => bulkSelected.has(o.id));
+                              if (chosen.length === 0) { toast.error("Захиалга сонгоно уу"); return; }
+                              handlePrintRequest(chosen);
+                            }}
+                            disabled={bulkSelected.size === 0}
+                            className="gap-1.5"
+                          >
+                            <PrintChecklistModal className="h-4 w-4" />
+                            Хэвлэх ({bulkSelected.size})
+                          </Button>
+
+                          <Button
+                            type="button"
+                            size="sm"
                             onClick={() => {
                               const chosen = orders.filter((o: any) => bulkSelected.has(o.id));
                               if (chosen.length === 0) { toast.error("Захиалга сонгоно уу"); return; }
@@ -4646,6 +4670,16 @@ const AdminPage = () => {
                           >
                             <Truck className="h-4 w-4" />
                             Жолоочид өгөх ({bulkSelected.size})
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => navigate("/admin/report")}
+                            className="gap-2"
+                          >
+                            <Lock className="h-4 w-4" />
+                            Борлуулалт хаах
                           </Button>
                         </div>
                       </div>
@@ -6870,6 +6904,15 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
           </div>
         </div>
       )}
+      <PrintChecklistModal
+        open={showPrintChecklist}
+        onOpenChange={setShowPrintChecklist}
+        onConfirm={() => {
+          printOrders(checklistTarget);
+          setShowPrintChecklist(false);
+        }}
+        count={checklistTarget.length}
+      />
     </div>
   );
 };
