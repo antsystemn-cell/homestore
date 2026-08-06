@@ -1110,6 +1110,35 @@ const AdminPage = () => {
     setDeliverDialog(null);
   };
 
+  const settleOrder = async (orderId: string) => {
+    const order = orders.find((o) => o.id === orderId);
+    if (!order) return;
+    
+    setSettlingOrderId(orderId);
+    try {
+      const now = new Date().toISOString();
+      const { error } = await supabase
+        .from("orders")
+        .update({ 
+          is_settled: true,
+          settled_at: now,
+          updated_at: now
+        })
+        .eq("id", orderId);
+        
+      if (error) throw error;
+      
+      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, is_settled: true, settled_at: now } : o));
+      toast.success("Борлуулалт хаагдлаа (Дараагийн өдрийн тайланд тооцогдохгүй)");
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Алдаа гарлаа: " + e.message);
+    } finally {
+      setSettlingOrderId(null);
+    }
+  };
+  };
+
   const handlePrintRequest = (orders: any[]) => {
     setChecklistTarget(orders);
     setShowPrintChecklist(true);
