@@ -150,17 +150,6 @@ const ReportDashboard = () => {
         <div className="space-y-1">
           <h2 className="text-2xl font-bold tracking-tight">Тайлан & Статистик</h2>
           <p className="text-muted-foreground text-sm">Борлуулалт болон хүргэлтийн нэгдсэн мэдээлэл</p>
-          <p className="text-[10px] text-muted-foreground/80 mt-1 max-w-md">
-            Өнөөдрийн хаасан гүйлгээ, маргаашийн хаасан гүйлгээ хүртэл бүх борлуулалтыг тооцож нэг өдрийн борлуулалтанд тооцно.
-          </p>
-          <div className="mt-4 p-3 bg-blue-50/50 border border-blue-100 rounded-lg max-w-lg">
-            <h4 className="text-xs font-semibold text-blue-900 mb-1 flex items-center gap-1">
-              <Truck className="h-3 w-3" /> Хүргэлтийн нэгдсэн тайлан
-            </h4>
-            <p className="text-[10px] text-blue-800/80 leading-relaxed">
-              Борлуулалт хаахдаа тайлан эсвэл захиалга хэсгээс шууд бус, хүргэлтийн явцаас хамаарч аль жолооч ямар захиалгыг хүргэж дууссанаар нь тасалж тайлан гаргана.
-            </p>
-          </div>
         </div>
 
         <div className="flex flex-wrap gap-2">
