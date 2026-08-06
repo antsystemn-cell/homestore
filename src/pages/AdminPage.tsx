@@ -1108,15 +1108,12 @@ const AdminPage = () => {
     setDeliverDialog(null);
   };
 
-  const [showPrintChecklist, setShowPrintChecklist] = useState(false);
-  const [checklistTarget, setChecklistTarget] = useState<any[]>([]);
-
   const handlePrintRequest = (orders: any[]) => {
     setChecklistTarget(orders);
     setShowPrintChecklist(true);
   };
 
-
+  const confirmBulkDeliverDispatch = async () => {
     if (!bulkDeliverDialog) return;
     const { orderIds, driverId } = bulkDeliverDialog;
     const partnerDriver = partnerDrivers.find((d) => d.driver_id === driverId);
