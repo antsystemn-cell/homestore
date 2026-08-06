@@ -6891,7 +6891,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
               </button>
               <button
                 type="button"
-                onClick={confirmBulkDispatch}
+                onClick={confirmBulkDeliverDispatch}
                 disabled={!!bulkDispatchProgress || !bulkDeliverDialog.driverId}
                 className="px-4 py-2 rounded-lg text-sm font-bold bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-50 inline-flex items-center gap-2"
               >
