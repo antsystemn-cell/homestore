@@ -479,6 +479,7 @@ const AdminPage = () => {
   const [bulkDiscountLoading, setBulkDiscountLoading] = useState(false);
   
   const [showPrintChecklist, setShowPrintChecklist] = useState(false);
+  const [checklistTarget, setChecklistTarget] = useState<any[]>([]);
   
   const [pendingPrintOrders, setPendingPrintOrders] = useState<any[]>([]);
 
