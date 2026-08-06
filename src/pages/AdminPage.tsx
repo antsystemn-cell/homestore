@@ -143,6 +143,9 @@ const AdminPage = () => {
   const [savingDeliverDialog, setSavingDeliverDialog] = useState(false);
   const [savingDelivery, setSavingDelivery] = useState<string | null>(null);
   
+  const [showPrintChecklist, setShowPrintChecklist] = useState(false);
+  const [checklistTarget, setChecklistTarget] = useState<any[]>([]);
+
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
