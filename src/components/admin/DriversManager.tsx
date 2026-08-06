@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Truck, Plus, Loader2, Trash2, Pencil, Check, X, ChevronDown, ChevronUp, History, Search, UserCheck, UserX, Clock, Mail, Phone } from "lucide-react";
+import { Truck, Plus, Loader2, Trash2, Pencil, Check, X, ChevronDown, ChevronUp, History, Search, UserCheck, UserX, Clock, Mail, Phone, Lock } from "lucide-react";
 
 type Driver = {
   id: string;
@@ -324,32 +324,56 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
     const expanded = expandedId === key;
     return (
       <div className="bg-card rounded-2xl border border-border overflow-hidden">
-        <button
-          type="button"
-          onClick={() => setExpandedId(expanded ? null : key)}
-          className="w-full flex items-center justify-between gap-3 p-4 hover:bg-secondary/40 transition-colors text-left"
-        >
-          <div className="flex-1 min-w-0">
-            <p className="font-bold text-sm truncate">{label}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Сүүлд: {formatDate(lastAt)}
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-xs">
-            <span className="bg-primary/10 text-primary font-bold px-2.5 py-1 rounded-full">
-              {total} хүргэлт
-            </span>
-            <span className="bg-emerald-100 text-emerald-700 font-bold px-2.5 py-1 rounded-full">
-              {delivered} ✓
-            </span>
-            {inProgress > 0 && (
-              <span className="bg-amber-100 text-amber-700 font-bold px-2.5 py-1 rounded-full">
-                {inProgress} яваа
+        <div className="flex items-center">
+          <button
+            type="button"
+            onClick={() => setExpandedId(expanded ? null : key)}
+            className="flex-1 flex items-center justify-between gap-3 p-4 hover:bg-secondary/40 transition-colors text-left"
+          >
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-sm truncate">{label}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Сүүлд: {formatDate(lastAt)}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <span className="bg-primary/10 text-primary font-bold px-2.5 py-1 rounded-full">
+                {total} хүргэлт
               </span>
-            )}
-            {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              <span className="bg-emerald-100 text-emerald-700 font-bold px-2.5 py-1 rounded-full">
+                {delivered} ✓
+              </span>
+              {inProgress > 0 && (
+                <span className="bg-amber-100 text-amber-700 font-bold px-2.5 py-1 rounded-full">
+                  {inProgress} яваа
+                </span>
+              )}
+            </div>
+          </button>
+          
+          <div className="pr-4 py-4 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                // Navigate to report page to close daily settlement
+                window.location.href = "/admin/report";
+              }}
+              className="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+              title="Тухайн жолоочийн хүргэлтээр өдрийн борлуулалтыг тасалж хаах"
+            >
+              <Lock className="h-3 w-3" />
+              Борлуулалт хаах
+            </button>
+            <button 
+              type="button"
+              onClick={() => setExpandedId(expanded ? null : key)}
+              className="p-1.5 hover:bg-secondary/40 rounded-full transition-colors"
+            >
+              {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
           </div>
-        </button>
+        </div>
+        
         {expanded && (
           <div className="border-t border-border divide-y divide-border max-h-96 overflow-y-auto">
             {rows.map((r) => (
