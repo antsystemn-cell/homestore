@@ -195,30 +195,6 @@ const ReportDashboard = () => {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/30 p-4 rounded-xl border border-border">
-        <div className="space-y-1">
-          <h3 className="text-sm font-medium flex items-center gap-2">
-            <Link2 className="h-4 w-4" />
-            Тайлангийн шууд холбоос
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            Энэ холбоосоор шууд тайлангийн хэсэг рүү нэвтрэх боломжтой
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <code className="text-xs bg-background border px-3 py-2 rounded-lg flex-1 sm:flex-none truncate max-w-[240px]">
-            {reportUrl}
-          </code>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={copyToClipboard}
-            className="shrink-0"
-          >
-            {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-          </Button>
-        </div>
-      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {stats.map((s, i) => (
