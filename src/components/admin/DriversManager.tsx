@@ -352,18 +352,6 @@ const DriversManager = ({ drivers, isAdmin, onChange }: Props) => {
           </button>
           
           <div className="pr-4 py-4 flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                // Navigate to report page to close daily settlement
-                window.location.href = "/admin/report";
-              }}
-              className="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold flex items-center gap-1.5 shadow-sm transition-colors"
-              title="Тухайн жолоочийн хүргэлтээр өдрийн борлуулалтыг тасалж хаах"
-            >
-              <Lock className="h-3 w-3" />
-              Борлуулалт хаах
-            </button>
             <button 
               type="button"
               onClick={() => setExpandedId(expanded ? null : key)}
