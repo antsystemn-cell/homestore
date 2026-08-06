@@ -4669,16 +4669,6 @@ const AdminPage = () => {
                             <Truck className="h-4 w-4" />
                             Жолоочид өгөх ({bulkSelected.size})
                           </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => navigate("/admin/report")}
-                            className="gap-2"
-                          >
-                            <Lock className="h-4 w-4" />
-                            Борлуулалт хаах
-                          </Button>
                         </div>
                       </div>
                     </div>
