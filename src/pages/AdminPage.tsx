@@ -4645,7 +4645,7 @@ const AdminPage = () => {
                             disabled={bulkSelected.size === 0}
                             className="gap-1.5"
                           >
-                            <PrintChecklistModal className="h-4 w-4" />
+                            <FileText className="h-4 w-4" />
                             Хэвлэх ({bulkSelected.size})
                           </Button>
 
