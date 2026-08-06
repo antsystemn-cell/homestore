@@ -1137,7 +1137,6 @@ const AdminPage = () => {
       setSettlingOrderId(null);
     }
   };
-  };
 
   const handlePrintRequest = (orders: any[]) => {
     setChecklistTarget(orders);
