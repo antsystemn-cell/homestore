@@ -4630,6 +4630,22 @@ const AdminPage = () => {
                           <Button
                             type="button"
                             size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              const chosen = orders.filter((o: any) => bulkSelected.has(o.id));
+                              if (chosen.length === 0) { toast.error("Захиалга сонгоно уу"); return; }
+                              printOrders(chosen);
+                            }}
+                            disabled={bulkSelected.size === 0}
+                            className="gap-1.5"
+                          >
+                            <PrintChecklistModal className="h-4 w-4" />
+                            Хэвлэх ({bulkSelected.size})
+                          </Button>
+
+                          <Button
+                            type="button"
+                            size="sm"
                             onClick={() => {
                               const chosen = orders.filter((o: any) => bulkSelected.has(o.id));
                               if (chosen.length === 0) { toast.error("Захиалга сонгоно уу"); return; }
