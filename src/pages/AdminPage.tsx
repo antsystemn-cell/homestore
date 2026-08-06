@@ -479,6 +479,7 @@ const AdminPage = () => {
   const [bulkDiscountLoading, setBulkDiscountLoading] = useState(false);
   
   const [showPrintChecklist, setShowPrintChecklist] = useState(false);
+  const [checklistTarget, setChecklistTarget] = useState<any[]>([]);
   
   const [pendingPrintOrders, setPendingPrintOrders] = useState<any[]>([]);
 
@@ -1108,15 +1109,12 @@ const AdminPage = () => {
     setDeliverDialog(null);
   };
 
-  const [showPrintChecklist, setShowPrintChecklist] = useState(false);
-  const [checklistTarget, setChecklistTarget] = useState<any[]>([]);
-
   const handlePrintRequest = (orders: any[]) => {
     setChecklistTarget(orders);
     setShowPrintChecklist(true);
   };
 
-
+  const confirmBulkDeliverDispatch = async () => {
     if (!bulkDeliverDialog) return;
     const { orderIds, driverId } = bulkDeliverDialog;
     const partnerDriver = partnerDrivers.find((d) => d.driver_id === driverId);
@@ -4647,7 +4645,7 @@ const AdminPage = () => {
                             disabled={bulkSelected.size === 0}
                             className="gap-1.5"
                           >
-                            <PrintChecklistModal className="h-4 w-4" />
+                            <FileText className="h-4 w-4" />
                             Хэвлэх ({bulkSelected.size})
                           </Button>
 
@@ -6893,7 +6891,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
               </button>
               <button
                 type="button"
-                onClick={confirmBulkDispatch}
+                onClick={confirmBulkDeliverDispatch}
                 disabled={!!bulkDispatchProgress || !bulkDeliverDialog.driverId}
                 className="px-4 py-2 rounded-lg text-sm font-bold bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-50 inline-flex items-center gap-2"
               >
