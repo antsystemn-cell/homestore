@@ -5365,6 +5365,22 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                                 <p className="flex items-center gap-1.5 text-emerald-600 font-bold">
                                   <Truck className="h-3.5 w-3.5" /> Хүргэгдсэн
                                 </p>
+                                {o.is_settled ? (
+                                  <div className="flex items-center gap-1 text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                                    <Lock className="h-3 w-3" />
+                                    Борлуулалт хаагдсан
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); settleOrder(o.id); }}
+                                    disabled={settlingOrderId === o.id}
+                                    className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 hover:bg-amber-100 px-2 py-0.5 rounded-full border border-amber-200 transition-colors"
+                                    title="Энэ захиалгыг өнөөдрийн борлуулалтанд тооцож хаах"
+                                  >
+                                    {settlingOrderId === o.id ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Lock className="h-3 w-3" />}
+                                    Борлуулалт хаах
+                                  </button>
+                                )}
                               </div>
                               {(assignedDriver || o.delivery_signature_name) && (
                                 <p>
