@@ -5352,9 +5352,20 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                           const assignedDriver = drivers.find((d) => d.id === o.driver_id);
                           return (
                             <div className="bg-emerald-500/5 border border-emerald-500/30 rounded-xl p-3 text-xs space-y-1.5">
-                              <p className="flex items-center gap-1.5 text-emerald-600 font-bold">
-                                <Truck className="h-3.5 w-3.5" /> Хүргэгдсэн
-                              </p>
+                              <div className="flex items-center justify-between">
+                                <p className="flex items-center gap-1.5 text-emerald-600 font-bold">
+                                  <Truck className="h-3.5 w-3.5" /> Хүргэгдсэн
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={() => navigate("/admin/report")}
+                                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-colors shadow-sm font-bold text-[10px]"
+                                  title="Борлуулалт хаах хуудас руу очих"
+                                >
+                                  <Lock className="h-3 w-3" />
+                                  Борлуулалт хаах
+                                </button>
+                              </div>
                               {(assignedDriver || o.delivery_signature_name) && (
                                 <p>
                                   <span className="text-muted-foreground">Авч явсан:</span>{" "}
