@@ -597,8 +597,8 @@ const Header = () => {
                             <User className="h-6 w-6 text-primary" />
                           </div>
                           <div className="flex-1 overflow-hidden">
-                            <p className="font-bold text-sm truncate">{user.user_metadata?.full_name || "Хэрэглэгч"}</p>
-                            <p className="text-[10px] text-muted-foreground">{user.email}</p>
+                            <p className="font-bold text-base truncate">{user.user_metadata?.full_name || "Хэрэглэгч"}</p>
+                            <p className="text-xs text-muted-foreground">{user.email}</p>
                           </div>
                         </div>
                         
