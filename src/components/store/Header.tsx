@@ -263,10 +263,12 @@ const Header = () => {
             
             {showMenu && (
 
+            {showMenu && (
               <div 
                 onMouseLeave={() => setShowMenu(false)}
-                className="absolute top-full left-0 w-[600px] bg-card rounded-2xl border border-border shadow-2xl z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+                className="absolute top-full left-0 w-[600px] bg-card rounded-2xl border border-border shadow-2xl z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 hidden md:block"
               >
+
                 <div className="flex h-[400px]">
                   {/* Menu Sidebar */}
                   <div className="w-48 bg-secondary/30 border-r border-border p-2 space-y-1">
