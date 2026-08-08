@@ -23,8 +23,77 @@ const UserDetailsPage = () => {
     if (user) {
       setFullName(user.user_metadata?.full_name || "");
       setPhone(user.user_metadata?.phone || "");
+      fetchAddresses();
     }
   }, [user]);
+
+  const fetchAddresses = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from("user_addresses")
+        .select("*")
+        .order("is_default", { ascending: false })
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      setAddresses(data || []);
+    } catch (err) {
+      console.error("Error fetching addresses:", err);
+    } finally {
+      setLoadingAddresses(false);
+    }
+  };
+
+  const handleAddAddress = async () => {
+    if (!newAddress.name || !newAddress.district || !newAddress.detail) {
+      toast.error("Мэдээллээ бүрэн бөглөнө үү");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("user_addresses")
+        .insert([{ ...newAddress, user_id: user?.id }]);
+      
+      if (error) throw error;
+      
+      toast.success("Хаяг амжилттай нэмэгдлээ");
+      setShowAddressForm(false);
+      setNewAddress({ name: "", district: "", khoroo: "", detail: "", is_default: false });
+      fetchAddresses();
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleDeleteAddress = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("user_addresses")
+        .delete()
+        .eq("id", id);
+      
+      if (error) throw error;
+      toast.success("Хаяг устгагдлаа");
+      fetchAddresses();
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleSetDefault = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("user_addresses")
+        .update({ is_default: true })
+        .eq("id", id);
+      
+      if (error) throw error;
+      fetchAddresses();
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
 
   if (loading) {
     return (
