@@ -107,7 +107,7 @@ const CartPage = () => {
                         >
                           <Minus className="h-3.5 w-3.5" />
                         </button>
-                        <span className="w-10 h-8 md:h-9 flex items-center justify-center text-sm font-semibold border-y-2 border-border bg-card text-foreground">
+                        <span className="w-10 h-8 md:h-9 flex items-center justify-center text-sm font-semibold border-y-2 border-border bg-card text-foreground whitespace-nowrap overflow-hidden">
                           {quantity}
                         </span>
                         <button
@@ -132,17 +132,6 @@ const CartPage = () => {
               <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-3 md:sticky md:top-20">
                 <h2 className="font-bold text-foreground md:text-lg">Захиалгын дүн</h2>
                 
-                {/* Promo Code Input */}
-                <div className="py-2 border-b border-border/50">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Промо код"
-                      className="flex-1 bg-secondary border-none rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary/20"
-                    />
-                    <Button variant="outline" size="sm" className="text-[10px] h-8 rounded-lg">Ашиглах</Button>
-                  </div>
-                </div>
                 {/* Promo Code Input */}
                 <div className="py-2 border-b border-border/50">
                   <div className="flex gap-2">
