@@ -287,11 +287,15 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
                 {formatPrice(displayPrice)}
               </span>
               {displayOriginal != null && displayOriginal > displayPrice && (
-                <span className="text-muted-foreground text-xs md:text-xs line-through whitespace-nowrap">
+                <span className="text-muted-foreground text-[10px] md:text-xs line-through whitespace-nowrap">
                   {formatPrice(displayOriginal)}
                 </span>
               )}
             </>
+          ) : product.price > 0 ? (
+            <span className="font-extrabold text-base md:text-base whitespace-nowrap text-foreground">
+              {formatPrice(product.price)}
+            </span>
           ) : (
             <div className="h-5 w-20 bg-secondary animate-pulse rounded" />
           )}
