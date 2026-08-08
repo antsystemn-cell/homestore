@@ -280,12 +280,20 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
         </h3>
         <RatingRow productId={product.id} />
         <div className="mt-2 flex items-baseline gap-1.5 flex-nowrap">
-          <span className={`font-extrabold text-base md:text-base whitespace-nowrap ${flashSale ? "text-destructive" : "text-foreground"}`}>
-            {formatPrice(displayPrice)}
-          </span>
-          {displayOriginal != null && displayOriginal > displayPrice && (
-            <span className="text-muted-foreground text-xs md:text-xs line-through whitespace-nowrap">
-              {formatPrice(displayOriginal)}
+          {hasValidPrice ? (
+            <>
+              <span className={`font-extrabold text-base md:text-base whitespace-nowrap ${flashSale ? "text-destructive" : "text-foreground"}`}>
+                {formatPrice(displayPrice)}
+              </span>
+              {displayOriginal != null && displayOriginal > displayPrice && (
+                <span className="text-muted-foreground text-xs md:text-xs line-through whitespace-nowrap">
+                  {formatPrice(displayOriginal)}
+                </span>
+              )}
+            </>
+          ) : (
+            <span className="text-xs text-muted-foreground animate-pulse">
+              Үнэ ачаалж байна...
             </span>
           )}
         </div>
