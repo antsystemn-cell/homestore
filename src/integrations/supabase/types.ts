@@ -1993,6 +1993,36 @@ export type Database = {
         }
         Relationships: []
       }
+      site_branding: {
+        Row: {
+          favicon_url: string | null
+          id: string
+          logo_url: string | null
+          og_image_url: string | null
+          site_description: string | null
+          site_title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          favicon_url?: string | null
+          id?: string
+          logo_url?: string | null
+          og_image_url?: string | null
+          site_description?: string | null
+          site_title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          favicon_url?: string | null
+          id?: string
+          logo_url?: string | null
+          og_image_url?: string | null
+          site_description?: string | null
+          site_title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       spin_balances: {
         Row: {
           available_spins: number

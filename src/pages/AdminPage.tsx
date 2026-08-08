@@ -25,6 +25,7 @@ import CouponUsageManager from "@/components/admin/CouponUsageManager";
 import FlashSalesManager from "@/components/admin/FlashSalesManager";
 import ReelsManager from "@/components/admin/ReelsManager";
 import ReportDashboard from "@/components/admin/ReportDashboard";
+import { BrandingSettingsManager } from "@/components/admin/BrandingSettingsManager";
 
 
 
@@ -60,9 +61,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
 
-type Tab = "stats" | "report" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "welcome-showcase" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "coupon-usage" | "flash-sales" | "reels" | "settings" | "bonus" | "branches" | "returns";
+type Tab = "stats" | "report" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "welcome-showcase" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "coupon-usage" | "flash-sales" | "reels" | "settings" | "bonus" | "branches" | "returns" | "branding";
 
-const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "announcements", "welcome-showcase", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "reminders", "reviews", "flash-sales", "reels", "drivers", "branches", "returns"];
+const SETTINGS_TABS: Tab[] = ["branding", "categories", "brands", "delivery", "payments", "banner", "announcements", "welcome-showcase", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "reminders", "reviews", "flash-sales", "reels", "drivers", "branches", "returns"];
 const BONUS_TABS: Tab[] = ["loyalty", "spin", "referral", "promotions", "coupon-usage"];
 
 
@@ -113,7 +114,7 @@ const AdminPage = () => {
   const [tab, setTab] = useState<Tab>(() => {
     if (isReportRoute) return "report";
     const t = searchParams.get("tab") as Tab | null;
-    const valid: Tab[] = ["stats", "report", "tracking", "products", "orders", "users", "drivers", "categories", "brands", "delivery", "delivery-portal", "payments", "banner", "announcements", "welcome-showcase", "collections", "chatbot", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "referral", "promotions", "coupon-usage", "flash-sales", "reels", "settings", "bonus", "branches", "returns"];
+    const valid: Tab[] = ["stats", "report", "tracking", "products", "orders", "users", "drivers", "categories", "brands", "delivery", "delivery-portal", "payments", "banner", "announcements", "welcome-showcase", "collections", "chatbot", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "referral", "promotions", "coupon-usage", "flash-sales", "reels", "settings", "bonus", "branches", "returns", "branding"];
     return t && valid.includes(t) ? t : "stats";
   });
 
@@ -2014,6 +2015,7 @@ const AdminPage = () => {
 
 
   const settingsSubItems: { id: Tab; label: string; icon: any }[] = [
+    { id: "branding", label: "Branding & SEO", icon: Globe },
     { id: "categories", label: "Ангилал", icon: Layers },
     { id: "brands", label: "Брэнд", icon: Tag },
     { id: "delivery", label: "Хүргэлт", icon: Truck },
@@ -3105,6 +3107,7 @@ const AdminPage = () => {
               {tab === "diagnostics" && "Зургийн оношлогоо & Cloud зардал"}
               {tab === "stocklog" && "Elle Sport нөөцөөс хасагдсан түүх"}
               {tab === "drivers" && `Нийт ${drivers.length} жолооч`}
+              {tab === "branding" && "Вэб сайтын лого, favicon болон SEO тохиргоо"}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -3157,6 +3160,9 @@ const AdminPage = () => {
           )}
           {/* Report Dashboard */}
           {tab === "report" && <ReportDashboard />}
+
+          {/* Branding Settings */}
+          {tab === "branding" && <BrandingSettingsManager />}
 
           {/* Stats */}
           {tab === "stats" && (
