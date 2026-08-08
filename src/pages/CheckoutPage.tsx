@@ -978,7 +978,7 @@ const CheckoutPage = () => {
               </div>
 
               {/* Action button */}
-              {paymentMethod === "cash" && (
+              {paymentMethod === "cash" && !isViewingExistingOrder && (
                 <Button
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-base rounded-xl mt-2 gap-2"
                   disabled={submitting}
