@@ -34,7 +34,8 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const [activeIdx, setActiveIdx] = useState(0);
   const flashSale = useFlashSaleFor(product.id);
   
-  const basePrice = Number(product.price || 0);
+  const firstColorPrice = product.colors?.[0]?.price;
+  const basePrice = Number(firstColorPrice ?? product.price ?? 0);
   const baseOriginal = product.originalPrice ? Number(product.originalPrice) : null;
   
   const displayPrice = flashSale ? Number(flashSale.sale_price) : basePrice;

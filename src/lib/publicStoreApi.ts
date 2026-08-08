@@ -89,6 +89,7 @@ const stripColorImages = (rows: any[]) =>
           name: c?.name || "",
           sku: c?.sku,
           id: c?.id,
+          price: c?.price,
           image: isInlineBlob ? "" : img,
         };
       });
