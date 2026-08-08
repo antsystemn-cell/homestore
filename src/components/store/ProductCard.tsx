@@ -93,7 +93,6 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
     }
   }, [navigate, productUrl]);
 
-  const colors = product.colors;
   const baseImage = product.thumbnail || product.image || "/placeholder.svg";
 
   // Build slides: base image + every distinct color image.
