@@ -40,6 +40,8 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const displayPrice = flashSale ? Number(flashSale.sale_price) : basePrice;
   const displayOriginal = flashSale ? basePrice : baseOriginal;
   
+  // A product is valid if it has a price > 0 OR if it's explicitly marked as "Үнэгүй"
+  // but we prefer to always show the ₮ symbol for items that should have prices.
   const hasValidPrice = displayPrice > 0;
 
 
