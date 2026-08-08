@@ -35,19 +35,19 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const flashSale = useFlashSaleFor(product.id);
   
   // Directly use the price values from the product object first
-  // to ensure immediate visibility while hooks/states resolve.
-  const basePrice = product.price;
-  const baseOriginal = product.originalPrice;
+  const basePrice = Number(product.price || 0);
+  const baseOriginal = product.originalPrice ? Number(product.originalPrice) : null;
   
   // Override with flash sale data if available
   const displayPrice = flashSale ? Number(flashSale.sale_price) : basePrice;
   const displayOriginal = flashSale ? basePrice : baseOriginal;
   
-  const hasValidPrice = typeof displayPrice === 'number' && displayPrice > 0;
+  // A price is valid if it is a number > 0
+  const hasValidPrice = displayPrice > 0;
   
   // Debug log for checking why prices might be missing in production environment
   useEffect(() => {
-    if (!hasValidPrice) {
+    if (!hasValidPrice && basePrice <= 0) {
       console.warn(`[ProductCard] Invalid price for product ${product.id} (${product.name}):`, {
         displayPrice,
         basePrice,
@@ -55,7 +55,8 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
         productObject: product
       });
     }
-  }, [hasValidPrice, product.id, product.name, displayPrice, basePrice, flashSale]);
+  }, [hasValidPrice, basePrice, product.id, product.name, displayPrice, flashSale]);
+
 
 
   const [isHovering, setIsHovering] = useState(false);

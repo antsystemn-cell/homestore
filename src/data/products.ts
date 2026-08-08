@@ -84,8 +84,10 @@ export const categories = [
   { id: "categories", label: "Ангилал", icon: "Grid3X3" },
 ];
 
-export function formatPrice(price: number): string {
-  return price.toLocaleString("mn-MN") + "₮";
+export function formatPrice(price: any): string {
+  const num = Number(price);
+  if (isNaN(num)) return "0₮";
+  return num.toLocaleString("mn-MN") + "₮";
 }
 
 /** Map DB row to Product */
