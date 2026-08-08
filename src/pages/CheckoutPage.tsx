@@ -193,16 +193,18 @@ const CheckoutPage = () => {
         return;
       }
 
-      if (data.min_order_amount && checkoutSubtotal < Number(data.min_order_amount)) {
-        toast.error(`Энэ код ${formatPrice(data.min_order_amount)}-с дээш захиалгад хүчинтэй`);
+      const promo = data as any;
+
+      if (promo.min_order_amount && checkoutSubtotal < Number(promo.min_order_amount)) {
+        toast.error(`Энэ код ${formatPrice(promo.min_order_amount)}-с дээш захиалгад хүчинтэй`);
         return;
       }
 
       let discount = 0;
-      if (data.discount_type === 'percentage') {
-        discount = (checkoutSubtotal * Number(data.discount_value)) / 100;
+      if (promo.discount_type === 'percentage') {
+        discount = (checkoutSubtotal * Number(promo.discount_value)) / 100;
       } else {
-        discount = Number(data.discount_value);
+        discount = Number(promo.discount_value);
       }
 
       setPromoDiscount(Math.min(discount, checkoutSubtotal));
