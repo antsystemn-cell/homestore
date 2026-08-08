@@ -765,7 +765,7 @@ const CheckoutPage = () => {
             )}
 
             {/* Pocket Payment Flow */}
-            {paymentMethod === "pocket" && orderId && (
+            {paymentMethod === "pocket" && (orderId || isViewingExistingOrder) && (
               <PocketPayment
                 orderId={orderId}
                 amount={grandTotal}
