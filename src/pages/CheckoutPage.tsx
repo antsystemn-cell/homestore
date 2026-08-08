@@ -784,7 +784,7 @@ const CheckoutPage = () => {
           <div className="md:col-span-1 mt-4 md:mt-0">
             <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-3 md:sticky md:top-20">
               <h2 className="font-bold text-foreground md:text-lg">Захиалгын мэдээлэл</h2>
-              {items.map((item) => {
+              {checkoutItems.map((item: any) => {
                 const { product, quantity, selectedColor, selectedSize, selectedGiftPackage } = item;
                 const key = `${product.id}__${selectedColor || ""}__${selectedSize || ""}__${selectedGiftPackage?.id || ""}`;
                 return (
@@ -800,7 +800,7 @@ const CheckoutPage = () => {
                       {selectedGiftPackage && (
                         <p className="text-[10px] text-primary font-medium">
                           🎁 {selectedGiftPackage.name}
-                          {selectedGiftPackage.items.length > 0 && `: ${selectedGiftPackage.items.map(g => g.name).join(", ")}`}
+                          {selectedGiftPackage.items.length > 0 && `: ${selectedGiftPackage.items.map((g: any) => g.name).join(", ")}`}
                         </p>
                       )}
                       <p className="text-[10px] text-muted-foreground">x{quantity}</p>
@@ -812,7 +812,7 @@ const CheckoutPage = () => {
               <div className="border-t border-border pt-3 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Барааны дүн</span>
-                  <span className="text-foreground font-medium">{formatPrice(cartTotal)}</span>
+                  <span className="text-foreground font-medium">{formatPrice(checkoutSubtotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Хүргэлт</span>
