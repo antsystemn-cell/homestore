@@ -523,40 +523,45 @@ const CheckoutPage = () => {
           {/* Left column */}
           <div className="md:col-span-2 space-y-4">
             {/* Shipping form */}
-            {!isViewingExistingOrder && (
+            {!isViewingExistingOrder ? (
               <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-4">
                 <h2 className="font-semibold text-foreground md:text-lg">Хүргэлтийн мэдээлэл</h2>
-              <div className="md:grid md:grid-cols-2 md:gap-4 space-y-3 md:space-y-0">
-                <input
-                  placeholder="Нэр *"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                <div className="md:grid md:grid-cols-2 md:gap-4 space-y-3 md:space-y-0">
+                  <input
+                    placeholder="Нэр *"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <input
+                    placeholder="Утасны дугаар *"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <AddressSelector value={address} onChange={setAddress} />
+                <textarea
+                  placeholder="Нэмэлт тэмдэглэл — хүргэлт, бараа болон бусад хүсэлт (заавал биш)"
+                  rows={3}
+                  value={note}
+                  onChange={(e) => setNote(e.target.value.slice(0, 500))}
+                  className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
                 />
-                <input
-                  placeholder="Утасны дугаар *"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
+                {note.length > 0 && (
+                  <div className="text-[10px] text-muted-foreground/60 text-right -mt-2">{note.length}/500</div>
+                )}
               </div>
-              <AddressSelector value={address} onChange={setAddress} />
-              <textarea
-                placeholder="Нэмэлт тэмдэглэл — хүргэлт, бараа болон бусад хүсэлт (заавал биш)"
-                rows={3}
-                value={note}
-                onChange={(e) => setNote(e.target.value.slice(0, 500))}
-                className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-              />
-              {note.length > 0 && (
-                <div className="text-[10px] text-muted-foreground/60 text-right -mt-2">{note.length}/500</div>
-              )}
-              )}
-            </div>
-          )}
+            ) : (
+              <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-2">
+                <h2 className="font-semibold text-foreground md:text-lg">Захиалгын мэдээлэл</h2>
+                <p className="text-sm text-muted-foreground">Утас: <span className="text-foreground font-medium">{phone}</span></p>
+                <p className="text-sm text-muted-foreground">Хаяг: <span className="text-foreground font-medium">{address}</span></p>
+              </div>
+            )}
 
-          {/* Delivery Options */}
-          {!isViewingExistingOrder && !loadingDelivery && deliveryOptions.length > 0 && (
+            {/* Delivery Options */}
+            {!isViewingExistingOrder && !loadingDelivery && deliveryOptions.length > 0 && (
               <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-3">
                 <h2 className="font-semibold text-foreground md:text-lg flex items-center gap-2">
                   <Truck className="h-5 w-5 text-primary" />
