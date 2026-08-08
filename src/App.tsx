@@ -62,6 +62,7 @@ const ReelsPage = lazy(() => lazyRetry(() => import("./pages/ReelsPage")));
 const QuickOrderPage = lazy(() => lazyRetry(() => import("./pages/QuickOrderPage")));
 const AuthCallback = lazy(() => lazyRetry(() => import("./pages/AuthCallback")));
 const UserDetailsPage = lazy(() => lazyRetry(() => import("./pages/UserDetailsPage")));
+const OrderHistoryPage = lazy(() => lazyRetry(() => import("./pages/OrderHistoryPage")));
 
 
 const queryClient = new QueryClient({
