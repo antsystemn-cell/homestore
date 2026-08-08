@@ -989,7 +989,7 @@ const CheckoutPage = () => {
                 </Button>
               )}
 
-              {paymentMethod === "storepay" && !orderId && (
+              {paymentMethod === "storepay" && !(orderId || isViewingExistingOrder) && !isViewingExistingOrder && (
                 <Button
                   className="w-full h-12 text-base rounded-xl mt-2 gap-2 bg-[#00B140] hover:bg-[#009930] text-white"
                   disabled={submitting}
