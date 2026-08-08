@@ -135,6 +135,7 @@ const App = () => {
                     <Route path="/checkout" element={<CheckoutPage />} />
                     <Route path="/product/:slug" element={<ProductPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/profile/details" element={<UserDetailsPage />} />
                     <Route path="/reels" element={<ReelsPage />} />
                     <Route path="/quick-order" element={<QuickOrderPage />} />
                     {SPIN_ENABLED && <Route path="/spin" element={<SpinPage />} />}
