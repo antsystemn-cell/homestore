@@ -32,13 +32,17 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
   // Price and discounts are always visible on all pages.
   // The user reported prices not appearing; verified they show in tests, 
   // but explicitly ensuring the elements are always rendered.
-
+  
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
   const flashSale = useFlashSaleFor(product.id);
   const displayPrice = flashSale ? Number(flashSale.sale_price) : product.price;
   const displayOriginal = flashSale ? product.price : product.originalPrice;
+  
+  // Validate price
+  const hasValidPrice = typeof displayPrice === 'number' && displayPrice > 0;
+
 
   const [isHovering, setIsHovering] = useState(false);
   const [pinnedColorIdx, setPinnedColorIdx] = useState<number | null>(null);
@@ -276,12 +280,20 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
         </h3>
         <RatingRow productId={product.id} />
         <div className="mt-2 flex items-baseline gap-1.5 flex-nowrap">
-          <span className={`font-extrabold text-base md:text-base whitespace-nowrap ${flashSale ? "text-destructive" : "text-foreground"}`}>
-            {formatPrice(displayPrice)}
-          </span>
-          {displayOriginal != null && displayOriginal > displayPrice && (
-            <span className="text-muted-foreground text-xs md:text-xs line-through whitespace-nowrap">
-              {formatPrice(displayOriginal)}
+          {hasValidPrice ? (
+            <>
+              <span className={`font-extrabold text-base md:text-base whitespace-nowrap ${flashSale ? "text-destructive" : "text-foreground"}`}>
+                {formatPrice(displayPrice)}
+              </span>
+              {displayOriginal != null && displayOriginal > displayPrice && (
+                <span className="text-muted-foreground text-xs md:text-xs line-through whitespace-nowrap">
+                  {formatPrice(displayOriginal)}
+                </span>
+              )}
+            </>
+          ) : (
+            <span className="text-xs text-muted-foreground animate-pulse">
+              Үнэ ачаалж байна...
             </span>
           )}
         </div>
