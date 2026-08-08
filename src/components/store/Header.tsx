@@ -181,6 +181,89 @@ const Header = () => {
             
             {showMenu && (
               <div 
+                className="fixed inset-0 z-[100] md:hidden"
+                onClick={() => setShowMenu(false)}
+              >
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+                <div 
+                  className="absolute bottom-0 left-0 right-0 bg-card rounded-t-3xl border-t border-border shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex flex-col h-[70vh]">
+                    <div className="flex items-center justify-between p-4 border-b border-border">
+                      <div className="flex gap-2 p-1 bg-secondary/50 rounded-xl">
+                        <button 
+                          onClick={() => setActiveMenuTab("cats")}
+                          className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeMenuTab === 'cats' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
+                        >
+                          Ангилал
+                        </button>
+                        <button 
+                          onClick={() => setActiveMenuTab("brands")}
+                          className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeMenuTab === 'brands' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
+                        >
+                          Брэндүүд
+                        </button>
+                      </div>
+                      <button onClick={() => setShowMenu(false)} className="p-2 rounded-full hover:bg-secondary">
+                        <X className="h-5 w-5" />
+                      </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-4 pb-20">
+                      {activeMenuTab === "cats" ? (
+                        <div className="space-y-6">
+                          {categories.filter(c => !c.parent_id).map(parent => (
+                            <div key={parent.id} className="space-y-3">
+                              <button 
+                                onClick={() => { navigate(`/category/${parent.slug}`); setShowMenu(false); }}
+                                className="text-sm font-bold text-foreground flex items-center gap-2"
+                              >
+                                {parent.icon && (() => {
+                                  const Icon = (Icons as any)[parent.icon] || LayoutGrid;
+                                  return <Icon className="h-4 w-4 text-primary" />;
+                                })()}
+                                {parent.name}
+                              </button>
+                              <div className="grid grid-cols-2 gap-2 pl-6">
+                                {categories.filter(c => c.parent_id === parent.id).map(child => (
+                                  <button 
+                                    key={child.id}
+                                    onClick={() => { navigate(`/category/${child.slug}`); setShowMenu(false); }}
+                                    className="px-3 py-2 rounded-lg bg-secondary/30 text-xs text-left text-muted-foreground hover:text-foreground"
+                                  >
+                                    {child.name}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-3 gap-3">
+                          {brands.map(b => (
+                            <button 
+                              key={b.id}
+                              onClick={() => { navigate(`/${b.name.replace(/\s+/g, '')}`); setShowMenu(false); }}
+                              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-secondary/30 border border-transparent"
+                            >
+                              <div className="h-10 w-10 rounded-lg bg-background flex items-center justify-center overflow-hidden">
+                                {b.logo_url ? <img src={b.logo_url} alt="" className="h-full w-full object-contain" /> : <Store className="h-4 w-4 text-muted-foreground" />}
+                              </div>
+                              <span className="text-[10px] font-bold text-center truncate w-full">{b.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {showMenu && (
+
+              <div 
                 onMouseLeave={() => setShowMenu(false)}
                 className="absolute top-full left-0 w-[600px] bg-card rounded-2xl border border-border shadow-2xl z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
               >
