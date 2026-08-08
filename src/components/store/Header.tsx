@@ -518,7 +518,7 @@ const Header = () => {
                 className="absolute bottom-0 left-0 right-0 bg-card rounded-t-3xl border-t border-border shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex flex-col h-[70vh]">
+                <div className="flex flex-col h-[85vh]">
                   <div className="flex items-center justify-between p-4 border-b border-border">
                     <h2 className="text-lg font-bold">Профайл / Цэс</h2>
                     <button onClick={() => setShowMenu(false)} className="p-2 rounded-full hover:bg-secondary">
