@@ -403,18 +403,36 @@ const Header = () => {
               <User className="h-5 w-5" />
             </button>
           </div>
+
+          {/* Mobile Login & Menu */}
+          <div className="flex md:hidden items-center gap-1">
+            {!user && (
+              <button
+                onClick={() => navigate("/auth")}
+                className="p-2.5 bg-black text-white rounded-full hover:bg-black/90 transition-all flex items-center justify-center"
+                aria-label="Нэвтрэх"
+              >
+                <LogIn className="h-5 w-5" />
+              </button>
+            )}
+            <button 
+              onClick={() => setShowMenu(true)}
+              className="p-2 rounded-full hover:bg-secondary transition-colors"
+            >
+               <Menu className="h-6 w-6" />
+            </button>
+          </div>
+
+          {/* Desktop Login */}
           {!user && (
             <button
               onClick={() => navigate("/auth")}
-              className="inline-flex items-center gap-1.5 h-9 px-3 md:px-4 rounded-full bg-primary text-primary-foreground text-xs md:text-sm font-semibold hover:opacity-90 transition-opacity"
+              className="hidden md:inline-flex items-center gap-1.5 h-9 px-4 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
             >
               <LogIn className="h-4 w-4" />
-              <span className="hidden sm:inline">Нэвтрэх</span>
+              <span>Нэвтрэх</span>
             </button>
           )}
-          <button className="md:hidden p-2 rounded-full hover:bg-secondary">
-             <Menu className="h-5 w-5" />
-          </button>
         </div>
       </div>
     </header>
