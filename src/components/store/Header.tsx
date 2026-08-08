@@ -507,12 +507,13 @@ const Header = () => {
           <div className="flex md:hidden items-center gap-1">
             <button 
               onClick={() => {
-                setActiveMenuTab("cats"); // Default to categories for this toggle
+                // If user is logged out, show the auth drawer options immediately
+                // If logged in, we want them to see their profile info
                 setShowMenu(true);
               }}
               className="p-2 rounded-full hover:bg-secondary transition-colors"
             >
-               <Menu className="h-6 w-6" />
+               <User className="h-6 w-6" />
             </button>
           </div>
 
