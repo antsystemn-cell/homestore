@@ -2834,6 +2834,37 @@ export type Database = {
           source: string
         }[]
       }
+      get_guest_coupons: {
+        Args: { _fp: string }
+        Returns: {
+          code: string
+          created_at: string
+          expires_at: string
+          guest_fingerprint: string | null
+          id: string
+          invalidated_at: string | null
+          is_used: boolean
+          minimum_order_amount: number
+          reward_type: string
+          reward_value: number
+          used_at: string | null
+          used_order_id: string | null
+          user_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "spin_coupons"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_guest_spin_balance: {
+        Args: { _fp: string }
+        Returns: {
+          available_spins: number
+          expires_at: string
+        }[]
+      }
       get_my_order_count: { Args: never; Returns: number }
       get_my_referral_stats: {
         Args: never
