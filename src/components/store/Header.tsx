@@ -480,16 +480,26 @@ const Header = () => {
         <div className="flex items-center gap-2 md:gap-3 shrink-0">
           <div className="hidden md:flex items-center gap-2">
             <NotificationsBell />
-            <button 
-              onClick={() => {
-                setActiveMenuTab("cats"); // Reuse state to avoid issues
-                setShowMenu(true);
-              }}
-              className="p-2 rounded-full hover:bg-secondary transition-colors"
-              title="Профайл"
-            >
-              <User className="h-5 w-5" />
-            </button>
+            {user ? (
+              <button 
+                onClick={() => navigate("/profile/details")}
+                className="p-2 rounded-full hover:bg-secondary transition-colors"
+                title="Миний мэдээлэл"
+              >
+                <User className="h-5 w-5" />
+              </button>
+            ) : (
+              <button 
+                onClick={() => {
+                  sessionStorage.setItem("returnAfterAuth", location.pathname + location.search);
+                  navigate("/auth");
+                }}
+                className="p-2 rounded-full hover:bg-secondary transition-colors"
+                title="Нэвтрэх"
+              >
+                <User className="h-5 w-5" />
+              </button>
+            )}
 
           </div>
 
