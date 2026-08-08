@@ -152,7 +152,7 @@ const Header = () => {
           aria-label="EasyShop"
           className={`cursor-pointer shrink-0 overflow-hidden transition-all duration-300 ease-out md:!max-w-none md:!opacity-100 md:!ml-0 ${
             collapsed
-              ? "max-w-0 opacity-0 -ml-4"
+              ? "max-w-0 opacity-0 -ml-4 pointer-events-none"
               : "max-w-[180px] opacity-100 ml-0"
           }`}
         >
@@ -368,7 +368,7 @@ const Header = () => {
               if (e.key === "Enter" && trimmed) pushHistory(trimmed);
             }}
             className={`w-full rounded-full bg-secondary pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-300 ease-out md:!py-2.5 ${
-              collapsed ? "py-1.5" : "py-2.5"
+              collapsed ? "py-2.5" : "py-2.5"
             }`}
           />
 
