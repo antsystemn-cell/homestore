@@ -134,10 +134,11 @@ const Index = () => {
       setError(mappedProducts.length === 0 && mappedSale.length === 0 && (newRes || []).length === 0);
     } catch (err) {
       console.error("Failed to load products", err);
-      setAllProducts([]);
-      setSaleProducts([]);
-      setFeaturedProducts([]);
       setError(true);
+      // Automatically retry once more in the background if it failed
+      setTimeout(() => {
+        if (loading) fetchAll();
+      }, 3000);
     } finally {
       setLoading(false);
       setGridLoading(false);
