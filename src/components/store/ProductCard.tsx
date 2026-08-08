@@ -30,7 +30,6 @@ const RatingRow = ({ productId }: { productId: string }) => {
 
 const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const location = useLocation();
-  const isHome = location.pathname === "/";
 
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
@@ -87,8 +86,8 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const { slides, colorSlideMap } = useMemo(() => {
     const list: string[] = [baseImage];
     const map = new Map<number, number>();
-    // On home page: don't expose color variants as slides — keep a single image.
-    if (!isHome && colors && colors.length) {
+    // Allow color variants images as slides on all pages
+    if (colors && colors.length) {
       colors.forEach((c, ci) => {
         if (c.image && c.image.trim()) {
           const existing = list.indexOf(c.image);
@@ -104,7 +103,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
       });
     }
     return { slides: list, colorSlideMap: map };
-  }, [baseImage, colors, isHome]);
+  }, [baseImage, colors]);
 
   const hasMultipleSlides = slides.length > 1;
   const hasSwatches = !!(colors && colors.length > 1);
@@ -251,7 +250,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
             <Zap className="h-3 w-3 fill-current" />
             -{flashSale.discount_percent}%
           </span>
-        ) : !isHome && displayOriginal != null && displayOriginal > displayPrice ? (
+        ) : displayOriginal != null && displayOriginal > displayPrice ? (
           <span className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded z-10">
             -{Math.round(((displayOriginal - displayPrice) / displayOriginal) * 100)}%
           </span>
