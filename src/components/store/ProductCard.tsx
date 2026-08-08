@@ -34,14 +34,15 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const [activeIdx, setActiveIdx] = useState(0);
   const flashSale = useFlashSaleFor(product.id);
   
-  const firstColorPrice = product.colors?.[0]?.price;
+  const colors = product.colors;
+  const firstColorPrice = colors?.[0]?.price;
+  
   const basePrice = Number(firstColorPrice ?? product.price ?? 0);
   const baseOriginal = product.originalPrice ? Number(product.originalPrice) : null;
   
   const displayPrice = flashSale ? Number(flashSale.sale_price) : basePrice;
   const displayOriginal = flashSale ? basePrice : baseOriginal;
   
-  // A product is valid if it has a price > 0
   const hasValidPrice = displayPrice > 0;
 
 
@@ -86,7 +87,6 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
     }
   }, [navigate, productUrl]);
 
-  const colors = product.colors;
   const baseImage = product.thumbnail || product.image || "/placeholder.svg";
 
   // Build slides: base image + every distinct color image.
