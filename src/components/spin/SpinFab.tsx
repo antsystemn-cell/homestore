@@ -24,11 +24,8 @@ export default function SpinFab() {
         setCount((data || []).reduce((s, r) => s + (r.available_spins as number), 0));
       } else {
         const fp = getDeviceFingerprint();
-        const { data } = await supabase
-          .from("guest_spin_balances")
-          .select("available_spins, expires_at")
-          .eq("fingerprint", fp)
-          .maybeSingle();
+        const { data: rows } = await supabase.rpc("get_guest_spin_balance" as any, { _fp: fp });
+        const data = (Array.isArray(rows) ? rows[0] : rows) as { available_spins: number; expires_at: string } | null;
         if (!active) return;
         if (data && new Date(data.expires_at).getTime() > Date.now()) {
           setCount(data.available_spins as number);
