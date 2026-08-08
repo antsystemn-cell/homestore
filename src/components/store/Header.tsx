@@ -268,7 +268,7 @@ const Header = () => {
               </div>
             )}
           </div>
-          <button onClick={() => navigate("/shop")} className="hover:text-foreground transition-colors">Бүх бараа</button>
+          
         </nav>
 
         <div ref={searchBoxRef} className="relative flex-1 max-w-md ml-auto transition-all duration-300 ease-out">
