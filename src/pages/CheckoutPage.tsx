@@ -26,8 +26,10 @@ const CheckoutPage = () => {
   const { items, cartTotal, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const isGuestCheckout = !user && searchParams.get("guest") === "1";
+  const externalOrderId = searchParams.get("orderId");
 
   const [ordered, setOrdered] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -38,6 +40,9 @@ const CheckoutPage = () => {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("qpay");
   const [orderId, setOrderId] = useState<string | null>(null);
   const [orderRef, setOrderRef] = useState<string | null>(null);
+  const [isViewingExistingOrder, setIsViewingViewingExistingOrder] = useState(false);
+  const [existingOrderData, setExistingOrderData] = useState<any>(null);
+  const [loadingExisting, setLoadingExisting] = useState(false);
 
   // Delivery options
   const [deliveryOptions, setDeliveryOptions] = useState<any[]>([]);
