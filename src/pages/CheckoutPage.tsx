@@ -20,7 +20,7 @@ import WalletCreditsSection from "@/components/store/WalletCreditsSection";
 import type { WalletCredit } from "@/hooks/useWalletCredits";
 import AddressSelector from "@/components/store/AddressSelector";
 
-type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket" | "sono";
+type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket" | "sono" | "card";
 
 const CheckoutPage = () => {
   const { items, cartTotal, clearCart } = useCart();
@@ -268,7 +268,26 @@ const CheckoutPage = () => {
   }, [user]);
 
   const selectedDeliveryOption = deliveryOptions.find(d => d.id === selectedDelivery);
-  const deliveryFee = selectedDeliveryOption?.price || 0;
+  
+  // Dynamic delivery fee calculation based on district
+  const getBaseDeliveryFee = () => {
+    if (!selectedDeliveryOption) return 0;
+    
+    // If user selected a specific district in AddressSelector, we could override base price
+    // For now, we assume the delivery_options price is the base, but we can add logic here
+    const parts = address.split(",").map(p => p.trim());
+    const district = parts[0];
+    
+    // Example: Distant districts have higher fees
+    const distantDistricts = ["Налайх", "Багануур", "Багахангай"];
+    if (distantDistricts.includes(district)) {
+      return Math.max(selectedDeliveryOption.price, 15000); // Minimum 15k for distant areas
+    }
+    
+    return selectedDeliveryOption.price;
+  };
+
+  const deliveryFee = getBaseDeliveryFee();
 
   // Use cart data or existing order data
   const checkoutItems = isViewingExistingOrder && existingOrderData?.items ? existingOrderData.items.map((it: any) => ({
@@ -417,6 +436,18 @@ const CheckoutPage = () => {
   const handleCashOrder = async () => {
     setSubmitting(true);
     const id = await createOrder("unpaid", "cash");
+    if (id) {
+      clearCart();
+      setOrdered(true);
+    }
+    setSubmitting(false);
+  };
+
+  const handleCardOrder = async () => {
+    setSubmitting(true);
+    // For now, treat card as "unpaid" order that admin confirms, 
+    // or you could integrate a Stripe/Paddle etc here.
+    const id = await createOrder("unpaid", "card");
     if (id) {
       clearCart();
       setOrdered(true);
@@ -809,6 +840,56 @@ const CheckoutPage = () => {
                   </div>
                 </label>
 
+                {/* Card Payment */}
+                <label
+                  className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    paymentMethod === "card"
+                      ? "border-primary bg-primary/5 shadow-sm"
+                      : "border-border hover:border-muted-foreground/30"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="card"
+                    checked={paymentMethod === "card"}
+                    onChange={() => setPaymentMethod("card")}
+                    className="w-4 h-4 accent-[hsl(var(--primary))]"
+                  />
+                  <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
+                    <CreditCard className="h-5 w-5 text-primary-foreground" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-foreground">Карт / Card</p>
+                    <p className="text-xs text-muted-foreground">Дебит болон Кредит карт</p>
+                  </div>
+                </label>
+
+                {/* Cash on Delivery (COD) */}
+                <label
+                  className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    paymentMethod === "cash"
+                      ? "border-primary bg-primary/5 shadow-sm"
+                      : "border-border hover:border-muted-foreground/30"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="cash"
+                    checked={paymentMethod === "cash"}
+                    onChange={() => setPaymentMethod("cash")}
+                    className="w-4 h-4 accent-[hsl(var(--primary))]"
+                  />
+                  <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center">
+                    <Banknote className="h-5 w-5 text-foreground" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-foreground">Бэлнээр / COD</p>
+                    <p className="text-xs text-muted-foreground">Бараа хүлээн авахдаа төлөх</p>
+                  </div>
+                </label>
+
               </div>
             </div>
 
@@ -1055,6 +1136,17 @@ const CheckoutPage = () => {
                   onClick={handleCashOrder}
                 >
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
+                  {submitting ? "Илгээж байна..." : `Захиалга өгөх — ${formatPrice(grandTotal)}`}
+                </Button>
+              )}
+
+              {paymentMethod === "card" && !(orderId || isViewingExistingOrder) && !isViewingExistingOrder && (
+                <Button
+                  className="w-full h-12 text-base rounded-xl mt-2 gap-2"
+                  disabled={submitting}
+                  onClick={handleCardOrder}
+                >
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
                   {submitting ? "Илгээж байна..." : `Захиалга өгөх — ${formatPrice(grandTotal)}`}
                 </Button>
               )}
