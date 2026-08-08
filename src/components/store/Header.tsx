@@ -518,7 +518,7 @@ const Header = () => {
                 className="absolute bottom-0 left-0 right-0 bg-card rounded-t-3xl border-t border-border shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex flex-col h-[90vh] max-h-[90dvh]">
+                <div className="flex flex-col h-[95vh] max-h-[95dvh]">
                   <div className="flex items-center justify-between p-5 border-b border-border">
                     <h2 className="text-xl font-black tracking-tight">Цэс</h2>
                     <button onClick={() => setShowMenu(false)} className="p-2 rounded-full hover:bg-secondary">
@@ -590,15 +590,14 @@ const Header = () => {
                     <div className="h-px bg-border my-6" />
 
                     {user ? (
-
                       <div className="space-y-2">
-                        <div className="flex items-center gap-3 p-4 bg-secondary/30 rounded-2xl mb-6">
-                          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                            <User className="h-6 w-6 text-primary" />
+                        <div className="flex items-center gap-3 p-5 bg-secondary/50 rounded-2xl mb-8 border border-border/50">
+                          <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center border-2 border-primary/20">
+                            <User className="h-7 w-7 text-primary" />
                           </div>
                           <div className="flex-1 overflow-hidden">
-                            <p className="font-bold text-base truncate">{user.user_metadata?.full_name || "Хэрэглэгч"}</p>
-                            <p className="text-xs text-muted-foreground">{user.email}</p>
+                            <p className="font-black text-lg truncate tracking-tight">{user.user_metadata?.full_name || "Хэрэглэгч"}</p>
+                            <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                           </div>
                         </div>
                         
