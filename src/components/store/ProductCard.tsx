@@ -30,7 +30,6 @@ const RatingRow = ({ productId }: { productId: string }) => {
 
 const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const location = useLocation();
-  const isHome = false; // Always show price/discount on cards even on home page
 
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
