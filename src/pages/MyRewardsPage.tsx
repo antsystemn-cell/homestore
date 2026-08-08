@@ -103,11 +103,7 @@ export default function MyRewardsPage() {
       } else {
         const { getDeviceFingerprint } = await import("@/lib/deviceFingerprint");
         const fp = getDeviceFingerprint();
-        const { data } = await supabase
-          .from("spin_coupons")
-          .select("*")
-          .eq("guest_fingerprint", fp)
-          .order("created_at", { ascending: false });
+        const { data } = await supabase.rpc("get_guest_coupons" as any, { _fp: fp });
         setCoupons((data as Coupon[]) || []);
         setWelcomeCoupon(null);
       }
