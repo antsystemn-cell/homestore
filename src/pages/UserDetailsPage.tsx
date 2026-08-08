@@ -31,7 +31,7 @@ const UserDetailsPage = () => {
     if (!user) return;
     try {
       const { data, error } = await supabase
-        .from("user_addresses")
+        .from("user_addresses" as any)
         .select("*")
         .order("is_default", { ascending: false })
         .order("created_at", { ascending: false });
