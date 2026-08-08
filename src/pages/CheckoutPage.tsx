@@ -523,8 +523,9 @@ const CheckoutPage = () => {
           {/* Left column */}
           <div className="md:col-span-2 space-y-4">
             {/* Shipping form */}
-            <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-4">
-              <h2 className="font-semibold text-foreground md:text-lg">Хүргэлтийн мэдээлэл</h2>
+            {!isViewingExistingOrder && (
+              <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-4">
+                <h2 className="font-semibold text-foreground md:text-lg">Хүргэлтийн мэдээлэл</h2>
               <div className="md:grid md:grid-cols-2 md:gap-4 space-y-3 md:space-y-0">
                 <input
                   placeholder="Нэр *"
