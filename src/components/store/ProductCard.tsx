@@ -87,8 +87,8 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const { slides, colorSlideMap } = useMemo(() => {
     const list: string[] = [baseImage];
     const map = new Map<number, number>();
-    // On home page: don't expose color variants as slides — keep a single image.
-    if (!isHome && colors && colors.length) {
+    // Allow color variants images as slides on all pages
+    if (colors && colors.length) {
       colors.forEach((c, ci) => {
         if (c.image && c.image.trim()) {
           const existing = list.indexOf(c.image);
