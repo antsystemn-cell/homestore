@@ -755,7 +755,7 @@ const CheckoutPage = () => {
             )}
 
             {/* QPay Payment Flow */}
-            {paymentMethod === "qpay" && orderId && (
+            {paymentMethod === "qpay" && (orderId || isViewingExistingOrder) && (
               <QPayPayment
                 orderId={orderId}
                 amount={grandTotal}
