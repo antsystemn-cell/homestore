@@ -1,12 +1,26 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, User, Mail, Phone, MapPin, Calendar, ShieldCheck } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, User, Mail, Phone, Calendar, ShieldCheck, Loader2, Save, Check } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import Header from "@/components/store/Header";
 import BottomNav from "@/components/store/BottomNav";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const UserDetailsPage = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setFullName(user.user_metadata?.full_name || "");
+      setPhone(user.user_metadata?.phone || "");
+    }
+  }, [user]);
 
   if (loading) {
     return (
@@ -21,12 +35,62 @@ const UserDetailsPage = () => {
     return null;
   }
 
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          full_name: fullName,
+          phone: phone
+        }
+      });
+
+      if (error) throw error;
+      
+      toast.success("Мэдээлэл амжилттай хадгалагдлаа");
+    } catch (error: any) {
+      toast.error(error.message || "Мэдээлэл хадгалахад алдаа гарлаа");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const userData = [
-    { label: "Бүтэн нэр", value: user.user_metadata?.full_name || "Тодорхойгүй", icon: User },
-    { label: "Имэйл хаяг", value: user.email, icon: Mail },
-    { label: "Утасны дугаар", value: user.user_metadata?.phone || "Холбоогүй", icon: Phone },
-    { label: "Бүртгүүлсэн огноо", value: new Date(user.created_at).toLocaleDateString("mn-MN"), icon: Calendar },
-    { label: "Статус", value: "Идэвхтэй", icon: ShieldCheck, color: "text-green-500" },
+    { 
+      label: "Бүтэн нэр", 
+      value: fullName, 
+      icon: User, 
+      editable: true,
+      onChange: (v: string) => setFullName(v),
+      placeholder: "Таны нэр"
+    },
+    { 
+      label: "Имэйл хаяг", 
+      value: user.email, 
+      icon: Mail, 
+      editable: false 
+    },
+    { 
+      label: "Утасны дугаар", 
+      value: phone, 
+      icon: Phone, 
+      editable: true,
+      onChange: (v: string) => setPhone(v),
+      placeholder: "Холбоо барих утас"
+    },
+    { 
+      label: "Бүртгүүлсэн огноо", 
+      value: new Date(user.created_at).toLocaleDateString("mn-MN"), 
+      icon: Calendar, 
+      editable: false 
+    },
+    { 
+      label: "Статус", 
+      value: "Идэвхтэй", 
+      icon: ShieldCheck, 
+      color: "text-green-500", 
+      editable: false 
+    },
   ];
 
   return (
