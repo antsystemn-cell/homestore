@@ -61,9 +61,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
 
-type Tab = "stats" | "report" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "welcome-showcase" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "coupon-usage" | "flash-sales" | "reels" | "settings" | "bonus" | "branches" | "returns";
+type Tab = "stats" | "report" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "welcome-showcase" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "coupon-usage" | "flash-sales" | "reels" | "settings" | "bonus" | "branches" | "returns" | "branding";
 
-const SETTINGS_TABS: Tab[] = ["categories", "brands", "delivery", "payments", "banner", "announcements", "welcome-showcase", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "reminders", "reviews", "flash-sales", "reels", "drivers", "branches", "returns"];
+const SETTINGS_TABS: Tab[] = ["branding", "categories", "brands", "delivery", "payments", "banner", "announcements", "welcome-showcase", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "reminders", "reviews", "flash-sales", "reels", "drivers", "branches", "returns"];
 const BONUS_TABS: Tab[] = ["loyalty", "spin", "referral", "promotions", "coupon-usage"];
 
 
@@ -114,7 +114,7 @@ const AdminPage = () => {
   const [tab, setTab] = useState<Tab>(() => {
     if (isReportRoute) return "report";
     const t = searchParams.get("tab") as Tab | null;
-    const valid: Tab[] = ["stats", "report", "tracking", "products", "orders", "users", "drivers", "categories", "brands", "delivery", "delivery-portal", "payments", "banner", "announcements", "welcome-showcase", "collections", "chatbot", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "referral", "promotions", "coupon-usage", "flash-sales", "reels", "settings", "bonus", "branches", "returns"];
+    const valid: Tab[] = ["stats", "report", "tracking", "products", "orders", "users", "drivers", "categories", "brands", "delivery", "delivery-portal", "payments", "banner", "announcements", "welcome-showcase", "collections", "chatbot", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "referral", "promotions", "coupon-usage", "flash-sales", "reels", "settings", "bonus", "branches", "returns", "branding"];
     return t && valid.includes(t) ? t : "stats";
   });
 
