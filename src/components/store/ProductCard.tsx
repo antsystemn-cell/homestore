@@ -37,18 +37,12 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const colors = product.colors;
   const firstColorPrice = colors?.[0]?.price;
   
-  // Use a simpler, more robust way to get the numeric price
   const basePrice = Number(firstColorPrice ?? product.price ?? 0);
   const baseOriginal = product.originalPrice ? Number(product.originalPrice) : null;
   
   const displayPrice = flashSale ? Number(flashSale.sale_price) : basePrice;
   const displayOriginal = flashSale ? basePrice : baseOriginal;
   
-  // LOGGING - REMOVE AFTER FIX
-  if (product.name.includes("PhotoTag")) {
-     console.log(`[Card Fix Log] ${product.name}: ${displayPrice} (base: ${basePrice}, raw: ${product.price})`);
-  }
-
   const hasValidPrice = displayPrice > 0;
 
 
