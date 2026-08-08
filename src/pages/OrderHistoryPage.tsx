@@ -150,8 +150,14 @@ const OrderHistoryPage = () => {
                       <p className="text-sm font-extrabold text-foreground">
                         {formatPrice(order.total || 0)}
                       </p>
-                      <div className="flex items-center justify-end gap-1 text-[10px] text-primary font-bold mt-1 group-hover:translate-x-1 transition-transform">
-                        Дэлгэрэнгүй <ChevronRight className="h-3 w-3" />
+                      <div 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/track/${order.id}`);
+                        }}
+                        className="flex items-center justify-end gap-1 text-[10px] text-primary font-bold mt-1 group-hover:translate-x-1 transition-transform cursor-pointer"
+                      >
+                        Захиалга хянах <ChevronRight className="h-3 w-3" />
                       </div>
                     </div>
                   </div>

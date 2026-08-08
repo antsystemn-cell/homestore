@@ -103,7 +103,7 @@ const UserDetailsPage = () => {
     );
   }
 
-  if (!user) {
+  if (!user && !loading) {
     navigate("/auth");
     return null;
   }

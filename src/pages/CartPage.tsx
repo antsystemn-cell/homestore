@@ -143,6 +143,21 @@ const CartPage = () => {
                     <Button variant="outline" size="sm" className="text-[10px] h-8 rounded-lg">Ашиглах</Button>
                   </div>
                 </div>
+                {/* Promo Code Input */}
+                <div className="py-2 border-b border-border/50">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Промо код"
+                      className="flex-1 bg-secondary border-none rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary/20"
+                      readOnly
+                      onClick={() => navigate("/checkout")}
+                    />
+                    <Button variant="outline" size="sm" className="text-[10px] h-8 rounded-lg" onClick={() => navigate("/checkout")}>Ашиглах</Button>
+                  </div>
+                  <p className="text-[9px] text-muted-foreground mt-1">Промо кодыг төлбөрийн хэсэгт ашиглана уу.</p>
+                </div>
+
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Нийт дүн</span>
                   <span className="font-bold text-foreground">{formatPrice(cartTotal)}</span>
