@@ -153,6 +153,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       const key = makeCartKey(product.id, color, size, giftPackage?.id);
       const existing = prev.find((i) => makeCartKey(i.product.id, i.selectedColor, i.selectedSize, i.selectedGiftPackage?.id) === key);
       if (existing) {
+        // Rule: If same item (Product + Color + Size + Gift) exists, increment quantity
         return prev.map((i) =>
           makeCartKey(i.product.id, i.selectedColor, i.selectedSize, i.selectedGiftPackage?.id) === key ? { ...i, quantity: i.quantity + quantity } : i
         );
@@ -166,6 +167,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       metadata: { color: color || null, size: size || null, quantity, giftPackage: giftPackage?.name || null },
     });
   }, []);
+
 
   const removeFromCart = useCallback((key: string) => {
     setItems((prev) => prev.filter((i) => makeCartKey(i.product.id, i.selectedColor, i.selectedSize, i.selectedGiftPackage?.id) !== key));
