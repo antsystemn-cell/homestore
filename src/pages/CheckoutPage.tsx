@@ -1000,7 +1000,7 @@ const CheckoutPage = () => {
                 </Button>
               )}
 
-              {paymentMethod === "qpay" && !orderId && (
+              {paymentMethod === "qpay" && !(orderId || isViewingExistingOrder) && !isViewingExistingOrder && (
                 <Button
                   className="w-full h-12 text-base rounded-xl mt-2 gap-2"
                   disabled={submitting}
