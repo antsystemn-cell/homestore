@@ -44,6 +44,18 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const displayOriginal = flashSale ? basePrice : baseOriginal;
   
   const hasValidPrice = typeof displayPrice === 'number' && displayPrice > 0;
+  
+  // Debug log for checking why prices might be missing in production environment
+  useEffect(() => {
+    if (!hasValidPrice) {
+      console.warn(`[ProductCard] Invalid price for product ${product.id} (${product.name}):`, {
+        displayPrice,
+        basePrice,
+        flashSalePrice: flashSale?.sale_price,
+        productObject: product
+      });
+    }
+  }, [hasValidPrice, product.id, product.name, displayPrice, basePrice, flashSale]);
 
 
   const [isHovering, setIsHovering] = useState(false);
@@ -295,7 +307,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
             </>
           ) : (
             <span className="font-extrabold text-base md:text-base whitespace-nowrap text-foreground">
-              {formatPrice(product.price)}
+              {formatPrice(product.price || 0)}
             </span>
           )}
         </div>
