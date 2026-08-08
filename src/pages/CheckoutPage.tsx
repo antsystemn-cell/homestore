@@ -165,7 +165,7 @@ const CheckoutPage = () => {
         .order("is_default", { ascending: false });
       setUserAddresses(data || []);
       // Auto-select default address if present
-      const def = data?.find(a => a.is_default);
+      const def = (data as any[])?.find(a => a.is_default);
       if (def) {
         setAddress(`${def.district}, ${def.khoroo ? def.khoroo + "-р хороо, " : ""}${def.detail}`);
       }
