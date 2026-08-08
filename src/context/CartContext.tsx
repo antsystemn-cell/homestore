@@ -64,11 +64,16 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>(() => loadCartFromStorage());
-  const [wishlist, setWishlist] = useState<Product[]>([]);
+  const [wishlist, setWishlist] = useState<Product[]>(() => loadWishlistFromStorage());
 
   useEffect(() => {
     saveCartToStorage(items);
   }, [items]);
+
+  useEffect(() => {
+    saveWishlistToStorage(wishlist);
+  }, [wishlist]);
+
 
   // Persist cart to `active_carts` for logged-in users so abandoned-cart reminders work
   const syncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
