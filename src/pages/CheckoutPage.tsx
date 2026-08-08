@@ -853,7 +853,7 @@ const CheckoutPage = () => {
                     <p className="text-[10px] text-muted-foreground mb-2">Олон купоныг давхарлаж ашиглаж болно</p>
                     <div className="space-y-1.5 max-h-40 overflow-y-auto">
                       {availableCoupons.map((c) => {
-                        const minOk = !c.minimum_order_amount || cartTotal >= Number(c.minimum_order_amount);
+                        const minOk = !c.minimum_order_amount || checkoutSubtotal >= Number(c.minimum_order_amount);
                         const checked = selectedCouponIds.includes(c.id);
                         return (
                           <label key={c.id} className={`flex items-center gap-2 text-xs p-1.5 rounded border ${minOk ? "border-border cursor-pointer hover:bg-accent/30" : "border-border opacity-50"}`}>
