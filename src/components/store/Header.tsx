@@ -526,7 +526,7 @@ const Header = () => {
                     </button>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto p-4 pb-20">
+                  <div className="flex-1 overflow-y-auto p-4 pb-20 scrollbar-hide">
                     <div className="flex bg-secondary/30 rounded-xl p-1 mb-6 sticky top-0 z-10 backdrop-blur-md">
                       <button 
                         onClick={() => setActiveMenuTab("cats")}
