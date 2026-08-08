@@ -522,6 +522,11 @@ const CheckoutPage = () => {
         <div className="md:grid md:grid-cols-3 md:gap-8">
           {/* Left column */}
           <div className="md:col-span-2 space-y-4">
+            {loadingExisting && (
+              <div className="flex items-center justify-center p-12 bg-card rounded-xl border border-border">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            )}
             {/* Shipping form */}
             {!isViewingExistingOrder ? (
               <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-4">
