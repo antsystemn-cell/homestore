@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/data/products";
 import { Button } from "@/components/ui/button";
