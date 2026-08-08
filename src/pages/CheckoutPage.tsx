@@ -443,6 +443,18 @@ const CheckoutPage = () => {
     setSubmitting(false);
   };
 
+  const handleCardOrder = async () => {
+    setSubmitting(true);
+    // For now, treat card as "unpaid" order that admin confirms, 
+    // or you could integrate a Stripe/Paddle etc here.
+    const id = await createOrder("unpaid", "card");
+    if (id) {
+      clearCart();
+      setOrdered(true);
+    }
+    setSubmitting(false);
+  };
+
   const handleStorepayStart = async () => {
     if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return; }
     if (isGuestCheckout && !name.trim()) { toast.error("Нэр заавал бөглөнө үү"); return; }
@@ -1148,6 +1160,17 @@ const CheckoutPage = () => {
                   onClick={handleCashOrder}
                 >
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
+                  {submitting ? "Илгээж байна..." : `Захиалга өгөх — ${formatPrice(grandTotal)}`}
+                </Button>
+              )}
+
+              {paymentMethod === "card" && !(orderId || isViewingExistingOrder) && !isViewingExistingOrder && (
+                <Button
+                  className="w-full h-12 text-base rounded-xl mt-2 gap-2"
+                  disabled={submitting}
+                  onClick={handleCardOrder}
+                >
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
                   {submitting ? "Илгээж байна..." : `Захиалга өгөх — ${formatPrice(grandTotal)}`}
                 </Button>
               )}
