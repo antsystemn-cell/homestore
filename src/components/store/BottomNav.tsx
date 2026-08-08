@@ -1,4 +1,4 @@
-import { Home, ShoppingCart } from "lucide-react";
+import { Home, ShoppingCart, User } from "lucide-react";
 
 const ReelsIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
@@ -21,6 +21,7 @@ const BottomNav = () => {
     { path: "/", label: "Нүүр", icon: Home },
     { path: "/reels", label: "Reels", icon: ReelsIcon },
     { path: "/cart", label: "Сагс", icon: ShoppingCart, badge: cartCount },
+    { path: "/profile/details", label: "Профайл", icon: User },
   ];
 
   const isActive = (path: string) => {
