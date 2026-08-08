@@ -531,27 +531,32 @@ const Header = () => {
               >
                 <div className="flex flex-col h-[95vh] max-h-[95dvh]">
                   <div className="flex items-center justify-between p-5 border-b border-border">
-                    <h2 className="text-xl font-black tracking-tight">Цэс</h2>
+                    <h2 className="text-xl font-black tracking-tight">{user ? "Профайл" : "Цэс"}</h2>
                     <button onClick={() => setShowMenu(false)} className="p-2 rounded-full hover:bg-secondary">
                       <X className="h-5 w-5" />
                     </button>
                   </div>
 
                   <div className="flex-1 overflow-y-auto p-4 pb-32 scrollbar-hide overscroll-contain">
-                    <div className="flex bg-secondary/30 rounded-xl p-1 mb-6 sticky top-0 z-10 backdrop-blur-md">
-                      <button 
-                        onClick={() => setActiveMenuTab("cats")}
-                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all ${activeMenuTab === 'cats' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
-                      >
-                        <Layers className="h-4 w-4" /> Ангилал
-                      </button>
-                      <button 
-                        onClick={() => setActiveMenuTab("brands")}
-                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all ${activeMenuTab === 'brands' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
-                      >
-                        <Store className="h-4 w-4" /> Брэндүүд
-                      </button>
-                    </div>
+                    {/* Only show categories/brands tabs if user is NOT logged in, 
+                        or if we want to keep them as secondary options. 
+                        Let's move them after the profile if logged in. */}
+                    {!user && (
+                      <div className="flex bg-secondary/30 rounded-xl p-1 mb-6 sticky top-0 z-10 backdrop-blur-md">
+                        <button 
+                          onClick={() => setActiveMenuTab("cats")}
+                          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all ${activeMenuTab === 'cats' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
+                        >
+                          <Layers className="h-4 w-4" /> Ангилал
+                        </button>
+                        <button 
+                          onClick={() => setActiveMenuTab("brands")}
+                          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all ${activeMenuTab === 'brands' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
+                        >
+                          <Store className="h-4 w-4" /> Брэндүүд
+                        </button>
+                      </div>
+                    )}
 
                     {activeMenuTab === "cats" ? (
                       <div className="space-y-6 mb-8">
