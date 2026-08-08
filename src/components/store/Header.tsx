@@ -632,7 +632,7 @@ const Header = () => {
                             className="w-full flex items-center gap-3 p-4 rounded-xl text-destructive hover:bg-destructive/10 transition-colors"
                           >
                             <LogOut className="h-5 w-5" />
-                            <span className="text-sm font-medium">Гарах</span>
+                            <span className="text-base font-medium">Гарах</span>
                           </button>
                         </div>
                       </div>
