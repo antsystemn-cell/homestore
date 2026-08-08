@@ -52,7 +52,7 @@ const UserDetailsPage = () => {
 
     try {
       const { error } = await supabase
-        .from("user_addresses")
+        .from("user_addresses" as any)
         .insert([{ ...newAddress, user_id: user?.id }]);
       
       if (error) throw error;
@@ -69,7 +69,7 @@ const UserDetailsPage = () => {
   const handleDeleteAddress = async (id: string) => {
     try {
       const { error } = await supabase
-        .from("user_addresses")
+        .from("user_addresses" as any)
         .delete()
         .eq("id", id);
       
@@ -84,8 +84,8 @@ const UserDetailsPage = () => {
   const handleSetDefault = async (id: string) => {
     try {
       const { error } = await supabase
-        .from("user_addresses")
-        .update({ is_default: true })
+        .from("user_addresses" as any)
+        .update({ is_default: true } as any)
         .eq("id", id);
       
       if (error) throw error;
