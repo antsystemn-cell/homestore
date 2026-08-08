@@ -883,6 +883,12 @@ const CheckoutPage = () => {
                   </div>
                 )}
 
+                {isViewingExistingOrder && (
+                  <div className="border-t border-border pt-2">
+                    <p className="text-xs text-muted-foreground">Захиалга баталгаажуулах хугацаа: {new Date(existingOrderData.created_at).toLocaleDateString()}</p>
+                  </div>
+                )}
+
                 {!isGuestCheckout && (
                   <WalletCreditsSection
                     subtotal={checkoutSubtotal}
