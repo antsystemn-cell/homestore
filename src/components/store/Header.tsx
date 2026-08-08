@@ -507,12 +507,13 @@ const Header = () => {
           <div className="flex md:hidden items-center gap-1">
             <button 
               onClick={() => {
-                setActiveMenuTab("cats"); // Default to categories for this toggle
+                // If user is logged out, show the auth drawer options immediately
+                // If logged in, we want them to see their profile info
                 setShowMenu(true);
               }}
               className="p-2 rounded-full hover:bg-secondary transition-colors"
             >
-               <Menu className="h-6 w-6" />
+               <User className="h-6 w-6" />
             </button>
           </div>
 
@@ -530,74 +531,107 @@ const Header = () => {
               >
                 <div className="flex flex-col h-[95vh] max-h-[95dvh]">
                   <div className="flex items-center justify-between p-5 border-b border-border">
-                    <h2 className="text-xl font-black tracking-tight">Цэс</h2>
+                    <h2 className="text-xl font-black tracking-tight">{user ? "Профайл" : "Цэс"}</h2>
                     <button onClick={() => setShowMenu(false)} className="p-2 rounded-full hover:bg-secondary">
                       <X className="h-5 w-5" />
                     </button>
                   </div>
 
                   <div className="flex-1 overflow-y-auto p-4 pb-32 scrollbar-hide overscroll-contain">
-                    <div className="flex bg-secondary/30 rounded-xl p-1 mb-6 sticky top-0 z-10 backdrop-blur-md">
-                      <button 
-                        onClick={() => setActiveMenuTab("cats")}
-                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all ${activeMenuTab === 'cats' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
-                      >
-                        <Layers className="h-4 w-4" /> Ангилал
-                      </button>
-                      <button 
-                        onClick={() => setActiveMenuTab("brands")}
-                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all ${activeMenuTab === 'brands' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
-                      >
-                        <Store className="h-4 w-4" /> Брэндүүд
-                      </button>
-                    </div>
-
-                    {activeMenuTab === "cats" ? (
-                      <div className="space-y-6 mb-8">
-                        {categories.filter(c => !c.parent_id).map(parent => (
-                          <div key={parent.id} className="space-y-3">
-                            <button 
-                              onClick={() => { navigate(`/category/${parent.slug}`); setShowMenu(false); }}
-                              className="text-base font-bold text-foreground flex items-center gap-3 py-1"
-                            >
-                              {parent.icon && (() => {
-                                const Icon = (Icons as any)[parent.icon] || LayoutGrid;
-                                return <Icon className="h-4 w-4 text-primary" />;
-                              })()}
-                              {parent.name}
-                            </button>
-                            <div className="grid grid-cols-2 gap-2 pl-6">
-                              {categories.filter(c => c.parent_id === parent.id).map(child => (
-                                <button 
-                                  key={child.id}
-                                  onClick={() => { navigate(`/category/${child.slug}`); setShowMenu(false); }}
-                                  className="text-left py-2 text-sm text-muted-foreground hover:text-foreground"
-                                >
-                                  {child.name}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-3 gap-3 mb-8">
-                        {brands.map(b => (
-                          <button 
-                            key={b.id}
-                            onClick={() => { navigate(`/${b.name.replace(/\s+/g, '')}`); setShowMenu(false); }}
-                            className="flex flex-col items-center gap-2 p-2 rounded-xl border border-border bg-card shadow-sm"
-                          >
-                            <div className="h-10 w-10 flex items-center justify-center overflow-hidden">
-                              {b.logo_url ? <img src={b.logo_url} alt="" className="h-full w-full object-contain" /> : <Store className="h-4 w-4 text-muted-foreground" />}
-                            </div>
-                            <span className="text-[10px] font-bold text-center truncate w-full">{b.name}</span>
-                          </button>
-                        ))}
+                    {/* Only show categories/brands tabs if user is NOT logged in, 
+                        or if we want to keep them as secondary options. 
+                        Let's move them after the profile if logged in. */}
+                    {!user && (
+                      <div className="flex bg-secondary/30 rounded-xl p-1 mb-6 sticky top-0 z-10 backdrop-blur-md">
+                        <button 
+                          onClick={() => setActiveMenuTab("cats")}
+                          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all ${activeMenuTab === 'cats' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
+                        >
+                          <Layers className="h-4 w-4" /> Ангилал
+                        </button>
+                        <button 
+                          onClick={() => setActiveMenuTab("brands")}
+                          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all ${activeMenuTab === 'brands' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
+                        >
+                          <Store className="h-4 w-4" /> Брэндүүд
+                        </button>
                       </div>
                     )}
 
-                    <div className="h-px bg-border my-6" />
+                    {!user ? (
+                      activeMenuTab === "cats" ? (
+                        <div className="space-y-6 mb-8">
+                          {categories.filter(c => !c.parent_id).map(parent => (
+                            <div key={parent.id} className="space-y-3">
+                              <button 
+                                onClick={() => { navigate(`/category/${parent.slug}`); setShowMenu(false); }}
+                                className="text-base font-bold text-foreground flex items-center gap-3 py-1"
+                              >
+                                {parent.icon && (() => {
+                                  const Icon = (Icons as any)[parent.icon] || LayoutGrid;
+                                  return <Icon className="h-4 w-4 text-primary" />;
+                                })()}
+                                {parent.name}
+                              </button>
+                              <div className="grid grid-cols-2 gap-2 pl-6">
+                                {categories.filter(c => c.parent_id === parent.id).map(child => (
+                                  <button 
+                                    key={child.id}
+                                    onClick={() => { navigate(`/category/${child.slug}`); setShowMenu(false); }}
+                                    className="text-left py-2 text-sm text-muted-foreground hover:text-foreground"
+                                  >
+                                    {child.name}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-3 gap-3 mb-8">
+                          {brands.map(b => (
+                            <button 
+                              key={b.id}
+                              onClick={() => { navigate(`/${b.name.replace(/\s+/g, '')}`); setShowMenu(false); }}
+                              className="flex flex-col items-center gap-2 p-2 rounded-xl border border-border bg-card shadow-sm"
+                            >
+                              <div className="h-10 w-10 flex items-center justify-center overflow-hidden">
+                                {b.logo_url ? <img src={b.logo_url} alt="" className="h-full w-full object-contain" /> : <Store className="h-4 w-4 text-muted-foreground" />}
+                              </div>
+                              <span className="text-[10px] font-bold text-center truncate w-full">{b.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )
+                    ) : null}
+
+                    {/* Show categories section at bottom if user IS logged in */}
+                    {user && (
+                      <div className="mt-10 mb-6">
+                        <div className="flex items-center gap-2 mb-4 px-1">
+                          <LayoutGrid className="h-4 w-4 text-muted-foreground" />
+                          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Дэлгүүр хэсэх</h3>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <button 
+                            onClick={() => { setActiveMenuTab("cats"); navigate("/"); setShowMenu(false); }}
+                            className="flex items-center gap-3 p-4 rounded-2xl bg-secondary/30 border border-border/50 text-sm font-bold"
+                          >
+                            <Layers className="h-4 w-4 text-primary" />
+                            Ангилал
+                          </button>
+                          <button 
+                            onClick={() => { setActiveMenuTab("brands"); navigate("/"); setShowMenu(false); }}
+                            className="flex items-center gap-3 p-4 rounded-2xl bg-secondary/30 border border-border/50 text-sm font-bold"
+                          >
+                            <Store className="h-4 w-4 text-primary" />
+                            Брэндүүд
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {!user && <div className="h-px bg-border my-6" />}
 
                     {user ? (
                       <div className="space-y-2">
