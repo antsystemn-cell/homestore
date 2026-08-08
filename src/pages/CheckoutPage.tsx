@@ -203,36 +203,50 @@ const CheckoutPage = () => {
   const selectedDeliveryOption = deliveryOptions.find(d => d.id === selectedDelivery);
   const deliveryFee = selectedDeliveryOption?.price || 0;
 
-  // Extra 8,000₮ delivery surcharge: if cart total < 50,000₮ OR cart has any sale items
-  const hasSaleItems = items.some(item => item.product.isOnSale || (item.product.discount && item.product.discount > 0));
-  // Flash sale = any sale item OR BOGO. Wallet credits are blocked in this case.
-  const hasFlashSaleItems = items.some(item => item.product.isOnSale || item.product.isBogo || (item.product.discount && item.product.discount > 0));
-  const { eligible: bundleFree } = useBundleFreeDelivery(cartTotal, items.length);
-  const productFree = hasFreeDeliveryProduct(items);
-  const surcharge = (bundleFree || productFree) ? 0 : ((cartTotal < 50000 || hasSaleItems) ? 8000 : 0);
-  const totalDeliveryFee = deliveryFee + surcharge;
+  // Use cart data or existing order data
+  const checkoutItems = isViewingExistingOrder && existingOrderData?.items ? existingOrderData.items.map((it: any) => ({
+    product: {
+      id: it.product_id,
+      name: it.name,
+      price: it.price,
+      image: it.image || "/placeholder.svg",
+    },
+    quantity: it.quantity,
+    selectedColor: it.color,
+    selectedSize: it.size,
+  })) : items;
 
-  // Sum discount of selected coupons (only those whose min_order ≤ cartTotal).
-  // Mutual exclusion: if a wallet credit is selected, ignore stacked coupons
-  // entirely to prevent any double-application of promotions.
-  // Welcome bonus cannot be used together with any sale items.
+  const checkoutSubtotal = isViewingExistingOrder ? 
+    (checkoutItems.reduce((sum: number, it: any) => sum + (it.product.price * it.quantity), 0)) : 
+    cartTotal;
+
+  // Extra 8,000₮ delivery surcharge
+  const hasSaleItems = checkoutItems.some((item: any) => item.product.isOnSale || (item.product.discount && item.product.discount > 0));
+  const hasFlashSaleItems = checkoutItems.some((item: any) => item.product.isOnSale || item.product.isBogo || (item.product.discount && item.product.discount > 0));
+  
+  const { eligible: bundleFree } = useBundleFreeDelivery(checkoutSubtotal, checkoutItems.length);
+  const productFree = hasFreeDeliveryProduct(checkoutItems);
+  const surcharge = (bundleFree || productFree) ? 0 : ((checkoutSubtotal < 50000 || hasSaleItems) ? 8000 : 0);
+  const totalDeliveryFee = isViewingExistingOrder ? (Number(existingOrderData.delivery_fee) || 0) : (deliveryFee + surcharge);
+
+  // Discounts
   const welcomeBlocked = hasSaleItems && walletCredit?.credit_type === "welcome";
   const walletActive = !hasFlashSaleItems && !welcomeBlocked && !!walletCreditId && walletCreditDiscount > 0;
   const validSelectedCoupons = walletActive ? [] : availableCoupons.filter(
-    (c) => selectedCouponIds.includes(c.id) && (!c.minimum_order_amount || cartTotal >= Number(c.minimum_order_amount))
+    (c) => selectedCouponIds.includes(c.id) && (!c.minimum_order_amount || checkoutSubtotal >= Number(c.minimum_order_amount))
   );
   const rawCouponDiscount = validSelectedCoupons.reduce((s, c) => s + Number(c.reward_value || 0), 0);
-  const couponDiscount = Math.max(0, Math.min(rawCouponDiscount, cartTotal));
+  const couponDiscount = isViewingExistingOrder ? 0 : Math.max(0, Math.min(rawCouponDiscount, checkoutSubtotal));
 
-  // Wallet credit discount (only applies when no flash sale items and not a blocked welcome)
   const effectiveWalletDiscount = (hasFlashSaleItems || welcomeBlocked) ? 0 : walletCreditDiscount;
 
-  // Loyalty points discount (1 point = 1₮)
-  const totalBeforePoints = Math.max(0, cartTotal + totalDeliveryFee - couponDiscount - effectiveWalletDiscount);
+  const totalBeforePoints = isViewingExistingOrder ? 
+    (Number(existingOrderData.total) || 0) : 
+    Math.max(0, checkoutSubtotal + totalDeliveryFee - couponDiscount - effectiveWalletDiscount);
 
   const maxRedeemable = Math.max(0, Math.min(loyaltyPoints, totalBeforePoints));
   const pointsDiscount = usePoints ? Math.max(0, Math.min(pointsInput || 0, maxRedeemable)) : 0;
-  const grandTotal = Math.max(0, totalBeforePoints - pointsDiscount);
+  const grandTotal = isViewingExistingOrder ? totalBeforePoints : Math.max(0, totalBeforePoints - pointsDiscount);
 
   const createOrder = async (paymentStatus = "unpaid", pm: PaymentMethod = "cash") => {
     if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return null; }
