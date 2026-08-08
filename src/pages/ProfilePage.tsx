@@ -94,11 +94,11 @@ const ProfilePage = () => {
 
   const menuItems = [
     
-    { label: "Захиалгууд", desc: "Миний бүх захиалгууд", icon: ShoppingBag, onClick: () => {} },
+    { label: "Захиалгууд", desc: "Миний бүх захиалгууд", icon: ShoppingBag, onClick: () => navigate("/orders") },
     { label: "Таалагдсан", desc: "Хадгалсан бараанууд", icon: Heart, onClick: () => navigate("/wishlist") },
-    { label: "Хаяг", desc: "Хүргэлтийн хаяг", icon: MapPin, onClick: () => {} },
-    { label: "Утасны дугаар", desc: "Холбоо барих мэдээлэл", icon: Phone, onClick: () => {} },
-    { label: "Тохиргоо", desc: "Аккаунт тохиргоо", icon: Settings, onClick: () => {} },
+    { label: "Хаяг", desc: "Хүргэлтийн хаяг", icon: MapPin, onClick: () => navigate("/profile/address") },
+    { label: "Утасны дугаар", desc: "Холбоо барих мэдээлэл", icon: Phone, onClick: () => navigate("/profile/phone") },
+    { label: "Тохиргоо", desc: "Аккаунт тохиргоо", icon: Settings, onClick: () => navigate("/profile/settings") },
     ...((isAdmin || isModerator) ? [{ label: "Админ удирдлага", desc: "Дэлгүүр удирдах", icon: Shield, onClick: () => navigate("/admin") }] : []),
   ];
 
