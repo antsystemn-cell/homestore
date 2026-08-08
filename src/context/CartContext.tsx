@@ -128,13 +128,68 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
           const localCart = loadCartFromStorage();
           if (localCart.length > 0) {
-            // Logic: Local cart is currently synced via the sync effect.
-            // When user logs in, we want to ensure their local cart is merged/saved to DB.
-            // The existing `useEffect` sync timer will handle upserting local items to DB.
+            // Rule: When merging local guest cart with DB cart:
+            // 1. If local cart has items, we assume the user wants these to be primary.
+            // 2. The syncTimer effect will automatically upsert the current 'items' state to DB.
+            // 3. To strictly 'merge' (combine) rather than 'overwrite' (sync current state):
+            //    We check if DB has items that are NOT in the local state and add them.
+            
+            if (dbCart?.items && Array.isArray(dbCart.items)) {
+              setItems(prevItems => {
+                const merged = [...prevItems];
+                dbCart.items.forEach((dbItem: any) => {
+                  const localIndex = merged.findIndex(li => 
+                    li.product.id === dbItem.product_id && 
+                    li.selectedColor === dbItem.color && 
+                    li.selectedSize === dbItem.size
+                  );
+                  
+                  if (localIndex > -1) {
+                    // Rule: If item exists in both, we can either sum quantity or prefer local.
+                    // For now, let's sum them to ensure no data is lost.
+                    merged[localIndex] = {
+                      ...merged[localIndex],
+                      quantity: merged[localIndex].quantity + (dbItem.quantity || 1)
+                    };
+                  } else {
+                    // Item in DB but not local. 
+                    // Note: Since DB stores 'slim' product data, we use that as a placeholder
+                    // or ideally fetch full product details. Since we have the ID, 
+                    // we'll at least preserve the entry.
+                    merged.push({
+                      product: { 
+                        id: dbItem.product_id, 
+                        name: dbItem.product?.name || 'Product', 
+                        price: dbItem.product?.price || 0,
+                        image: '/placeholder.svg',
+                        category: ''
+                      } as any,
+                      quantity: dbItem.quantity || 1,
+                      selectedColor: dbItem.color,
+                      selectedSize: dbItem.size
+                    });
+                  }
+                });
+                return merged;
+              });
+            }
           } else if (dbCart?.items && Array.isArray(dbCart.items)) {
-            // If local cart is empty, try to restore from DB
-            // (Requires product detail hydration - left for future refinement if needed)
+            // If local cart is empty, restore from DB
+            const restored = dbCart.items.map((dbItem: any) => ({
+              product: { 
+                id: dbItem.product_id, 
+                name: dbItem.product?.name || 'Product', 
+                price: dbItem.product?.price || 0,
+                image: '/placeholder.svg',
+                category: ''
+              } as any,
+              quantity: dbItem.quantity || 1,
+              selectedColor: dbItem.color,
+              selectedSize: dbItem.size
+            }));
+            setItems(restored);
           }
+
 
 
           // 2. Wishlist Merge (Logic: persist local wishlist to DB if we had a table, 
