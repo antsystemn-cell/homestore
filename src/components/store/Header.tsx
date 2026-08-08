@@ -605,33 +605,8 @@ const Header = () => {
                       )
                     ) : null}
 
-                    {/* Show categories section at bottom if user IS logged in */}
-                    {user && (
-                      <div className="mt-10 mb-6">
-                        <div className="flex items-center gap-2 mb-4 px-1">
-                          <LayoutGrid className="h-4 w-4 text-muted-foreground" />
-                          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Дэлгүүр хэсэх</h3>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <button 
-                            onClick={() => { setActiveMenuTab("cats"); navigate("/"); setShowMenu(false); }}
-                            className="flex items-center gap-3 p-4 rounded-2xl bg-secondary/30 border border-border/50 text-sm font-bold"
-                          >
-                            <Layers className="h-4 w-4 text-primary" />
-                            Ангилал
-                          </button>
-                          <button 
-                            onClick={() => { setActiveMenuTab("brands"); navigate("/"); setShowMenu(false); }}
-                            className="flex items-center gap-3 p-4 rounded-2xl bg-secondary/30 border border-border/50 text-sm font-bold"
-                          >
-                            <Store className="h-4 w-4 text-primary" />
-                            Брэндүүд
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
                     {!user && <div className="h-px bg-border my-6" />}
+
 
                     {user ? (
                       <div className="space-y-2">
@@ -678,7 +653,32 @@ const Header = () => {
                             <span className="text-base font-medium">Гарах</span>
                           </button>
                         </div>
+
+                        {/* Shop navigation below profile */}
+                        <div className="mt-8">
+                          <div className="flex items-center gap-2 mb-4 px-1">
+                            <LayoutGrid className="h-4 w-4 text-muted-foreground" />
+                            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Дэлгүүр хэсэх</h3>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <button 
+                              onClick={() => { setActiveMenuTab("cats"); navigate("/"); setShowMenu(false); }}
+                              className="flex items-center gap-3 p-4 rounded-2xl bg-secondary/30 border border-border/50 text-sm font-bold"
+                            >
+                              <Layers className="h-4 w-4 text-primary" />
+                              Ангилал
+                            </button>
+                            <button 
+                              onClick={() => { setActiveMenuTab("brands"); navigate("/"); setShowMenu(false); }}
+                              className="flex items-center gap-3 p-4 rounded-2xl bg-secondary/30 border border-border/50 text-sm font-bold"
+                            >
+                              <Store className="h-4 w-4 text-primary" />
+                              Брэндүүд
+                            </button>
+                          </div>
+                        </div>
                       </div>
+
                     ) : (
                       <div className="flex flex-col items-center justify-center py-10 text-center px-4">
                         <div className="h-16 w-16 rounded-full bg-secondary flex items-center justify-center mb-4">
