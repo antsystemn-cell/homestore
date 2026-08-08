@@ -885,7 +885,7 @@ const CheckoutPage = () => {
 
                 {!isGuestCheckout && (
                   <WalletCreditsSection
-                    subtotal={cartTotal}
+                    subtotal={checkoutSubtotal}
                     hasFlashSaleItems={hasFlashSaleItems}
                     hasSaleItems={hasSaleItems}
                     selectedCreditId={walletCreditId}
