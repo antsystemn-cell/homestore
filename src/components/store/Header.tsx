@@ -558,52 +558,80 @@ const Header = () => {
                       </div>
                     )}
 
-                    {activeMenuTab === "cats" ? (
-                      <div className="space-y-6 mb-8">
-                        {categories.filter(c => !c.parent_id).map(parent => (
-                          <div key={parent.id} className="space-y-3">
+                    {!user ? (
+                      activeMenuTab === "cats" ? (
+                        <div className="space-y-6 mb-8">
+                          {categories.filter(c => !c.parent_id).map(parent => (
+                            <div key={parent.id} className="space-y-3">
+                              <button 
+                                onClick={() => { navigate(`/category/${parent.slug}`); setShowMenu(false); }}
+                                className="text-base font-bold text-foreground flex items-center gap-3 py-1"
+                              >
+                                {parent.icon && (() => {
+                                  const Icon = (Icons as any)[parent.icon] || LayoutGrid;
+                                  return <Icon className="h-4 w-4 text-primary" />;
+                                })()}
+                                {parent.name}
+                              </button>
+                              <div className="grid grid-cols-2 gap-2 pl-6">
+                                {categories.filter(c => c.parent_id === parent.id).map(child => (
+                                  <button 
+                                    key={child.id}
+                                    onClick={() => { navigate(`/category/${child.slug}`); setShowMenu(false); }}
+                                    className="text-left py-2 text-sm text-muted-foreground hover:text-foreground"
+                                  >
+                                    {child.name}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-3 gap-3 mb-8">
+                          {brands.map(b => (
                             <button 
-                              onClick={() => { navigate(`/category/${parent.slug}`); setShowMenu(false); }}
-                              className="text-base font-bold text-foreground flex items-center gap-3 py-1"
+                              key={b.id}
+                              onClick={() => { navigate(`/${b.name.replace(/\s+/g, '')}`); setShowMenu(false); }}
+                              className="flex flex-col items-center gap-2 p-2 rounded-xl border border-border bg-card shadow-sm"
                             >
-                              {parent.icon && (() => {
-                                const Icon = (Icons as any)[parent.icon] || LayoutGrid;
-                                return <Icon className="h-4 w-4 text-primary" />;
-                              })()}
-                              {parent.name}
+                              <div className="h-10 w-10 flex items-center justify-center overflow-hidden">
+                                {b.logo_url ? <img src={b.logo_url} alt="" className="h-full w-full object-contain" /> : <Store className="h-4 w-4 text-muted-foreground" />}
+                              </div>
+                              <span className="text-[10px] font-bold text-center truncate w-full">{b.name}</span>
                             </button>
-                            <div className="grid grid-cols-2 gap-2 pl-6">
-                              {categories.filter(c => c.parent_id === parent.id).map(child => (
-                                <button 
-                                  key={child.id}
-                                  onClick={() => { navigate(`/category/${child.slug}`); setShowMenu(false); }}
-                                  className="text-left py-2 text-sm text-muted-foreground hover:text-foreground"
-                                >
-                                  {child.name}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-3 gap-3 mb-8">
-                        {brands.map(b => (
+                          ))}
+                        </div>
+                      )
+                    ) : null}
+
+                    {/* Show categories section at bottom if user IS logged in */}
+                    {user && (
+                      <div className="mt-10 mb-6">
+                        <div className="flex items-center gap-2 mb-4 px-1">
+                          <LayoutGrid className="h-4 w-4 text-muted-foreground" />
+                          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Дэлгүүр хэсэх</h3>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
                           <button 
-                            key={b.id}
-                            onClick={() => { navigate(`/${b.name.replace(/\s+/g, '')}`); setShowMenu(false); }}
-                            className="flex flex-col items-center gap-2 p-2 rounded-xl border border-border bg-card shadow-sm"
+                            onClick={() => { setActiveMenuTab("cats"); navigate("/"); setShowMenu(false); }}
+                            className="flex items-center gap-3 p-4 rounded-2xl bg-secondary/30 border border-border/50 text-sm font-bold"
                           >
-                            <div className="h-10 w-10 flex items-center justify-center overflow-hidden">
-                              {b.logo_url ? <img src={b.logo_url} alt="" className="h-full w-full object-contain" /> : <Store className="h-4 w-4 text-muted-foreground" />}
-                            </div>
-                            <span className="text-[10px] font-bold text-center truncate w-full">{b.name}</span>
+                            <Layers className="h-4 w-4 text-primary" />
+                            Ангилал
                           </button>
-                        ))}
+                          <button 
+                            onClick={() => { setActiveMenuTab("brands"); navigate("/"); setShowMenu(false); }}
+                            className="flex items-center gap-3 p-4 rounded-2xl bg-secondary/30 border border-border/50 text-sm font-bold"
+                          >
+                            <Store className="h-4 w-4 text-primary" />
+                            Брэндүүд
+                          </button>
+                        </div>
                       </div>
                     )}
 
-                    <div className="h-px bg-border my-6" />
+                    {!user && <div className="h-px bg-border my-6" />}
 
                     {user ? (
                       <div className="space-y-2">
