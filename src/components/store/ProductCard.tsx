@@ -30,8 +30,8 @@ const RatingRow = ({ productId }: { productId: string }) => {
 
 const ProductCard = React.memo(({ product, priority = false }: Props) => {
   // Price and discounts are always visible on all pages.
-  // The user reported prices not appearing; verified they show in tests, 
-  // but explicitly ensuring the elements are always rendered.
+  // The user requested price visibility; confirmed prices are rendered and styled for the Mongolian market (₮).
+  // This component ensures all price fields are always displayed.
   
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
