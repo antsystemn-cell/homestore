@@ -548,7 +548,7 @@ const Header = () => {
                           <div key={parent.id} className="space-y-3">
                             <button 
                               onClick={() => { navigate(`/category/${parent.slug}`); setShowMenu(false); }}
-                              className="text-sm font-bold text-foreground flex items-center gap-2"
+                              className="text-base font-bold text-foreground flex items-center gap-3 py-1"
                             >
                               {parent.icon && (() => {
                                 const Icon = (Icons as any)[parent.icon] || LayoutGrid;
