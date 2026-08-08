@@ -76,6 +76,42 @@ const CheckoutPage = () => {
 
   // Track checkout start once
   useEffect(() => {
+    if (externalOrderId) {
+      const fetchExisting = async () => {
+        setLoadingExisting(true);
+        try {
+          const { data, error } = await supabase
+            .from("orders")
+            .select("*")
+            .eq("id", externalOrderId)
+            .maybeSingle();
+          
+          if (error) throw error;
+          if (data) {
+            setExistingOrderData(data);
+            setIsViewingViewingExistingOrder(true);
+            setOrderId(data.id);
+            setOrderRef(data.order_ref);
+            setPhone(data.phone || "");
+            setAddress(data.shipping_address || "");
+            setPaymentMethod(data.payment_method as PaymentMethod || "qpay");
+            
+            // If already paid, show success
+            if (data.payment_status === "paid" || data.status === "completed") {
+              setOrdered(true);
+            }
+          }
+        } catch (err) {
+          console.error("Error fetching existing order:", err);
+        } finally {
+          setLoadingExisting(false);
+        }
+      };
+      fetchExisting();
+    }
+  }, [externalOrderId]);
+
+  useEffect(() => {
     if (items.length > 0) {
       track("checkout_start", { value: cartTotal, metadata: { items: items.length } });
     }
