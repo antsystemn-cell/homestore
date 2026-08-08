@@ -25,19 +25,46 @@ const buildUrl = (path: string, params: Record<string, string | number | boolean
   return url.toString();
 };
 
-async function fetchPublic<T>(path: string, params: Record<string, string | number | boolean | undefined>) {
-  const response = await withTimeout(
-    fetch(buildUrl(path, params), {
-      headers: DEFAULT_HEADERS,
-      cache: "no-store",
-    })
-  );
+async function fetchPublic<T>(path: string, params: Record<string, string | number | boolean | undefined>, retries = 2) {
+  let lastError: any;
+  
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const response = await withTimeout(
+        fetch(buildUrl(path, params), {
+          headers: DEFAULT_HEADERS,
+          cache: "no-store",
+        })
+      );
 
-  if (!response.ok) {
-    throw new Error(`Public API request failed: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`Public API request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // If we're fetching products, verify they have valid prices
+      if (path === "products" && Array.isArray(data)) {
+        const missingPrices = data.some(p => p.price === undefined || p.price === null || p.price <= 0);
+        if (missingPrices && i < retries) {
+          console.warn(`Data detected with missing prices on attempt ${i + 1}, retrying...`);
+          await new Promise(r => setTimeout(r, 1000 * (i + 1))); // exponential backoff
+          continue;
+        }
+      }
+      
+      return data as T;
+    } catch (err) {
+      lastError = err;
+      if (i < retries) {
+        console.warn(`Request failed on attempt ${i + 1}, retrying...`, err);
+        await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+        continue;
+      }
+    }
   }
 
-  return (await response.json()) as T;
+  throw lastError;
 }
 
 const logError = (scope: string, error: unknown) => {
