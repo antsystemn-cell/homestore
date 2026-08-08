@@ -775,7 +775,7 @@ const CheckoutPage = () => {
             )}
 
             {/* Sono Payment Flow */}
-            {paymentMethod === "sono" && orderId && (
+            {paymentMethod === "sono" && (orderId || isViewingExistingOrder) && (
               <SonoPayment
                 orderId={orderId}
                 amount={grandTotal}
