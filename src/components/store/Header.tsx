@@ -481,12 +481,16 @@ const Header = () => {
           <div className="hidden md:flex items-center gap-2">
             <NotificationsBell />
             <button 
-              onClick={() => navigate("/profile")}
+              onClick={() => {
+                setActiveMenuTab("cats"); // Reuse state to avoid issues
+                setShowMenu(true);
+              }}
               className="p-2 rounded-full hover:bg-secondary transition-colors"
               title="Профайл"
             >
               <User className="h-5 w-5" />
             </button>
+
           </div>
 
           {/* Mobile Profile Toggle */}
