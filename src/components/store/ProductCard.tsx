@@ -35,9 +35,12 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const flashSale = useFlashSaleFor(product.id);
   
   const colors = product.colors;
-  const firstColorPrice = colors?.[0]?.price;
-  
-  const basePrice = Number(firstColorPrice ?? product.price ?? 0);
+  const firstValidColorPrice = colors
+    ?.map((color) => Number(color.price))
+    .find((price) => Number.isFinite(price) && price > 0);
+
+  const productPrice = Number(product.price);
+  const basePrice = firstValidColorPrice ?? (Number.isFinite(productPrice) ? productPrice : 0);
   const baseOriginal = product.originalPrice ? Number(product.originalPrice) : null;
   
   const displayPrice = flashSale ? Number(flashSale.sale_price) : basePrice;
@@ -273,11 +276,11 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
 
         {/* Color swatches disabled on cards — colors chosen on product detail page */}
       </div>
-      <div className="px-3 py-3 md:px-4 md:py-3 flex flex-col h-full">
+      <div className="px-3 py-3 md:px-4 md:py-3 flex flex-col">
         {product.brandName && (
           <p className="text-[10px] text-primary font-bold uppercase tracking-wider mb-1">{product.brandName}</p>
         )}
-        <h3 className="text-sm md:text-sm text-foreground line-clamp-2 leading-snug font-medium min-h-[2.6em] flex-grow">
+        <h3 className="text-sm md:text-sm text-foreground line-clamp-2 leading-snug font-medium min-h-[2.6em]">
           {product.name}
         </h3>
         <RatingRow productId={product.id} />
