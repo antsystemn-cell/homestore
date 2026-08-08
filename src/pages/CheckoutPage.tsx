@@ -66,6 +66,11 @@ const CheckoutPage = () => {
   const [loyaltyPoints, setLoyaltyPoints] = useState<number>(0);
   const [usePoints, setUsePoints] = useState<boolean>(false);
   const [pointsInput, setPointsInput] = useState<number>(0);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [applyingPromo, setApplyingPromo] = useState(false);
+  const [userAddresses, setUserAddresses] = useState<any[]>([]);
+  const [loadingUserAddresses, setLoadingUserAddresses] = useState(false);
 
   // Redirect unauthenticated non-guest users
   useEffect(() => {
@@ -147,7 +152,69 @@ const CheckoutPage = () => {
     };
     fetchDelivery();
     fetchProviderLogos();
-  }, []);
+    fetchUserAddresses();
+  }, [user]);
+
+  const fetchUserAddresses = async () => {
+    if (!user) return;
+    setLoadingUserAddresses(true);
+    try {
+      const { data } = await supabase
+        .from("user_addresses" as any)
+        .select("*")
+        .order("is_default", { ascending: false });
+      setUserAddresses(data || []);
+      // Auto-select default address if present
+      const def = (data as any[])?.find(a => a.is_default);
+      if (def) {
+        setAddress(`${def.district}, ${def.khoroo ? def.khoroo + "-р хороо, " : ""}${def.detail}`);
+      }
+    } catch (err) {
+      console.error("Error fetching user addresses:", err);
+    } finally {
+      setLoadingUserAddresses(false);
+    }
+  };
+
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) return;
+    setApplyingPromo(true);
+    try {
+      const { data, error } = await supabase
+        .from("promo_codes" as any)
+        .select("*")
+        .eq("code", promoCode.toUpperCase())
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (error || !data) {
+        toast.error("Промо код хүчингүй байна");
+        setPromoDiscount(0);
+        return;
+      }
+
+      const promo = data as any;
+
+      if (promo.min_order_amount && checkoutSubtotal < Number(promo.min_order_amount)) {
+        toast.error(`Энэ код ${formatPrice(promo.min_order_amount)}-с дээш захиалгад хүчинтэй`);
+        return;
+      }
+
+      let discount = 0;
+      if (promo.discount_type === 'percentage') {
+        discount = (checkoutSubtotal * Number(promo.discount_value)) / 100;
+      } else {
+        discount = Number(promo.discount_value);
+      }
+
+      setPromoDiscount(Math.min(discount, checkoutSubtotal));
+      toast.success("Промо код амжилттай ашиглагдлаа");
+    } catch (err) {
+      toast.error("Алдаа гарлаа");
+    } finally {
+      setApplyingPromo(false);
+    }
+  };
 
   // Fetch coupons earned within the last 5 hours (active, unused, not expired).
   // Exclude coupons that are already mirrored into wallet_credits to prevent
@@ -246,7 +313,8 @@ const CheckoutPage = () => {
 
   const maxRedeemable = Math.max(0, Math.min(loyaltyPoints, totalBeforePoints));
   const pointsDiscount = usePoints ? Math.max(0, Math.min(pointsInput || 0, maxRedeemable)) : 0;
-  const grandTotal = isViewingExistingOrder ? totalBeforePoints : Math.max(0, totalBeforePoints - pointsDiscount);
+  const finalPromoDiscount = isViewingExistingOrder ? 0 : promoDiscount;
+  const grandTotal = isViewingExistingOrder ? totalBeforePoints : Math.max(0, totalBeforePoints - pointsDiscount - finalPromoDiscount);
 
   const createOrder = async (paymentStatus = "unpaid", pm: PaymentMethod = "cash") => {
     if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return null; }
@@ -285,6 +353,8 @@ const CheckoutPage = () => {
     } else {
       orderData.user_id = user!.id;
       if (pointsDiscount > 0) orderData.points_redeemed = pointsDiscount;
+      if (finalPromoDiscount > 0) orderData.promo_discount = finalPromoDiscount;
+      if (promoCode) orderData.promo_code = promoCode.toUpperCase();
     }
 
     let data: { id: string; order_ref: string | null } | null = null;

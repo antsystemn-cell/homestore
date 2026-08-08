@@ -63,6 +63,7 @@ const QuickOrderPage = lazy(() => lazyRetry(() => import("./pages/QuickOrderPage
 const AuthCallback = lazy(() => lazyRetry(() => import("./pages/AuthCallback")));
 const UserDetailsPage = lazy(() => lazyRetry(() => import("./pages/UserDetailsPage")));
 const OrderHistoryPage = lazy(() => lazyRetry(() => import("./pages/OrderHistoryPage")));
+const OrderTrackingPage = lazy(() => lazyRetry(() => import("./pages/OrderTrackingPage")));
 
 
 const queryClient = new QueryClient({
@@ -138,6 +139,7 @@ const App = () => {
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/profile/details" element={<UserDetailsPage />} />
                     <Route path="/orders" element={<OrderHistoryPage />} />
+                    <Route path="/track/:id" element={<OrderTrackingPage />} />
                     <Route path="/reels" element={<ReelsPage />} />
                     <Route path="/quick-order" element={<QuickOrderPage />} />
                     {SPIN_ENABLED && <Route path="/spin" element={<SpinPage />} />}
