@@ -106,7 +106,10 @@ const AuthPage = () => {
 
     setLoading(true);
     try {
-      const result = await withTimeout(lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin }));
+      const returnUrl = sessionStorage.getItem("returnAfterAuth");
+      const result = await withTimeout(lovable.auth.signInWithOAuth(provider, { 
+        redirect_uri: `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent(returnUrl || "/")}` 
+      }));
       if (!result) throw new Error("Request timeout");
       if (result && "error" in result && result.error) throw result.error;
     } catch (error) {
