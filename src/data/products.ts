@@ -2,6 +2,7 @@ export interface ProductColor {
   name: string;
   image: string;
   sku?: string;
+  price?: number;
 }
 
 export interface ProductSpec {
@@ -112,7 +113,7 @@ export function mapDbProduct(row: any): Product {
     detailMedia: Array.isArray(row.detail_media) ? row.detail_media : [],
     brand_id: row.brand_id || null,
     brand_position: row.brand_position ?? null,
-    colors: Array.isArray(row.colors) ? row.colors.map((c: any) => typeof c === 'string' ? { name: c, image: '', sku: '' } : { name: c.name || '', image: c.image || '', sku: c.sku || '' }) : [],
+    colors: Array.isArray(row.colors) ? row.colors.map((c: any) => typeof c === 'string' ? { name: c, image: '', sku: '', price: undefined } : { name: c.name || '', image: c.image || '', sku: c.sku || '', price: c.price }) : [],
     sizes: Array.isArray(row.sizes) ? row.sizes : [],
     isBogo: row.is_bogo ?? false,
     hasGift: row.has_gift ?? false,
