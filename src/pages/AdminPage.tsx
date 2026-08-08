@@ -25,6 +25,7 @@ import CouponUsageManager from "@/components/admin/CouponUsageManager";
 import FlashSalesManager from "@/components/admin/FlashSalesManager";
 import ReelsManager from "@/components/admin/ReelsManager";
 import ReportDashboard from "@/components/admin/ReportDashboard";
+import { BrandingSettingsManager } from "@/components/admin/BrandingSettingsManager";
 
 
 
