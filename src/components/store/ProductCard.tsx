@@ -251,7 +251,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
             <Zap className="h-3 w-3 fill-current" />
             -{flashSale.discount_percent}%
           </span>
-        ) : !isHome && displayOriginal != null && displayOriginal > displayPrice ? (
+        ) : displayOriginal != null && displayOriginal > displayPrice ? (
           <span className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded z-10">
             -{Math.round(((displayOriginal - displayPrice) / displayOriginal) * 100)}%
           </span>
