@@ -38,6 +38,14 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const basePrice = Number(firstColorPrice ?? product.price ?? 0);
   const baseOriginal = product.originalPrice ? Number(product.originalPrice) : null;
   
+  // DEBUG LOGGING - REMOVE AFTER FIX VERIFIED
+  if (basePrice <= 0) {
+    console.warn(`[ProductCard] Zero/Null price for product ${product.id} (${product.name}):`, {
+      price: product.price,
+      colors: product.colors
+    });
+  }
+  
   const displayPrice = flashSale ? Number(flashSale.sale_price) : basePrice;
   const displayOriginal = flashSale ? basePrice : baseOriginal;
   
