@@ -743,7 +743,7 @@ const CheckoutPage = () => {
             </div>
 
             {/* Storepay Payment Flow */}
-            {paymentMethod === "storepay" && orderId && (
+            {paymentMethod === "storepay" && (orderId || isViewingExistingOrder) && (
               <StorepayPayment
                 amount={grandTotal}
                 orderId={orderId}
