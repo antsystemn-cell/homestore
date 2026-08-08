@@ -551,10 +551,12 @@ const CheckoutPage = () => {
               {note.length > 0 && (
                 <div className="text-[10px] text-muted-foreground/60 text-right -mt-2">{note.length}/500</div>
               )}
+              )}
             </div>
+          )}
 
-            {/* Delivery Options */}
-            {!loadingDelivery && deliveryOptions.length > 0 && (
+          {/* Delivery Options */}
+          {!isViewingExistingOrder && !loadingDelivery && deliveryOptions.length > 0 && (
               <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-3">
                 <h2 className="font-semibold text-foreground md:text-lg flex items-center gap-2">
                   <Truck className="h-5 w-5 text-primary" />
