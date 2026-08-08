@@ -615,7 +615,7 @@ const Header = () => {
                           className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-secondary transition-colors"
                         >
                           <Package className="h-5 w-5 text-muted-foreground" />
-                          <span className="text-sm font-medium text-foreground">Захиалгын түүх</span>
+                          <span className="text-base font-medium text-foreground">Захиалгын түүх</span>
                         </button>
 
                         <button 
