@@ -131,6 +131,18 @@ const CartPage = () => {
             <div className="md:col-span-1 mt-4 md:mt-0">
               <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-3 md:sticky md:top-20">
                 <h2 className="font-bold text-foreground md:text-lg">Захиалгын дүн</h2>
+                
+                {/* Promo Code Input */}
+                <div className="py-2 border-b border-border/50">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Промо код"
+                      className="flex-1 bg-secondary border-none rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-primary/20"
+                    />
+                    <Button variant="outline" size="sm" className="text-[10px] h-8 rounded-lg">Ашиглах</Button>
+                  </div>
+                </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Нийт дүн</span>
                   <span className="font-bold text-foreground">{formatPrice(cartTotal)}</span>
