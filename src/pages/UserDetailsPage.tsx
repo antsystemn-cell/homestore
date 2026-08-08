@@ -14,6 +14,10 @@ const UserDetailsPage = () => {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [saving, setSaving] = useState(false);
+  const [addresses, setAddresses] = useState<any[]>([]);
+  const [loadingAddresses, setLoadingAddresses] = useState(true);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [newAddress, setNewAddress] = useState({ name: "", district: "", khoroo: "", detail: "", is_default: false });
 
   useEffect(() => {
     if (user) {
