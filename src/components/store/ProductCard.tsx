@@ -34,28 +34,13 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const [activeIdx, setActiveIdx] = useState(0);
   const flashSale = useFlashSaleFor(product.id);
   
-  // Directly use the price values from the product object first
   const basePrice = Number(product.price || 0);
   const baseOriginal = product.originalPrice ? Number(product.originalPrice) : null;
   
-  // Override with flash sale data if available
   const displayPrice = flashSale ? Number(flashSale.sale_price) : basePrice;
   const displayOriginal = flashSale ? basePrice : baseOriginal;
   
-  // A price is valid if it is a number > 0
   const hasValidPrice = displayPrice > 0;
-  
-  // Debug log for checking why prices might be missing in production environment
-  useEffect(() => {
-    if (!hasValidPrice && basePrice <= 0) {
-      console.warn(`[ProductCard] Invalid price for product ${product.id} (${product.name}):`, {
-        displayPrice,
-        basePrice,
-        flashSalePrice: flashSale?.sale_price,
-        productObject: product
-      });
-    }
-  }, [hasValidPrice, basePrice, product.id, product.name, displayPrice, flashSale]);
 
 
 

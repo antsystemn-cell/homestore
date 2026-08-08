@@ -92,7 +92,7 @@ const FeaturedSection = React.memo(({ products }: Props) => {
                 )}
                 <div className="absolute bottom-3 left-3 right-3">
                   <h3 className="text-white text-sm font-semibold line-clamp-1 drop-shadow-md">{p.name}</h3>
-                  <span className="text-white font-bold text-sm drop-shadow-md">{formatPrice(p.price)}</span>
+                  <span className="text-white font-bold text-sm drop-shadow-md">{formatPrice(p.price || 0)}</span>
                 </div>
               </div>
             ))}
