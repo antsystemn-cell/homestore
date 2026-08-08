@@ -520,7 +520,7 @@ const Header = () => {
               >
                 <div className="flex flex-col h-[70vh]">
                   <div className="flex items-center justify-between p-4 border-b border-border">
-                    <h2 className="text-lg font-bold">Профайл</h2>
+                    <h2 className="text-lg font-bold">Профайл / Цэс</h2>
                     <button onClick={() => setShowMenu(false)} className="p-2 rounded-full hover:bg-secondary">
                       <X className="h-5 w-5" />
                     </button>
