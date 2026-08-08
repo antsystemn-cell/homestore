@@ -60,6 +60,7 @@ const AdminSpinPage = lazy(() => lazyRetry(() => import("./pages/AdminSpinPage")
 const MyRewardsPage = lazy(() => lazyRetry(() => import("./pages/MyRewardsPage")));
 const ReelsPage = lazy(() => lazyRetry(() => import("./pages/ReelsPage")));
 const QuickOrderPage = lazy(() => lazyRetry(() => import("./pages/QuickOrderPage")));
+const AuthCallback = lazy(() => lazyRetry(() => import("./pages/AuthCallback")));
 
 
 const queryClient = new QueryClient({
@@ -139,6 +140,7 @@ const App = () => {
                     {SPIN_ENABLED && <Route path="/my-rewards" element={<MyRewardsPage />} />}
                     
                     <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="/admin/manual-order" element={<AdminPage />} />
