@@ -404,20 +404,8 @@ const Header = () => {
             </button>
           </div>
 
-          {/* Mobile Login & Menu */}
+          {/* Mobile Login & Menu Toggle */}
           <div className="flex md:hidden items-center gap-1">
-            {!user && (
-              <button
-                onClick={() => {
-                  sessionStorage.setItem("returnAfterAuth", location.pathname + location.search);
-                  navigate("/auth");
-                }}
-                className="p-2.5 bg-black text-white rounded-full hover:bg-black/90 transition-all flex items-center justify-center"
-                aria-label="Нэвтрэх"
-              >
-                <LogIn className="h-5 w-5" />
-              </button>
-            )}
             <button 
               onClick={() => setShowMenu(true)}
               className="p-2 rounded-full hover:bg-secondary transition-colors"
@@ -425,6 +413,93 @@ const Header = () => {
                <Menu className="h-6 w-6" />
             </button>
           </div>
+
+          {/* Mobile Profile Drawer */}
+          {showMenu && (
+            <div 
+              className="fixed inset-0 z-[100] md:hidden"
+              onClick={() => setShowMenu(false)}
+            >
+              <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+              <div 
+                className="absolute bottom-0 left-0 right-0 bg-card rounded-t-3xl border-t border-border shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex flex-col h-[70vh]">
+                  <div className="flex items-center justify-between p-4 border-b border-border">
+                    <h2 className="text-lg font-bold">Профайл</h2>
+                    <button onClick={() => setShowMenu(false)} className="p-2 rounded-full hover:bg-secondary">
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto p-4 pb-20">
+                    {user ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3 p-4 bg-secondary/30 rounded-2xl mb-6">
+                          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                            <User className="h-6 w-6 text-primary" />
+                          </div>
+                          <div className="flex-1 overflow-hidden">
+                            <p className="font-bold text-sm truncate">{user.user_metadata?.full_name || "Хэрэглэгч"}</p>
+                            <p className="text-[10px] text-muted-foreground">{user.email}</p>
+                          </div>
+                        </div>
+                        
+                        <button 
+                          onClick={() => { navigate("/profile/details"); setShowMenu(false); }}
+                          className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-secondary transition-colors"
+                        >
+                          <UserCircle className="h-5 w-5 text-muted-foreground" />
+                          <span className="text-sm font-medium text-foreground">Миний мэдээлэл</span>
+                        </button>
+                        
+                        <button 
+                          onClick={() => { navigate("/orders"); setShowMenu(false); }}
+                          className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-secondary transition-colors"
+                        >
+                          <Package className="h-5 w-5 text-muted-foreground" />
+                          <span className="text-sm font-medium text-foreground">Захиалгын түүх</span>
+                        </button>
+
+                        <button 
+                          onClick={() => { navigate("/wishlist"); setShowMenu(false); }}
+                          className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-secondary transition-colors"
+                        >
+                          <Heart className="h-5 w-5 text-muted-foreground" />
+                          <span className="text-sm font-medium text-foreground">Хадгалсан</span>
+                        </button>
+
+                        <div className="pt-4 mt-4 border-t border-border">
+                          <button 
+                            onClick={() => { signOut(); setShowMenu(false); }}
+                            className="w-full flex items-center gap-3 p-4 rounded-xl text-destructive hover:bg-destructive/10 transition-colors"
+                          >
+                            <LogOut className="h-5 w-5" />
+                            <span className="text-sm font-medium">Гарах</span>
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-10 text-center">
+                        <div className="h-16 w-16 rounded-full bg-secondary flex items-center justify-center mb-4">
+                          <User className="h-8 w-8 text-muted-foreground" />
+                        </div>
+                        <h3 className="text-base font-bold mb-2">Нэвтрэх</h3>
+                        <p className="text-sm text-muted-foreground mb-6">Захиалга хийх болон хүслийн жагсаалтаа хадгалахын тулд нэвтэрнэ үү.</p>
+                        <button 
+                          onClick={() => { navigate("/auth"); setShowMenu(false); }}
+                          className="w-full py-3 rounded-xl bg-black text-white font-bold"
+                        >
+                          Нэвтрэх
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Desktop Login */}
           {!user && (
