@@ -2015,6 +2015,7 @@ const AdminPage = () => {
 
 
   const settingsSubItems: { id: Tab; label: string; icon: any }[] = [
+    { id: "branding", label: "Branding & SEO", icon: Globe },
     { id: "categories", label: "Ангилал", icon: Layers },
     { id: "brands", label: "Брэнд", icon: Tag },
     { id: "delivery", label: "Хүргэлт", icon: Truck },
@@ -3106,6 +3107,7 @@ const AdminPage = () => {
               {tab === "diagnostics" && "Зургийн оношлогоо & Cloud зардал"}
               {tab === "stocklog" && "Elle Sport нөөцөөс хасагдсан түүх"}
               {tab === "drivers" && `Нийт ${drivers.length} жолооч`}
+              {tab === "branding" && "Вэб сайтын лого, favicon болон SEO тохиргоо"}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -3158,6 +3160,9 @@ const AdminPage = () => {
           )}
           {/* Report Dashboard */}
           {tab === "report" && <ReportDashboard />}
+
+          {/* Branding Settings */}
+          {tab === "branding" && <BrandingSettingsManager />}
 
           {/* Stats */}
           {tab === "stats" && (
