@@ -12,6 +12,7 @@ const MAINTENANCE_MODE = false;
 
 // Spin feature toggle — now controlled dynamically via admin panel (spin_config.is_enabled)
 import { useSpinEnabled } from "@/hooks/useSpinEnabled";
+import { useBranding } from "@/hooks/useBranding";
 
 
 // Eagerly load Index (critical landing page)
@@ -101,6 +102,7 @@ const PageFallback = () => (
 
 const App = () => {
   const SPIN_ENABLED = useSpinEnabled();
+  useBranding(); // Apply branding settings to head tags
   return (
 
   <QueryClientProvider client={queryClient}>
