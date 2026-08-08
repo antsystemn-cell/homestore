@@ -118,34 +118,24 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           prevUserRef.current = user.id;
 
           // 1. Merge Cart
-          const { data: dbCart } = await supabase
+          const { data: dbCartData } = await supabase
             .from("active_carts" as any)
             .select("items")
             .eq("user_id", user.id)
             .maybeSingle();
+          
+          const dbCart = dbCartData as any;
 
           const localCart = loadCartFromStorage();
           if (localCart.length > 0) {
-            let mergedCart = [...localCart];
-            if (dbCart?.items && Array.isArray(dbCart.items)) {
-              // Merge items from DB that aren't in local cart
-              const dbItems = dbCart.items;
-              dbItems.forEach((dbItem: any) => {
-                const exists = mergedCart.find(li => li.product.id === dbItem.product_id && li.selectedColor === dbItem.color && li.selectedSize === dbItem.size);
-                if (!exists) {
-                  // Note: Since DB stores slim version, we might need to fetch full product details if we really wanted to.
-                  // But for now, syncTimer will handle upserting local products to DB.
-                  // To keep it simple, we just prefer local cart contents and let it overwrite if user is logging in.
-                }
-              });
-            }
-            // Logic: If user logs in, we assume they want their current local cart to be their cart.
-            // If we want a true merge, we'd need to fetch full product details for DB items.
+            // Logic: Local cart is currently synced via the sync effect.
+            // When user logs in, we want to ensure their local cart is merged/saved to DB.
+            // The existing `useEffect` sync timer will handle upserting local items to DB.
           } else if (dbCart?.items && Array.isArray(dbCart.items)) {
             // If local cart is empty, try to restore from DB
-            // This requires fetching product details. 
-            // For now, let's focus on ensuring items are PERSISTED to the user account on login.
+            // (Requires product detail hydration - left for future refinement if needed)
           }
+
 
           // 2. Wishlist Merge (Logic: persist local wishlist to DB if we had a table, 
           // but since wishlist is client-side only for now, we just persist it in localStorage)
