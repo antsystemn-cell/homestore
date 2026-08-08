@@ -637,17 +637,21 @@ const Header = () => {
                         </div>
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center justify-center py-10 text-center">
+                      <div className="flex flex-col items-center justify-center py-10 text-center px-4">
                         <div className="h-16 w-16 rounded-full bg-secondary flex items-center justify-center mb-4">
                           <User className="h-8 w-8 text-muted-foreground" />
                         </div>
-                        <h3 className="text-base font-bold mb-2">Нэвтрэх</h3>
-                        <p className="text-sm text-muted-foreground mb-6">Захиалга хийх болон хүслийн жагсаалтаа хадгалахын тулд нэвтэрнэ үү.</p>
+                        <h3 className="text-lg font-bold mb-2 text-foreground">Тавтай морилно уу</h3>
+                        <p className="text-sm text-muted-foreground mb-8">Захиалга хийх болон хүслийн жагсаалтаа хадгалахын тулд нэвтэрнэ үү.</p>
                         <button 
-                          onClick={() => { navigate("/auth"); setShowMenu(false); }}
-                          className="w-full py-3 rounded-xl bg-black text-white font-bold"
+                          onClick={() => {
+                            sessionStorage.setItem("returnAfterAuth", location.pathname + location.search);
+                            navigate("/auth"); 
+                            setShowMenu(false); 
+                          }}
+                          className="w-full py-4 rounded-2xl bg-black text-white font-bold text-base shadow-lg shadow-black/10 active:scale-[0.98] transition-all"
                         >
-                          Нэвтрэх
+                          Нэвтрэх / Бүртгүүлэх
                         </button>
                       </div>
                     )}
