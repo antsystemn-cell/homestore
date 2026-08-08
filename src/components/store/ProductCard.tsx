@@ -29,19 +29,20 @@ const RatingRow = ({ productId }: { productId: string }) => {
 };
 
 const ProductCard = React.memo(({ product, priority = false }: Props) => {
-  // Price and discounts are always visible on all pages.
-  // The user requested price visibility; confirmed prices are rendered and styled for the Mongolian market (₮).
-  // This component ensures all price fields are always displayed.
-  
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
   const flashSale = useFlashSaleFor(product.id);
-  const displayPrice = flashSale ? Number(flashSale.sale_price) : product.price;
-  const displayOriginal = flashSale ? product.price : product.originalPrice;
   
-  // Validate price
-  const hasValidPrice = typeof displayPrice === 'number' && displayPrice > 0;
+  // Ensure we always have a numeric price to avoid layout shifts or empty displays
+  const rawPrice = flashSale ? Number(flashSale.sale_price) : product.price;
+  const displayPrice = (typeof rawPrice === 'number' && rawPrice > 0) ? rawPrice : 0;
+  
+  const rawOriginal = flashSale ? product.price : product.originalPrice;
+  const displayOriginal = (typeof rawOriginal === 'number' && rawOriginal > 0) ? rawOriginal : null;
+  
+  // Use a strictly boolean check for rendering price logic
+  const hasValidPrice = displayPrice > 0;
 
 
   const [isHovering, setIsHovering] = useState(false);
@@ -279,7 +280,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
           {product.name}
         </h3>
         <RatingRow productId={product.id} />
-        <div className="mt-2 flex items-baseline gap-1.5 flex-nowrap">
+        <div className="mt-2 flex items-baseline gap-1.5 flex-nowrap min-h-[1.5rem]">
           {hasValidPrice ? (
             <>
               <span className={`font-extrabold text-base md:text-base whitespace-nowrap ${flashSale ? "text-destructive" : "text-foreground"}`}>
@@ -292,9 +293,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
               )}
             </>
           ) : (
-            <span className="font-extrabold text-base md:text-base whitespace-nowrap text-foreground">
-              {formatPrice(product.price)}
-            </span>
+            <div className="h-5 w-20 bg-secondary animate-pulse rounded" />
           )}
         </div>
       </div>
