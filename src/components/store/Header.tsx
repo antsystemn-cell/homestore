@@ -518,25 +518,25 @@ const Header = () => {
                 className="absolute bottom-0 left-0 right-0 bg-card rounded-t-3xl border-t border-border shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex flex-col h-[70vh]">
-                  <div className="flex items-center justify-between p-4 border-b border-border">
-                    <h2 className="text-lg font-bold">Профайл / Цэс</h2>
+                <div className="flex flex-col h-[85vh]">
+                  <div className="flex items-center justify-between p-5 border-b border-border">
+                    <h2 className="text-xl font-black tracking-tight">Цэс</h2>
                     <button onClick={() => setShowMenu(false)} className="p-2 rounded-full hover:bg-secondary">
                       <X className="h-5 w-5" />
                     </button>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto p-4 pb-20">
-                    <div className="flex bg-secondary/30 rounded-xl p-1 mb-6">
+                  <div className="flex-1 overflow-y-auto p-4 pb-20 scrollbar-hide">
+                    <div className="flex bg-secondary/30 rounded-xl p-1 mb-6 sticky top-0 z-10 backdrop-blur-md">
                       <button 
                         onClick={() => setActiveMenuTab("cats")}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all ${activeMenuTab === 'cats' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
+                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all ${activeMenuTab === 'cats' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
                       >
                         <Layers className="h-4 w-4" /> Ангилал
                       </button>
                       <button 
                         onClick={() => setActiveMenuTab("brands")}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all ${activeMenuTab === 'brands' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
+                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all ${activeMenuTab === 'brands' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
                       >
                         <Store className="h-4 w-4" /> Брэндүүд
                       </button>
@@ -548,7 +548,7 @@ const Header = () => {
                           <div key={parent.id} className="space-y-3">
                             <button 
                               onClick={() => { navigate(`/category/${parent.slug}`); setShowMenu(false); }}
-                              className="text-sm font-bold text-foreground flex items-center gap-2"
+                              className="text-base font-bold text-foreground flex items-center gap-3 py-1"
                             >
                               {parent.icon && (() => {
                                 const Icon = (Icons as any)[parent.icon] || LayoutGrid;
@@ -561,7 +561,7 @@ const Header = () => {
                                 <button 
                                   key={child.id}
                                   onClick={() => { navigate(`/category/${child.slug}`); setShowMenu(false); }}
-                                  className="text-left py-1 text-xs text-muted-foreground hover:text-foreground"
+                                  className="text-left py-2 text-sm text-muted-foreground hover:text-foreground"
                                 >
                                   {child.name}
                                 </button>
@@ -581,7 +581,7 @@ const Header = () => {
                             <div className="h-10 w-10 flex items-center justify-center overflow-hidden">
                               {b.logo_url ? <img src={b.logo_url} alt="" className="h-full w-full object-contain" /> : <Store className="h-4 w-4 text-muted-foreground" />}
                             </div>
-                            <span className="text-[9px] font-bold text-center truncate w-full">{b.name}</span>
+                            <span className="text-[10px] font-bold text-center truncate w-full">{b.name}</span>
                           </button>
                         ))}
                       </div>
@@ -597,8 +597,8 @@ const Header = () => {
                             <User className="h-6 w-6 text-primary" />
                           </div>
                           <div className="flex-1 overflow-hidden">
-                            <p className="font-bold text-sm truncate">{user.user_metadata?.full_name || "Хэрэглэгч"}</p>
-                            <p className="text-[10px] text-muted-foreground">{user.email}</p>
+                            <p className="font-bold text-base truncate">{user.user_metadata?.full_name || "Хэрэглэгч"}</p>
+                            <p className="text-xs text-muted-foreground">{user.email}</p>
                           </div>
                         </div>
                         
@@ -607,7 +607,7 @@ const Header = () => {
                           className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-secondary transition-colors"
                         >
                           <UserCircle className="h-5 w-5 text-muted-foreground" />
-                          <span className="text-sm font-medium text-foreground">Миний мэдээлэл</span>
+                          <span className="text-base font-medium text-foreground">Миний мэдээлэл</span>
                         </button>
                         
                         <button 
@@ -615,7 +615,7 @@ const Header = () => {
                           className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-secondary transition-colors"
                         >
                           <Package className="h-5 w-5 text-muted-foreground" />
-                          <span className="text-sm font-medium text-foreground">Захиалгын түүх</span>
+                          <span className="text-base font-medium text-foreground">Захиалгын түүх</span>
                         </button>
 
                         <button 
@@ -623,7 +623,7 @@ const Header = () => {
                           className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-secondary transition-colors"
                         >
                           <Heart className="h-5 w-5 text-muted-foreground" />
-                          <span className="text-sm font-medium text-foreground">Хадгалсан</span>
+                          <span className="text-base font-medium text-foreground">Хадгалсан</span>
                         </button>
 
                         <div className="pt-4 mt-4 border-t border-border">
@@ -632,7 +632,7 @@ const Header = () => {
                             className="w-full flex items-center gap-3 p-4 rounded-xl text-destructive hover:bg-destructive/10 transition-colors"
                           >
                             <LogOut className="h-5 w-5" />
-                            <span className="text-sm font-medium">Гарах</span>
+                            <span className="text-base font-medium">Гарах</span>
                           </button>
                         </div>
                       </div>
