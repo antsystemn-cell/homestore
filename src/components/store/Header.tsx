@@ -1,4 +1,4 @@
-import { Search, Clock, X, ArrowUpRight, LogIn, ChevronDown, LayoutGrid, Tag, Layers, Star, Store, Sparkles, User, Menu } from "lucide-react";
+import { Search, Clock, X, ArrowUpRight, LogIn, ChevronDown, LayoutGrid, Tag, Layers, Star, Store, Sparkles, User, Menu, LogOut, Package, History, Heart, UserCircle } from "lucide-react";
 import NotificationsBell from "./NotificationsBell";
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -41,7 +41,7 @@ const Header = () => {
   const [history, setHistory] = useState<string[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const suggestDebounceRef = useRef<ReturnType<typeof setTimeout>>();
   const searchBoxRef = useRef<HTMLDivElement>(null);
@@ -191,68 +191,72 @@ const Header = () => {
                 >
                   <div className="flex flex-col h-[70vh]">
                     <div className="flex items-center justify-between p-4 border-b border-border">
-                      <div className="flex gap-2 p-1 bg-secondary/50 rounded-xl">
-                        <button 
-                          onClick={() => setActiveMenuTab("cats")}
-                          className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeMenuTab === 'cats' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
-                        >
-                          Ангилал
-                        </button>
-                        <button 
-                          onClick={() => setActiveMenuTab("brands")}
-                          className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeMenuTab === 'brands' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
-                        >
-                          Брэндүүд
-                        </button>
-                      </div>
+                      <h2 className="text-lg font-bold">Профайл</h2>
                       <button onClick={() => setShowMenu(false)} className="p-2 rounded-full hover:bg-secondary">
                         <X className="h-5 w-5" />
                       </button>
                     </div>
 
                     <div className="flex-1 overflow-y-auto p-4 pb-20">
-                      {activeMenuTab === "cats" ? (
-                        <div className="space-y-6">
-                          {categories.filter(c => !c.parent_id).map(parent => (
-                            <div key={parent.id} className="space-y-3">
-                              <button 
-                                onClick={() => { navigate(`/category/${parent.slug}`); setShowMenu(false); }}
-                                className="text-sm font-bold text-foreground flex items-center gap-2"
-                              >
-                                {parent.icon && (() => {
-                                  const Icon = (Icons as any)[parent.icon] || LayoutGrid;
-                                  return <Icon className="h-4 w-4 text-primary" />;
-                                })()}
-                                {parent.name}
-                              </button>
-                              <div className="grid grid-cols-2 gap-2 pl-6">
-                                {categories.filter(c => c.parent_id === parent.id).map(child => (
-                                  <button 
-                                    key={child.id}
-                                    onClick={() => { navigate(`/category/${child.slug}`); setShowMenu(false); }}
-                                    className="px-3 py-2 rounded-lg bg-secondary/30 text-xs text-left text-muted-foreground hover:text-foreground"
-                                  >
-                                    {child.name}
-                                  </button>
-                                ))}
-                              </div>
+                      {user ? (
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3 p-4 bg-secondary/30 rounded-2xl mb-6">
+                            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                              <User className="h-6 w-6 text-primary" />
                             </div>
-                          ))}
+                            <div className="flex-1 overflow-hidden">
+                              <p className="font-bold text-sm truncate">{user.email}</p>
+                              <p className="text-[10px] text-muted-foreground">Хэрэглэгч</p>
+                            </div>
+                          </div>
+                          
+                          <button 
+                            onClick={() => { navigate("/profile"); setShowMenu(false); }}
+                            className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-secondary transition-colors"
+                          >
+                            <UserCircle className="h-5 w-5 text-muted-foreground" />
+                            <span className="text-sm font-medium text-foreground">Миний мэдээлэл</span>
+                          </button>
+                          
+                          <button 
+                            onClick={() => { navigate("/orders"); setShowMenu(false); }}
+                            className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-secondary transition-colors"
+                          >
+                            <Package className="h-5 w-5 text-muted-foreground" />
+                            <span className="text-sm font-medium text-foreground">Захиалгын түүх</span>
+                          </button>
+
+                          <button 
+                            onClick={() => { navigate("/wishlist"); setShowMenu(false); }}
+                            className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-secondary transition-colors"
+                          >
+                            <Heart className="h-5 w-5 text-muted-foreground" />
+                            <span className="text-sm font-medium text-foreground">Хадгалсан</span>
+                          </button>
+
+                          <div className="pt-4 mt-4 border-t border-border">
+                            <button 
+                              onClick={() => { signOut(); setShowMenu(false); }}
+                              className="w-full flex items-center gap-3 p-4 rounded-xl text-destructive hover:bg-destructive/10 transition-colors"
+                            >
+                              <LogOut className="h-5 w-5" />
+                              <span className="text-sm font-medium">Гарах</span>
+                            </button>
+                          </div>
                         </div>
                       ) : (
-                        <div className="grid grid-cols-3 gap-3">
-                          {brands.map(b => (
-                            <button 
-                              key={b.id}
-                              onClick={() => { navigate(`/${b.name.replace(/\s+/g, '')}`); setShowMenu(false); }}
-                              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-secondary/30 border border-transparent"
-                            >
-                              <div className="h-10 w-10 rounded-lg bg-background flex items-center justify-center overflow-hidden">
-                                {b.logo_url ? <img src={b.logo_url} alt="" className="h-full w-full object-contain" /> : <Store className="h-4 w-4 text-muted-foreground" />}
-                              </div>
-                              <span className="text-[10px] font-bold text-center truncate w-full">{b.name}</span>
-                            </button>
-                          ))}
+                        <div className="flex flex-col items-center justify-center py-10 text-center">
+                          <div className="h-16 w-16 rounded-full bg-secondary flex items-center justify-center mb-4">
+                            <User className="h-8 w-8 text-muted-foreground" />
+                          </div>
+                          <h3 className="text-base font-bold mb-2">Нэвтрэх</h3>
+                          <p className="text-sm text-muted-foreground mb-6">Захиалга хийх болон хүслийн жагсаалтаа хадгалахын тулд нэвтэрнэ үү.</p>
+                          <button 
+                            onClick={() => { navigate("/auth"); setShowMenu(false); }}
+                            className="w-full py-3 rounded-xl bg-black text-white font-bold"
+                          >
+                            Нэвтрэх
+                          </button>
                         </div>
                       )}
                     </div>
