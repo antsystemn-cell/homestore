@@ -34,15 +34,16 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const [activeIdx, setActiveIdx] = useState(0);
   const flashSale = useFlashSaleFor(product.id);
   
-  // Ensure we always have a numeric price to avoid layout shifts or empty displays
-  const rawPrice = flashSale ? Number(flashSale.sale_price) : product.price;
-  const displayPrice = (typeof rawPrice === 'number' && rawPrice > 0) ? rawPrice : 0;
+  // Directly use the price values from the product object first
+  // to ensure immediate visibility while hooks/states resolve.
+  const basePrice = product.price;
+  const baseOriginal = product.originalPrice;
   
-  const rawOriginal = flashSale ? product.price : product.originalPrice;
-  const displayOriginal = (typeof rawOriginal === 'number' && rawOriginal > 0) ? rawOriginal : null;
+  // Override with flash sale data if available
+  const displayPrice = flashSale ? Number(flashSale.sale_price) : basePrice;
+  const displayOriginal = flashSale ? basePrice : baseOriginal;
   
-  // Use a strictly boolean check for rendering price logic
-  const hasValidPrice = displayPrice > 0;
+  const hasValidPrice = typeof displayPrice === 'number' && displayPrice > 0;
 
 
   const [isHovering, setIsHovering] = useState(false);
@@ -287,13 +288,15 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
                 {formatPrice(displayPrice)}
               </span>
               {displayOriginal != null && displayOriginal > displayPrice && (
-                <span className="text-muted-foreground text-xs md:text-xs line-through whitespace-nowrap">
+                <span className="text-muted-foreground text-[10px] md:text-xs line-through whitespace-nowrap">
                   {formatPrice(displayOriginal)}
                 </span>
               )}
             </>
           ) : (
-            <div className="h-5 w-20 bg-secondary animate-pulse rounded" />
+            <span className="font-extrabold text-base md:text-base whitespace-nowrap text-foreground">
+              {formatPrice(product.price)}
+            </span>
           )}
         </div>
       </div>
