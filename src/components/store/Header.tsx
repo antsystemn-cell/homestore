@@ -623,7 +623,7 @@ const Header = () => {
                           className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-secondary transition-colors"
                         >
                           <Heart className="h-5 w-5 text-muted-foreground" />
-                          <span className="text-sm font-medium text-foreground">Хадгалсан</span>
+                          <span className="text-base font-medium text-foreground">Хадгалсан</span>
                         </button>
 
                         <div className="pt-4 mt-4 border-t border-border">
