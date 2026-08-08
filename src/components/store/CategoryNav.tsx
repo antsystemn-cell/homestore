@@ -18,15 +18,18 @@ const CategoryNav = () => {
   }, []);
 
   if (loading) return (
-    <div className="flex overflow-x-auto px-3 py-2.5 bg-background border-b border-border no-scrollbar gap-1.5">
-      {[1, 2, 3, 4, 5].map(i => (
-        <div key={i} className="h-8 w-24 bg-secondary animate-pulse rounded-full shrink-0" />
-      ))}
+    <div className="flex overflow-x-auto px-4 md:px-8 py-2.5 bg-background border-b border-border no-scrollbar gap-1.5">
+      <div className="max-w-6xl mx-auto w-full flex items-center gap-1.5">
+        {[1, 2, 3, 4, 5].map(i => (
+          <div key={i} className="h-8 w-24 bg-secondary animate-pulse rounded-full shrink-0" />
+        ))}
+      </div>
     </div>
   );
 
   return (
-    <div className="flex overflow-x-auto px-3 py-2.5 bg-background border-b border-border no-scrollbar gap-1.5 sticky top-0 z-30">
+    <div className="flex overflow-x-auto px-4 md:px-8 py-2.5 bg-background border-b border-border no-scrollbar gap-1.5 sticky top-0 z-30">
+      <div className="max-w-6xl mx-auto w-full flex items-center gap-1.5">
       {categories.map((c) => {
         const IconComponent = (Icons as any)[c.icon] || LayoutGrid;
         return (
@@ -47,6 +50,7 @@ const CategoryNav = () => {
         <LayoutGrid className="h-3.5 w-3.5" />
         Бүх брэнд
       </button>
+      </div>
     </div>
   );
 };
