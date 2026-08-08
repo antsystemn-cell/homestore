@@ -536,7 +536,7 @@ const Header = () => {
                       </button>
                       <button 
                         onClick={() => setActiveMenuTab("brands")}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all ${activeMenuTab === 'brands' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
+                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition-all ${activeMenuTab === 'brands' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
                       >
                         <Store className="h-4 w-4" /> Брэндүүд
                       </button>
