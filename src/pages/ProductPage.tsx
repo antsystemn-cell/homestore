@@ -820,7 +820,7 @@ const ProductPage = () => {
 
 
             <div className="space-y-2">
-              <div className="flex items-baseline gap-3 flex-wrap">
+              <div className="flex items-baseline gap-3 flex-wrap min-h-[40px]">
                 <span className={`text-2xl md:text-3xl font-extrabold ${flashSale ? "text-destructive" : "text-foreground"}`}>
                   {formatPrice(displayPrice)}
                 </span>
