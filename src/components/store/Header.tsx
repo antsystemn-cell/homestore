@@ -1,4 +1,4 @@
-import { Search, Clock, X, ArrowUpRight, LogIn, ChevronDown, LayoutGrid, Tag, Layers, Star, Store, Sparkles, User, Menu } from "lucide-react";
+import { Search, Clock, X, ArrowUpRight, LogIn, ChevronDown, LayoutGrid, Tag, Layers, Star, Store, Sparkles, User, Menu, LogOut, Package, History, Heart, UserCircle } from "lucide-react";
 import NotificationsBell from "./NotificationsBell";
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
