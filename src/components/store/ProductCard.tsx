@@ -103,7 +103,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
       });
     }
     return { slides: list, colorSlideMap: map };
-  }, [baseImage, colors, isHome]);
+  }, [baseImage, colors]);
 
   const hasMultipleSlides = slides.length > 1;
   const hasSwatches = !!(colors && colors.length > 1);
