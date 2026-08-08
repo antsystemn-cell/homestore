@@ -429,7 +429,10 @@ const Header = () => {
           {/* Desktop Login */}
           {!user && (
             <button
-              onClick={() => navigate("/auth")}
+              onClick={() => {
+                sessionStorage.setItem("returnAfterAuth", location.pathname + location.search);
+                navigate("/auth");
+              }}
               className="hidden md:inline-flex items-center gap-1.5 h-9 px-4 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
             >
               <LogIn className="h-4 w-4" />
