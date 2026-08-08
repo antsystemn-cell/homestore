@@ -181,6 +181,7 @@ const Header = () => {
             
             {showMenu && (
               <div 
+
                 className="fixed inset-0 z-[100] md:hidden"
                 onClick={() => setShowMenu(false)}
               >
