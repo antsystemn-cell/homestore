@@ -561,7 +561,7 @@ const Header = () => {
                                 <button 
                                   key={child.id}
                                   onClick={() => { navigate(`/category/${child.slug}`); setShowMenu(false); }}
-                                  className="text-left py-1 text-xs text-muted-foreground hover:text-foreground"
+                                  className="text-left py-2 text-sm text-muted-foreground hover:text-foreground"
                                 >
                                   {child.name}
                                 </button>
