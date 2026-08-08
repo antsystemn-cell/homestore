@@ -488,15 +488,19 @@ const Header = () => {
             </button>
           </div>
 
-          {/* Mobile Login & Menu Toggle */}
+          {/* Mobile Profile Toggle */}
           <div className="flex md:hidden items-center gap-1">
             <button 
-              onClick={() => setShowMenu(true)}
+              onClick={() => {
+                setActiveMenuTab("cats"); // Default to categories for this toggle
+                setShowMenu(true);
+              }}
               className="p-2 rounded-full hover:bg-secondary transition-colors"
             >
                <Menu className="h-6 w-6" />
             </button>
           </div>
+
 
           {/* Mobile Profile Drawer */}
           {showMenu && (
