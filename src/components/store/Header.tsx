@@ -182,6 +182,91 @@ const Header = () => {
             
             {showMenu && (
               <div 
+                className="fixed inset-0 z-[100] md:hidden"
+                onClick={() => setShowMenu(false)}
+              >
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+                <div 
+                  className="absolute bottom-0 left-0 right-0 bg-card rounded-t-3xl border-t border-border shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex flex-col h-[70vh]">
+                    <div className="flex items-center justify-between p-4 border-b border-border">
+                      <h2 className="text-lg font-bold">Цэс</h2>
+                      <button onClick={() => setShowMenu(false)} className="p-2 rounded-full hover:bg-secondary">
+                        <X className="h-5 w-5" />
+                      </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-4 pb-20">
+                      <div className="flex bg-secondary/30 rounded-xl p-1 mb-6">
+                        <button 
+                          onClick={() => setActiveMenuTab("cats")}
+                          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all ${activeMenuTab === 'cats' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
+                        >
+                          <Layers className="h-4 w-4" /> Ангилал
+                        </button>
+                        <button 
+                          onClick={() => setActiveMenuTab("brands")}
+                          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all ${activeMenuTab === 'brands' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
+                        >
+                          <Store className="h-4 w-4" /> Брэндүүд
+                        </button>
+                      </div>
+
+                      {activeMenuTab === "cats" ? (
+                        <div className="space-y-6">
+                          {categories.filter(c => !c.parent_id).map(parent => (
+                            <div key={parent.id} className="space-y-3">
+                              <button 
+                                onClick={() => { navigate(`/category/${parent.slug}`); setShowMenu(false); }}
+                                className="text-sm font-bold text-foreground flex items-center gap-2"
+                              >
+                                {parent.icon && (() => {
+                                  const Icon = (Icons as any)[parent.icon] || LayoutGrid;
+                                  return <Icon className="h-4 w-4 text-primary" />;
+                                })()}
+                                {parent.name}
+                              </button>
+                              <div className="grid grid-cols-2 gap-2 pl-6">
+                                {categories.filter(c => c.parent_id === parent.id).map(child => (
+                                  <button 
+                                    key={child.id}
+                                    onClick={() => { navigate(`/category/${child.slug}`); setShowMenu(false); }}
+                                    className="text-left py-1 text-xs text-muted-foreground hover:text-foreground"
+                                  >
+                                    {child.name}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-3 gap-3">
+                          {brands.map(b => (
+                            <button 
+                              key={b.id}
+                              onClick={() => { navigate(`/${b.name.replace(/\s+/g, '')}`); setShowMenu(false); }}
+                              className="flex flex-col items-center gap-2 p-2 rounded-xl border border-border bg-card shadow-sm"
+                            >
+                              <div className="h-10 w-10 flex items-center justify-center overflow-hidden">
+                                {b.logo_url ? <img src={b.logo_url} alt="" className="h-full w-full object-contain" /> : <Store className="h-4 w-4 text-muted-foreground" />}
+                              </div>
+                              <span className="text-[9px] font-bold text-center truncate w-full">{b.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+
+            {showMenu && (
+              <div 
                 onMouseLeave={() => setShowMenu(false)}
                 className="absolute top-full left-0 w-[600px] bg-card rounded-2xl border border-border shadow-2xl z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 hidden md:block"
               >
@@ -396,23 +481,31 @@ const Header = () => {
           <div className="hidden md:flex items-center gap-2">
             <NotificationsBell />
             <button 
-              onClick={() => navigate("/profile")}
+              onClick={() => {
+                setActiveMenuTab("cats"); // Reuse state to avoid issues
+                setShowMenu(true);
+              }}
               className="p-2 rounded-full hover:bg-secondary transition-colors"
               title="Профайл"
             >
               <User className="h-5 w-5" />
             </button>
+
           </div>
 
-          {/* Mobile Login & Menu Toggle */}
+          {/* Mobile Profile Toggle */}
           <div className="flex md:hidden items-center gap-1">
             <button 
-              onClick={() => setShowMenu(true)}
+              onClick={() => {
+                setActiveMenuTab("cats"); // Default to categories for this toggle
+                setShowMenu(true);
+              }}
               className="p-2 rounded-full hover:bg-secondary transition-colors"
             >
                <Menu className="h-6 w-6" />
             </button>
           </div>
+
 
           {/* Mobile Profile Drawer */}
           {showMenu && (
@@ -427,14 +520,77 @@ const Header = () => {
               >
                 <div className="flex flex-col h-[70vh]">
                   <div className="flex items-center justify-between p-4 border-b border-border">
-                    <h2 className="text-lg font-bold">Профайл</h2>
+                    <h2 className="text-lg font-bold">Профайл / Цэс</h2>
                     <button onClick={() => setShowMenu(false)} className="p-2 rounded-full hover:bg-secondary">
                       <X className="h-5 w-5" />
                     </button>
                   </div>
 
                   <div className="flex-1 overflow-y-auto p-4 pb-20">
+                    <div className="flex bg-secondary/30 rounded-xl p-1 mb-6">
+                      <button 
+                        onClick={() => setActiveMenuTab("cats")}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all ${activeMenuTab === 'cats' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
+                      >
+                        <Layers className="h-4 w-4" /> Ангилал
+                      </button>
+                      <button 
+                        onClick={() => setActiveMenuTab("brands")}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all ${activeMenuTab === 'brands' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground'}`}
+                      >
+                        <Store className="h-4 w-4" /> Брэндүүд
+                      </button>
+                    </div>
+
+                    {activeMenuTab === "cats" ? (
+                      <div className="space-y-6 mb-8">
+                        {categories.filter(c => !c.parent_id).map(parent => (
+                          <div key={parent.id} className="space-y-3">
+                            <button 
+                              onClick={() => { navigate(`/category/${parent.slug}`); setShowMenu(false); }}
+                              className="text-sm font-bold text-foreground flex items-center gap-2"
+                            >
+                              {parent.icon && (() => {
+                                const Icon = (Icons as any)[parent.icon] || LayoutGrid;
+                                return <Icon className="h-4 w-4 text-primary" />;
+                              })()}
+                              {parent.name}
+                            </button>
+                            <div className="grid grid-cols-2 gap-2 pl-6">
+                              {categories.filter(c => c.parent_id === parent.id).map(child => (
+                                <button 
+                                  key={child.id}
+                                  onClick={() => { navigate(`/category/${child.slug}`); setShowMenu(false); }}
+                                  className="text-left py-1 text-xs text-muted-foreground hover:text-foreground"
+                                >
+                                  {child.name}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-3 mb-8">
+                        {brands.map(b => (
+                          <button 
+                            key={b.id}
+                            onClick={() => { navigate(`/${b.name.replace(/\s+/g, '')}`); setShowMenu(false); }}
+                            className="flex flex-col items-center gap-2 p-2 rounded-xl border border-border bg-card shadow-sm"
+                          >
+                            <div className="h-10 w-10 flex items-center justify-center overflow-hidden">
+                              {b.logo_url ? <img src={b.logo_url} alt="" className="h-full w-full object-contain" /> : <Store className="h-4 w-4 text-muted-foreground" />}
+                            </div>
+                            <span className="text-[9px] font-bold text-center truncate w-full">{b.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="h-px bg-border my-6" />
+
                     {user ? (
+
                       <div className="space-y-2">
                         <div className="flex items-center gap-3 p-4 bg-secondary/30 rounded-2xl mb-6">
                           <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -499,6 +655,7 @@ const Header = () => {
                 </div>
               </div>
             </div>
+
           )}
 
           {/* Desktop Login */}
