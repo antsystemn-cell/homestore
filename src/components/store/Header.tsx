@@ -205,13 +205,13 @@ const Header = () => {
                               <User className="h-6 w-6 text-primary" />
                             </div>
                             <div className="flex-1 overflow-hidden">
-                              <p className="font-bold text-sm truncate">{user.email}</p>
-                              <p className="text-[10px] text-muted-foreground">Хэрэглэгч</p>
+                              <p className="font-bold text-sm truncate">{user.user_metadata?.full_name || "Хэрэглэгч"}</p>
+                              <p className="text-[10px] text-muted-foreground">{user.email}</p>
                             </div>
                           </div>
                           
                           <button 
-                            onClick={() => { navigate("/profile"); setShowMenu(false); }}
+                            onClick={() => { navigate("/profile/details"); setShowMenu(false); }}
                             className="w-full flex items-center gap-3 p-4 rounded-xl hover:bg-secondary transition-colors"
                           >
                             <UserCircle className="h-5 w-5 text-muted-foreground" />
