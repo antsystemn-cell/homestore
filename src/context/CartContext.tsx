@@ -29,6 +29,22 @@ function makeCartKey(productId: string, color?: string | null, size?: string | n
 }
 
 const CART_STORAGE_KEY = "easyshop_cart";
+const WISHLIST_STORAGE_KEY = "easyshop_wishlist";
+
+function loadWishlistFromStorage(): Product[] {
+  try {
+    const raw = localStorage.getItem(WISHLIST_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return [];
+}
+
+function saveWishlistToStorage(items: Product[]) {
+  try {
+    localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(items));
+  } catch {}
+}
+
 
 function loadCartFromStorage(): CartItem[] {
   try {
