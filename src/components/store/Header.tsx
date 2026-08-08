@@ -408,7 +408,10 @@ const Header = () => {
           <div className="flex md:hidden items-center gap-1">
             {!user && (
               <button
-                onClick={() => navigate("/auth")}
+                onClick={() => {
+                  sessionStorage.setItem("returnAfterAuth", location.pathname + location.search);
+                  navigate("/auth");
+                }}
                 className="p-2.5 bg-black text-white rounded-full hover:bg-black/90 transition-all flex items-center justify-center"
                 aria-label="Нэвтрэх"
               >
