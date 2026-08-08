@@ -140,6 +140,7 @@ const App = () => {
                     {SPIN_ENABLED && <Route path="/my-rewards" element={<MyRewardsPage />} />}
                     
                     <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="/admin/manual-order" element={<AdminPage />} />
