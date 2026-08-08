@@ -1022,7 +1022,7 @@ const CheckoutPage = () => {
                 </Button>
               )}
 
-              {paymentMethod === "sono" && !orderId && (
+              {paymentMethod === "sono" && !(orderId || isViewingExistingOrder) && !isViewingExistingOrder && (
                 <Button
                   className="w-full h-12 text-base rounded-xl mt-2 gap-2 bg-[#F25C2A] hover:bg-[#D94A1C] text-white"
                   disabled={submitting}
@@ -1031,6 +1031,10 @@ const CheckoutPage = () => {
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <QrCode className="h-4 w-4" />}
                   {submitting ? "Үүсгэж байна..." : `Sono-р төлөх — ${formatPrice(grandTotal)}`}
                 </Button>
+              )}
+
+              {isViewingExistingOrder && !ordered && (
+                <p className="text-xs text-center text-muted-foreground mt-2">Төлбөр төлөх сувгаа дээрээс сонгоно уу</p>
               )}
 
               <p className="text-[10px] text-muted-foreground text-center mt-2">
