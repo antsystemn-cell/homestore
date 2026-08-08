@@ -28,7 +28,7 @@ const CategoryNav = () => {
   );
 
   return (
-    <div className="flex overflow-x-auto px-4 md:px-8 py-2.5 bg-background border-b border-border no-scrollbar gap-1.5 sticky top-0 z-30">
+    <div className="flex overflow-x-auto px-4 md:px-8 py-2.5 bg-background border-b border-border no-scrollbar gap-1.5 sticky top-[57px] md:top-[65px] z-30">
       <div className="max-w-6xl mx-auto w-full flex items-center gap-1.5">
       {categories.map((c) => {
         const IconComponent = (Icons as any)[c.icon] || LayoutGrid;
