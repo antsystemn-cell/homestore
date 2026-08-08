@@ -1,12 +1,26 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, User, Mail, Phone, MapPin, Calendar, ShieldCheck } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, User, Mail, Phone, Calendar, ShieldCheck, Loader2, Save, Check } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import Header from "@/components/store/Header";
 import BottomNav from "@/components/store/BottomNav";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const UserDetailsPage = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setFullName(user.user_metadata?.full_name || "");
+      setPhone(user.user_metadata?.phone || "");
+    }
+  }, [user]);
 
   if (loading) {
     return (
@@ -21,12 +35,62 @@ const UserDetailsPage = () => {
     return null;
   }
 
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          full_name: fullName,
+          phone: phone
+        }
+      });
+
+      if (error) throw error;
+      
+      toast.success("Мэдээлэл амжилттай хадгалагдлаа");
+    } catch (error: any) {
+      toast.error(error.message || "Мэдээлэл хадгалахад алдаа гарлаа");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const userData = [
-    { label: "Бүтэн нэр", value: user.user_metadata?.full_name || "Тодорхойгүй", icon: User },
-    { label: "Имэйл хаяг", value: user.email, icon: Mail },
-    { label: "Утасны дугаар", value: user.user_metadata?.phone || "Холбоогүй", icon: Phone },
-    { label: "Бүртгүүлсэн огноо", value: new Date(user.created_at).toLocaleDateString("mn-MN"), icon: Calendar },
-    { label: "Статус", value: "Идэвхтэй", icon: ShieldCheck, color: "text-green-500" },
+    { 
+      label: "Бүтэн нэр", 
+      value: fullName, 
+      icon: User, 
+      editable: true,
+      onChange: (v: string) => setFullName(v),
+      placeholder: "Таны нэр"
+    },
+    { 
+      label: "Имэйл хаяг", 
+      value: user.email, 
+      icon: Mail, 
+      editable: false 
+    },
+    { 
+      label: "Утасны дугаар", 
+      value: phone, 
+      icon: Phone, 
+      editable: true,
+      onChange: (v: string) => setPhone(v),
+      placeholder: "Холбоо барих утас"
+    },
+    { 
+      label: "Бүртгүүлсэн огноо", 
+      value: new Date(user.created_at).toLocaleDateString("mn-MN"), 
+      icon: Calendar, 
+      editable: false 
+    },
+    { 
+      label: "Статус", 
+      value: "Идэвхтэй", 
+      icon: ShieldCheck, 
+      color: "text-green-500", 
+      editable: false 
+    },
   ];
 
   return (
@@ -62,7 +126,7 @@ const UserDetailsPage = () => {
             <div className="h-24 w-24 rounded-full bg-primary/10 flex items-center justify-center mb-4 ring-4 ring-background shadow-inner">
               <User className="h-10 w-10 text-primary" />
             </div>
-            <h2 className="text-xl font-bold">{user.user_metadata?.full_name || "Хэрэглэгч"}</h2>
+            <h2 className="text-xl font-bold">{fullName || "Хэрэглэгч"}</h2>
             <p className="text-sm text-muted-foreground mt-1">{user.email}</p>
           </div>
 
@@ -73,30 +137,56 @@ const UserDetailsPage = () => {
               return (
                 <div 
                   key={idx} 
-                  className={`flex items-center gap-4 p-5 ${
+                  className={`flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-5 ${
                     idx !== userData.length - 1 ? "border-b border-border" : ""
                   }`}
                 >
-                  <div className="h-10 w-10 rounded-xl bg-secondary flex items-center justify-center flex-shrink-0">
-                    <Icon className={`h-5 w-5 ${item.color || "text-muted-foreground"}`} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
-                      {item.label}
-                    </p>
-                    <p className="text-sm font-semibold text-foreground mt-0.5 truncate">
-                      {item.value}
-                    </p>
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="h-10 w-10 rounded-xl bg-secondary flex items-center justify-center flex-shrink-0">
+                      <Icon className={`h-5 w-5 ${item.color || "text-muted-foreground"}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+                        {item.label}
+                      </p>
+                      {item.editable ? (
+                        <input
+                          type="text"
+                          value={item.value || ""}
+                          onChange={(e) => item.onChange?.(e.target.value)}
+                          placeholder={item.placeholder}
+                          className="w-full text-sm font-semibold text-foreground mt-0.5 bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-primary/20 rounded px-1 -ml-1"
+                        />
+                      ) : (
+                        <p className="text-sm font-semibold text-foreground mt-0.5 truncate">
+                          {item.value}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
 
+          {/* Action Button */}
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="w-full bg-primary text-primary-foreground rounded-2xl py-4 font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:opacity-90 transition-all disabled:opacity-50"
+          >
+            {saving ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <Save className="h-5 w-5" />
+            )}
+            Мэдээлэл хадгалах
+          </button>
+
           {/* Edit Info Note */}
           <div className="p-4 bg-secondary/30 rounded-2xl border border-dashed border-border">
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Мэдээллээ шинэчлэх эсвэл нууц үгээ солих бол Тохиргоо цэс рүү орно уу.
+            <p className="text-xs text-muted-foreground leading-relaxed text-center">
+              Имэйл хаягийг аюулгүй байдлын үүднээс өөрчлөх боломжгүй.
             </p>
           </div>
         </div>

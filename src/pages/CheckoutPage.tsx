@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/data/products";
 import { Button } from "@/components/ui/button";
@@ -26,8 +26,10 @@ const CheckoutPage = () => {
   const { items, cartTotal, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const isGuestCheckout = !user && searchParams.get("guest") === "1";
+  const externalOrderId = searchParams.get("orderId");
 
   const [ordered, setOrdered] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -38,6 +40,9 @@ const CheckoutPage = () => {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("qpay");
   const [orderId, setOrderId] = useState<string | null>(null);
   const [orderRef, setOrderRef] = useState<string | null>(null);
+  const [isViewingExistingOrder, setIsViewingViewingExistingOrder] = useState(false);
+  const [existingOrderData, setExistingOrderData] = useState<any>(null);
+  const [loadingExisting, setLoadingExisting] = useState(false);
 
   // Delivery options
   const [deliveryOptions, setDeliveryOptions] = useState<any[]>([]);
@@ -70,6 +75,42 @@ const CheckoutPage = () => {
   }, [user, isGuestCheckout, navigate]);
 
   // Track checkout start once
+  useEffect(() => {
+    if (externalOrderId) {
+      const fetchExisting = async () => {
+        setLoadingExisting(true);
+        try {
+          const { data, error } = await supabase
+            .from("orders")
+            .select("*")
+            .eq("id", externalOrderId)
+            .maybeSingle();
+          
+          if (error) throw error;
+          if (data) {
+            setExistingOrderData(data);
+            setIsViewingViewingExistingOrder(true);
+            setOrderId(data.id);
+            setOrderRef(data.order_ref);
+            setPhone(data.phone || "");
+            setAddress(data.shipping_address || "");
+            setPaymentMethod(data.payment_method as PaymentMethod || "qpay");
+            
+            // If already paid, show success
+            if (data.payment_status === "paid" || data.status === "completed") {
+              setOrdered(true);
+            }
+          }
+        } catch (err) {
+          console.error("Error fetching existing order:", err);
+        } finally {
+          setLoadingExisting(false);
+        }
+      };
+      fetchExisting();
+    }
+  }, [externalOrderId]);
+
   useEffect(() => {
     if (items.length > 0) {
       track("checkout_start", { value: cartTotal, metadata: { items: items.length } });
@@ -162,36 +203,50 @@ const CheckoutPage = () => {
   const selectedDeliveryOption = deliveryOptions.find(d => d.id === selectedDelivery);
   const deliveryFee = selectedDeliveryOption?.price || 0;
 
-  // Extra 8,000₮ delivery surcharge: if cart total < 50,000₮ OR cart has any sale items
-  const hasSaleItems = items.some(item => item.product.isOnSale || (item.product.discount && item.product.discount > 0));
-  // Flash sale = any sale item OR BOGO. Wallet credits are blocked in this case.
-  const hasFlashSaleItems = items.some(item => item.product.isOnSale || item.product.isBogo || (item.product.discount && item.product.discount > 0));
-  const { eligible: bundleFree } = useBundleFreeDelivery(cartTotal, items.length);
-  const productFree = hasFreeDeliveryProduct(items);
-  const surcharge = (bundleFree || productFree) ? 0 : ((cartTotal < 50000 || hasSaleItems) ? 8000 : 0);
-  const totalDeliveryFee = deliveryFee + surcharge;
+  // Use cart data or existing order data
+  const checkoutItems = isViewingExistingOrder && existingOrderData?.items ? existingOrderData.items.map((it: any) => ({
+    product: {
+      id: it.product_id,
+      name: it.name,
+      price: it.price,
+      image: it.image || "/placeholder.svg",
+    },
+    quantity: it.quantity,
+    selectedColor: it.color,
+    selectedSize: it.size,
+  })) : items;
 
-  // Sum discount of selected coupons (only those whose min_order ≤ cartTotal).
-  // Mutual exclusion: if a wallet credit is selected, ignore stacked coupons
-  // entirely to prevent any double-application of promotions.
-  // Welcome bonus cannot be used together with any sale items.
+  const checkoutSubtotal = isViewingExistingOrder ? 
+    (checkoutItems.reduce((sum: number, it: any) => sum + (it.product.price * it.quantity), 0)) : 
+    cartTotal;
+
+  // Extra 8,000₮ delivery surcharge
+  const hasSaleItems = checkoutItems.some((item: any) => item.product.isOnSale || (item.product.discount && item.product.discount > 0));
+  const hasFlashSaleItems = checkoutItems.some((item: any) => item.product.isOnSale || item.product.isBogo || (item.product.discount && item.product.discount > 0));
+  
+  const { eligible: bundleFree } = useBundleFreeDelivery(checkoutSubtotal, checkoutItems.length);
+  const productFree = hasFreeDeliveryProduct(checkoutItems);
+  const surcharge = (bundleFree || productFree) ? 0 : ((checkoutSubtotal < 50000 || hasSaleItems) ? 8000 : 0);
+  const totalDeliveryFee = isViewingExistingOrder ? (Number(existingOrderData.delivery_fee) || 0) : (deliveryFee + surcharge);
+
+  // Discounts
   const welcomeBlocked = hasSaleItems && walletCredit?.credit_type === "welcome";
   const walletActive = !hasFlashSaleItems && !welcomeBlocked && !!walletCreditId && walletCreditDiscount > 0;
   const validSelectedCoupons = walletActive ? [] : availableCoupons.filter(
-    (c) => selectedCouponIds.includes(c.id) && (!c.minimum_order_amount || cartTotal >= Number(c.minimum_order_amount))
+    (c) => selectedCouponIds.includes(c.id) && (!c.minimum_order_amount || checkoutSubtotal >= Number(c.minimum_order_amount))
   );
   const rawCouponDiscount = validSelectedCoupons.reduce((s, c) => s + Number(c.reward_value || 0), 0);
-  const couponDiscount = Math.max(0, Math.min(rawCouponDiscount, cartTotal));
+  const couponDiscount = isViewingExistingOrder ? 0 : Math.max(0, Math.min(rawCouponDiscount, checkoutSubtotal));
 
-  // Wallet credit discount (only applies when no flash sale items and not a blocked welcome)
   const effectiveWalletDiscount = (hasFlashSaleItems || welcomeBlocked) ? 0 : walletCreditDiscount;
 
-  // Loyalty points discount (1 point = 1₮)
-  const totalBeforePoints = Math.max(0, cartTotal + totalDeliveryFee - couponDiscount - effectiveWalletDiscount);
+  const totalBeforePoints = isViewingExistingOrder ? 
+    (Number(existingOrderData.total) || 0) : 
+    Math.max(0, checkoutSubtotal + totalDeliveryFee - couponDiscount - effectiveWalletDiscount);
 
   const maxRedeemable = Math.max(0, Math.min(loyaltyPoints, totalBeforePoints));
   const pointsDiscount = usePoints ? Math.max(0, Math.min(pointsInput || 0, maxRedeemable)) : 0;
-  const grandTotal = Math.max(0, totalBeforePoints - pointsDiscount);
+  const grandTotal = isViewingExistingOrder ? totalBeforePoints : Math.max(0, totalBeforePoints - pointsDiscount);
 
   const createOrder = async (paymentStatus = "unpaid", pm: PaymentMethod = "cash") => {
     if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return null; }
@@ -467,38 +522,51 @@ const CheckoutPage = () => {
         <div className="md:grid md:grid-cols-3 md:gap-8">
           {/* Left column */}
           <div className="md:col-span-2 space-y-4">
-            {/* Shipping form */}
-            <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-4">
-              <h2 className="font-semibold text-foreground md:text-lg">Хүргэлтийн мэдээлэл</h2>
-              <div className="md:grid md:grid-cols-2 md:gap-4 space-y-3 md:space-y-0">
-                <input
-                  placeholder="Нэр *"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-                <input
-                  placeholder="Утасны дугаар *"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
+            {loadingExisting && (
+              <div className="flex items-center justify-center p-12 bg-card rounded-xl border border-border">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
-              <AddressSelector value={address} onChange={setAddress} />
-              <textarea
-                placeholder="Нэмэлт тэмдэглэл — хүргэлт, бараа болон бусад хүсэлт (заавал биш)"
-                rows={3}
-                value={note}
-                onChange={(e) => setNote(e.target.value.slice(0, 500))}
-                className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-              />
-              {note.length > 0 && (
-                <div className="text-[10px] text-muted-foreground/60 text-right -mt-2">{note.length}/500</div>
-              )}
-            </div>
+            )}
+            {/* Shipping form */}
+            {!isViewingExistingOrder ? (
+              <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-4">
+                <h2 className="font-semibold text-foreground md:text-lg">Хүргэлтийн мэдээлэл</h2>
+                <div className="md:grid md:grid-cols-2 md:gap-4 space-y-3 md:space-y-0">
+                  <input
+                    placeholder="Нэр *"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                  <input
+                    placeholder="Утасны дугаар *"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <AddressSelector value={address} onChange={setAddress} />
+                <textarea
+                  placeholder="Нэмэлт тэмдэглэл — хүргэлт, бараа болон бусад хүсэлт (заавал биш)"
+                  rows={3}
+                  value={note}
+                  onChange={(e) => setNote(e.target.value.slice(0, 500))}
+                  className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                />
+                {note.length > 0 && (
+                  <div className="text-[10px] text-muted-foreground/60 text-right -mt-2">{note.length}/500</div>
+                )}
+              </div>
+            ) : (
+              <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-2">
+                <h2 className="font-semibold text-foreground md:text-lg">Захиалгын мэдээлэл</h2>
+                <p className="text-sm text-muted-foreground">Утас: <span className="text-foreground font-medium">{phone}</span></p>
+                <p className="text-sm text-muted-foreground">Хаяг: <span className="text-foreground font-medium">{address}</span></p>
+              </div>
+            )}
 
             {/* Delivery Options */}
-            {!loadingDelivery && deliveryOptions.length > 0 && (
+            {!isViewingExistingOrder && !loadingDelivery && deliveryOptions.length > 0 && (
               <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-3">
                 <h2 className="font-semibold text-foreground md:text-lg flex items-center gap-2">
                   <Truck className="h-5 w-5 text-primary" />
@@ -675,7 +743,7 @@ const CheckoutPage = () => {
             </div>
 
             {/* Storepay Payment Flow */}
-            {paymentMethod === "storepay" && orderId && (
+            {paymentMethod === "storepay" && (orderId || isViewingExistingOrder) && (
               <StorepayPayment
                 amount={grandTotal}
                 orderId={orderId}
@@ -687,7 +755,7 @@ const CheckoutPage = () => {
             )}
 
             {/* QPay Payment Flow */}
-            {paymentMethod === "qpay" && orderId && (
+            {paymentMethod === "qpay" && (orderId || isViewingExistingOrder) && (
               <QPayPayment
                 orderId={orderId}
                 amount={grandTotal}
@@ -697,7 +765,7 @@ const CheckoutPage = () => {
             )}
 
             {/* Pocket Payment Flow */}
-            {paymentMethod === "pocket" && orderId && (
+            {paymentMethod === "pocket" && (orderId || isViewingExistingOrder) && (
               <PocketPayment
                 orderId={orderId}
                 amount={grandTotal}
@@ -707,7 +775,7 @@ const CheckoutPage = () => {
             )}
 
             {/* Sono Payment Flow */}
-            {paymentMethod === "sono" && orderId && (
+            {paymentMethod === "sono" && (orderId || isViewingExistingOrder) && (
               <SonoPayment
                 orderId={orderId}
                 amount={grandTotal}
@@ -721,7 +789,7 @@ const CheckoutPage = () => {
           <div className="md:col-span-1 mt-4 md:mt-0">
             <div className="bg-card rounded-xl p-4 md:p-6 border border-border space-y-3 md:sticky md:top-20">
               <h2 className="font-bold text-foreground md:text-lg">Захиалгын мэдээлэл</h2>
-              {items.map((item) => {
+              {checkoutItems.map((item: any) => {
                 const { product, quantity, selectedColor, selectedSize, selectedGiftPackage } = item;
                 const key = `${product.id}__${selectedColor || ""}__${selectedSize || ""}__${selectedGiftPackage?.id || ""}`;
                 return (
@@ -737,7 +805,7 @@ const CheckoutPage = () => {
                       {selectedGiftPackage && (
                         <p className="text-[10px] text-primary font-medium">
                           🎁 {selectedGiftPackage.name}
-                          {selectedGiftPackage.items.length > 0 && `: ${selectedGiftPackage.items.map(g => g.name).join(", ")}`}
+                          {selectedGiftPackage.items.length > 0 && `: ${selectedGiftPackage.items.map((g: any) => g.name).join(", ")}`}
                         </p>
                       )}
                       <p className="text-[10px] text-muted-foreground">x{quantity}</p>
@@ -749,7 +817,7 @@ const CheckoutPage = () => {
               <div className="border-t border-border pt-3 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Барааны дүн</span>
-                  <span className="text-foreground font-medium">{formatPrice(cartTotal)}</span>
+                  <span className="text-foreground font-medium">{formatPrice(checkoutSubtotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Хүргэлт</span>
@@ -790,7 +858,7 @@ const CheckoutPage = () => {
                     <p className="text-[10px] text-muted-foreground mb-2">Олон купоныг давхарлаж ашиглаж болно</p>
                     <div className="space-y-1.5 max-h-40 overflow-y-auto">
                       {availableCoupons.map((c) => {
-                        const minOk = !c.minimum_order_amount || cartTotal >= Number(c.minimum_order_amount);
+                        const minOk = !c.minimum_order_amount || checkoutSubtotal >= Number(c.minimum_order_amount);
                         const checked = selectedCouponIds.includes(c.id);
                         return (
                           <label key={c.id} className={`flex items-center gap-2 text-xs p-1.5 rounded border ${minOk ? "border-border cursor-pointer hover:bg-accent/30" : "border-border opacity-50"}`}>
@@ -820,9 +888,15 @@ const CheckoutPage = () => {
                   </div>
                 )}
 
+                {isViewingExistingOrder && (
+                  <div className="border-t border-border pt-2">
+                    <p className="text-xs text-muted-foreground">Захиалга баталгаажуулах хугацаа: {new Date(existingOrderData.created_at).toLocaleDateString()}</p>
+                  </div>
+                )}
+
                 {!isGuestCheckout && (
                   <WalletCreditsSection
-                    subtotal={cartTotal}
+                    subtotal={checkoutSubtotal}
                     hasFlashSaleItems={hasFlashSaleItems}
                     hasSaleItems={hasSaleItems}
                     selectedCreditId={walletCreditId}
@@ -904,7 +978,7 @@ const CheckoutPage = () => {
               </div>
 
               {/* Action button */}
-              {paymentMethod === "cash" && (
+              {paymentMethod === "cash" && !isViewingExistingOrder && (
                 <Button
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-base rounded-xl mt-2 gap-2"
                   disabled={submitting}
@@ -915,7 +989,7 @@ const CheckoutPage = () => {
                 </Button>
               )}
 
-              {paymentMethod === "storepay" && !orderId && (
+              {paymentMethod === "storepay" && !(orderId || isViewingExistingOrder) && !isViewingExistingOrder && (
                 <Button
                   className="w-full h-12 text-base rounded-xl mt-2 gap-2 bg-[#00B140] hover:bg-[#009930] text-white"
                   disabled={submitting}
@@ -926,7 +1000,7 @@ const CheckoutPage = () => {
                 </Button>
               )}
 
-              {paymentMethod === "qpay" && !orderId && (
+              {paymentMethod === "qpay" && !(orderId || isViewingExistingOrder) && !isViewingExistingOrder && (
                 <Button
                   className="w-full h-12 text-base rounded-xl mt-2 gap-2"
                   disabled={submitting}
@@ -937,7 +1011,7 @@ const CheckoutPage = () => {
                 </Button>
               )}
 
-              {paymentMethod === "pocket" && !orderId && (
+              {paymentMethod === "pocket" && !(orderId || isViewingExistingOrder) && !isViewingExistingOrder && (
                 <Button
                   className="w-full h-12 text-base rounded-xl mt-2 gap-2 bg-[#6C3FC5] hover:bg-[#5A32A8] text-white"
                   disabled={submitting}
@@ -948,7 +1022,7 @@ const CheckoutPage = () => {
                 </Button>
               )}
 
-              {paymentMethod === "sono" && !orderId && (
+              {paymentMethod === "sono" && !(orderId || isViewingExistingOrder) && !isViewingExistingOrder && (
                 <Button
                   className="w-full h-12 text-base rounded-xl mt-2 gap-2 bg-[#F25C2A] hover:bg-[#D94A1C] text-white"
                   disabled={submitting}
@@ -957,6 +1031,10 @@ const CheckoutPage = () => {
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <QrCode className="h-4 w-4" />}
                   {submitting ? "Үүсгэж байна..." : `Sono-р төлөх — ${formatPrice(grandTotal)}`}
                 </Button>
+              )}
+
+              {isViewingExistingOrder && !ordered && (
+                <p className="text-xs text-center text-muted-foreground mt-2">Төлбөр төлөх сувгаа дээрээс сонгоно уу</p>
               )}
 
               <p className="text-[10px] text-muted-foreground text-center mt-2">
