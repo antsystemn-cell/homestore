@@ -45,7 +45,7 @@ const ForYou = () => {
           </h2>
           <span className="text-xs text-muted-foreground">Таны сонирхолд тохирсон</span>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-0 md:gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 md:gap-5">
           {items.map((p) => (
             <ErrorBoundary key={p.id}>
               <ProductCard product={p} />
