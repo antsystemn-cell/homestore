@@ -34,22 +34,25 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
   const [activeIdx, setActiveIdx] = useState(0);
   const flashSale = useFlashSaleFor(product.id);
   
+  // LOG EVERYTHING TO FIND THE CULPRIT
+  useEffect(() => {
+    if (product.name.includes("PhotoTag")) {
+      console.log(`[ProductCard DEBUG] ${product.name}:`, {
+        product_price: product.price,
+        product_originalPrice: product.originalPrice,
+        colors: product.colors,
+        flashSale
+      });
+    }
+  }, [product, flashSale]);
+
   const firstColorPrice = product.colors?.[0]?.price;
   const basePrice = Number(firstColorPrice ?? product.price ?? 0);
   const baseOriginal = product.originalPrice ? Number(product.originalPrice) : null;
   
-  // DEBUG LOGGING - REMOVE AFTER FIX VERIFIED
-  if (basePrice <= 0) {
-    console.warn(`[ProductCard] Zero/Null price for product ${product.id} (${product.name}):`, {
-      price: product.price,
-      colors: product.colors
-    });
-  }
-  
   const displayPrice = flashSale ? Number(flashSale.sale_price) : basePrice;
   const displayOriginal = flashSale ? basePrice : baseOriginal;
   
-  // A product is valid if it has a price > 0
   const hasValidPrice = displayPrice > 0;
 
 
