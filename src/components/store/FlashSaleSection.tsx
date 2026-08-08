@@ -162,7 +162,7 @@ const FlashSaleSection = React.memo(() => {
     .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0];
 
   return (
-    <section className="py-4 md:py-6">
+    <section className="py-2 md:py-6 overflow-hidden">
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between gap-2 mb-3 md:mb-5">
           <div className="flex items-center gap-2 md:gap-2.5 min-w-0">
