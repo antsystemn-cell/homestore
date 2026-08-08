@@ -581,7 +581,7 @@ const Header = () => {
                             <div className="h-10 w-10 flex items-center justify-center overflow-hidden">
                               {b.logo_url ? <img src={b.logo_url} alt="" className="h-full w-full object-contain" /> : <Store className="h-4 w-4 text-muted-foreground" />}
                             </div>
-                            <span className="text-[9px] font-bold text-center truncate w-full">{b.name}</span>
+                            <span className="text-[10px] font-bold text-center truncate w-full">{b.name}</span>
                           </button>
                         ))}
                       </div>
