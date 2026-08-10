@@ -6804,7 +6804,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
           <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-md p-5 space-y-4" onClick={(e) => e.stopPropagation()}>
             <div>
               <h3 className="text-base font-bold flex items-center gap-2">
-                <Truck className="h-4 w-4 text-violet-600" /> Хүргэлтэнд гаргах
+                <Truck className="h-4 w-4 text-violet-600" /> {deliverDialog.reassign ? "Жолооч солих" : "Хүргэлтэнд гаргах"}
               </h3>
               <p className="text-xs text-muted-foreground mt-1">Swift Delivery Hub-д бүртгэлтэй жолоочоос сонгоно уу.</p>
             </div>
