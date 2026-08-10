@@ -6855,7 +6855,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                 className="px-4 py-2 rounded-lg text-sm font-bold bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-50 inline-flex items-center gap-2"
               >
                 {savingDeliverDialog ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Truck className="h-3.5 w-3.5" />}
-                Хүргэлтэнд гаргах
+                {deliverDialog.reassign ? "Жолооч солих" : "Хүргэлтэнд гаргах"}
               </button>
             </div>
           </div>
