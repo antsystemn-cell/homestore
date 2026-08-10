@@ -5334,7 +5334,6 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                         {/* Out for delivery driver display */}
                         {(o.status === "delivering" || o.delivery_status === "out_for_delivery") && (o.delivered_at == null && o.delivery_status !== "delivered") && (() => {
                           const assignedDriver = drivers.find((d) => d.id === o.driver_id);
-                          if (!assignedDriver && !o.delivery_signature_name) return null;
                           return (
                             <div className="bg-amber-500/5 border border-amber-500/30 rounded-xl p-3 text-xs space-y-1.5">
                               <p className="flex items-center gap-1.5 text-amber-600 font-bold">
@@ -5356,6 +5355,23 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                                   </span>
                                 </p>
                               )}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  loadPartnerDrivers();
+                                  setDeliverDialog({
+                                    orderId: o.id,
+                                    driverId: "",
+                                    courierName: o.delivery_signature_name || "",
+                                    courierPhone: "",
+                                    reassign: true,
+                                  });
+                                }}
+                                className="mt-1 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-amber-500/15 text-amber-700 border border-amber-500/40 hover:bg-amber-500/25"
+                              >
+                                <Truck className="h-3 w-3" /> Жолооч солих
+                              </button>
                             </div>
                           );
                         })()}
