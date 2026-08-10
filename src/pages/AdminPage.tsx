@@ -135,7 +135,7 @@ const AdminPage = () => {
   const [adImages, setAdImages] = useState<any[]>([]);
   const [drivers, setDrivers] = useState<{ id: string; full_name: string; phone: string | null; note: string | null; is_active: boolean }[]>([]);
   const [deliveryDraft, setDeliveryDraft] = useState<Record<string, { driverId: string; courierName: string }>>({});
-  const [deliverDialog, setDeliverDialog] = useState<{ orderId: string; driverId: string; courierName: string; courierPhone: string } | null>(null);
+  const [deliverDialog, setDeliverDialog] = useState<{ orderId: string; driverId: string; courierName: string; courierPhone: string; reassign?: boolean } | null>(null);
   const [bulkDeliverDialog, setBulkDeliverDialog] = useState<{ orderIds: string[]; driverId: string } | null>(null);
   const [bulkDispatchProgress, setBulkDispatchProgress] = useState<{ done: number; total: number; failed: number } | null>(null);
   const [partnerDrivers, setPartnerDrivers] = useState<{ driver_id: string; name: string; phone: string }[]>([]);
@@ -1064,7 +1064,7 @@ const AdminPage = () => {
 
   const confirmDeliverDispatch = async () => {
     if (!deliverDialog) return;
-    const { orderId, driverId } = deliverDialog;
+    const { orderId, driverId, reassign } = deliverDialog;
     const partnerDriver = partnerDrivers.find((d) => d.driver_id === driverId);
     if (!partnerDriver) {
       toast.error("Жолооч сонгоно уу");
@@ -1080,9 +1080,9 @@ const AdminPage = () => {
       delivery_failed_at: null,
       delivery_return_reason: null,
       delivery_signature_name: signature,
-      picked_up_at: nowIso,
       updated_at: nowIso,
     };
+    if (!reassign) patch.picked_up_at = nowIso;
     const { error } = await supabase.from("orders").update(patch).eq("id", orderId);
     if (error) {
       setSavingDeliverDialog(false);
@@ -1096,8 +1096,8 @@ const AdminPage = () => {
         fulfillment_status: "out_for_delivery",
         driver_id: partnerDriver.driver_id,
         driver_phone: partnerDriver.phone,
-        event_id: `easyshop-dispatch-${orderId}-${Date.now()}`,
-        note: `Жолооч оноогдлоо: ${signature}`,
+        event_id: `easyshop-${reassign ? "reassign" : "dispatch"}-${orderId}-${Date.now()}`,
+        note: `${reassign ? "Жолооч солигдлоо" : "Жолооч оноогдлоо"}: ${signature}`,
       },
     });
     setSavingDeliverDialog(false);
@@ -1105,7 +1105,7 @@ const AdminPage = () => {
       console.error("Swift Hub notify failed:", notifyErr || notifyData);
       toast.error("Хүргэлтийн систем рүү илгээхэд алдаа гарлаа");
     } else {
-      toast.success(`Хүргэлтэнд гарлаа · ${partnerDriver.name}`);
+      toast.success(`${reassign ? "Жолооч солигдлоо" : "Хүргэлтэнд гарлаа"} · ${partnerDriver.name}`);
     }
     setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, ...patch } : o)));
     setDeliverDialog(null);
@@ -5334,7 +5334,6 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                         {/* Out for delivery driver display */}
                         {(o.status === "delivering" || o.delivery_status === "out_for_delivery") && (o.delivered_at == null && o.delivery_status !== "delivered") && (() => {
                           const assignedDriver = drivers.find((d) => d.id === o.driver_id);
-                          if (!assignedDriver && !o.delivery_signature_name) return null;
                           return (
                             <div className="bg-amber-500/5 border border-amber-500/30 rounded-xl p-3 text-xs space-y-1.5">
                               <p className="flex items-center gap-1.5 text-amber-600 font-bold">
@@ -5356,6 +5355,23 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                                   </span>
                                 </p>
                               )}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  loadPartnerDrivers();
+                                  setDeliverDialog({
+                                    orderId: o.id,
+                                    driverId: "",
+                                    courierName: o.delivery_signature_name || "",
+                                    courierPhone: "",
+                                    reassign: true,
+                                  });
+                                }}
+                                className="mt-1 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-amber-500/15 text-amber-700 border border-amber-500/40 hover:bg-amber-500/25"
+                              >
+                                <Truck className="h-3 w-3" /> Жолооч солих
+                              </button>
                             </div>
                           );
                         })()}
@@ -6788,7 +6804,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
           <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-md p-5 space-y-4" onClick={(e) => e.stopPropagation()}>
             <div>
               <h3 className="text-base font-bold flex items-center gap-2">
-                <Truck className="h-4 w-4 text-violet-600" /> Хүргэлтэнд гаргах
+                <Truck className="h-4 w-4 text-violet-600" /> {deliverDialog.reassign ? "Жолооч солих" : "Хүргэлтэнд гаргах"}
               </h3>
               <p className="text-xs text-muted-foreground mt-1">Swift Delivery Hub-д бүртгэлтэй жолоочоос сонгоно уу.</p>
             </div>
@@ -6839,7 +6855,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                 className="px-4 py-2 rounded-lg text-sm font-bold bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-50 inline-flex items-center gap-2"
               >
                 {savingDeliverDialog ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Truck className="h-3.5 w-3.5" />}
-                Хүргэлтэнд гаргах
+                {deliverDialog.reassign ? "Жолооч солих" : "Хүргэлтэнд гаргах"}
               </button>
             </div>
           </div>
