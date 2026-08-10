@@ -1064,7 +1064,7 @@ const AdminPage = () => {
 
   const confirmDeliverDispatch = async () => {
     if (!deliverDialog) return;
-    const { orderId, driverId } = deliverDialog;
+    const { orderId, driverId, reassign } = deliverDialog;
     const partnerDriver = partnerDrivers.find((d) => d.driver_id === driverId);
     if (!partnerDriver) {
       toast.error("Жолооч сонгоно уу");
@@ -1080,9 +1080,9 @@ const AdminPage = () => {
       delivery_failed_at: null,
       delivery_return_reason: null,
       delivery_signature_name: signature,
-      picked_up_at: nowIso,
       updated_at: nowIso,
     };
+    if (!reassign) patch.picked_up_at = nowIso;
     const { error } = await supabase.from("orders").update(patch).eq("id", orderId);
     if (error) {
       setSavingDeliverDialog(false);
@@ -1096,8 +1096,8 @@ const AdminPage = () => {
         fulfillment_status: "out_for_delivery",
         driver_id: partnerDriver.driver_id,
         driver_phone: partnerDriver.phone,
-        event_id: `easyshop-dispatch-${orderId}-${Date.now()}`,
-        note: `Жолооч оноогдлоо: ${signature}`,
+        event_id: `easyshop-${reassign ? "reassign" : "dispatch"}-${orderId}-${Date.now()}`,
+        note: `${reassign ? "Жолооч солигдлоо" : "Жолооч оноогдлоо"}: ${signature}`,
       },
     });
     setSavingDeliverDialog(false);
@@ -1105,7 +1105,7 @@ const AdminPage = () => {
       console.error("Swift Hub notify failed:", notifyErr || notifyData);
       toast.error("Хүргэлтийн систем рүү илгээхэд алдаа гарлаа");
     } else {
-      toast.success(`Хүргэлтэнд гарлаа · ${partnerDriver.name}`);
+      toast.success(`${reassign ? "Жолооч солигдлоо" : "Хүргэлтэнд гарлаа"} · ${partnerDriver.name}`);
     }
     setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, ...patch } : o)));
     setDeliverDialog(null);
