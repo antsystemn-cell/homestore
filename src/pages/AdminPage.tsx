@@ -135,7 +135,7 @@ const AdminPage = () => {
   const [adImages, setAdImages] = useState<any[]>([]);
   const [drivers, setDrivers] = useState<{ id: string; full_name: string; phone: string | null; note: string | null; is_active: boolean }[]>([]);
   const [deliveryDraft, setDeliveryDraft] = useState<Record<string, { driverId: string; courierName: string }>>({});
-  const [deliverDialog, setDeliverDialog] = useState<{ orderId: string; driverId: string; courierName: string; courierPhone: string } | null>(null);
+  const [deliverDialog, setDeliverDialog] = useState<{ orderId: string; driverId: string; courierName: string; courierPhone: string; reassign?: boolean } | null>(null);
   const [bulkDeliverDialog, setBulkDeliverDialog] = useState<{ orderIds: string[]; driverId: string } | null>(null);
   const [bulkDispatchProgress, setBulkDispatchProgress] = useState<{ done: number; total: number; failed: number } | null>(null);
   const [partnerDrivers, setPartnerDrivers] = useState<{ driver_id: string; name: string; phone: string }[]>([]);
