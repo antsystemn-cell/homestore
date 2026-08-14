@@ -399,12 +399,21 @@ const ReelsPage = () => {
   if (typeof window !== "undefined" && window.innerWidth >= 768) return <Navigate to="/" replace />;
 
   return (
-    <div className="fixed inset-0 bg-black text-white z-50">
+    <div className="fixed inset-0 h-[100dvh] w-screen bg-black text-white z-[60] overflow-hidden">
       <button
         onClick={() => navigate("/")}
-        className="absolute top-3 left-3 z-30 flex items-center gap-1.5 bg-black/50 backdrop-blur px-3 py-1.5 rounded-full text-sm"
+        className="absolute top-3 left-3 z-30 h-9 w-9 rounded-full bg-black/45 backdrop-blur flex items-center justify-center active:scale-95"
+        aria-label="Буцах"
       >
-        <ArrowLeft className="h-4 w-4" /> Буцах
+        <ArrowLeft className="h-5 w-5" />
+      </button>
+
+      <button
+        onClick={() => setMuted((m) => !m)}
+        className="absolute top-3 right-3 z-30 h-9 w-9 rounded-full bg-black/45 backdrop-blur flex items-center justify-center active:scale-95"
+        aria-label={muted ? "Дуутай болгох" : "Дуугүй болгох"}
+      >
+        {muted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
       </button>
 
       {loading ? (
@@ -422,7 +431,7 @@ const ReelsPage = () => {
           style={{ scrollbarWidth: "none" }}
         >
           {reels.map((r) => (
-            <ReelCard key={r.id} reel={r} />
+            <ReelCard key={r.id} reel={r} muted={muted} />
           ))}
         </div>
       )}
