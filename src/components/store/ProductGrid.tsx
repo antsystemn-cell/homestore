@@ -5,6 +5,7 @@ import ProductCard from "./ProductCard";
 import ErrorBoundary from "./ErrorBoundary";
 import { transformImage } from "@/lib/imageUrl";
 import { useDominantColor } from "@/hooks/useDominantColor";
+import { blendModeForColor } from "@/lib/dominantColor";
 
 interface Brand {
   id: string;
@@ -39,6 +40,7 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
   }, [slides.length]);
 
   const dominant = useDominantColor(brand.logo_url);
+  const blend = blendModeForColor(dominant);
 
   return (
     <button
@@ -48,7 +50,7 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
     >
       <div
         className={`relative aspect-square overflow-hidden flex items-center justify-center ${
-          dominant ? "" : "bg-gradient-to-b from-white to-neutral-300"
+          dominant ? "isolate" : "bg-gradient-to-b from-white to-neutral-300"
         }`}
         style={dominant ? { backgroundColor: dominant } : undefined}
       >
@@ -84,6 +86,7 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
             alt={brand.name}
             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
             loading="lazy"
+            style={{ mixBlendMode: blend }}
           />
         ) : (
           <span className="text-4xl font-bold text-muted-foreground">
@@ -95,7 +98,7 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
         </span>
         {slides.length > 0 && brand.logo_url && (
           <div
-            className={`absolute bottom-2 left-2 z-10 rounded-md shadow-md ring-1 ring-black/5 overflow-hidden h-9 md:h-11 w-20 md:w-24 flex items-center justify-center transition-transform duration-200 group-hover:scale-105 ${
+            className={`absolute bottom-2 left-2 z-10 rounded-md shadow-md ring-1 ring-black/5 overflow-hidden h-9 md:h-11 w-20 md:w-24 flex items-center justify-center transition-transform duration-200 group-hover:scale-105 isolate ${
               dominant ? "" : "bg-white/95 backdrop-blur-sm"
             }`}
             style={dominant ? { backgroundColor: dominant } : undefined}
@@ -105,6 +108,7 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
               alt={brand.name}
               className="max-h-full max-w-full object-contain"
               loading="lazy"
+              style={{ mixBlendMode: blend }}
             />
           </div>
         )}
