@@ -360,7 +360,23 @@ const ReelsPage = () => {
   const isMobile = useIsMobile();
   const [reels, setReels] = useState<Reel[]>([]);
   const [loading, setLoading] = useState(true);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(() => {
+    try {
+      const stored = localStorage.getItem("reels-muted");
+      // default unmuted ("0") → false, muted ("1") → true; absent defaults to muted
+      return stored === null ? true : stored === "1";
+    } catch {
+      return true;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("reels-muted", muted ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
+  }, [muted]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
