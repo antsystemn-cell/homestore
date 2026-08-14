@@ -46,9 +46,8 @@ declare global {
   }
 }
 
-const NativeReelVideo = ({ url, title }: { url: string; title: string | null }) => {
+const NativeReelVideo = ({ url, title, muted }: { url: string; title: string | null; muted: boolean }) => {
   const [resolved, setResolved] = useState<string>(() => (url.startsWith("storage://product-videos/") ? "" : url));
-  const [muted, setMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
@@ -69,8 +68,12 @@ const NativeReelVideo = ({ url, title }: { url: string; title: string | null }) 
     };
   }, [url]);
 
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.muted = muted;
+  }, [muted]);
+
   return (
-    <div className="relative w-full h-full flex items-center justify-center bg-black">
+    <div className="absolute inset-0 flex items-center justify-center bg-black">
       {resolved ? (
         <video
           ref={videoRef}
@@ -80,7 +83,7 @@ const NativeReelVideo = ({ url, title }: { url: string; title: string | null }) 
           loop
           playsInline
           preload="auto"
-          className="w-full h-full object-contain"
+          className="w-full h-full object-cover"
           onLoadedMetadata={(e) => {
             const v = e.currentTarget;
             v.muted = muted;
@@ -91,22 +94,11 @@ const NativeReelVideo = ({ url, title }: { url: string; title: string | null }) 
       ) : (
         <div className="text-white/60 text-xs">Видео ачааллаж байна...</div>
       )}
-      <button
-        onClick={() => {
-          const v = videoRef.current;
-          const next = !muted;
-          setMuted(next);
-          if (v) v.muted = next;
-        }}
-        className="absolute top-3 right-3 z-10 bg-black/50 backdrop-blur px-3 py-1.5 rounded-full text-xs"
-        aria-label={muted ? "Дуутай болгох" : "Дуугүй болгох"}
-      >
-        {muted ? "🔇 Дуутай" : "🔊 Дуугүй"}
-      </button>
       {title && <p className="sr-only">{title}</p>}
     </div>
   );
 };
+
 
 const RailButton = ({
   icon,
