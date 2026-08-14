@@ -113,11 +113,11 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
           </div>
         )}
       </div>
-      <div className="px-3 py-2.5 md:px-4 md:py-3">
-        <h3 className="text-xs md:text-sm text-foreground line-clamp-2 leading-snug font-medium min-h-[2.5em]">
+      <div className="px-3 py-2.5 md:px-4 md:py-3 flex flex-col flex-1">
+        <h3 className="text-xs md:text-sm text-foreground line-clamp-2 leading-snug font-medium min-h-[2.6em]">
           {brand.name}
         </h3>
-        <div className="mt-2 text-[10px] md:text-xs text-muted-foreground">
+        <div className="mt-auto pt-2 text-[10px] md:text-xs text-muted-foreground">
           Бүх бараагаар үзэх →
         </div>
       </div>
