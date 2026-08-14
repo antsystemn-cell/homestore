@@ -153,29 +153,23 @@ const ProductGrid = React.memo(({ products, brands, allProducts }: Props) => {
     > = products.map((p) => ({ kind: "product" as const, product: p }));
 
     if (brands && brands.length > 0 && list.length > 0) {
-      // Evenly space brand tiles across the ENTIRE catalog with a wide, fixed gap.
-      // Every INTERVAL products we insert one brand, cycling through the brand list.
-      // Using allProducts.length ensures spacing stays consistent as more products load.
-      const INTERVAL = 10; // ~one brand every 10 products => wide, even spacing
-      const START = 6; // first brand appears after some products
-      const total = source.length || products.length;
+      // Show EVERY brand on EVERY page: spread all brand tiles evenly across the
+      // currently visible product slice instead of using a fixed global interval
+      // (which only ever surfaced ~2 brands per page).
+      const visibleCount = products.length;
       const seed = hashString(brands.map((b) => b.id).join("|"));
       const shuffled = [...brands].sort(
         (a, b) => (hashString(a.id + seed) % 1000) - (hashString(b.id + seed) % 1000)
       );
 
-      const globalPositions: Array<{ brand: Brand; pos: number }> = [];
-      let bi = 0;
-      for (let pos = START; pos <= total; pos += INTERVAL) {
-        globalPositions.push({ brand: shuffled[bi % shuffled.length], pos });
-        bi++;
-      }
+      const count = Math.min(shuffled.length, Math.max(1, Math.floor(visibleCount / 3)));
+      const step = visibleCount / (count + 1);
 
-      // Only apply positions that fall within the currently visible slice.
-      const visibleCount = products.length;
-      const placements = globalPositions
-        .filter((p) => p.pos <= visibleCount)
-        .sort((a, b) => b.pos - a.pos);
+      const placements = Array.from({ length: count }, (_, i) => ({
+        brand: shuffled[i % shuffled.length],
+        pos: Math.min(visibleCount, Math.max(1, Math.round((i + 1) * step))),
+      })).sort((a, b) => b.pos - a.pos);
+
       placements.forEach(({ brand, pos }) => {
         list.splice(pos, 0, { kind: "brand", brand });
       });
@@ -185,6 +179,7 @@ const ProductGrid = React.memo(({ products, brands, allProducts }: Props) => {
     const trimmed = list.length - (list.length % 4);
     return list.slice(0, trimmed);
   }, [products, brands, source.length]);
+
 
   return (
     <div className="max-w-6xl mx-auto md:px-8 md:py-6">
