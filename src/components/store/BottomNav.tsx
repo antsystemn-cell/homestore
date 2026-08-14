@@ -1,4 +1,4 @@
-import { Home, ShoppingCart, User } from "lucide-react";
+import { Home, Heart, User } from "lucide-react";
 
 const ReelsIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
