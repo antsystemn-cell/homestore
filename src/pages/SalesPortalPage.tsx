@@ -47,7 +47,7 @@ const STATUS_BADGE_CLASS: Record<string, string> = {
 
 const SalesPortalPage = () => {
   const navigate = useNavigate();
-  const { user, loading, isSeller, isAdmin, signOut } = useAuth();
+  const { user, loading: authLoading, rolesLoading, isSeller, isAdmin, signOut } = useAuth();
   const [sales, setSales] = useState<Sale[]>([]);
   const [fetching, setFetching] = useState(true);
   const [tab, setTab] = useState<"sales" | "orders">("sales");
@@ -108,6 +108,8 @@ const SalesPortalPage = () => {
       void loadOrders();
     }
   }, [loading, user, allowed, tab, orders.length, loadOrders]);
+
+  const loading = authLoading || (!!user && rolesLoading);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Уншиж байна...</div>;
