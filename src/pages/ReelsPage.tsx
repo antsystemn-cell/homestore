@@ -128,7 +128,7 @@ const RailButton = ({
   </button>
 );
 
-const ReelCard = ({ reel }: { reel: Reel }) => {
+const ReelCard = ({ reel, muted }: { reel: Reel; muted: boolean }) => {
   const navigate = useNavigate();
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const { user } = useAuth();
