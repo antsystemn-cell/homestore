@@ -119,105 +119,75 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     return () => { if (syncTimer.current) clearTimeout(syncTimer.current); };
   }, [items]);
 
-  // Merge logic for cart and wishlist when user logs in
-  const prevUserRef = useRef<string | null>(null);
+  // Merge cart once when the user logs in (never re-run on items change — that caused
+  // exponential quantity doubling)
+  const mergedUserRef = useRef<string | null>(null);
   useEffect(() => {
-    const mergeData = async () => {
+    const mergeForUser = async (userId: string) => {
+      if (mergedUserRef.current === userId) return;
+      mergedUserRef.current = userId;
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          prevUserRef.current = null;
-          return;
-        }
+        const { data: dbCartData } = await supabase
+          .from("active_carts" as any)
+          .select("items")
+          .eq("user_id", userId)
+          .maybeSingle();
 
-        // Only merge if user just logged in (prevUser was null)
-        if (prevUserRef.current !== user.id) {
-          prevUserRef.current = user.id;
+        const dbItems = (dbCartData as any)?.items;
+        if (!Array.isArray(dbItems) || dbItems.length === 0) return;
 
-          // 1. Merge Cart
-          const { data: dbCartData } = await supabase
-            .from("active_carts" as any)
-            .select("items")
-            .eq("user_id", user.id)
-            .maybeSingle();
-          
-          const dbCart = dbCartData as any;
-
-          const localCart = loadCartFromStorage();
-          if (localCart.length > 0) {
-            // Rule: When merging local guest cart with DB cart:
-            // 1. If local cart has items, we assume the user wants these to be primary.
-            // 2. The syncTimer effect will automatically upsert the current 'items' state to DB.
-            // 3. To strictly 'merge' (combine) rather than 'overwrite' (sync current state):
-            //    We check if DB has items that are NOT in the local state and add them.
-            
-            if (dbCart?.items && Array.isArray(dbCart.items)) {
-              setItems(prevItems => {
-                const merged = [...prevItems];
-                dbCart.items.forEach((dbItem: any) => {
-                  const localIndex = merged.findIndex(li => 
-                    li.product.id === dbItem.product_id && 
-                    li.selectedColor === dbItem.color && 
-                    li.selectedSize === dbItem.size
-                  );
-                  
-                  if (localIndex > -1) {
-                    // Rule: If item exists in both, we can either sum quantity or prefer local.
-                    // For now, let's sum them to ensure no data is lost.
-                    merged[localIndex] = {
-                      ...merged[localIndex],
-                      quantity: merged[localIndex].quantity + (dbItem.quantity || 1)
-                    };
-                  } else {
-                    // Item in DB but not local. 
-                    // Note: Since DB stores 'slim' product data, we use that as a placeholder
-                    // or ideally fetch full product details. Since we have the ID, 
-                    // we'll at least preserve the entry.
-                    merged.push({
-                      product: { 
-                        id: dbItem.product_id, 
-                        name: dbItem.product?.name || 'Product', 
-                        price: dbItem.product?.price || 0,
-                        image: '/placeholder.svg',
-                        category: ''
-                      } as any,
-                      quantity: dbItem.quantity || 1,
-                      selectedColor: dbItem.color,
-                      selectedSize: dbItem.size
-                    });
-                  }
-                });
-                return merged;
+        setItems((prevItems) => {
+          const merged = prevItems.map((i) => ({ ...i, quantity: sanitizeQty(i.quantity) }));
+          dbItems.forEach((dbItem: any) => {
+            if (!dbItem?.product_id) return;
+            const idx = merged.findIndex(
+              (li) =>
+                li.product.id === dbItem.product_id &&
+                (li.selectedColor ?? null) === (dbItem.color ?? null) &&
+                (li.selectedSize ?? null) === (dbItem.size ?? null)
+            );
+            if (idx > -1) {
+              // Prefer the larger quantity instead of summing (summing duplicated on re-runs)
+              merged[idx] = {
+                ...merged[idx],
+                quantity: sanitizeQty(Math.max(merged[idx].quantity, sanitizeQty(dbItem.quantity))),
+              };
+            } else {
+              merged.push({
+                product: {
+                  id: dbItem.product_id,
+                  name: dbItem.product?.name || "Product",
+                  price: dbItem.product?.price || 0,
+                  image: "/placeholder.svg",
+                  category: "",
+                } as any,
+                quantity: sanitizeQty(dbItem.quantity),
+                selectedColor: dbItem.color ?? null,
+                selectedSize: dbItem.size ?? null,
               });
             }
-          } else if (dbCart?.items && Array.isArray(dbCart.items)) {
-            // If local cart is empty, restore from DB
-            const restored = dbCart.items.map((dbItem: any) => ({
-              product: { 
-                id: dbItem.product_id, 
-                name: dbItem.product?.name || 'Product', 
-                price: dbItem.product?.price || 0,
-                image: '/placeholder.svg',
-                category: ''
-              } as any,
-              quantity: dbItem.quantity || 1,
-              selectedColor: dbItem.color,
-              selectedSize: dbItem.size
-            }));
-            setItems(restored);
-          }
-
-
-
-          // 2. Wishlist Merge (Logic: persist local wishlist to DB if we had a table, 
-          // but since wishlist is client-side only for now, we just persist it in localStorage)
-        }
+          });
+          return merged;
+        });
       } catch (err) {
-        console.error("Error during cart/wishlist merge:", err);
+        console.error("Error during cart merge:", err);
       }
     };
-    mergeData();
-  }, [items, wishlist]);
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session?.user) void mergeForUser(data.session.user.id);
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        void mergeForUser(session.user.id);
+      } else {
+        mergedUserRef.current = null;
+      }
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
 
 
   const addToCart = useCallback((product: Product, color?: string | null, size?: string | null, quantity: number = 1, giftPackage?: GiftPackage | null) => {
