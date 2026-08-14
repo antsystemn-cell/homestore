@@ -2,7 +2,7 @@ import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/data/products";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Lock, Loader2, Truck, Banknote, CreditCard, Copy, UserPlus, QrCode, Wallet } from "lucide-react";
+import { CheckCircle, Lock, Loader2, Truck, CreditCard, Copy, UserPlus, QrCode, Wallet } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
@@ -466,7 +466,7 @@ const CheckoutPage = () => {
 
   const handleStorepayCancel = () => {
     setOrderId(null);
-    setPaymentMethod("cash");
+    setPaymentMethod("qpay");
   };
 
   const handleQPayStart = async () => {
@@ -490,7 +490,7 @@ const CheckoutPage = () => {
 
   const handleQPayCancel = () => {
     setOrderId(null);
-    setPaymentMethod("cash");
+    setPaymentMethod("qpay");
   };
 
   const handlePocketStart = async () => {
@@ -514,7 +514,7 @@ const CheckoutPage = () => {
 
   const handlePocketCancel = () => {
     setOrderId(null);
-    setPaymentMethod("cash");
+    setPaymentMethod("qpay");
   };
 
   const handleSonoStart = async () => {
@@ -537,7 +537,7 @@ const CheckoutPage = () => {
 
   const handleSonoCancel = () => {
     setOrderId(null);
-    setPaymentMethod("cash");
+    setPaymentMethod("qpay");
   };
 
   // Guest order confirmation
