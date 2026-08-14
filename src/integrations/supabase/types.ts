@@ -1719,9 +1719,80 @@ export type Database = {
           },
         ]
       }
+      reel_comments: {
+        Row: {
+          author_name: string | null
+          content: string
+          created_at: string
+          id: string
+          is_hidden: boolean
+          reel_id: string
+          user_id: string | null
+        }
+        Insert: {
+          author_name?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          is_hidden?: boolean
+          reel_id: string
+          user_id?: string | null
+        }
+        Update: {
+          author_name?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          is_hidden?: boolean
+          reel_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reel_comments_reel_id_fkey"
+            columns: ["reel_id"]
+            isOneToOne: false
+            referencedRelation: "reels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reel_likes: {
+        Row: {
+          created_at: string
+          device_id: string | null
+          id: string
+          reel_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_id?: string | null
+          id?: string
+          reel_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_id?: string | null
+          id?: string
+          reel_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reel_likes_reel_id_fkey"
+            columns: ["reel_id"]
+            isOneToOne: false
+            referencedRelation: "reels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reels: {
         Row: {
           created_at: string
+          description: string | null
           facebook_embed_url: string
           facebook_page_url: string | null
           id: string
@@ -1733,6 +1804,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          description?: string | null
           facebook_embed_url: string
           facebook_page_url?: string | null
           id?: string
@@ -1744,6 +1816,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          description?: string | null
           facebook_embed_url?: string
           facebook_page_url?: string | null
           id?: string
