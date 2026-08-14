@@ -1,4 +1,4 @@
-import { Search, Clock, X, ArrowUpRight, LogIn, ChevronDown, LayoutGrid, Tag, Layers, Star, Store, Sparkles, User, Menu, LogOut, Package, History, Heart, UserCircle } from "lucide-react";
+import { Search, Clock, X, ArrowUpRight, LogIn, ChevronDown, LayoutGrid, Tag, Layers, Star, Store, Sparkles, User, Menu, LogOut, Package, History, Heart, UserCircle, ShoppingBag } from "lucide-react";
 import NotificationsBell from "./NotificationsBell";
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -6,8 +6,10 @@ import { Product, mapDbProduct } from "@/data/products";
 import { searchPublicProducts, fetchPublicCategories, fetchPublicBrands } from "@/lib/publicStoreApi";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useAuth } from "@/context/AuthContext";
+import { useCart } from "@/context/CartContext";
 import easyshopLogo from "@/assets/easyshop-logo.png.asset.json";
 import * as Icons from "lucide-react";
+
 
 const DEBOUNCE_MS = 300;
 const SUGGEST_DEBOUNCE_MS = 150;
