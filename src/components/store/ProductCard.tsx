@@ -284,7 +284,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
           {product.name}
         </h3>
         <RatingRow productId={product.id} />
-        <div className="mt-2 flex items-baseline gap-1.5 flex-nowrap min-h-[1.5rem]">
+        <div className="mt-auto pt-2 flex items-baseline gap-1.5 flex-nowrap min-h-[1.5rem]">
           {hasValidPrice ? (
             <>
               <span className={`font-extrabold text-base md:text-base whitespace-nowrap ${flashSale ? "text-destructive" : "text-foreground"}`}>
