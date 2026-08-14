@@ -40,6 +40,7 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
   }, [slides.length]);
 
   const dominant = useDominantColor(brand.logo_url);
+  const blend = blendModeForColor(dominant);
 
   return (
     <button
@@ -49,7 +50,7 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
     >
       <div
         className={`relative aspect-square overflow-hidden flex items-center justify-center ${
-          dominant ? "" : "bg-gradient-to-b from-white to-neutral-300"
+          dominant ? "isolate" : "bg-gradient-to-b from-white to-neutral-300"
         }`}
         style={dominant ? { backgroundColor: dominant } : undefined}
       >
