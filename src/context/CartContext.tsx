@@ -149,7 +149,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         if (!Array.isArray(dbItems) || dbItems.length === 0) return;
 
         setItems((prevItems) => {
-          const merged = prevItems.map((i) => ({ ...i, quantity: sanitizeQty(i.quantity) }));
+          const merged = prevItems.map((i) => ({ ...i, quantity: repairQty(i.quantity) }));
           dbItems.forEach((dbItem: any) => {
             if (!dbItem?.product_id) return;
             const idx = merged.findIndex(
@@ -162,7 +162,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
               // Prefer the larger quantity instead of summing (summing duplicated on re-runs)
               merged[idx] = {
                 ...merged[idx],
-                quantity: sanitizeQty(Math.max(merged[idx].quantity, sanitizeQty(dbItem.quantity))),
+                quantity: repairQty(Math.max(merged[idx].quantity, repairQty(dbItem.quantity))),
               };
             } else {
               merged.push({
@@ -173,7 +173,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                   image: "/placeholder.svg",
                   category: "",
                 } as any,
-                quantity: sanitizeQty(dbItem.quantity),
+                quantity: repairQty(dbItem.quantity),
+
                 selectedColor: dbItem.color ?? null,
                 selectedSize: dbItem.size ?? null,
               });
