@@ -141,6 +141,7 @@ const CollectionPage = () => {
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-0">
       <Header />
+      <CategoryNav />
 
       {/* Hero */}
       <div className="bg-gradient-to-b from-muted/40 to-background border-b">
