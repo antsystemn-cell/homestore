@@ -20,9 +20,10 @@ const BottomNav = () => {
   const tabs = [
     { path: "/", label: "Нүүр", icon: Home },
     { path: "/reels", label: "Reels", icon: ReelsIcon },
-    { path: "/cart", label: "Сагс", icon: ShoppingCart, badge: cartCount },
+    { path: "/wishlist", label: "Хадгалсан", icon: Heart },
     { path: "/profile/details", label: "Профайл", icon: User },
   ];
+
 
   const isActive = (path: string) => {
     if (path === "/") return pathname === "/";
