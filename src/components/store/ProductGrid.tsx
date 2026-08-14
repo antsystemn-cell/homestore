@@ -4,6 +4,7 @@ import { Product } from "@/data/products";
 import ProductCard from "./ProductCard";
 import ErrorBoundary from "./ErrorBoundary";
 import { transformImage } from "@/lib/imageUrl";
+import { useDominantColor } from "@/hooks/useDominantColor";
 
 interface Brand {
   id: string;
@@ -37,13 +38,20 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
     return () => clearInterval(t);
   }, [slides.length]);
 
+  const dominant = useDominantColor(brand.logo_url);
+
   return (
     <button
       type="button"
       onClick={() => navigate(`/${brand.name.replace(/\s+/g, "")}`)}
       className="bg-card overflow-hidden group transition-all duration-200 hover:shadow-lg rounded-none md:rounded-xl animate-fade-in block text-left w-full"
     >
-      <div className="relative aspect-square overflow-hidden flex items-center justify-center bg-gradient-to-b from-white to-neutral-300">
+      <div
+        className={`relative aspect-square overflow-hidden flex items-center justify-center ${
+          dominant ? "" : "bg-gradient-to-b from-white to-neutral-300"
+        }`}
+        style={dominant ? { backgroundColor: dominant } : undefined}
+      >
         {slides.length > 0 ? (
           <>
             {slides.map((src, i) => (
