@@ -276,7 +276,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
 
         {/* Color swatches disabled on cards — colors chosen on product detail page */}
       </div>
-      <div className="px-3 py-3 md:px-4 md:py-3 flex flex-col">
+      <div className="px-3 py-3 md:px-4 md:py-3 flex flex-col flex-1">
         {product.brandName && (
           <p className="text-[10px] text-primary font-bold uppercase tracking-wider mb-1">{product.brandName}</p>
         )}
