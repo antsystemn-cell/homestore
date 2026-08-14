@@ -142,7 +142,7 @@ const ReelCard = ({ reel, muted }: { reel: Reel; muted: boolean }) => {
   const url = reel.facebook_embed_url;
   const isFacebook = url.includes("facebook.com") || url.includes("fb.watch");
   const src = isFacebook
-    ? `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true&mute=0`
+    ? `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true&mute=${muted ? 1 : 0}`
     : "";
 
   useEffect(() => {
