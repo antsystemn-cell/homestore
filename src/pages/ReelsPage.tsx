@@ -10,6 +10,8 @@ import {
   Bookmark,
   Share2,
   ChevronRight,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
