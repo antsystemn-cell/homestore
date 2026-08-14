@@ -534,6 +534,18 @@ const Header = () => {
 
           {/* Mobile Profile Toggle */}
           <div className="flex md:hidden items-center gap-1">
+            <button
+              onClick={() => navigate("/cart")}
+              className="p-2 rounded-full hover:bg-secondary transition-colors relative"
+              title="Сагс"
+            >
+              <ShoppingBag className="h-6 w-6" />
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
+            </button>
             <button 
               onClick={() => {
                 // If user is logged out, show the auth drawer options immediately
