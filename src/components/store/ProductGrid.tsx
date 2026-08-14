@@ -86,6 +86,7 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
             alt={brand.name}
             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
             loading="lazy"
+            style={{ mixBlendMode: blend }}
           />
         ) : (
           <span className="text-4xl font-bold text-muted-foreground">
