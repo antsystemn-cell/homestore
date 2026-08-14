@@ -5,6 +5,7 @@ import ProductCard from "./ProductCard";
 import ErrorBoundary from "./ErrorBoundary";
 import { transformImage } from "@/lib/imageUrl";
 import { useDominantColor } from "@/hooks/useDominantColor";
+import { blendModeForColor } from "@/lib/dominantColor";
 
 interface Brand {
   id: string;
