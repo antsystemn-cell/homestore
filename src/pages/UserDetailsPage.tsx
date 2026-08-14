@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 const UserDetailsPage = () => {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { user, loading, signOut } = useAuth();
   
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
