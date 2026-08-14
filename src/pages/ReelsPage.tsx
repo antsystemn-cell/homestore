@@ -382,7 +382,7 @@ const ReelsPage = () => {
       if (pids.length) {
         const { data: prods } = await supabase
           .from("products")
-          .select("id, slug, name, price, original_price, thumbnail_url, image_url, stock")
+          .select("id, slug, name, price, original_price, thumbnail_url, image_url")
           .in("id", pids);
         const map = new Map((prods || []).map((p: any) => [p.id, p]));
         list.forEach((r) => {
