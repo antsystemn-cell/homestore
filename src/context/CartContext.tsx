@@ -46,13 +46,30 @@ function saveWishlistToStorage(items: Product[]) {
 }
 
 
+const MAX_QTY = 99;
+
+/** Guard against corrupted/exploded quantities (NaN, Infinity, huge merge loops) */
+export function sanitizeQty(q: any): number {
+  const n = Math.floor(Number(q));
+  if (!Number.isFinite(n) || n < 1) return 1;
+  return Math.min(n, MAX_QTY);
+}
+
 function loadCartFromStorage(): CartItem[] {
   try {
     const raw = localStorage.getItem(CART_STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed
+          .filter((i: any) => i && i.product && i.product.id)
+          .map((i: any) => ({ ...i, quantity: sanitizeQty(i.quantity) }));
+      }
+    }
   } catch {}
   return [];
 }
+
 
 function saveCartToStorage(items: CartItem[]) {
   try {
