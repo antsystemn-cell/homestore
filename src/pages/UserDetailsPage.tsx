@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { ArrowLeft, User, Mail, Phone, Calendar, ShieldCheck, Loader2, Save, MapPin, Plus, Trash2, Home, Briefcase, Map as MapIcon, Check } from "lucide-react";
+import { ArrowLeft, User, Mail, Phone, Calendar, ShieldCheck, Loader2, Save, MapPin, Plus, Trash2, Home, Briefcase, Map as MapIcon, Check, LogOut, LogIn } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import Header from "@/components/store/Header";
 import BottomNav from "@/components/store/BottomNav";
