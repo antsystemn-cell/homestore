@@ -191,22 +191,25 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
 
   const addToCart = useCallback((product: Product, color?: string | null, size?: string | null, quantity: number = 1, giftPackage?: GiftPackage | null) => {
+    const qty = sanitizeQty(quantity);
     setItems((prev) => {
       const key = makeCartKey(product.id, color, size, giftPackage?.id);
       const existing = prev.find((i) => makeCartKey(i.product.id, i.selectedColor, i.selectedSize, i.selectedGiftPackage?.id) === key);
       if (existing) {
         // Rule: If same item (Product + Color + Size + Gift) exists, increment quantity
         return prev.map((i) =>
-          makeCartKey(i.product.id, i.selectedColor, i.selectedSize, i.selectedGiftPackage?.id) === key ? { ...i, quantity: i.quantity + quantity } : i
+          makeCartKey(i.product.id, i.selectedColor, i.selectedSize, i.selectedGiftPackage?.id) === key
+            ? { ...i, quantity: sanitizeQty(sanitizeQty(i.quantity) + qty) }
+            : i
         );
       }
-      return [...prev, { product, quantity, selectedColor: color || null, selectedSize: size || null, selectedGiftPackage: giftPackage || null }];
+      return [...prev, { product, quantity: qty, selectedColor: color || null, selectedSize: size || null, selectedGiftPackage: giftPackage || null }];
     });
     track("add_to_cart", {
       product_id: product.id,
       category: product.category,
-      value: product.price * quantity,
-      metadata: { color: color || null, size: size || null, quantity, giftPackage: giftPackage?.name || null },
+      value: product.price * qty,
+      metadata: { color: color || null, size: size || null, quantity: qty, giftPackage: giftPackage?.name || null },
     });
   }, []);
 
@@ -217,14 +220,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const updateQuantity = useCallback((key: string, quantity: number) => {
-    if (quantity <= 0) {
+    const qty = Math.floor(Number(quantity));
+    if (!Number.isFinite(qty) || qty <= 0) {
       setItems((prev) => prev.filter((i) => makeCartKey(i.product.id, i.selectedColor, i.selectedSize, i.selectedGiftPackage?.id) !== key));
       return;
     }
+    const safe = sanitizeQty(qty);
     setItems((prev) =>
-      prev.map((i) => (makeCartKey(i.product.id, i.selectedColor, i.selectedSize, i.selectedGiftPackage?.id) === key ? { ...i, quantity } : i))
+      prev.map((i) => (makeCartKey(i.product.id, i.selectedColor, i.selectedSize, i.selectedGiftPackage?.id) === key ? { ...i, quantity: safe } : i))
     );
   }, []);
+
 
   const toggleWishlist = useCallback((product: Product) => {
     setWishlist((prev) =>
