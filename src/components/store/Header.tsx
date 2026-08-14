@@ -508,27 +508,6 @@ const Header = () => {
                 </span>
               )}
             </button>
-            {user ? (
-
-              <button 
-                onClick={() => navigate("/profile/details")}
-                className="p-2 rounded-full hover:bg-secondary transition-colors"
-                title="Миний мэдээлэл"
-              >
-                <User className="h-5 w-5" />
-              </button>
-            ) : (
-              <button 
-                onClick={() => {
-                  sessionStorage.setItem("returnAfterAuth", location.pathname + location.search);
-                  navigate("/auth");
-                }}
-                className="p-2 rounded-full hover:bg-secondary transition-colors"
-                title="Нэвтрэх"
-              >
-                <User className="h-5 w-5" />
-              </button>
-            )}
 
           </div>
 
