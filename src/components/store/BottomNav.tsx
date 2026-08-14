@@ -15,7 +15,7 @@ import { useCart } from "@/context/CartContext";
 const BottomNav = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { cartCount } = useCart();
+  
 
   const tabs = [
     { path: "/", label: "Нүүр", icon: Home },
