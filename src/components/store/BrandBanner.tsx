@@ -1,5 +1,6 @@
 import React from "react";
 import { useDominantColor } from "@/hooks/useDominantColor";
+import { blendModeForColor } from "@/lib/dominantColor";
 
 interface Props {
   logoUrl?: string | null;
@@ -7,6 +8,7 @@ interface Props {
 
 const BrandBanner: React.FC<Props> = ({ logoUrl }) => {
   const dominant = useDominantColor(logoUrl);
+  const blend = blendModeForColor(dominant);
 
   if (!logoUrl) return null;
 
