@@ -47,6 +47,8 @@ const ProductPage = lazy(() => lazyRetry(() => import("./pages/ProductPage")));
 const ProfilePage = lazy(() => lazyRetry(() => import("./pages/ProfilePage")));
 const WishlistPage = lazy(() => lazyRetry(() => import("./pages/WishlistPage")));
 const AuthPage = lazy(() => lazyRetry(() => import("./pages/AuthPage")));
+const OAuthConsent = lazy(() => lazyRetry(() => import("./pages/OAuthConsent")));
+
 const ResetPasswordPage = lazy(() => lazyRetry(() => import("./pages/ResetPasswordPage")));
 const AdminPage = lazy(() => lazyRetry(() => import("./pages/AdminPage")));
 const WarehousePage = lazy(() => lazyRetry(() => import("./pages/WarehousePage")));
@@ -122,7 +124,9 @@ const App = () => {
                     <Route path="/driver" element={<DriverPage />} />
                     <Route path="/delivery-entry" element={<DeliveryEntryPage />} />
                     <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
+
                     <Route path="*" element={<MaintenancePage />} />
                   </>
                 ) : (

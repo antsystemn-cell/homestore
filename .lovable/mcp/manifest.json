@@ -1,0 +1,162 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.2",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://jiqjebbxcwetakdhfuel.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "homestore-mongolia",
+      "version": "0.1.0",
+      "title": "HomeStore Mongolia"
+    },
+    "tools": [
+      {
+        "name": "search_products",
+        "title": "Бараа хайх (Search products)",
+        "description": "Search the EasyShop catalog by name, category or brand. Returns name, price, discount, stock and product URL slug.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Text to match against product name."
+            },
+            "category": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Filter by category code/name."
+            },
+            "on_sale": {
+              "type": "boolean",
+              "description": "Only products currently on sale."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "description": "Max number of results."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_product",
+        "title": "Барааны дэлгэрэнгүй (Get product)",
+        "description": "Get full details for one product by its URL slug or id: price, description, colors, sizes and stock.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "slug": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Product URL slug, e.g. 'hotbrush'."
+            },
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Product id (UUID)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_orders",
+        "title": "Миний захиалгууд (List my orders)",
+        "description": "List the signed-in user's own orders with status, payment status, total and items.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Filter by order status."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "description": "Max number of orders."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "track_order",
+        "title": "Захиалга хянах (Track order)",
+        "description": "Get delivery and payment status for one of the signed-in user's orders by order reference or id.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "order_ref": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Order reference, e.g. 'ES-260814-123456'."
+            },
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Order id (UUID)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_my_profile",
+        "title": "Миний профайл (My profile)",
+        "description": "Get the signed-in user's EasyShop profile: name, phone, address, loyalty points and referral code.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
