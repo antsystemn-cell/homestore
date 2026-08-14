@@ -29,7 +29,7 @@ const CategoryNav = () => {
       <div className="max-w-6xl mx-auto px-3 md:px-8 py-2.5">
         <div className="flex items-center gap-2 overflow-hidden">
           {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="h-[62px] w-[86px] bg-secondary animate-pulse rounded-xl shrink-0" />
+            <div key={i} className="h-[62px] w-[88px] bg-secondary animate-pulse rounded-xl shrink-0" />
           ))}
         </div>
       </div>
