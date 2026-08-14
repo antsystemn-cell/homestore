@@ -358,6 +358,7 @@ const ReelsPage = () => {
   const isMobile = useIsMobile();
   const [reels, setReels] = useState<Reel[]>([]);
   const [loading, setLoading] = useState(true);
+  const [muted, setMuted] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
