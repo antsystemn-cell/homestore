@@ -62,3 +62,18 @@ function cacheSet(src: string, value: string | null) {
   cache.set(src, value);
   return value;
 }
+
+/**
+ * Returns a CSS mix-blend-mode that makes a logo's baked-in white/light
+ * background dissolve into the brand color so the tile reads as a solid fill.
+ *  - light brand color  → "multiply" (white bg becomes the color, dark ink stays)
+ *  - dark brand color   → "normal"   (logo's own dark bg already matches)
+ */
+export function blendModeForColor(color: string | null): "multiply" | "normal" {
+  if (!color) return "normal";
+  const m = color.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i);
+  if (!m) return "normal";
+  const r = +m[1], g = +m[2], b = +m[3];
+  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return lum > 0.5 ? "multiply" : "normal";
+}
