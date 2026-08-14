@@ -6,6 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  rolesLoading: boolean;
   isAdmin: boolean;
   isModerator: boolean;
   isDriver: boolean;
