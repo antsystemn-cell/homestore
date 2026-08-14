@@ -11,6 +11,7 @@ type Reel = {
   facebook_page_url: string | null;
   product_id: string | null;
   title: string | null;
+  description?: string | null;
   is_active: boolean;
   sort_order: number;
   created_at: string;
@@ -36,6 +37,7 @@ const ReelsManager = () => {
     facebook_page_url: "",
     product_id: "",
     title: "",
+    description: "",
     sort_order: 0,
   });
 
@@ -89,6 +91,7 @@ const ReelsManager = () => {
       facebook_page_url: form.facebook_page_url.trim() || null,
       product_id: form.product_id || null,
       title: form.title.trim() || null,
+      description: form.description.trim() || null,
       sort_order: Number(form.sort_order) || 0,
     });
     if (error) {
@@ -96,7 +99,7 @@ const ReelsManager = () => {
       return;
     }
     toast.success("Reel нэмэгдлээ");
-    setForm({ facebook_embed_url: "", facebook_page_url: "", product_id: "", title: "", sort_order: 0 });
+    setForm({ facebook_embed_url: "", facebook_page_url: "", product_id: "", title: "", description: "", sort_order: 0 });
     load();
   };
 
@@ -182,6 +185,16 @@ const ReelsManager = () => {
             <Input
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className="text-xs text-muted-foreground">Тайлбар</label>
+            <textarea
+              rows={3}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              placeholder="Видеоны тайлбар..."
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
           </div>
           <div>
