@@ -104,8 +104,39 @@ const UserDetailsPage = () => {
   }
 
   if (!user && !loading) {
-    navigate("/auth");
-    return null;
+    return (
+      <div className="min-h-screen bg-background pb-20 md:pb-0">
+        <Header />
+        <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md px-4 py-3 flex items-center gap-3 border-b border-border md:hidden">
+          <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-secondary transition-colors">
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <h1 className="text-lg font-bold">Хэрэглэгчийн мэдээлэл</h1>
+        </header>
+        <main className="max-w-2xl mx-auto px-4 py-8 md:py-12">
+          <div className="flex flex-col items-center justify-center p-10 bg-card border border-border rounded-3xl text-center shadow-sm">
+            <div className="h-20 w-20 rounded-full bg-secondary flex items-center justify-center mb-5">
+              <User className="h-10 w-10 text-muted-foreground" />
+            </div>
+            <h2 className="text-xl font-bold mb-2">Тавтай морилно уу</h2>
+            <p className="text-sm text-muted-foreground mb-8 max-w-xs">
+              Захиалга хийх, хүслийн жагсаалт болон хаягаа хадгалахын тулд нэвтэрнэ үү.
+            </p>
+            <button
+              onClick={() => {
+                sessionStorage.setItem("returnAfterAuth", "/profile/details");
+                navigate("/auth");
+              }}
+              className="w-full max-w-xs py-4 rounded-2xl bg-primary text-primary-foreground font-bold text-base shadow-lg shadow-primary/20 hover:opacity-90 transition-all flex items-center justify-center gap-2"
+            >
+              <LogIn className="h-5 w-5" />
+              Нэвтрэх / Бүртгүүлэх
+            </button>
+          </div>
+        </main>
+        <BottomNav />
+      </div>
+    );
   }
 
   const handleSave = async () => {
