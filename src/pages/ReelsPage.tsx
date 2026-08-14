@@ -10,6 +10,8 @@ import {
   Bookmark,
   Share2,
   ChevronRight,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -46,9 +48,8 @@ declare global {
   }
 }
 
-const NativeReelVideo = ({ url, title }: { url: string; title: string | null }) => {
+const NativeReelVideo = ({ url, title, muted }: { url: string; title: string | null; muted: boolean }) => {
   const [resolved, setResolved] = useState<string>(() => (url.startsWith("storage://product-videos/") ? "" : url));
-  const [muted, setMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
@@ -69,8 +70,12 @@ const NativeReelVideo = ({ url, title }: { url: string; title: string | null }) 
     };
   }, [url]);
 
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.muted = muted;
+  }, [muted]);
+
   return (
-    <div className="relative w-full h-full flex items-center justify-center bg-black">
+    <div className="absolute inset-0 flex items-center justify-center bg-black">
       {resolved ? (
         <video
           ref={videoRef}
@@ -80,7 +85,7 @@ const NativeReelVideo = ({ url, title }: { url: string; title: string | null }) 
           loop
           playsInline
           preload="auto"
-          className="w-full h-full object-contain"
+          className="w-full h-full object-cover"
           onLoadedMetadata={(e) => {
             const v = e.currentTarget;
             v.muted = muted;
@@ -91,22 +96,11 @@ const NativeReelVideo = ({ url, title }: { url: string; title: string | null }) 
       ) : (
         <div className="text-white/60 text-xs">Видео ачааллаж байна...</div>
       )}
-      <button
-        onClick={() => {
-          const v = videoRef.current;
-          const next = !muted;
-          setMuted(next);
-          if (v) v.muted = next;
-        }}
-        className="absolute top-3 right-3 z-10 bg-black/50 backdrop-blur px-3 py-1.5 rounded-full text-xs"
-        aria-label={muted ? "Дуутай болгох" : "Дуугүй болгох"}
-      >
-        {muted ? "🔇 Дуутай" : "🔊 Дуугүй"}
-      </button>
       {title && <p className="sr-only">{title}</p>}
     </div>
   );
 };
+
 
 const RailButton = ({
   icon,
@@ -136,7 +130,7 @@ const RailButton = ({
   </button>
 );
 
-const ReelCard = ({ reel }: { reel: Reel }) => {
+const ReelCard = ({ reel, muted }: { reel: Reel; muted: boolean }) => {
   const navigate = useNavigate();
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const { user } = useAuth();
@@ -150,7 +144,7 @@ const ReelCard = ({ reel }: { reel: Reel }) => {
   const url = reel.facebook_embed_url;
   const isFacebook = url.includes("facebook.com") || url.includes("fb.watch");
   const src = isFacebook
-    ? `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true&mute=0`
+    ? `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true&mute=${muted ? 1 : 0}`
     : "";
 
   useEffect(() => {
@@ -219,7 +213,7 @@ const ReelCard = ({ reel }: { reel: Reel }) => {
   };
 
   return (
-    <section className="h-screen w-full snap-start relative flex items-center justify-center bg-black overflow-hidden">
+    <section className="h-[100dvh] w-full snap-start relative flex items-center justify-center bg-black overflow-hidden">
       {isFacebook ? (
         <>
           <iframe
@@ -239,7 +233,7 @@ const ReelCard = ({ reel }: { reel: Reel }) => {
           </a>
         </>
       ) : (
-        <NativeReelVideo url={url} title={reel.title} />
+        <NativeReelVideo url={url} title={reel.title} muted={muted} />
       )}
 
       {/* Gradient for readability */}
@@ -366,6 +360,7 @@ const ReelsPage = () => {
   const isMobile = useIsMobile();
   const [reels, setReels] = useState<Reel[]>([]);
   const [loading, setLoading] = useState(true);
+  const [muted, setMuted] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -407,12 +402,21 @@ const ReelsPage = () => {
   if (typeof window !== "undefined" && window.innerWidth >= 768) return <Navigate to="/" replace />;
 
   return (
-    <div className="fixed inset-0 bg-black text-white z-50">
+    <div className="fixed inset-0 h-[100dvh] w-screen bg-black text-white z-[60] overflow-hidden">
       <button
         onClick={() => navigate("/")}
-        className="absolute top-3 left-3 z-30 flex items-center gap-1.5 bg-black/50 backdrop-blur px-3 py-1.5 rounded-full text-sm"
+        className="absolute top-3 left-3 z-30 h-9 w-9 rounded-full bg-black/45 backdrop-blur flex items-center justify-center active:scale-95"
+        aria-label="Буцах"
       >
-        <ArrowLeft className="h-4 w-4" /> Буцах
+        <ArrowLeft className="h-5 w-5" />
+      </button>
+
+      <button
+        onClick={() => setMuted((m) => !m)}
+        className="absolute top-3 right-3 z-30 h-9 w-9 rounded-full bg-black/45 backdrop-blur flex items-center justify-center active:scale-95"
+        aria-label={muted ? "Дуутай болгох" : "Дуугүй болгох"}
+      >
+        {muted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
       </button>
 
       {loading ? (
@@ -430,7 +434,7 @@ const ReelsPage = () => {
           style={{ scrollbarWidth: "none" }}
         >
           {reels.map((r) => (
-            <ReelCard key={r.id} reel={r} />
+            <ReelCard key={r.id} reel={r} muted={muted} />
           ))}
         </div>
       )}
