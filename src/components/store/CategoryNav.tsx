@@ -40,7 +40,7 @@ const CategoryNav = () => {
     <div className={shell}>
       <div className="max-w-6xl mx-auto px-3 md:px-8 py-2.5">
         <div className="relative">
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth">
+          <div className="flex items-stretch gap-2 overflow-x-auto no-scrollbar scroll-smooth">
             {categories.map((c) => {
               const IconComponent = (Icons as any)[c.icon] || LayoutGrid;
               const active = activeSlug === c.slug;
@@ -50,7 +50,7 @@ const CategoryNav = () => {
                   onClick={() => navigate(`/category/${c.slug}`)}
                   aria-current={active ? "page" : undefined}
                   className={[
-                    "group shrink-0 flex flex-col items-center justify-center gap-1.5 px-4 md:px-5 py-2.5 rounded-xl border transition-all duration-200",
+                    "group shrink-0 w-[88px] flex flex-col items-center justify-center gap-1.5 py-2.5 rounded-xl border transition-all duration-200",
                     active
                       ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20"
                       : "bg-card/60 border-transparent text-muted-foreground hover:bg-secondary hover:border-border hover:text-foreground",
@@ -64,12 +64,12 @@ const CategoryNav = () => {
               );
             })}
 
-            <div className="h-10 w-px bg-border mx-1.5 shrink-0" />
+            <div className="h-10 w-px bg-border self-center shrink-0" />
 
             <button
               onClick={() => navigate("/shop")}
               className={[
-                "shrink-0 flex flex-col items-center justify-center gap-1.5 px-4 md:px-5 py-2.5 rounded-xl border border-dashed transition-all duration-200",
+                "shrink-0 w-[88px] flex flex-col items-center justify-center gap-1.5 py-2.5 rounded-xl border border-dashed transition-all duration-200",
                 isShop
                   ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20"
                   : "bg-secondary/60 border-border text-primary hover:bg-primary/10 hover:border-primary/40",
