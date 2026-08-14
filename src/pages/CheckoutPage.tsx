@@ -433,16 +433,6 @@ const CheckoutPage = () => {
     return data.id;
   };
 
-  const handleCashOrder = async () => {
-    setSubmitting(true);
-    const id = await createOrder("unpaid", "cash");
-    if (id) {
-      clearCart();
-      setOrdered(true);
-    }
-    setSubmitting(false);
-  };
-
   const handleCardOrder = async () => {
     setSubmitting(true);
     // For now, treat card as "unpaid" order that admin confirms, 
@@ -865,31 +855,6 @@ const CheckoutPage = () => {
                   </div>
                 </label>
 
-                {/* Cash on Delivery (COD) */}
-                <label
-                  className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    paymentMethod === "cash"
-                      ? "border-primary bg-primary/5 shadow-sm"
-                      : "border-border hover:border-muted-foreground/30"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="cash"
-                    checked={paymentMethod === "cash"}
-                    onChange={() => setPaymentMethod("cash")}
-                    className="w-4 h-4 accent-[hsl(var(--primary))]"
-                  />
-                  <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center">
-                    <Banknote className="h-5 w-5 text-foreground" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-foreground">Бэлнээр / COD</p>
-                    <p className="text-xs text-muted-foreground">Бараа хүлээн авахдаа төлөх</p>
-                  </div>
-                </label>
-
               </div>
             </div>
 
@@ -1129,17 +1094,6 @@ const CheckoutPage = () => {
               </div>
 
               {/* Action button */}
-              {paymentMethod === "cash" && !isViewingExistingOrder && (
-                <Button
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-base rounded-xl mt-2 gap-2"
-                  disabled={submitting}
-                  onClick={handleCashOrder}
-                >
-                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
-                  {submitting ? "Илгээж байна..." : `Захиалга өгөх — ${formatPrice(grandTotal)}`}
-                </Button>
-              )}
-
               {paymentMethod === "card" && !(orderId || isViewingExistingOrder) && !isViewingExistingOrder && (
                 <Button
                   className="w-full h-12 text-base rounded-xl mt-2 gap-2"
