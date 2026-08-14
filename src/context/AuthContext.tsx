@@ -57,7 +57,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (!result) {
         console.error("Failed to check roles: request timed out");
-        setAuthError(true);
         setIsAdmin(false);
         setIsModerator(false);
         setIsDriver(false);
@@ -67,7 +66,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (result.error) {
         console.error("Failed to check roles", result.error);
-        setAuthError(true);
         setIsAdmin(false);
         setIsModerator(false);
         setIsDriver(false);
@@ -83,7 +81,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsSeller(roles.includes("seller"));
     } catch (error) {
       console.error("Failed to check roles", error);
-      setAuthError(true);
       setIsAdmin(false);
       setIsModerator(false);
       setIsDriver(false);
@@ -109,9 +106,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!mounted) return;
       setSession(nextSession);
       setUser(nextSession?.user ?? null);
+      setLoading(false);
 
       if (nextSession?.user) {
-        await checkRoles(nextSession.user.id);
+        // Role loading must not block or invalidate an otherwise valid login.
+        void checkRoles(nextSession.user.id);
         // Redeem stashed referral code (silent no-op if invalid / already used)
         try {
           const pending = localStorage.getItem("pending_ref");
@@ -131,7 +130,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsSeller(false);
       }
 
-      if (mounted) setLoading(false);
     };
 
 
@@ -141,24 +139,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     const loadSession = async () => {
-      try {
-        const result = await withTimeout(supabase.auth.getSession());
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        try {
+          const result = await withTimeout(supabase.auth.getSession());
 
-        if (!result || result.error) {
+          if (result && !result.error) {
+            setAuthError(false);
+            await applySession(result.data.session);
+            return;
+          }
+
           if (result?.error) console.error("Failed to restore session", result.error);
-          clearStoredSession();
-          setAuthError(true);
-          await applySession(null);
-          return;
+        } catch (error) {
+          console.error("Failed to restore session", error);
         }
 
-        await applySession(result.data.session);
-      } catch (error) {
-        console.error("Failed to restore session", error);
-        clearStoredSession();
-        setAuthError(true);
-        await applySession(null);
+        if (attempt < 2) {
+          await new Promise((resolve) => setTimeout(resolve, 750 * (attempt + 1)));
+        }
       }
+
+      // A temporary backend/network error must never delete a valid saved login.
+      // Keep the token so the SDK can recover automatically on the next refresh.
+      if (!mounted) return;
+      setAuthError(true);
+      setLoading(false);
     };
 
     void loadSession();
