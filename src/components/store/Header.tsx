@@ -44,6 +44,8 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { cartCount, wishlist } = useCart();
+
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const suggestDebounceRef = useRef<ReturnType<typeof setTimeout>>();
   const searchBoxRef = useRef<HTMLDivElement>(null);
