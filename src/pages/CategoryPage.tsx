@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "@/components/store/Header";
+import CategoryNav from "@/components/store/CategoryNav";
 import BottomNav from "@/components/store/BottomNav";
 import ProductGrid from "@/components/store/ProductGrid";
 import ProductGridSkeleton from "@/components/store/ProductGridSkeleton";
@@ -86,6 +87,7 @@ const CategoryPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
+        <CategoryNav />
         <LoadError onRetry={() => window.location.reload()} />
         <BottomNav />
       </div>
@@ -95,7 +97,8 @@ const CategoryPage = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       <Header />
-      
+      <CategoryNav />
+
       {/* Category Hero/Breadcrumb */}
       <div className="bg-secondary/30 border-b border-border">
         <div className="max-w-6xl mx-auto px-4 py-6 md:py-10">

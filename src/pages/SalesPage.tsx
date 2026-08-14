@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Header from "@/components/store/Header";
+import CategoryNav from "@/components/store/CategoryNav";
 import BottomNav from "@/components/store/BottomNav";
 import ProductGrid from "@/components/store/ProductGrid";
 import ProductGridSkeleton from "@/components/store/ProductGridSkeleton";
@@ -75,6 +76,7 @@ const SalesPage = () => {
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
       <Header />
+      <CategoryNav />
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-4 md:py-8">
         <div className="flex items-center gap-3 mb-4 md:mb-6">
