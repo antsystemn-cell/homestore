@@ -98,7 +98,7 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
         </span>
         {slides.length > 0 && brand.logo_url && (
           <div
-            className={`absolute bottom-2 left-2 z-10 rounded-md shadow-md ring-1 ring-black/5 overflow-hidden h-9 md:h-11 w-20 md:w-24 flex items-center justify-center transition-transform duration-200 group-hover:scale-105 ${
+            className={`absolute bottom-2 left-2 z-10 rounded-md shadow-md ring-1 ring-black/5 overflow-hidden h-9 md:h-11 w-20 md:w-24 flex items-center justify-center transition-transform duration-200 group-hover:scale-105 isolate ${
               dominant ? "" : "bg-white/95 backdrop-blur-sm"
             }`}
             style={dominant ? { backgroundColor: dominant } : undefined}
@@ -108,6 +108,7 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
               alt={brand.name}
               className="max-h-full max-w-full object-contain"
               loading="lazy"
+              style={{ mixBlendMode: blend }}
             />
           </div>
         )}
