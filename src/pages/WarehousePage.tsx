@@ -86,7 +86,8 @@ const formatPrice = (n: number) => `${(n ?? 0).toLocaleString("mn-MN")}₮`;
 
 export default function WarehousePage() {
   const navigate = useNavigate();
-  const { user, isAdmin, isModerator, loading: authLoading } = useAuth();
+  const { user, isAdmin, isModerator, loading: authBaseLoading, rolesLoading } = useAuth();
+  const authLoading = authBaseLoading || (!!user && rolesLoading);
   const hasAccess = isAdmin || isModerator;
 
   const [tab, setTab] = useState<Tab>("dashboard");

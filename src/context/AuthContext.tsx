@@ -6,6 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  rolesLoading: boolean;
   isAdmin: boolean;
   isModerator: boolean;
   isDriver: boolean;
@@ -45,8 +46,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isDriver, setIsDriver] = useState(false);
   const [isSeller, setIsSeller] = useState(false);
   const [authError, setAuthError] = useState(false);
+  const [rolesLoading, setRolesLoading] = useState(true);
 
   const checkRoles = async (userId: string) => {
+    setRolesLoading(true);
     try {
       const result = await withTimeout(
         supabase
@@ -85,6 +88,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsModerator(false);
       setIsDriver(false);
       setIsSeller(false);
+    } finally {
+      setRolesLoading(false);
     }
   };
 
@@ -128,6 +133,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsModerator(false);
         setIsDriver(false);
         setIsSeller(false);
+        setRolesLoading(false);
       }
 
     };
@@ -188,12 +194,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsDriver(false);
       setIsSeller(false);
       setAuthError(false);
+      setRolesLoading(false);
       setLoading(false);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isAdmin, isModerator, isDriver, isSeller, authError, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, rolesLoading, isAdmin, isModerator, isDriver, isSeller, authError, signOut }}>
       {children}
     </AuthContext.Provider>
   );

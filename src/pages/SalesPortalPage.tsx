@@ -47,7 +47,8 @@ const STATUS_BADGE_CLASS: Record<string, string> = {
 
 const SalesPortalPage = () => {
   const navigate = useNavigate();
-  const { user, loading, isSeller, isAdmin, signOut } = useAuth();
+  const { user, loading: authLoading, rolesLoading, isSeller, isAdmin, signOut } = useAuth();
+  const loading = authLoading || (!!user && rolesLoading);
   const [sales, setSales] = useState<Sale[]>([]);
   const [fetching, setFetching] = useState(true);
   const [tab, setTab] = useState<"sales" | "orders">("sales");
