@@ -1,4 +1,4 @@
-import { Search, Clock, X, ArrowUpRight, LogIn, ChevronDown, LayoutGrid, Tag, Layers, Star, Store, Sparkles, User, Menu, LogOut, Package, History, Heart, UserCircle } from "lucide-react";
+import { Search, Clock, X, ArrowUpRight, LogIn, ChevronDown, LayoutGrid, Tag, Layers, Star, Store, Sparkles, User, Menu, LogOut, Package, History, Heart, UserCircle, ShoppingBag } from "lucide-react";
 import NotificationsBell from "./NotificationsBell";
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -6,8 +6,10 @@ import { Product, mapDbProduct } from "@/data/products";
 import { searchPublicProducts, fetchPublicCategories, fetchPublicBrands } from "@/lib/publicStoreApi";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useAuth } from "@/context/AuthContext";
+import { useCart } from "@/context/CartContext";
 import easyshopLogo from "@/assets/easyshop-logo.png.asset.json";
 import * as Icons from "lucide-react";
+
 
 const DEBOUNCE_MS = 300;
 const SUGGEST_DEBOUNCE_MS = 150;
@@ -42,6 +44,8 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { cartCount, wishlist } = useCart();
+
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const suggestDebounceRef = useRef<ReturnType<typeof setTimeout>>();
   const searchBoxRef = useRef<HTMLDivElement>(null);
@@ -480,7 +484,32 @@ const Header = () => {
         <div className="flex items-center gap-2 md:gap-3 shrink-0">
           <div className="hidden md:flex items-center gap-2">
             <NotificationsBell />
+            <button
+              onClick={() => navigate("/wishlist")}
+              className="p-2 rounded-full hover:bg-secondary transition-colors relative"
+              title="Хадгалсан"
+            >
+              <Heart className="h-5 w-5" />
+              {wishlist.length > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                  {wishlist.length > 99 ? "99+" : wishlist.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => navigate("/cart")}
+              className="p-2 rounded-full hover:bg-secondary transition-colors relative"
+              title="Сагс"
+            >
+              <ShoppingBag className="h-5 w-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
+            </button>
             {user ? (
+
               <button 
                 onClick={() => navigate("/profile/details")}
                 className="p-2 rounded-full hover:bg-secondary transition-colors"
