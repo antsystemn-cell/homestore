@@ -508,8 +508,17 @@ const Header = () => {
                 </span>
               )}
             </button>
-
+            {user && (
+              <button
+                onClick={() => navigate("/profile/details")}
+                className="p-2 rounded-full hover:bg-secondary transition-colors"
+                title="Профайл"
+              >
+                <UserCircle className="h-5 w-5" />
+              </button>
+            )}
           </div>
+
 
           {/* Mobile Profile Toggle */}
           <div className="flex md:hidden items-center gap-1">
