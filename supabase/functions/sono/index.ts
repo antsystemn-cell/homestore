@@ -145,12 +145,18 @@ async function handleCreateInvoice(body: any, req: Request) {
   console.log("Sono response:", res.status, JSON.stringify(data));
 
   if (!res.ok || data?.code !== 0 || !data?.response?.qr_string) {
+    // 401 = Sono merchant credentials invalid/expired or server IP not whitelisted
+    if (data?.code === 401) {
+      console.error("Sono auth failed (401). Check SONO_AUTH_USER / SONO_AUTH_TOKEN and IP whitelist.");
+      return err("Sono холболтын эрх хүчингүй байна. Sono-той холбогдож нэвтрэх мэдээллээ шинэчилнэ үү.", 502);
+    }
     const message =
       data?.response?.ErrorMessage ||
       data?.description ||
       "Sono нэхэмжлэл үүсгэхэд алдаа гарлаа";
     return err(message, 502);
   }
+
 
   const sonoResp = data.response;
 
