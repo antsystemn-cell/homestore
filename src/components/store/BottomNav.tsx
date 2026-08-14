@@ -1,4 +1,4 @@
-import { Home, ShoppingCart, User } from "lucide-react";
+import { Home, Heart, User } from "lucide-react";
 
 const ReelsIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
@@ -10,19 +10,20 @@ const ReelsIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 import { useNavigate, useLocation } from "react-router-dom";
-import { useCart } from "@/context/CartContext";
+
 
 const BottomNav = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { cartCount } = useCart();
+  
 
   const tabs = [
     { path: "/", label: "Нүүр", icon: Home },
     { path: "/reels", label: "Reels", icon: ReelsIcon },
-    { path: "/cart", label: "Сагс", icon: ShoppingCart, badge: cartCount },
+    { path: "/wishlist", label: "Хадгалсан", icon: Heart },
     { path: "/profile/details", label: "Профайл", icon: User },
   ];
+
 
   const isActive = (path: string) => {
     if (path === "/") return pathname === "/";
@@ -112,11 +113,8 @@ const BottomNav = () => {
                     active ? "scale-110 fill-sale/15" : ""
                   }`}
                 />
-                {t.badge !== undefined && t.badge > 0 && (
-                  <span className="absolute -top-1.5 -right-2 bg-sale text-sale-foreground text-[9px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
-                    {t.badge}
-                  </span>
-                )}
+
+
               </div>
               <span className={`text-[10px] ${active ? "font-bold" : "font-medium"}`}>
                 {t.label}

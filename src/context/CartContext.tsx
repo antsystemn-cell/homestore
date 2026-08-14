@@ -47,6 +47,9 @@ function saveWishlistToStorage(items: Product[]) {
 
 
 const MAX_QTY = 99;
+/** Anything above this in stored data is corrupted legacy data, not a real order */
+const SANE_QTY = 20;
+const REPAIR_FLAG = "easyshop_cart_repair_v2";
 
 /** Guard against corrupted/exploded quantities (NaN, Infinity, huge merge loops) */
 export function sanitizeQty(q: any): number {
@@ -55,20 +58,29 @@ export function sanitizeQty(q: any): number {
   return Math.min(n, MAX_QTY);
 }
 
+/** Repair quantities coming from persisted storage (local or DB) */
+function repairQty(q: any): number {
+  const n = sanitizeQty(q);
+  return n > SANE_QTY ? 1 : n;
+}
+
 function loadCartFromStorage(): CartItem[] {
   try {
     const raw = localStorage.getItem(CART_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
-        return parsed
+        const items = parsed
           .filter((i: any) => i && i.product && i.product.id)
-          .map((i: any) => ({ ...i, quantity: sanitizeQty(i.quantity) }));
+          .map((i: any) => ({ ...i, quantity: repairQty(i.quantity) }));
+        try { localStorage.setItem(REPAIR_FLAG, "1"); } catch {}
+        return items;
       }
     }
   } catch {}
   return [];
 }
+
 
 
 function saveCartToStorage(items: CartItem[]) {
@@ -137,7 +149,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         if (!Array.isArray(dbItems) || dbItems.length === 0) return;
 
         setItems((prevItems) => {
-          const merged = prevItems.map((i) => ({ ...i, quantity: sanitizeQty(i.quantity) }));
+          const merged = prevItems.map((i) => ({ ...i, quantity: repairQty(i.quantity) }));
           dbItems.forEach((dbItem: any) => {
             if (!dbItem?.product_id) return;
             const idx = merged.findIndex(
@@ -150,7 +162,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
               // Prefer the larger quantity instead of summing (summing duplicated on re-runs)
               merged[idx] = {
                 ...merged[idx],
-                quantity: sanitizeQty(Math.max(merged[idx].quantity, sanitizeQty(dbItem.quantity))),
+                quantity: repairQty(Math.max(merged[idx].quantity, repairQty(dbItem.quantity))),
               };
             } else {
               merged.push({
@@ -161,7 +173,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
                   image: "/placeholder.svg",
                   category: "",
                 } as any,
-                quantity: sanitizeQty(dbItem.quantity),
+                quantity: repairQty(dbItem.quantity),
+
                 selectedColor: dbItem.color ?? null,
                 selectedSize: dbItem.size ?? null,
               });
