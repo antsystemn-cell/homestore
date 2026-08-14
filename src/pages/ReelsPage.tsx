@@ -211,7 +211,7 @@ const ReelCard = ({ reel, muted }: { reel: Reel; muted: boolean }) => {
   };
 
   return (
-    <section className="h-screen w-full snap-start relative flex items-center justify-center bg-black overflow-hidden">
+    <section className="h-[100dvh] w-full snap-start relative flex items-center justify-center bg-black overflow-hidden">
       {isFacebook ? (
         <>
           <iframe
