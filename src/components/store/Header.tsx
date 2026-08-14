@@ -525,16 +525,6 @@ const Header = () => {
                 </span>
               )}
             </button>
-            <button 
-              onClick={() => {
-                // If user is logged out, show the auth drawer options immediately
-                // If logged in, we want them to see their profile info
-                setShowMenu(true);
-              }}
-              className="p-2 rounded-full hover:bg-secondary transition-colors"
-            >
-               <User className="h-6 w-6" />
-            </button>
           </div>
 
 
