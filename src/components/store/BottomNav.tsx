@@ -113,11 +113,8 @@ const BottomNav = () => {
                     active ? "scale-110 fill-sale/15" : ""
                   }`}
                 />
-                {t.badge !== undefined && t.badge > 0 && (
-                  <span className="absolute -top-1.5 -right-2 bg-sale text-sale-foreground text-[9px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
-                    {t.badge}
-                  </span>
-                )}
+
+
               </div>
               <span className={`text-[10px] ${active ? "font-bold" : "font-medium"}`}>
                 {t.label}
