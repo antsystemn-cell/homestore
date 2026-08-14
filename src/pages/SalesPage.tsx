@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Header from "@/components/store/Header";
+import CategoryNav from "@/components/store/CategoryNav";
 import BottomNav from "@/components/store/BottomNav";
 import ProductGrid from "@/components/store/ProductGrid";
 import ProductGridSkeleton from "@/components/store/ProductGridSkeleton";

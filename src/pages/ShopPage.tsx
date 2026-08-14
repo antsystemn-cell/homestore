@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import Header from "@/components/store/Header";
+import CategoryNav from "@/components/store/CategoryNav";
 import ProductGrid from "@/components/store/ProductGrid";
 import BottomNav from "@/components/store/BottomNav";
 import ProductGridSkeleton from "@/components/store/ProductGridSkeleton";
