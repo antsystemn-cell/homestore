@@ -231,7 +231,7 @@ const ReelCard = ({ reel, muted }: { reel: Reel; muted: boolean }) => {
           </a>
         </>
       ) : (
-        <NativeReelVideo url={url} title={reel.title} />
+        <NativeReelVideo url={url} title={reel.title} muted={muted} />
       )}
 
       {/* Gradient for readability */}
