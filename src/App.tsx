@@ -153,6 +153,8 @@ const App = () => {
                     
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/auth/callback" element={<AuthCallback />} />
+                    <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
+
                     <Route path="/reset-password" element={<ResetPasswordPage />} />
                     <Route path="/admin" element={<AdminPage />} />
                     <Route path="/admin/manual-order" element={<AdminPage />} />
