@@ -286,29 +286,22 @@ const ReelCard = ({ reel }: { reel: Reel }) => {
         )}
 
         {reel.product && (
-          <>
+          <div className="flex items-stretch gap-2">
+            {/* Douyin-style product link tile */}
             <button
               onClick={() => navigate(`/product/${reel.product!.slug || reel.product!.id}`)}
-              className="self-start flex items-center gap-1 text-[11px] text-white bg-white/15 backdrop-blur border border-white/20 px-2.5 py-1 rounded-full"
+              className="flex-1 min-w-0 flex items-center gap-2 bg-black/55 backdrop-blur-md border border-white/15 rounded-lg p-1.5 text-left active:scale-[0.98] transition-transform"
             >
-              Барааны хуудас руу орох <ChevronRight className="h-3 w-3" />
-            </button>
-
-            <div className="bg-black/60 backdrop-blur-md rounded-2xl p-2.5 flex items-center gap-2.5 border border-white/10">
-              <button
-                onClick={() => navigate(`/product/${reel.product!.slug || reel.product!.id}`)}
-                className="flex-shrink-0"
-              >
-                <img
-                  src={reel.product.thumbnail_url || reel.product.image_url || ""}
-                  alt={reel.product.name}
-                  className="h-14 w-14 rounded-lg object-cover bg-white"
-                />
-              </button>
+              <img
+                src={reel.product.thumbnail_url || reel.product.image_url || ""}
+                alt={reel.product.name}
+                loading="lazy"
+                className="h-11 w-11 rounded-md object-cover bg-white flex-shrink-0"
+              />
               <div className="flex-1 min-w-0">
-                <p className="text-white text-xs font-medium line-clamp-1">{reel.product.name}</p>
+                <p className="text-white text-[12px] leading-tight line-clamp-2">{reel.product.name}</p>
                 <div className="flex items-baseline gap-1.5 mt-0.5">
-                  <span className="text-white font-bold text-sm">
+                  <span className="text-white font-bold text-[13px]">
                     {reel.product.price.toLocaleString()}₮
                   </span>
                   {reel.product.original_price && reel.product.original_price > reel.product.price && (
@@ -318,12 +311,16 @@ const ReelCard = ({ reel }: { reel: Reel }) => {
                   )}
                 </div>
               </div>
+              <ChevronRight className="h-4 w-4 text-white/70 flex-shrink-0" />
+            </button>
+
+            <div className="flex flex-col gap-1 justify-center">
               <button
                 onClick={() => {
                   addToCart(reel.product as any, null, null, 1);
                   toast.success("Сагсанд нэмэгдлээ");
                 }}
-                className="flex-shrink-0 h-10 w-10 rounded-full bg-white/95 text-black flex items-center justify-center active:scale-95"
+                className="h-8 w-8 rounded-full bg-white/95 text-black flex items-center justify-center active:scale-95"
                 aria-label="Сагсанд нэмэх"
               >
                 <ShoppingCart className="h-4 w-4" />
@@ -333,13 +330,14 @@ const ReelCard = ({ reel }: { reel: Reel }) => {
                   addToCart(reel.product as any, null, null, 1);
                   navigate("/checkout");
                 }}
-                className="flex-shrink-0 h-10 px-3 rounded-full bg-primary text-primary-foreground text-xs font-semibold flex items-center gap-1 active:scale-95"
+                className="h-8 px-2.5 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold flex items-center gap-1 active:scale-95"
               >
-                <Zap className="h-3.5 w-3.5" /> Захиалах
+                <Zap className="h-3 w-3" /> Авах
               </button>
             </div>
-          </>
+          </div>
         )}
+
 
         {!reel.product && reel.facebook_page_url && (
           <a
