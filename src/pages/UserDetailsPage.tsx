@@ -428,6 +428,18 @@ const UserDetailsPage = () => {
               Имэйл хаягийг аюулгүй байдлын үүднээс өөрчлөх боломжгүй.
             </p>
           </div>
+
+          {/* Logout Button */}
+          <button
+            onClick={async () => {
+              await signOut();
+              navigate("/");
+            }}
+            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border border-destructive/30 text-destructive font-bold hover:bg-destructive/10 transition-colors"
+          >
+            <LogOut className="h-5 w-5" />
+            Гарах
+          </button>
         </div>
       </main>
 
