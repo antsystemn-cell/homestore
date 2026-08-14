@@ -184,6 +184,16 @@ const ReelsManager = () => {
               onChange={(e) => setForm({ ...form, title: e.target.value })}
             />
           </div>
+          <div className="md:col-span-2">
+            <label className="text-xs text-muted-foreground">Тайлбар</label>
+            <textarea
+              rows={3}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              placeholder="Видеоны тайлбар..."
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+            />
+          </div>
           <div>
             <label className="text-xs text-muted-foreground">Дараалал</label>
             <Input
