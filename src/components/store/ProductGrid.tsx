@@ -46,7 +46,7 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
     <button
       type="button"
       onClick={() => navigate(`/${brand.name.replace(/\s+/g, "")}`)}
-      className="bg-card overflow-hidden group transition-all duration-200 hover:shadow-lg rounded-none md:rounded-xl animate-fade-in block text-left w-full"
+      className="bg-card overflow-hidden group transition-all duration-200 hover:shadow-lg rounded-none md:rounded-xl animate-fade-in flex flex-col text-left w-full"
     >
       <div
         className={`relative aspect-square overflow-hidden flex items-center justify-center ${
@@ -113,11 +113,11 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
           </div>
         )}
       </div>
-      <div className="px-3 py-2.5 md:px-4 md:py-3">
-        <h3 className="text-xs md:text-sm text-foreground line-clamp-2 leading-snug font-medium min-h-[2.5em]">
+      <div className="px-3 py-2.5 md:px-4 md:py-3 flex flex-col flex-1">
+        <h3 className="text-xs md:text-sm text-foreground line-clamp-2 leading-snug font-medium min-h-[2.6em]">
           {brand.name}
         </h3>
-        <div className="mt-2 text-[10px] md:text-xs text-muted-foreground">
+        <div className="mt-auto pt-2 text-[10px] md:text-xs text-muted-foreground">
           Бүх бараагаар үзэх →
         </div>
       </div>

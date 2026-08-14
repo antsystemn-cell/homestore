@@ -178,7 +178,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
   return (
     <a
       href={productUrl}
-      className="bg-card overflow-hidden cursor-pointer group transition-all duration-200 hover:shadow-lg rounded-none md:rounded-xl animate-fade-in block no-underline text-inherit"
+      className="bg-card overflow-hidden cursor-pointer group transition-all duration-200 hover:shadow-lg rounded-none md:rounded-xl animate-fade-in flex flex-col no-underline text-inherit"
       onClick={handleLinkClick}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -276,7 +276,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
 
         {/* Color swatches disabled on cards — colors chosen on product detail page */}
       </div>
-      <div className="px-3 py-3 md:px-4 md:py-3 flex flex-col">
+      <div className="px-3 py-3 md:px-4 md:py-3 flex flex-col flex-1">
         {product.brandName && (
           <p className="text-[10px] text-primary font-bold uppercase tracking-wider mb-1">{product.brandName}</p>
         )}
@@ -284,7 +284,7 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
           {product.name}
         </h3>
         <RatingRow productId={product.id} />
-        <div className="mt-2 flex items-baseline gap-1.5 flex-nowrap min-h-[1.5rem]">
+        <div className="mt-auto pt-2 flex items-baseline gap-1.5 flex-nowrap min-h-[1.5rem]">
           {hasValidPrice ? (
             <>
               <span className={`font-extrabold text-base md:text-base whitespace-nowrap ${flashSale ? "text-destructive" : "text-foreground"}`}>
