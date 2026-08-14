@@ -245,15 +245,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const cartTotal = useMemo(() =>
     items.reduce((sum, i) => {
+      const q = sanitizeQty(i.quantity);
       if (i.product.isBogo) {
-        const paidQty = Math.ceil(i.quantity / 2);
+        const paidQty = Math.ceil(q / 2);
         return sum + i.product.price * paidQty;
       }
-      return sum + i.product.price * i.quantity;
+      return sum + i.product.price * q;
     }, 0), [items]);
 
   const cartCount = useMemo(() =>
-    items.reduce((sum, i) => sum + i.quantity, 0), [items]);
+    items.reduce((sum, i) => sum + sanitizeQty(i.quantity), 0), [items]);
+
 
   const clearCart = useCallback(() => {
     setItems([]);
