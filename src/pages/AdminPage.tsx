@@ -2617,6 +2617,40 @@ const AdminPage = () => {
                         {filtered.length === 0 && (
                           <p className="text-center text-xs text-muted-foreground py-4">Илэрц олдсонгүй</p>
                         )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const customName = manualProductSearch.trim();
+                            setManualItems((prev) => {
+                              const next = [...prev, {
+                                product_id: "",
+                                name: customName || "Бусад",
+                                price: 0,
+                                quantity: 1,
+                                product_code: "",
+                                sku: "",
+                                image: "",
+                                color: "",
+                                size: "",
+                              }];
+                              setEditingItemIdx(next.length - 1);
+                              return next;
+                            });
+                            setManualProductSearch("");
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 text-left border-t border-border bg-primary/5 hover:bg-primary/10"
+                        >
+                          <span className="w-10 h-10 rounded flex items-center justify-center bg-primary/10 text-primary shrink-0">
+                            <Plus className="h-4 w-4" />
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-primary truncate">
+                              Бусад {manualProductSearch.trim() ? `— "${manualProductSearch.trim()}"` : "(жагсаалтад байхгүй бараа)"}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground">Нэр, үнэ, тоог гараар оруулна</p>
+                          </div>
+                        </button>
+
                       </div>
                     );
                   })()}
