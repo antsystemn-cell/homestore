@@ -46,7 +46,7 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
     <button
       type="button"
       onClick={() => navigate(`/${brand.name.replace(/\s+/g, "")}`)}
-      className="bg-card overflow-hidden group transition-all duration-200 hover:shadow-lg rounded-none md:rounded-xl animate-fade-in block text-left w-full"
+      className="bg-card overflow-hidden group transition-all duration-200 hover:shadow-lg rounded-none md:rounded-xl animate-fade-in flex flex-col text-left w-full"
     >
       <div
         className={`relative aspect-square overflow-hidden flex items-center justify-center ${
