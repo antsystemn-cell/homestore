@@ -51,6 +51,7 @@ declare global {
 const NativeReelVideo = ({ url, title, muted }: { url: string; title: string | null; muted: boolean }) => {
   const [resolved, setResolved] = useState<string>(() => (url.startsWith("storage://product-videos/") ? "" : url));
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -70,9 +71,38 @@ const NativeReelVideo = ({ url, title, muted }: { url: string; title: string | n
     };
   }, [url]);
 
+  // Only the reel currently on screen should play (and own the audio)
   useEffect(() => {
-    if (videoRef.current) videoRef.current.muted = muted;
-  }, [muted]);
+    const v = videoRef.current;
+    if (!v) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setVisible(entry.isIntersecting && entry.intersectionRatio > 0.6),
+      { threshold: [0, 0.6, 1] }
+    );
+    io.observe(v);
+    return () => io.disconnect();
+  }, [resolved]);
+
+  // Apply mute + playback state. Unmuting happens right after a user tap,
+  // so play() is allowed with sound; fall back to muted playback if blocked.
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    const shouldMute = muted || !visible;
+    v.muted = shouldMute;
+    v.volume = 1;
+    if (visible) {
+      const p = v.play();
+      if (p && typeof p.catch === "function") {
+        p.catch(() => {
+          v.muted = true;
+          v.play().catch(() => {});
+        });
+      }
+    } else {
+      v.pause();
+    }
+  }, [muted, visible, resolved]);
 
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-black">
@@ -81,16 +111,21 @@ const NativeReelVideo = ({ url, title, muted }: { url: string; title: string | n
           ref={videoRef}
           src={resolved}
           autoPlay
-          muted={muted}
+          muted
           loop
           playsInline
           preload="auto"
           className="w-full h-full object-cover"
           onLoadedMetadata={(e) => {
             const v = e.currentTarget;
-            v.muted = muted;
+            v.muted = muted || !visible;
+            v.volume = 1;
             const p = v.play();
-            if (p && typeof p.catch === "function") p.catch(() => {});
+            if (p && typeof p.catch === "function")
+              p.catch(() => {
+                v.muted = true;
+                v.play().catch(() => {});
+              });
           }}
         />
       ) : (
@@ -100,6 +135,7 @@ const NativeReelVideo = ({ url, title, muted }: { url: string; title: string | n
     </div>
   );
 };
+
 
 
 const RailButton = ({
