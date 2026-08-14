@@ -10,7 +10,7 @@ const ReelsIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 import { useNavigate, useLocation } from "react-router-dom";
-import { useCart } from "@/context/CartContext";
+
 
 const BottomNav = () => {
   const navigate = useNavigate();
