@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -14,6 +14,14 @@ const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 8000): Promise<T | 
   ]);
 };
 
+/** Only same-origin relative paths are accepted as a post-auth redirect. */
+const safeNext = (value: string | null): string | null => {
+  if (!value) return null;
+  if (!value.startsWith("/") || value.startsWith("//")) return null;
+  return value;
+};
+
+
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
@@ -25,6 +33,14 @@ const AuthPage = () => {
   const [resetLoading, setResetLoading] = useState(false);
   const navigate = useNavigate();
   const { authError } = useAuth();
+
+  // Support ?next=/path (used by the OAuth consent flow) alongside the existing session storage.
+  useEffect(() => {
+    const next = safeNext(new URLSearchParams(window.location.search).get("next"));
+    if (next) sessionStorage.setItem("returnAfterAuth", next);
+  }, []);
+
+
 
 
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -84,7 +100,11 @@ const AuthPage = () => {
           supabase.auth.signUp({
             email,
             password,
-            options: { data: { full_name: fullName }, emailRedirectTo: window.location.origin },
+            options: {
+              data: { full_name: fullName },
+              emailRedirectTo: `${window.location.origin}${sessionStorage.getItem("returnAfterAuth") || "/"}`,
+            },
+
           })
         );
         if (!result) throw new Error("Request timeout");
