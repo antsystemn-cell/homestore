@@ -484,7 +484,32 @@ const Header = () => {
         <div className="flex items-center gap-2 md:gap-3 shrink-0">
           <div className="hidden md:flex items-center gap-2">
             <NotificationsBell />
+            <button
+              onClick={() => navigate("/wishlist")}
+              className="p-2 rounded-full hover:bg-secondary transition-colors relative"
+              title="Хадгалсан"
+            >
+              <Heart className="h-5 w-5" />
+              {wishlist.length > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                  {wishlist.length > 99 ? "99+" : wishlist.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => navigate("/cart")}
+              className="p-2 rounded-full hover:bg-secondary transition-colors relative"
+              title="Сагс"
+            >
+              <ShoppingBag className="h-5 w-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
+            </button>
             {user ? (
+
               <button 
                 onClick={() => navigate("/profile/details")}
                 className="p-2 rounded-full hover:bg-secondary transition-colors"
