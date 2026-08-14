@@ -33,7 +33,7 @@ const REWARD_LABEL: Record<string, string> = {
 };
 
 export default function AdminSpinPage() {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, loading, rolesLoading } = useAuth();
   const navigate = useNavigate();
   const [cfg, setCfg] = useState<Cfg | null>(null);
   const [gifts, setGifts] = useState<GiftRow[]>([]);
@@ -48,8 +48,8 @@ export default function AdminSpinPage() {
   const [historyFilter, setHistoryFilter] = useState<"all" | "user" | "guest">("all");
 
   useEffect(() => {
-    if (!loading && (!user || !isAdmin)) navigate("/");
-  }, [loading, user, isAdmin, navigate]);
+    if (!loading && !rolesLoading && (!user || !isAdmin)) navigate("/");
+  }, [loading, rolesLoading, user, isAdmin, navigate]);
 
   async function load() {
     const [c, g, hist, coup, userHist, guestHist] = await Promise.all([

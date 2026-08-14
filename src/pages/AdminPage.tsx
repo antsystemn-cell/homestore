@@ -109,7 +109,7 @@ const AdminPage = () => {
   const isManualOrderRoute = location.pathname === "/admin/manual-order";
   const isReportRoute = location.pathname === "/admin/report";
   const [searchParams, setSearchParams] = useSearchParams();
-  const { isAdmin, isModerator, isSeller, loading: authLoading, authError } = useAuth();
+  const { isAdmin, isModerator, isSeller, loading: authLoading, rolesLoading, authError } = useAuth();
   const hasAdminAccess = isAdmin || isModerator || isSeller;
   const [tab, setTab] = useState<Tab>(() => {
     if (isReportRoute) return "report";
@@ -612,11 +612,11 @@ const AdminPage = () => {
   };
 
   useEffect(() => {
-    if (!authLoading && !hasAdminAccess && !authError) {
+    if (!authLoading && !rolesLoading && !hasAdminAccess && !authError) {
       toast.error("Админ эрхгүй байна");
       navigate("/");
     }
-  }, [isAdmin, authLoading, authError]);
+  }, [isAdmin, isModerator, isSeller, authLoading, rolesLoading, authError]);
 
   const loadAdminData = () => {
     fetchProducts();
@@ -652,9 +652,9 @@ const AdminPage = () => {
   };
 
   useEffect(() => {
-    if (authLoading || !hasAdminAccess) return;
+    if (authLoading || rolesLoading || !hasAdminAccess) return;
     loadAdminData();
-  }, [authLoading, isAdmin]);
+  }, [authLoading, rolesLoading, isAdmin, isModerator, isSeller]);
 
   // Realtime sync: reflect delivery/payment/status updates from the partner
   // portal & webhooks without needing a manual refresh.
