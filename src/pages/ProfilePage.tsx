@@ -93,7 +93,7 @@ const ProfilePage = () => {
   }
 
   const menuItems = [
-    
+    { label: "EasyRewards", desc: "Оноо, кредит, урилгын код", icon: Sparkles, onClick: () => navigate("/easy-rewards") },
     { label: "Захиалгууд", desc: "Миний бүх захиалгууд", icon: ShoppingBag, onClick: () => navigate("/orders") },
     { label: "Таалагдсан", desc: "Хадгалсан бараанууд", icon: Heart, onClick: () => navigate("/wishlist") },
     { label: "Хаяг", desc: "Хүргэлтийн хаяг", icon: MapPin, onClick: () => navigate("/profile/address") },
