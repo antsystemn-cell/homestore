@@ -37,8 +37,8 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
     return () => clearInterval(t);
   }, [slides.length]);
 
-  const dominant = useDominantColor(brand.logo_url);
-  const blend = blendModeForColor(dominant);
+
+
 
   return (
     <button
