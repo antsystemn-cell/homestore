@@ -97,21 +97,16 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
           Брэнд
         </span>
         {slides.length > 0 && brand.logo_url && (
-          <div
-            className={`absolute bottom-2 left-2 z-10 rounded-md shadow-md ring-1 ring-black/5 overflow-hidden h-9 md:h-11 w-20 md:w-24 flex items-center justify-center transition-transform duration-200 group-hover:scale-105 isolate ${
-              dominant ? "" : "bg-white/95 backdrop-blur-sm"
-            }`}
-            style={dominant ? { backgroundColor: dominant } : undefined}
-          >
+          <div className="absolute bottom-2 left-2 z-10 rounded-md shadow-md ring-1 ring-black/5 overflow-hidden aspect-square h-14 md:h-16 w-14 md:w-16 flex items-center justify-center transition-transform duration-200 group-hover:scale-105 bg-white/95 backdrop-blur-sm">
             <img
               src={brand.logo_url}
               alt={brand.name}
-              className="max-h-full max-w-full object-contain"
+              className="max-h-full max-w-full w-full h-full object-contain p-1.5"
               loading="lazy"
-              style={{ mixBlendMode: blend }}
             />
           </div>
         )}
+
       </div>
       <div className="px-3 py-2.5 md:px-4 md:py-3 flex flex-col flex-1">
         <h3 className="text-xs md:text-sm text-foreground line-clamp-2 leading-snug font-medium min-h-[2.6em]">
