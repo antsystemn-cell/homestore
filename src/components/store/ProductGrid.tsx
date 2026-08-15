@@ -49,10 +49,7 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
       className="bg-card overflow-hidden group transition-all duration-200 hover:shadow-lg rounded-none md:rounded-xl animate-fade-in flex flex-col text-left w-full"
     >
       <div
-        className={`relative aspect-square overflow-hidden flex items-center justify-center ${
-          dominant ? "isolate" : "bg-gradient-to-b from-white to-neutral-300"
-        }`}
-        style={dominant ? { backgroundColor: dominant } : undefined}
+        className="relative aspect-square overflow-hidden flex items-center justify-center bg-white"
       >
         {slides.length > 0 ? (
           <>
@@ -86,7 +83,6 @@ const BrandTile = ({ brand, brandProducts }: { brand: Brand; brandProducts: Prod
             alt={brand.name}
             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
             loading="lazy"
-            style={{ mixBlendMode: blend }}
           />
         ) : (
           <span className="text-4xl font-bold text-muted-foreground">
