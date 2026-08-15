@@ -2,12 +2,12 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import Header from "@/components/store/Header";
 import CategoryNav from "@/components/store/CategoryNav";
+import BrandNav from "@/components/store/BrandNav";
 import ProductGrid from "@/components/store/ProductGrid";
 import BottomNav from "@/components/store/BottomNav";
 import ProductGridSkeleton from "@/components/store/ProductGridSkeleton";
 import LoadError from "@/components/store/LoadError";
 import ErrorBoundary from "@/components/store/ErrorBoundary";
-import BrandBanner from "@/components/store/BrandBanner";
 import WestinghouseHeader from "@/components/store/WestinghouseHeader";
 import EllehomeHeader from "@/components/store/EllehomeHeader";
 import { Product, mapDbProduct } from "@/data/products";
@@ -112,9 +112,10 @@ const ShopPage = () => {
       ) : (
         <>
           <Header />
-          <CategoryNav />
-          {selectedBrand !== "all" && !isEllehome && (
-            <BrandBanner logoUrl={selectedBrandObj?.logo_url} />
+          {selectedBrand !== "all" && !isWestinghouse && !isEllehome ? (
+            <BrandNav />
+          ) : (
+            <CategoryNav />
           )}
           {isEllehome && (
             <EllehomeHeader
@@ -125,35 +126,6 @@ const ShopPage = () => {
             />
           )}
         </>
-      )}
-      {brands.length > 0 && selectedBrand === "all" && (
-        <div className="max-w-6xl mx-auto px-4 md:px-8 pt-4">
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            <button
-              onClick={() => { setSelectedBrand("all"); navigate("/shop"); }}
-              className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                selectedBrand === "all"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-card text-muted-foreground border border-border hover:bg-accent"
-              }`}
-            >
-              Бүгд
-            </button>
-            {brands.map((b) => (
-              <button
-                key={b.id}
-                onClick={() => { setSelectedBrand(b.id); navigate(`/${b.name.replace(/\s+/g, '')}`); }}
-                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                  selectedBrand === b.id
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-card text-muted-foreground border border-border hover:bg-accent"
-                }`}
-              >
-                {b.name}
-              </button>
-            ))}
-          </div>
-        </div>
       )}
       {loading ? (
         <ProductGridSkeleton count={8} />
