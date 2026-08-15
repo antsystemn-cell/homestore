@@ -1,0 +1,1 @@
+update public.site_branding set favicon_url = '/favicon.png', updated_at = now();
