@@ -112,9 +112,10 @@ const ShopPage = () => {
       ) : (
         <>
           <Header />
-          <CategoryNav />
-          {selectedBrand !== "all" && !isEllehome && (
-            <BrandBanner logoUrl={selectedBrandObj?.logo_url} />
+          {selectedBrand !== "all" && !isWestinghouse && !isEllehome ? (
+            <BrandNav />
+          ) : (
+            <CategoryNav />
           )}
           {isEllehome && (
             <EllehomeHeader
