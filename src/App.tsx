@@ -60,6 +60,7 @@ const CollectionPage = lazy(() => lazyRetry(() => import("./pages/CollectionPage
 const SpinPage = lazy(() => lazyRetry(() => import("./pages/SpinPage")));
 const SpinFabLazy = lazy(() => lazyRetry(() => import("./components/spin/SpinFab")));
 const AdminSpinPage = lazy(() => lazyRetry(() => import("./pages/AdminSpinPage")));
+const EasyRewardsPage = lazy(() => lazyRetry(() => import("./pages/EasyRewardsPage")));
 const MyRewardsPage = lazy(() => lazyRetry(() => import("./pages/MyRewardsPage")));
 const ReelsPage = lazy(() => lazyRetry(() => import("./pages/ReelsPage")));
 const QuickOrderPage = lazy(() => lazyRetry(() => import("./pages/QuickOrderPage")));
@@ -147,6 +148,7 @@ const App = () => {
                     <Route path="/orders" element={<OrderHistoryPage />} />
                     <Route path="/track/:id" element={<OrderTrackingPage />} />
                     <Route path="/reels" element={<ReelsPage />} />
+                    <Route path="/easy-rewards" element={<EasyRewardsPage />} />
                     <Route path="/quick-order" element={<QuickOrderPage />} />
                     {SPIN_ENABLED && <Route path="/spin" element={<SpinPage />} />}
                     {SPIN_ENABLED && <Route path="/my-rewards" element={<MyRewardsPage />} />}

@@ -19,6 +19,7 @@ import LoyaltySettingsManager from "@/components/admin/LoyaltySettingsManager";
 import ReminderSettingsManager from "@/components/admin/ReminderSettingsManager";
 import ReviewsManager from "@/components/admin/ReviewsManager";
 import SpinSettingsManager from "@/components/admin/SpinSettingsManager";
+import EasyRewardsManager from "@/components/admin/EasyRewardsManager";
 import ReferralManager from "@/components/admin/ReferralManager";
 import WalletCreditsManager from "@/components/admin/WalletCreditsManager";
 import CouponUsageManager from "@/components/admin/CouponUsageManager";
@@ -61,10 +62,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
 
-type Tab = "stats" | "report" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "welcome-showcase" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "coupon-usage" | "flash-sales" | "reels" | "settings" | "bonus" | "branches" | "returns" | "branding";
+type Tab = "stats" | "report" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "welcome-showcase" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "coupon-usage" | "easyrewards" | "flash-sales" | "reels" | "settings" | "bonus" | "branches" | "returns" | "branding";
 
 const SETTINGS_TABS: Tab[] = ["branding", "categories", "brands", "delivery", "payments", "banner", "announcements", "welcome-showcase", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "reminders", "reviews", "flash-sales", "reels", "drivers", "branches", "returns"];
-const BONUS_TABS: Tab[] = ["loyalty", "spin", "referral", "promotions", "coupon-usage"];
+const BONUS_TABS: Tab[] = ["loyalty", "spin", "referral", "promotions", "coupon-usage", "easyrewards"];
 
 
 
@@ -114,7 +115,7 @@ const AdminPage = () => {
   const [tab, setTab] = useState<Tab>(() => {
     if (isReportRoute) return "report";
     const t = searchParams.get("tab") as Tab | null;
-    const valid: Tab[] = ["stats", "report", "tracking", "products", "orders", "users", "drivers", "categories", "brands", "delivery", "delivery-portal", "payments", "banner", "announcements", "welcome-showcase", "collections", "chatbot", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "referral", "promotions", "coupon-usage", "flash-sales", "reels", "settings", "bonus", "branches", "returns", "branding"];
+    const valid: Tab[] = ["stats", "report", "tracking", "products", "orders", "users", "drivers", "categories", "brands", "delivery", "delivery-portal", "payments", "banner", "announcements", "welcome-showcase", "collections", "chatbot", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "referral", "promotions", "coupon-usage", "easyrewards", "flash-sales", "reels", "settings", "bonus", "branches", "returns", "branding"];
     return t && valid.includes(t) ? t : "stats";
   });
 
@@ -2043,6 +2044,7 @@ const AdminPage = () => {
     { id: "referral", label: "Referral", icon: Users },
     { id: "promotions", label: "Урамшуулал", icon: Gift },
     { id: "coupon-usage", label: "Купон/Хожил", icon: Gift },
+    { id: "easyrewards", label: "EasyRewards", icon: Gift },
   ];
 
 
@@ -5730,6 +5732,8 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
           {tab === "promotions" && <WalletCreditsManager />}
 
           {tab === "coupon-usage" && <CouponUsageManager />}
+
+          {tab === "easyrewards" && <EasyRewardsManager />}
 
           {tab === "flash-sales" && <FlashSalesManager />}
 

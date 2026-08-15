@@ -531,6 +531,459 @@ export type Database = {
         }
         Relationships: []
       }
+      easy_rewards_audit_logs: {
+        Row: {
+          action: string
+          admin_email: string | null
+          admin_user_id: string | null
+          after_state: Json | null
+          before_state: Json | null
+          created_at: string
+          id: string
+          reason: string | null
+          target_id: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          admin_email?: string | null
+          admin_user_id?: string | null
+          after_state?: Json | null
+          before_state?: Json | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          target_id?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          admin_email?: string | null
+          admin_user_id?: string | null
+          after_state?: Json | null
+          before_state?: Json | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          target_id?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
+      easy_rewards_engagement_events: {
+        Row: {
+          action_key: string
+          action_type: string
+          created_at: string
+          event_date: string
+          id: string
+          ledger_id: string | null
+          metadata: Json
+          points_awarded: number
+          user_id: string
+        }
+        Insert: {
+          action_key: string
+          action_type: string
+          created_at?: string
+          event_date?: string
+          id?: string
+          ledger_id?: string | null
+          metadata?: Json
+          points_awarded?: number
+          user_id: string
+        }
+        Update: {
+          action_key?: string
+          action_type?: string
+          created_at?: string
+          event_date?: string
+          id?: string
+          ledger_id?: string | null
+          metadata?: Json
+          points_awarded?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "easy_rewards_engagement_events_ledger_id_fkey"
+            columns: ["ledger_id"]
+            isOneToOne: false
+            referencedRelation: "easy_rewards_ledger"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      easy_rewards_fraud_flags: {
+        Row: {
+          created_at: string
+          details: Json
+          flag_type: string
+          id: string
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          flag_type: string
+          id?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          flag_type?: string
+          id?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      easy_rewards_ledger: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          expires_at: string | null
+          id: string
+          idempotency_key: string
+          metadata: Json
+          order_id: string | null
+          parent_entry_id: string | null
+          reason: string
+          source_id: string | null
+          source_type: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          approved_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency: string
+          expires_at?: string | null
+          id?: string
+          idempotency_key: string
+          metadata?: Json
+          order_id?: string | null
+          parent_entry_id?: string | null
+          reason: string
+          source_id?: string | null
+          source_type: string
+          status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          expires_at?: string | null
+          id?: string
+          idempotency_key?: string
+          metadata?: Json
+          order_id?: string | null
+          parent_entry_id?: string | null
+          reason?: string
+          source_id?: string | null
+          source_type?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "easy_rewards_ledger_parent_entry_id_fkey"
+            columns: ["parent_entry_id"]
+            isOneToOne: false
+            referencedRelation: "easy_rewards_ledger"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      easy_rewards_missions: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          ledger_id: string | null
+          login_days: number
+          reels_watched: number
+          updated_at: string
+          user_id: string
+          week_start: string
+          wishlist_added: number
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          ledger_id?: string | null
+          login_days?: number
+          reels_watched?: number
+          updated_at?: string
+          user_id: string
+          week_start: string
+          wishlist_added?: number
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          ledger_id?: string | null
+          login_days?: number
+          reels_watched?: number
+          updated_at?: string
+          user_id?: string
+          week_start?: string
+          wishlist_added?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "easy_rewards_missions_ledger_id_fkey"
+            columns: ["ledger_id"]
+            isOneToOne: false
+            referencedRelation: "easy_rewards_ledger"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      easy_rewards_referrals: {
+        Row: {
+          approved_at: string | null
+          created_at: string
+          delivered_at: string | null
+          id: string
+          invitee_ledger_id: string | null
+          invitee_user_id: string
+          inviter_ledger_id: string | null
+          inviter_user_id: string
+          qualifying_order_id: string | null
+          referral_code: string
+          rejection_reason: string | null
+          signup_fingerprint: string | null
+          signup_ip: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          invitee_ledger_id?: string | null
+          invitee_user_id: string
+          inviter_ledger_id?: string | null
+          inviter_user_id: string
+          qualifying_order_id?: string | null
+          referral_code: string
+          rejection_reason?: string | null
+          signup_fingerprint?: string | null
+          signup_ip?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          invitee_ledger_id?: string | null
+          invitee_user_id?: string
+          inviter_ledger_id?: string | null
+          inviter_user_id?: string
+          qualifying_order_id?: string | null
+          referral_code?: string
+          rejection_reason?: string | null
+          signup_fingerprint?: string | null
+          signup_ip?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "easy_rewards_referrals_invitee_ledger_id_fkey"
+            columns: ["invitee_ledger_id"]
+            isOneToOne: false
+            referencedRelation: "easy_rewards_ledger"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "easy_rewards_referrals_inviter_ledger_id_fkey"
+            columns: ["inviter_ledger_id"]
+            isOneToOne: false
+            referencedRelation: "easy_rewards_ledger"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      easy_rewards_settings: {
+        Row: {
+          campaign_ends_at: string | null
+          campaign_starts_at: string | null
+          category_multipliers: Json
+          engagement_monthly_cap: number
+          engagement_rules: Json
+          excluded_categories: Json
+          excluded_product_ids: Json
+          id: number
+          is_enabled: boolean
+          launch_date: string
+          point_value_mnt: number
+          points_expiry_months: number
+          points_per_mnt: number
+          redemption_cap_percent: number
+          referral_credit_amount: number
+          referral_credit_expiry_days: number
+          referral_hold_days: number
+          referral_min_order: number
+          referral_monthly_limit: number
+          referral_points: number
+          sku_multipliers: Json
+          updated_at: string
+          welcome_credit_amount: number
+          welcome_expiry_days: number
+          welcome_min_order: number
+        }
+        Insert: {
+          campaign_ends_at?: string | null
+          campaign_starts_at?: string | null
+          category_multipliers?: Json
+          engagement_monthly_cap?: number
+          engagement_rules?: Json
+          excluded_categories?: Json
+          excluded_product_ids?: Json
+          id?: number
+          is_enabled?: boolean
+          launch_date?: string
+          point_value_mnt?: number
+          points_expiry_months?: number
+          points_per_mnt?: number
+          redemption_cap_percent?: number
+          referral_credit_amount?: number
+          referral_credit_expiry_days?: number
+          referral_hold_days?: number
+          referral_min_order?: number
+          referral_monthly_limit?: number
+          referral_points?: number
+          sku_multipliers?: Json
+          updated_at?: string
+          welcome_credit_amount?: number
+          welcome_expiry_days?: number
+          welcome_min_order?: number
+        }
+        Update: {
+          campaign_ends_at?: string | null
+          campaign_starts_at?: string | null
+          category_multipliers?: Json
+          engagement_monthly_cap?: number
+          engagement_rules?: Json
+          excluded_categories?: Json
+          excluded_product_ids?: Json
+          id?: number
+          is_enabled?: boolean
+          launch_date?: string
+          point_value_mnt?: number
+          points_expiry_months?: number
+          points_per_mnt?: number
+          redemption_cap_percent?: number
+          referral_credit_amount?: number
+          referral_credit_expiry_days?: number
+          referral_hold_days?: number
+          referral_min_order?: number
+          referral_monthly_limit?: number
+          referral_points?: number
+          sku_multipliers?: Json
+          updated_at?: string
+          welcome_credit_amount?: number
+          welcome_expiry_days?: number
+          welcome_min_order?: number
+        }
+        Relationships: []
+      }
+      easy_rewards_users: {
+        Row: {
+          created_at: string
+          credit_balance: number
+          device_fingerprint: string | null
+          enrolled_at: string
+          fraud_status: string
+          last_ip: string | null
+          lifetime_points: number
+          pending_credit: number
+          pending_points: number
+          phone_verified_at: string | null
+          points_balance: number
+          referral_code: string
+          referred_by: string | null
+          updated_at: string
+          user_id: string
+          welcome_consumed_at: string | null
+          welcome_granted_at: string | null
+          welcome_revoked_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          credit_balance?: number
+          device_fingerprint?: string | null
+          enrolled_at?: string
+          fraud_status?: string
+          last_ip?: string | null
+          lifetime_points?: number
+          pending_credit?: number
+          pending_points?: number
+          phone_verified_at?: string | null
+          points_balance?: number
+          referral_code: string
+          referred_by?: string | null
+          updated_at?: string
+          user_id: string
+          welcome_consumed_at?: string | null
+          welcome_granted_at?: string | null
+          welcome_revoked_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          credit_balance?: number
+          device_fingerprint?: string | null
+          enrolled_at?: string
+          fraud_status?: string
+          last_ip?: string | null
+          lifetime_points?: number
+          pending_credit?: number
+          pending_points?: number
+          phone_verified_at?: string | null
+          points_balance?: number
+          referral_code?: string
+          referred_by?: string | null
+          updated_at?: string
+          user_id?: string
+          welcome_consumed_at?: string | null
+          welcome_granted_at?: string | null
+          welcome_revoked_at?: string | null
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -2881,6 +3334,80 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      er_enroll: {
+        Args: { _fingerprint?: string; _referral_code?: string }
+        Returns: {
+          created_at: string
+          credit_balance: number
+          device_fingerprint: string | null
+          enrolled_at: string
+          fraud_status: string
+          last_ip: string | null
+          lifetime_points: number
+          pending_credit: number
+          pending_points: number
+          phone_verified_at: string | null
+          points_balance: number
+          referral_code: string
+          referred_by: string | null
+          updated_at: string
+          user_id: string
+          welcome_consumed_at: string | null
+          welcome_granted_at: string | null
+          welcome_revoked_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "easy_rewards_users"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      er_generate_referral_code: { Args: never; Returns: string }
+      er_is_eligible: { Args: { _user_id: string }; Returns: boolean }
+      er_my_summary: { Args: never; Returns: Json }
+      er_post_ledger: {
+        Args: {
+          _amount: number
+          _created_by?: string
+          _currency: string
+          _expires_at?: string
+          _idempotency_key?: string
+          _metadata?: Json
+          _order_id?: string
+          _reason: string
+          _source_id?: string
+          _source_type: string
+          _status: string
+          _user_id: string
+        }
+        Returns: {
+          amount: number
+          approved_at: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          expires_at: string | null
+          id: string
+          idempotency_key: string
+          metadata: Json
+          order_id: string | null
+          parent_entry_id: string | null
+          reason: string
+          source_id: string | null
+          source_type: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "easy_rewards_ledger"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      er_recompute_balance: { Args: { _user_id: string }; Returns: undefined }
       generate_referral_code: { Args: never; Returns: string }
       generate_slug: { Args: { name: string }; Returns: string }
       get_active_flash_sales: {
