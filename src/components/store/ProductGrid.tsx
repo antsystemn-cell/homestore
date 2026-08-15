@@ -136,38 +136,39 @@ const ProductGrid = React.memo(({ products, brands, allProducts }: Props) => {
     return map;
   }, [source]);
 
+  const BRAND_INTERVAL = 8;
+
   const items = useMemo(() => {
     const list: Array<
       { kind: "product"; product: Product } | { kind: "brand"; brand: Brand }
-    > = products.map((p) => ({ kind: "product" as const, product: p }));
+    > = [];
 
-    if (brands && brands.length > 0 && list.length > 0) {
-      // Show EVERY brand on EVERY page: spread all brand tiles evenly across the
-      // currently visible product slice instead of using a fixed global interval
-      // (which only ever surfaced ~2 brands per page).
-      const visibleCount = products.length;
-      const seed = hashString(brands.map((b) => b.id).join("|"));
-      const shuffled = [...brands].sort(
-        (a, b) => (hashString(a.id + seed) % 1000) - (hashString(b.id + seed) % 1000)
-      );
+    const seed = brands?.length ? hashString(brands.map((b) => b.id).join("|")) : 0;
+    const shuffled = brands
+      ? [...brands].sort(
+          (a, b) => (hashString(a.id + seed) % 1000) - (hashString(b.id + seed) % 1000)
+        )
+      : [];
 
-      const count = Math.min(shuffled.length, Math.max(1, Math.floor(visibleCount / 3)));
-      const step = visibleCount / (count + 1);
+    // Stable, index-based placement: a brand tile lands after every Nth product,
+    // always the same brand for the same slot. This keeps positions unchanged when
+    // more products are appended by infinite scroll (no repeats, no shifting gaps).
+    products.forEach((p, i) => {
+      list.push({ kind: "product", product: p });
+      const slot = Math.floor((i + 1) / BRAND_INTERVAL) - 1;
+      if (
+        shuffled.length > 0 &&
+        (i + 1) % BRAND_INTERVAL === 0 &&
+        slot >= 0 &&
+        slot < shuffled.length
+      ) {
+        list.push({ kind: "brand", brand: shuffled[slot] });
+      }
+    });
 
-      const placements = Array.from({ length: count }, (_, i) => ({
-        brand: shuffled[i % shuffled.length],
-        pos: Math.min(visibleCount, Math.max(1, Math.round((i + 1) * step))),
-      })).sort((a, b) => b.pos - a.pos);
+    return list;
+  }, [products, brands]);
 
-      placements.forEach(({ brand, pos }) => {
-        list.splice(pos, 0, { kind: "brand", brand });
-      });
-    }
-    // Trim to a multiple of 4 so each row on desktop (lg: 4 cols) is fully filled.
-    // Brand tiles inserted above can leave 1–3 orphans on the last row otherwise.
-    const trimmed = list.length - (list.length % 4);
-    return list.slice(0, trimmed);
-  }, [products, brands, source.length]);
 
 
   return (
