@@ -104,60 +104,65 @@ const CategoryNav = () => {
 
             <div className="h-5 w-px bg-border/70 self-center shrink-0 mx-0.5" />
 
-            <div className="relative">
-              <button
-                onClick={() => setShowBrands((v) => !v)}
-                aria-current={isShop ? "page" : undefined}
-                aria-expanded={showBrands}
-                className={[buttonBase, "border-dashed", isShop ? activeCls : shopIdleCls].join(" ")}
+            <button
+              onClick={() => setShowBrands((v) => !v)}
+              aria-current={isShop ? "page" : undefined}
+              aria-expanded={showBrands}
+              className={[buttonBase, "border-dashed", isShop ? activeCls : shopIdleCls].join(" ")}
+            >
+              <span
+                className={[
+                  "font-bold tracking-tight whitespace-nowrap",
+                  scrolled ? "text-[10px] md:text-[11px]" : "text-[11px] md:text-[12px]",
+                ].join(" ")}
               >
-                <span
-                  className={[
-                    "font-bold tracking-tight whitespace-nowrap",
-                    scrolled ? "text-[10px] md:text-[11px]" : "text-[11px] md:text-[12px]",
-                  ].join(" ")}
-                >
-                  Бүх брэнд
-                </span>
-              </button>
-
-              {showBrands && (
-                <div className="absolute top-full right-0 mt-2 w-[min(92vw,420px)] bg-card rounded-2xl border border-border shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="px-4 py-2.5 border-b border-border flex items-center justify-between">
-                    <span className="text-[11px] font-bold tracking-tight text-foreground">Брэндүүд</span>
-                    <button
-                      onClick={() => { setShowBrands(false); navigate("/shop"); }}
-                      className="text-[10px] font-semibold text-sale hover:underline"
-                    >
-                      Бүгдийг үзэх
-                    </button>
-                  </div>
-                  <div className="max-h-[60vh] overflow-y-auto p-3 grid grid-cols-4 gap-2">
-                    {brands.map((b) => (
-                      <button
-                        key={b.id}
-                        onClick={() => goBrand(b.name)}
-                        className="flex flex-col items-center gap-1.5 p-2 rounded-xl border border-transparent hover:border-border hover:bg-secondary/40 transition-all group"
-                      >
-                        <div className="h-11 w-11 rounded-lg bg-background border border-border flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform shrink-0">
-                          {b.logo_url ? (
-                            <img src={b.logo_url} alt="" className="h-full w-full object-contain" loading="lazy" />
-                          ) : (
-                            <span className="text-[10px] font-bold text-muted-foreground">{b.name.slice(0, 2)}</span>
-                          )}
-                        </div>
-                        <span className="text-[9px] font-semibold text-center text-muted-foreground group-hover:text-foreground leading-tight line-clamp-2">
-                          {b.name}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+                Бүх брэнд
+              </span>
+            </button>
           </div>
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent md:hidden" />
+
+          {showBrands && (
+            <div className="absolute top-full right-0 mt-2 w-[min(92vw,420px)] bg-card rounded-2xl border border-border shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="px-4 py-2.5 border-b border-border flex items-center justify-between">
+                <span className="text-[11px] font-bold tracking-tight text-foreground">Брэндүүд</span>
+                <button
+                  onClick={() => { setShowBrands(false); navigate("/shop"); }}
+                  className="text-[10px] font-semibold text-sale hover:underline"
+                >
+                  Бүгдийг үзэх
+                </button>
+              </div>
+              <div className="max-h-[60vh] overflow-y-auto p-3 grid grid-cols-4 gap-2">
+                {brands.length === 0 && (
+                  <div className="col-span-4 py-6 text-center text-[11px] text-muted-foreground">Брэнд олдсонгүй</div>
+                )}
+                {brands.map((b) => (
+                  <button
+                    key={b.id}
+                    onClick={() => goBrand(b.name)}
+                    className="flex flex-col items-center gap-1.5 p-2 rounded-xl border border-transparent hover:border-border hover:bg-secondary/40 transition-all group"
+                  >
+                    <div className="h-11 w-11 rounded-lg bg-background border border-border flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform shrink-0">
+                      {b.logo_url ? (
+                        <img src={b.logo_url} alt="" className="h-full w-full object-contain" loading="lazy" />
+                      ) : (
+                        <span className="text-[10px] font-bold text-muted-foreground">{b.name.slice(0, 2)}</span>
+                      )}
+                    </div>
+                    <span className="text-[9px] font-semibold text-center text-muted-foreground group-hover:text-foreground leading-tight line-clamp-2">
+                      {b.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!showBrands && (
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent md:hidden" />
+          )}
         </div>
+
       </div>
     </div>
   );
