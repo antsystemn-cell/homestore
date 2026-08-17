@@ -20,6 +20,8 @@ import { hasFreeDeliveryProduct } from "@/lib/freeDeliveryProducts";
 import WalletCreditsSection from "@/components/store/WalletCreditsSection";
 import type { WalletCredit } from "@/hooks/useWalletCredits";
 import AddressSelector from "@/components/store/AddressSelector";
+import omniwayLogo from "@/assets/omniway-logo.png.asset.json";
+
 
 type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket" | "sono" | "omniway" | "card";
 
@@ -869,13 +871,8 @@ const CheckoutPage = () => {
                     onChange={() => setPaymentMethod("omniway")}
                     className="w-4 h-4 accent-[#0F9D58]"
                   />
-                  {providerLogos["omniway"] ? (
-                    <img src={providerLogos["omniway"]} alt="OmniWay" className="w-9 h-9 rounded-lg object-contain" />
-                  ) : (
-                    <div className="w-9 h-9 rounded-lg bg-[#0F9D58] flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">OW</span>
-                    </div>
-                  )}
+                  <img src={omniwayLogo.url} alt="OmniWay" className="w-9 h-9 rounded-lg object-contain" />
+
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-foreground">OmniWay</p>
                     <p className="text-xs text-muted-foreground">OmniWay апп-аар QR төлөх</p>
