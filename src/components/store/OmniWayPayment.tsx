@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle, XCircle, QrCode, RefreshCw, Smartphone } from "lucide-react";
 import { formatPrice } from "@/data/products";
+import omniwayLogo from "@/assets/omniway-logo.png.asset.json";
+
 
 type Step = "creating" | "qr" | "paid" | "failed";
 
@@ -123,8 +125,8 @@ export default function OmniWayPayment({ orderId, amount, onSuccess, onCancel }:
     <div ref={rootRef} id="omniway-payment" className="bg-card rounded-xl border border-border p-4 md:p-6 space-y-4 scroll-mt-24">
 
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${BRAND}1a` }}>
-          <QrCode className="h-5 w-5" style={{ color: BRAND }} />
+        <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-muted/40">
+          <img src={omniwayLogo.url} alt="OmniWay" className="w-8 h-8 object-contain" />
         </div>
         <div>
           <h3 className="font-semibold text-foreground">OmniWay</h3>
