@@ -23,14 +23,20 @@ export default function OmniWayPayment({ orderId, amount, onSuccess, onCancel }:
   const [errorMsg, setErrorMsg] = useState("");
   const [pollCount, setPollCount] = useState(0);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
 
   const isMobile = typeof navigator !== "undefined" && /android|iphone|ipad|ipod/i.test(navigator.userAgent);
 
   useEffect(() => {
+    const t = setTimeout(() => {
+      rootRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 150);
     return () => {
+      clearTimeout(t);
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
   }, []);
+
 
   const startPolling = useCallback(
     (id: string) => {
