@@ -1222,9 +1222,23 @@ const CheckoutPage = () => {
                 </Button>
               )}
 
+              {paymentMethod === "omniway" && orderId && !ordered && (
+                <Button
+                  variant="outline"
+                  className="w-full h-12 text-base rounded-xl mt-2 gap-2 border-[#0F9D58] text-[#0F9D58] hover:bg-[#0F9D58]/10"
+                  onClick={() =>
+                    document.getElementById("omniway-payment")?.scrollIntoView({ behavior: "smooth", block: "center" })
+                  }
+                >
+                  <QrCode className="h-4 w-4" />
+                  QR код руу очих
+                </Button>
+              )}
+
               {isViewingExistingOrder && !ordered && (
                 <p className="text-xs text-center text-muted-foreground mt-2">Төлбөр төлөх сувгаа дээрээс сонгоно уу</p>
               )}
+
 
               <p className="text-[10px] text-muted-foreground text-center mt-2">
                 Таны мэдээлэл аюулгүй хадгалагдана
