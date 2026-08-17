@@ -13,6 +13,7 @@ import StorepayPayment from "@/components/store/StorepayPayment";
 import QPayPayment from "@/components/store/QPayPayment";
 import PocketPayment from "@/components/store/PocketPayment";
 import SonoPayment from "@/components/store/SonoPayment";
+import OmniWayPayment from "@/components/store/OmniWayPayment";
 import { track, attachLeadContact } from "@/lib/tracking";
 import { useBundleFreeDelivery } from "@/lib/bundleDelivery";
 import { hasFreeDeliveryProduct } from "@/lib/freeDeliveryProducts";
@@ -20,7 +21,7 @@ import WalletCreditsSection from "@/components/store/WalletCreditsSection";
 import type { WalletCredit } from "@/hooks/useWalletCredits";
 import AddressSelector from "@/components/store/AddressSelector";
 
-type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket" | "sono" | "card";
+type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket" | "sono" | "omniway" | "card";
 
 const CheckoutPage = () => {
   const { items, cartTotal, clearCart } = useCart();
@@ -540,6 +541,28 @@ const CheckoutPage = () => {
     setPaymentMethod("qpay");
   };
 
+  const handleOmniWayStart = async () => {
+    if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return; }
+    if (isGuestCheckout && !name.trim()) { toast.error("Нэр заавал бөглөнө үү"); return; }
+    if (deliveryOptions.length > 0 && !selectedDelivery) { toast.error("Хүргэлтийн сонголт хийнэ үү"); return; }
+    if (!/^\d{8}$/.test(phone.trim())) { toast.error("Утасны дугаар 8 оронтой байх ёстой"); return; }
+
+    setSubmitting(true);
+    const id = await createOrder("processing", "omniway");
+    setSubmitting(false);
+    if (id) setOrderId(id);
+  };
+
+  const handleOmniWaySuccess = () => {
+    clearCart();
+    setOrdered(true);
+  };
+
+  const handleOmniWayCancel = () => {
+    setOrderId(null);
+    setPaymentMethod("qpay");
+  };
+
   // Guest order confirmation
   if (ordered && isGuestCheckout) {
     return (
@@ -830,6 +853,35 @@ const CheckoutPage = () => {
                   </div>
                 </label>
 
+                {/* OmniWay */}
+                <label
+                  className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    paymentMethod === "omniway"
+                      ? "border-[#0F9D58] bg-[#0F9D58]/5 shadow-sm"
+                      : "border-border hover:border-muted-foreground/30"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="omniway"
+                    checked={paymentMethod === "omniway"}
+                    onChange={() => setPaymentMethod("omniway")}
+                    className="w-4 h-4 accent-[#0F9D58]"
+                  />
+                  {providerLogos["omniway"] ? (
+                    <img src={providerLogos["omniway"]} alt="OmniWay" className="w-9 h-9 rounded-lg object-contain" />
+                  ) : (
+                    <div className="w-9 h-9 rounded-lg bg-[#0F9D58] flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">OW</span>
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-foreground">OmniWay</p>
+                    <p className="text-xs text-muted-foreground">OmniWay апп-аар QR төлөх</p>
+                  </div>
+                </label>
+
                 {/* Card Payment */}
                 <label
                   className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
@@ -897,6 +949,16 @@ const CheckoutPage = () => {
                 amount={grandTotal}
                 onSuccess={handleSonoSuccess}
                 onCancel={handleSonoCancel}
+              />
+            )}
+
+            {/* OmniWay Payment Flow */}
+            {paymentMethod === "omniway" && (orderId || isViewingExistingOrder) && (
+              <OmniWayPayment
+                orderId={orderId}
+                amount={grandTotal}
+                onSuccess={handleOmniWaySuccess}
+                onCancel={handleOmniWayCancel}
               />
             )}
           </div>
@@ -1146,6 +1208,17 @@ const CheckoutPage = () => {
                 >
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <QrCode className="h-4 w-4" />}
                   {submitting ? "Үүсгэж байна..." : `Sono-р төлөх — ${formatPrice(grandTotal)}`}
+                </Button>
+              )}
+
+              {paymentMethod === "omniway" && !(orderId || isViewingExistingOrder) && !isViewingExistingOrder && (
+                <Button
+                  className="w-full h-12 text-base rounded-xl mt-2 gap-2 bg-[#0F9D58] hover:bg-[#0B7C46] text-white"
+                  disabled={submitting}
+                  onClick={handleOmniWayStart}
+                >
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <QrCode className="h-4 w-4" />}
+                  {submitting ? "Үүсгэж байна..." : `OmniWay-ээр төлөх — ${formatPrice(grandTotal)}`}
                 </Button>
               )}
 

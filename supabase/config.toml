@@ -1,3 +1,9 @@
 project_id = "jiqjebbxcwetakdhfuel"
 [functions.process-email-queue]
 verify_jwt = true
+
+[functions.omniway-webhook]
+verify_jwt = false
+
+[functions.omniway]
+verify_jwt = false
