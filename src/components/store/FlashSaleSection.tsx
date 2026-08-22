@@ -116,7 +116,7 @@ const FlashSaleSection = React.memo(() => {
   }, [allRows, productBrandMap]);
 
   // Elle Sport + 50% off only
-  const rows = useMemo<FlashSaleRow[]>(() => {
+  const flashRows = useMemo<FlashSaleRow[]>(() => {
     if (!elleBrandId) return [];
     return allRows.filter(
       (r) =>
@@ -125,41 +125,97 @@ const FlashSaleSection = React.memo(() => {
     );
   }, [allRows, productBrandMap, elleBrandId]);
 
+  // BOGO (1+1) products — shown inside the flash sale carousel
+  const [bogoRows, setBogoRows] = useState<any[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id,slug,name,price,original_price,image_url,thumbnail_url")
+        .eq("is_bogo", true)
+        .eq("is_active", true)
+        .limit(12);
+      if (cancelled || error || !data) return;
+      setBogoRows(data);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  type Slide = {
+    key: string;
+    kind: "flash" | "bogo";
+    name: string;
+    url: string;
+    image: string;
+    price: number;
+    original: number | null;
+    endsAt?: string;
+    discount?: number;
+  };
+
+  const slides = useMemo<Slide[]>(() => {
+    const f: Slide[] = flashRows.map((r) => ({
+      key: `f-${r.id}`,
+      kind: "flash",
+      name: r.product_name,
+      url: `/product/${r.product_slug || r.product_id}`,
+      image: r.product_thumbnail || r.product_image || "/placeholder.svg",
+      price: Number(r.sale_price),
+      original: Number(r.product_price) || null,
+      endsAt: r.ends_at,
+      discount: Number(r.discount_percent),
+    }));
+    const b: Slide[] = bogoRows.map((p) => ({
+      key: `b-${p.id}`,
+      kind: "bogo",
+      name: p.name,
+      url: `/product/${p.slug || p.id}`,
+      image: p.thumbnail_url || p.image_url || "/placeholder.svg",
+      price: Number(p.price),
+      original: p.original_price ? Number(p.original_price) : null,
+    }));
+    return [...b, ...f];
+  }, [flashRows, bogoRows]);
+
   // Reset index when list changes
   useEffect(() => {
-    setIndex((i) => (rows.length === 0 ? 0 : i % rows.length));
-  }, [rows.length]);
+    setIndex((i) => (slides.length === 0 ? 0 : i % slides.length));
+  }, [slides.length]);
 
   // Autoplay
   useEffect(() => {
-    if (rows.length <= 1) return;
+    if (slides.length <= 1) return;
     const id = window.setInterval(
-      () => setIndex((i) => (i + 1) % rows.length),
+      () => setIndex((i) => (i + 1) % slides.length),
       AUTOPLAY_MS
     );
     return () => window.clearInterval(id);
-  }, [rows.length]);
+  }, [slides.length]);
 
   const go = useCallback(
     (dir: "left" | "right") => {
       setIndex((i) => {
-        const n = rows.length;
+        const n = slides.length;
         if (n === 0) return 0;
         return dir === "left" ? (i - 1 + n) % n : (i + 1) % n;
       });
     },
-    [rows.length]
+    [slides.length]
   );
 
-  if (!rows.length) return null;
+  if (!slides.length) return null;
 
-  const current = rows[index];
-  const productUrl = `/product/${current.product_slug || current.product_id}`;
-  const img = current.product_thumbnail || current.product_image || "/placeholder.svg";
-  const soonestEndsAt = [...rows]
+  const current = slides[Math.min(index, slides.length - 1)];
+  const isBogo = current.kind === "bogo";
+  const productUrl = current.url;
+  const soonestEndsAt = flashRows
     .map((r) => r.ends_at)
     .filter(Boolean)
     .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0];
+  const accent = isBogo ? "primary" : "destructive";
 
   return (
     <section className="py-2 md:py-6 overflow-hidden">
@@ -170,7 +226,7 @@ const FlashSaleSection = React.memo(() => {
               <Zap className="h-4 w-4 md:h-5 md:w-5 text-destructive fill-destructive" />
             </div>
             <h2 className="text-sm md:text-base font-bold text-foreground tracking-tight whitespace-nowrap">
-              Elle Sport Woman · 50%
+              {bogoRows.length ? "Flash Sale · 1+1 урамшуулал" : "Elle Sport Woman · 50%"}
             </h2>
             {soonestEndsAt && (
               <>
@@ -181,7 +237,11 @@ const FlashSaleSection = React.memo(() => {
           </div>
         </div>
 
-        <div className="relative rounded-2xl overflow-hidden bg-card border border-destructive/30 shadow-sm">
+        <div
+          className={`relative rounded-2xl overflow-hidden bg-card border shadow-sm ${
+            isBogo ? "border-primary/40" : "border-destructive/30"
+          }`}
+        >
           <a
             href={productUrl}
             onClick={(e) => {
@@ -194,44 +254,75 @@ const FlashSaleSection = React.memo(() => {
           >
             <div className="relative aspect-square md:aspect-[4/5] bg-secondary overflow-hidden">
               <img
-                key={current.id}
-                src={transformImage(img, 800)}
-                alt={current.product_name}
+                key={current.key}
+                src={transformImage(current.image, 800)}
+                alt={current.name}
                 className="w-full h-full object-cover animate-fade-in group-hover:scale-105 transition-transform duration-700"
                 loading="lazy"
                 decoding="async"
               />
-              <span className="absolute top-3 left-3 bg-destructive text-destructive-foreground text-xs font-bold px-2 py-1 rounded-md shadow">
-                -50%
-              </span>
+              {isBogo ? (
+                <>
+                  <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-xs md:text-sm font-extrabold uppercase px-3 py-1.5 rounded-full shadow-lg ring-2 ring-primary/30 animate-pulse">
+                    <Gift className="h-3.5 w-3.5" />
+                    1+1 ҮНЭГҮЙ
+                  </span>
+                  <span className="absolute bottom-0 left-0 right-0 bg-primary/95 py-1.5 text-center text-xs md:text-sm font-bold text-primary-foreground">
+                    1 авбал 1 ҮНЭГҮЙ
+                  </span>
+                </>
+              ) : (
+                <span className="absolute top-3 left-3 bg-destructive text-destructive-foreground text-xs font-bold px-2 py-1 rounded-md shadow">
+                  -{current.discount ?? 50}%
+                </span>
+              )}
             </div>
             <div className="p-4 md:p-6 flex flex-col justify-center gap-3">
-              <p className="text-[11px] md:text-xs uppercase tracking-wider text-destructive font-semibold">
-                Flash Sale
+              <p
+                className={`text-[11px] md:text-xs uppercase tracking-wider font-semibold ${
+                  isBogo ? "text-primary" : "text-destructive"
+                }`}
+              >
+                {isBogo ? "1+1 урамшуулал" : "Flash Sale"}
               </p>
               <h3
-                key={`t-${current.id}`}
+                key={`t-${current.key}`}
                 className="text-base md:text-2xl font-bold text-foreground leading-snug animate-fade-in"
               >
-                {current.product_name}
+                {current.name}
               </h3>
               <div className="flex items-baseline gap-2">
-                <span className="text-xl md:text-3xl font-extrabold text-destructive">
-                  {formatPrice(current.sale_price)}
+                <span
+                  className={`text-xl md:text-3xl font-extrabold ${
+                    isBogo ? "text-primary" : "text-destructive"
+                  }`}
+                >
+                  {formatPrice(current.price)}
                 </span>
-                {Number(current.product_price) > Number(current.sale_price) && (
+                {current.original != null && current.original > current.price && (
                   <span className="text-sm md:text-base text-muted-foreground line-through">
-                    {formatPrice(current.product_price)}
+                    {formatPrice(current.original)}
                   </span>
                 )}
               </div>
-              <span className="mt-2 inline-flex items-center justify-center text-xs md:text-sm font-semibold bg-destructive text-destructive-foreground rounded-full px-4 py-2 w-fit">
+              {isBogo && (
+                <p className="text-xs md:text-sm text-muted-foreground">
+                  2 ширхэг сагсанд нэмэхэд төлбөр нь 1 ширхэгийн үнэтэй тэнцэнэ.
+                </p>
+              )}
+              <span
+                className={`mt-2 inline-flex items-center justify-center text-xs md:text-sm font-semibold rounded-full px-4 py-2 w-fit ${
+                  isBogo
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-destructive text-destructive-foreground"
+                }`}
+              >
                 Худалдан авах →
               </span>
             </div>
           </a>
 
-          {rows.length > 1 && (
+          {slides.length > 1 && (
             <>
               <button
                 onClick={() => go("left")}
@@ -249,13 +340,17 @@ const FlashSaleSection = React.memo(() => {
               </button>
 
               <div className="absolute bottom-2 left-0 right-0 flex items-center justify-center gap-1.5">
-                {rows.map((_, i) => (
+                {slides.map((s, i) => (
                   <button
-                    key={i}
+                    key={s.key}
                     onClick={() => setIndex(i)}
                     aria-label={`Slide ${i + 1}`}
                     className={`h-1.5 rounded-full transition-all ${
-                      i === index ? "w-6 bg-destructive" : "w-1.5 bg-foreground/30"
+                      i === index
+                        ? s.kind === "bogo"
+                          ? "w-6 bg-primary"
+                          : "w-6 bg-destructive"
+                        : "w-1.5 bg-foreground/30"
                     }`}
                   />
                 ))}
@@ -267,6 +362,7 @@ const FlashSaleSection = React.memo(() => {
     </section>
   );
 });
+
 
 FlashSaleSection.displayName = "FlashSaleSection";
 
