@@ -841,8 +841,6 @@ const ProductPage = () => {
                   </p>
                 </div>
               ) : null}
-
-              </div>
             </div>
 
             {flashSale && (
