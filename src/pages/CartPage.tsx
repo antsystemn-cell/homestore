@@ -1,6 +1,6 @@
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { formatPrice } from "@/data/products";
@@ -13,6 +13,9 @@ import FrequentlyBoughtTogether from "@/components/store/FrequentlyBoughtTogethe
 import { useRecommendationWeights } from "@/hooks/useRecommendationWeights";
 import { useBundleFreeDelivery } from "@/lib/bundleDelivery";
 import { hasFreeDeliveryProduct } from "@/lib/freeDeliveryProducts";
+import { supabase } from "@/integrations/supabase/client";
+
+const PLACEHOLDER = "/placeholder.svg";
 
 const CartPage = () => {
   const { items, updateQuantity, removeFromCart, cartTotal } = useCart();
@@ -21,10 +24,36 @@ const CartPage = () => {
   const [showGuestModal, setShowGuestModal] = useState(false);
   const cartWeights = useRecommendationWeights("cart");
 
+  // Fallback images fetched from the database (cart items stored in localStorage
+  // may have stale/missing image URLs)
+  const [dbImages, setDbImages] = useState<Record<string, string>>({});
+  const productIds = useMemo(() => items.map((i) => i.product.id).filter(Boolean), [items]);
+  const idsKey = productIds.join(",");
+
+  useEffect(() => {
+    if (!productIds.length) return;
+    let active = true;
+    (async () => {
+      const { data } = await supabase
+        .from("products")
+        .select("id, image_url, thumbnail_url")
+        .in("id", productIds);
+      if (!active || !data) return;
+      const map: Record<string, string> = {};
+      data.forEach((p: any) => {
+        const url = p.thumbnail_url || p.image_url;
+        if (url) map[p.id] = url;
+      });
+      setDbImages(map);
+    })();
+    return () => { active = false; };
+  }, [idsKey]);
+
   const hasSaleItems = items.some(item => item.product.isOnSale || (item.product.discount && item.product.discount > 0));
   const { eligible: bundleFree } = useBundleFreeDelivery(cartTotal, items.length);
   const productFree = hasFreeDeliveryProduct(items);
   const deliverySurcharge = (bundleFree || productFree) ? 0 : ((cartTotal < 50000 || hasSaleItems) ? 8000 : 0);
+
 
   const handleCheckout = () => {
     if (user) {
@@ -55,18 +84,25 @@ const CartPage = () => {
               {items.map((item) => {
                 const { product, quantity, selectedColor, selectedSize, selectedGiftPackage } = item;
                 const key = `${product.id}__${selectedColor || ""}__${selectedSize || ""}__${selectedGiftPackage?.id || ""}`;
+                const colorImg = selectedColor ? product.colors?.find(c => c.name === selectedColor)?.image : "";
+                const localImg = product.image && product.image !== PLACEHOLDER ? product.image : "";
+                const imgSrc = colorImg || localImg || dbImages[product.id] || PLACEHOLDER;
                 return (
                 <div key={key} className="bg-card rounded-xl p-3 md:p-4 flex gap-3 md:gap-5 border border-border">
                   <img
-                    src={
-                      selectedColor && product.colors?.find(c => c.name === selectedColor)?.image
-                        ? product.colors.find(c => c.name === selectedColor)!.image
-                        : product.image
-                    }
+                    src={imgSrc}
                     alt={product.name}
-                    className="w-20 h-20 md:w-28 md:h-28 rounded-lg object-cover bg-secondary cursor-pointer"
+                    loading="lazy"
+                    onError={(e) => {
+                      const el = e.currentTarget;
+                      const fallback = dbImages[product.id];
+                      if (fallback && el.src !== fallback) el.src = fallback;
+                      else if (!el.src.endsWith(PLACEHOLDER)) el.src = PLACEHOLDER;
+                    }}
+                    className="w-20 h-20 md:w-28 md:h-28 shrink-0 rounded-lg object-cover bg-secondary cursor-pointer"
                     onClick={() => navigate(`/product/${product.slug || product.id}`)}
                   />
+
                   <div className="flex-1 min-w-0">
                     <h3
                       className="text-sm md:text-base font-medium text-foreground truncate cursor-pointer hover:underline"
