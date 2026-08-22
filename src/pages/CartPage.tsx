@@ -84,18 +84,25 @@ const CartPage = () => {
               {items.map((item) => {
                 const { product, quantity, selectedColor, selectedSize, selectedGiftPackage } = item;
                 const key = `${product.id}__${selectedColor || ""}__${selectedSize || ""}__${selectedGiftPackage?.id || ""}`;
+                const colorImg = selectedColor ? product.colors?.find(c => c.name === selectedColor)?.image : "";
+                const localImg = product.image && product.image !== PLACEHOLDER ? product.image : "";
+                const imgSrc = colorImg || localImg || dbImages[product.id] || PLACEHOLDER;
                 return (
                 <div key={key} className="bg-card rounded-xl p-3 md:p-4 flex gap-3 md:gap-5 border border-border">
                   <img
-                    src={
-                      selectedColor && product.colors?.find(c => c.name === selectedColor)?.image
-                        ? product.colors.find(c => c.name === selectedColor)!.image
-                        : product.image
-                    }
+                    src={imgSrc}
                     alt={product.name}
-                    className="w-20 h-20 md:w-28 md:h-28 rounded-lg object-cover bg-secondary cursor-pointer"
+                    loading="lazy"
+                    onError={(e) => {
+                      const el = e.currentTarget;
+                      const fallback = dbImages[product.id];
+                      if (fallback && el.src !== fallback) el.src = fallback;
+                      else if (!el.src.endsWith(PLACEHOLDER)) el.src = PLACEHOLDER;
+                    }}
+                    className="w-20 h-20 md:w-28 md:h-28 shrink-0 rounded-lg object-cover bg-secondary cursor-pointer"
                     onClick={() => navigate(`/product/${product.slug || product.id}`)}
                   />
+
                   <div className="flex-1 min-w-0">
                     <h3
                       className="text-sm md:text-base font-medium text-foreground truncate cursor-pointer hover:underline"
