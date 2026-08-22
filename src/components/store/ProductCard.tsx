@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Star, Zap } from "lucide-react";
+import { Star, Zap, Gift } from "lucide-react";
 import { Product, formatPrice } from "@/data/products";
 import { getColorHex } from "@/lib/colorMap";
 import { transformImage, buildSrcSet } from "@/lib/imageUrl";

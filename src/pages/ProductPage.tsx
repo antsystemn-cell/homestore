@@ -828,8 +828,20 @@ const ProductPage = () => {
                   <span className="text-muted-foreground line-through text-lg">{formatPrice(displayOriginal)}</span>
                 ) : null}
                 {product.isBogo ? (
-                  <span className="bg-primary text-primary-foreground text-xs font-bold px-2.5 py-1 rounded-lg">1+1 Үнэгүй</span>
+                  <span className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground text-xs md:text-sm font-extrabold uppercase px-3 py-1.5 rounded-full shadow-lg ring-2 ring-primary/30 animate-pulse">
+                    🎁 1+1 ҮНЭГҮЙ
+                  </span>
                 ) : null}
+              </div>
+              {product.isBogo ? (
+                <div className="rounded-xl border-2 border-primary/40 bg-primary/5 p-3">
+                  <p className="text-sm font-bold text-primary">1 ширхэг авбал 1 ширхэг ҮНЭГҮЙ!</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    2 ширхэг сагсанд нэмэхэд төлбөр нь 1 ширхэгийн үнэтэй тэнцэнэ.
+                  </p>
+                </div>
+              ) : null}
+
               </div>
             </div>
 
