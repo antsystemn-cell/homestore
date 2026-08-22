@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Zap, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Zap, Clock, Gift } from "lucide-react";
 import { formatPrice } from "@/data/products";
 import { useFlashSales, FlashSaleRow } from "@/hooks/useFlashSales";
 import { fetchPublicBrands } from "@/lib/publicStoreApi";
