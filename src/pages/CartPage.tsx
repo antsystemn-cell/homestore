@@ -1,6 +1,6 @@
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { formatPrice } from "@/data/products";
@@ -13,6 +13,9 @@ import FrequentlyBoughtTogether from "@/components/store/FrequentlyBoughtTogethe
 import { useRecommendationWeights } from "@/hooks/useRecommendationWeights";
 import { useBundleFreeDelivery } from "@/lib/bundleDelivery";
 import { hasFreeDeliveryProduct } from "@/lib/freeDeliveryProducts";
+import { supabase } from "@/integrations/supabase/client";
+
+const PLACEHOLDER = "/placeholder.svg";
 
 const CartPage = () => {
   const { items, updateQuantity, removeFromCart, cartTotal } = useCart();
@@ -21,10 +24,36 @@ const CartPage = () => {
   const [showGuestModal, setShowGuestModal] = useState(false);
   const cartWeights = useRecommendationWeights("cart");
 
+  // Fallback images fetched from the database (cart items stored in localStorage
+  // may have stale/missing image URLs)
+  const [dbImages, setDbImages] = useState<Record<string, string>>({});
+  const productIds = useMemo(() => items.map((i) => i.product.id).filter(Boolean), [items]);
+  const idsKey = productIds.join(",");
+
+  useEffect(() => {
+    if (!productIds.length) return;
+    let active = true;
+    (async () => {
+      const { data } = await supabase
+        .from("products")
+        .select("id, image_url, thumbnail_url")
+        .in("id", productIds);
+      if (!active || !data) return;
+      const map: Record<string, string> = {};
+      data.forEach((p: any) => {
+        const url = p.thumbnail_url || p.image_url;
+        if (url) map[p.id] = url;
+      });
+      setDbImages(map);
+    })();
+    return () => { active = false; };
+  }, [idsKey]);
+
   const hasSaleItems = items.some(item => item.product.isOnSale || (item.product.discount && item.product.discount > 0));
   const { eligible: bundleFree } = useBundleFreeDelivery(cartTotal, items.length);
   const productFree = hasFreeDeliveryProduct(items);
   const deliverySurcharge = (bundleFree || productFree) ? 0 : ((cartTotal < 50000 || hasSaleItems) ? 8000 : 0);
+
 
   const handleCheckout = () => {
     if (user) {
