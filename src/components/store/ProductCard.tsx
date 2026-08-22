@@ -247,10 +247,17 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
         )}
 
         {product.isBogo && (
-          <span className="absolute top-2 left-2 bg-primary text-primary-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded z-10">
-            1+1
-          </span>
+          <>
+            <span className="absolute top-2 left-2 z-10 flex items-center gap-1 rounded-full bg-primary px-2 py-1 text-[10px] md:text-xs font-extrabold uppercase tracking-wide text-primary-foreground shadow-lg ring-2 ring-primary/30 animate-pulse">
+              <Gift className="h-3 w-3 md:h-3.5 md:w-3.5" />
+              1+1 ҮНЭГҮЙ
+            </span>
+            <span className="absolute bottom-0 left-0 right-0 z-10 bg-primary/95 py-1 text-center text-[10px] md:text-xs font-bold text-primary-foreground">
+              1 авбал 1 ҮНЭГҮЙ
+            </span>
+          </>
         )}
+
         {product.hasGift && !product.isBogo && (
           <span className="absolute top-2 left-2 bg-accent text-accent-foreground text-[10px] md:text-xs font-bold px-1.5 py-0.5 rounded z-10 flex items-center gap-1">
             🎁 Бэлэгтэй
