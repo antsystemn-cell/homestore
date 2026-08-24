@@ -2063,6 +2063,68 @@ const AdminPage = () => {
   const totalDeliveryRevenue = paidOrders.reduce((s: number, o: any) => s + deliveryFeeOf(o), 0);
   const totalRevenue = productRevenue + totalDeliveryRevenue;
 
+  // Орлогын дэлгэрэнгүй задаргаа
+  const SOURCE_LABELS: Record<string, string> = {
+    web: "🌐 Вэбээр",
+    facebook: "📘 Facebook",
+    phone: "📞 Утсаар",
+    instagram: "📷 Instagram",
+    store: "🏬 Дэлгүүр",
+    other: "Бусад",
+  };
+  const PAYMENT_LABELS: Record<string, string> = {
+    qpay: "QPay",
+    storepay: "Storepay",
+    pocket: "Pocket",
+    sono: "Sono",
+    omniway: "OmniWay",
+    cash: "Бэлнээр",
+    bank_personal: "Дансаар",
+    exchange: "Солилцоо",
+  };
+
+  const revenueBreakdown = useMemo(() => {
+    const isWeb = (o: any) => !o.source || o.source === "web";
+    const sum = (list: any[], fn: (o: any) => number) => list.reduce((s, o) => s + fn(o), 0);
+
+    const webOrders = paidOrders.filter(isWeb);
+    const manualOrders = paidOrders.filter((o: any) => !isWeb(o));
+
+    const group = (keyFn: (o: any) => string, labels: Record<string, string>) => {
+      const map = new Map<string, { count: number; product: number; delivery: number }>();
+      for (const o of paidOrders) {
+        const k = keyFn(o) || "other";
+        const cur = map.get(k) || { count: 0, product: 0, delivery: 0 };
+        cur.count += 1;
+        cur.product += netTotal(o);
+        cur.delivery += deliveryFeeOf(o);
+        map.set(k, cur);
+      }
+      return Array.from(map.entries())
+        .map(([k, v]) => ({ key: k, label: labels[k] || k, ...v, total: v.product + v.delivery }))
+        .sort((a, b) => b.total - a.total);
+    };
+
+    const channel = [
+      { key: "web", label: "🌐 Вэбээр", count: webOrders.length, product: sum(webOrders, netTotal), delivery: sum(webOrders, deliveryFeeOf) },
+      { key: "manual", label: "✍️ Гараар", count: manualOrders.length, product: sum(manualOrders, netTotal), delivery: sum(manualOrders, deliveryFeeOf) },
+    ].map((c) => ({ ...c, total: c.product + c.delivery }));
+
+    const paidDeliveryOrders = paidOrders.filter((o: any) => deliveryFeeOf(o) > 0);
+
+    return {
+      channel,
+      bySource: group((o) => o.source || "web", SOURCE_LABELS),
+      byPayment: group((o) => o.payment_method || "other", PAYMENT_LABELS),
+      byStatus: group((o) => o.status, { confirmed: "Баталгаажсан", completed: "Дууссан" }),
+      deliveryPaidCount: paidDeliveryOrders.length,
+      deliveryFreeCount: paidOrders.length - paidDeliveryOrders.length,
+      orderCount: paidOrders.length,
+      avgOrder: paidOrders.length ? Math.round(totalRevenue / paidOrders.length) : 0,
+    };
+  }, [orders]);
+
+
   // Өнөөдрийн захиалга
   const todayOrders = useMemo(() => {
     const today = new Date().toISOString().split("T")[0];
