@@ -3272,23 +3272,83 @@ const AdminPage = () => {
                   <h2 className="text-sm font-bold tracking-tight">Орлого</h2>
                   <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Баталгаажсан захиалга</span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                  {[
-                    { label: "Нийт орлого", value: formatPrice(totalRevenue), icon: BarChart3, color: "bg-amber-500/10 text-amber-600", tab: "orders" as Tab },
-                    { label: "Орлого", value: formatPrice(productRevenue), icon: BarChart3, color: "bg-emerald-500/10 text-emerald-600", tab: "orders" as Tab },
-                  ].map((stat, i) => {
-                    const Icon = stat.icon;
-                    return (
-                      <div key={i} onClick={() => setTab(stat.tab)} className="bg-card rounded-2xl p-4 md:p-6 border border-border cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all active:scale-[0.98]">
-                        <div className={`h-9 w-9 md:h-10 md:w-10 rounded-xl ${stat.color} flex items-center justify-center mb-3 md:mb-4`}>
-                          <Icon className="h-4 w-4 md:h-5 md:w-5" />
+                <div className="bg-card rounded-2xl border border-border overflow-hidden">
+                  <button
+                    onClick={() => setRevenueOpen((v) => !v)}
+                    className="w-full text-left p-4 md:p-6 hover:bg-secondary/40 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center mb-3 md:mb-4">
+                          <BarChart3 className="h-4 w-4 md:h-5 md:w-5" />
                         </div>
-                        <p className="text-[10px] md:text-xs text-muted-foreground mb-1">{stat.label}</p>
-                        <p className="text-xl md:text-2xl font-extrabold">{stat.value}</p>
+                        <p className="text-[10px] md:text-xs text-muted-foreground mb-1">Нийт орлого</p>
+                        <p className="text-2xl md:text-3xl font-extrabold">{formatPrice(totalRevenue)}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          {revenueBreakdown.orderCount} захиалга · дундаж {formatPrice(revenueBreakdown.avgOrder)}
+                        </p>
                       </div>
-                    );
-                  })}
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-1 shrink-0 mt-1">
+                        {revenueOpen ? "Хаах" : "Задаргаа"}
+                        <ChevronDown className={`h-4 w-4 transition-transform ${revenueOpen ? "rotate-180" : ""}`} />
+                      </span>
+                    </div>
+                  </button>
+
+                  {revenueOpen && (
+                    <div className="border-t border-border p-4 md:p-6 space-y-5 animate-in fade-in duration-200">
+                      {/* Үндсэн задаргаа */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="rounded-xl border border-border p-3">
+                          <p className="text-[10px] text-muted-foreground mb-1">Зөвхөн борлуулалт</p>
+                          <p className="text-lg font-extrabold text-emerald-600">{formatPrice(productRevenue)}</p>
+                        </div>
+                        <div className="rounded-xl border border-border p-3">
+                          <p className="text-[10px] text-muted-foreground mb-1">Хүргэлтийн төлбөр</p>
+                          <p className="text-lg font-extrabold text-blue-600">{formatPrice(totalDeliveryRevenue)}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            Төлбөртэй {revenueBreakdown.deliveryPaidCount} · Үнэгүй {revenueBreakdown.deliveryFreeCount}
+                          </p>
+                        </div>
+                      </div>
+
+                      {[
+                        { title: "Сувгаар (вэб / гараар)", rows: revenueBreakdown.channel },
+                        { title: "Захиалгын эх үүсвэрээр", rows: revenueBreakdown.bySource },
+                        { title: "Төлбөрийн хэлбэрээр", rows: revenueBreakdown.byPayment },
+                        { title: "Төлөвөөр", rows: revenueBreakdown.byStatus },
+                      ].map((sec) => (
+                        <div key={sec.title}>
+                          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2">{sec.title}</p>
+                          <div className="rounded-xl border border-border divide-y divide-border overflow-hidden">
+                            {sec.rows.length === 0 && (
+                              <div className="p-3 text-xs text-muted-foreground">Мэдээлэл алга</div>
+                            )}
+                            {sec.rows.map((r: any) => (
+                              <div key={r.key} className="p-3 flex items-center justify-between gap-3">
+                                <div className="min-w-0">
+                                  <p className="text-xs font-semibold truncate">{r.label}</p>
+                                  <p className="text-[10px] text-muted-foreground">
+                                    {r.count} захиалга · борлуулалт {formatPrice(r.product)} · хүргэлт {formatPrice(r.delivery)}
+                                  </p>
+                                </div>
+                                <p className="text-sm font-extrabold shrink-0">{formatPrice(r.total)}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+
+                      <button
+                        onClick={() => setTab("orders")}
+                        className="w-full rounded-xl bg-secondary hover:bg-secondary/80 text-xs font-medium py-2.5 transition-colors"
+                      >
+                        Захиалгууд руу очих
+                      </button>
+                    </div>
+                  )}
                 </div>
+
               </section>
 
               {/* Хэмжээ */}
