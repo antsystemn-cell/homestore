@@ -112,6 +112,7 @@ const AdminPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAdmin, isModerator, isSeller, loading: authLoading, rolesLoading, authError } = useAuth();
   const hasAdminAccess = isAdmin || isModerator || isSeller;
+  const [revenueOpen, setRevenueOpen] = useState(false);
   const [tab, setTab] = useState<Tab>(() => {
     if (isReportRoute) return "report";
     const t = searchParams.get("tab") as Tab | null;
@@ -2063,6 +2064,68 @@ const AdminPage = () => {
   const totalDeliveryRevenue = paidOrders.reduce((s: number, o: any) => s + deliveryFeeOf(o), 0);
   const totalRevenue = productRevenue + totalDeliveryRevenue;
 
+  // Орлогын дэлгэрэнгүй задаргаа
+  const SOURCE_LABELS: Record<string, string> = {
+    web: "🌐 Вэбээр",
+    facebook: "📘 Facebook",
+    phone: "📞 Утсаар",
+    instagram: "📷 Instagram",
+    store: "🏬 Дэлгүүр",
+    other: "Бусад",
+  };
+  const PAYMENT_LABELS: Record<string, string> = {
+    qpay: "QPay",
+    storepay: "Storepay",
+    pocket: "Pocket",
+    sono: "Sono",
+    omniway: "OmniWay",
+    cash: "Бэлнээр",
+    bank_personal: "Дансаар",
+    exchange: "Солилцоо",
+  };
+
+  const revenueBreakdown = useMemo(() => {
+    const isWeb = (o: any) => !o.source || o.source === "web";
+    const sum = (list: any[], fn: (o: any) => number) => list.reduce((s, o) => s + fn(o), 0);
+
+    const webOrders = paidOrders.filter(isWeb);
+    const manualOrders = paidOrders.filter((o: any) => !isWeb(o));
+
+    const group = (keyFn: (o: any) => string, labels: Record<string, string>) => {
+      const map = new Map<string, { count: number; product: number; delivery: number }>();
+      for (const o of paidOrders) {
+        const k = keyFn(o) || "other";
+        const cur = map.get(k) || { count: 0, product: 0, delivery: 0 };
+        cur.count += 1;
+        cur.product += netTotal(o);
+        cur.delivery += deliveryFeeOf(o);
+        map.set(k, cur);
+      }
+      return Array.from(map.entries())
+        .map(([k, v]) => ({ key: k, label: labels[k] || k, ...v, total: v.product + v.delivery }))
+        .sort((a, b) => b.total - a.total);
+    };
+
+    const channel = [
+      { key: "web", label: "🌐 Вэбээр", count: webOrders.length, product: sum(webOrders, netTotal), delivery: sum(webOrders, deliveryFeeOf) },
+      { key: "manual", label: "✍️ Гараар", count: manualOrders.length, product: sum(manualOrders, netTotal), delivery: sum(manualOrders, deliveryFeeOf) },
+    ].map((c) => ({ ...c, total: c.product + c.delivery }));
+
+    const paidDeliveryOrders = paidOrders.filter((o: any) => deliveryFeeOf(o) > 0);
+
+    return {
+      channel,
+      bySource: group((o) => o.source || "web", SOURCE_LABELS),
+      byPayment: group((o) => o.payment_method || "other", PAYMENT_LABELS),
+      byStatus: group((o) => o.status, { confirmed: "Баталгаажсан", completed: "Дууссан" }),
+      deliveryPaidCount: paidDeliveryOrders.length,
+      deliveryFreeCount: paidOrders.length - paidDeliveryOrders.length,
+      orderCount: paidOrders.length,
+      avgOrder: paidOrders.length ? Math.round(totalRevenue / paidOrders.length) : 0,
+    };
+  }, [orders]);
+
+
   // Өнөөдрийн захиалга
   const todayOrders = useMemo(() => {
     const today = new Date().toISOString().split("T")[0];
@@ -3210,23 +3273,83 @@ const AdminPage = () => {
                   <h2 className="text-sm font-bold tracking-tight">Орлого</h2>
                   <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Баталгаажсан захиалга</span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                  {[
-                    { label: "Нийт орлого", value: formatPrice(totalRevenue), icon: BarChart3, color: "bg-amber-500/10 text-amber-600", tab: "orders" as Tab },
-                    { label: "Орлого", value: formatPrice(productRevenue), icon: BarChart3, color: "bg-emerald-500/10 text-emerald-600", tab: "orders" as Tab },
-                  ].map((stat, i) => {
-                    const Icon = stat.icon;
-                    return (
-                      <div key={i} onClick={() => setTab(stat.tab)} className="bg-card rounded-2xl p-4 md:p-6 border border-border cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all active:scale-[0.98]">
-                        <div className={`h-9 w-9 md:h-10 md:w-10 rounded-xl ${stat.color} flex items-center justify-center mb-3 md:mb-4`}>
-                          <Icon className="h-4 w-4 md:h-5 md:w-5" />
+                <div className="bg-card rounded-2xl border border-border overflow-hidden">
+                  <button
+                    onClick={() => setRevenueOpen((v) => !v)}
+                    className="w-full text-left p-4 md:p-6 hover:bg-secondary/40 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center mb-3 md:mb-4">
+                          <BarChart3 className="h-4 w-4 md:h-5 md:w-5" />
                         </div>
-                        <p className="text-[10px] md:text-xs text-muted-foreground mb-1">{stat.label}</p>
-                        <p className="text-xl md:text-2xl font-extrabold">{stat.value}</p>
+                        <p className="text-[10px] md:text-xs text-muted-foreground mb-1">Нийт орлого</p>
+                        <p className="text-2xl md:text-3xl font-extrabold">{formatPrice(totalRevenue)}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          {revenueBreakdown.orderCount} захиалга · дундаж {formatPrice(revenueBreakdown.avgOrder)}
+                        </p>
                       </div>
-                    );
-                  })}
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-1 shrink-0 mt-1">
+                        {revenueOpen ? "Хаах" : "Задаргаа"}
+                        <ChevronDown className={`h-4 w-4 transition-transform ${revenueOpen ? "rotate-180" : ""}`} />
+                      </span>
+                    </div>
+                  </button>
+
+                  {revenueOpen && (
+                    <div className="border-t border-border p-4 md:p-6 space-y-5 animate-in fade-in duration-200">
+                      {/* Үндсэн задаргаа */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="rounded-xl border border-border p-3">
+                          <p className="text-[10px] text-muted-foreground mb-1">Зөвхөн борлуулалт</p>
+                          <p className="text-lg font-extrabold text-emerald-600">{formatPrice(productRevenue)}</p>
+                        </div>
+                        <div className="rounded-xl border border-border p-3">
+                          <p className="text-[10px] text-muted-foreground mb-1">Хүргэлтийн төлбөр</p>
+                          <p className="text-lg font-extrabold text-blue-600">{formatPrice(totalDeliveryRevenue)}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            Төлбөртэй {revenueBreakdown.deliveryPaidCount} · Үнэгүй {revenueBreakdown.deliveryFreeCount}
+                          </p>
+                        </div>
+                      </div>
+
+                      {[
+                        { title: "Сувгаар (вэб / гараар)", rows: revenueBreakdown.channel },
+                        { title: "Захиалгын эх үүсвэрээр", rows: revenueBreakdown.bySource },
+                        { title: "Төлбөрийн хэлбэрээр", rows: revenueBreakdown.byPayment },
+                        { title: "Төлөвөөр", rows: revenueBreakdown.byStatus },
+                      ].map((sec) => (
+                        <div key={sec.title}>
+                          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2">{sec.title}</p>
+                          <div className="rounded-xl border border-border divide-y divide-border overflow-hidden">
+                            {sec.rows.length === 0 && (
+                              <div className="p-3 text-xs text-muted-foreground">Мэдээлэл алга</div>
+                            )}
+                            {sec.rows.map((r: any) => (
+                              <div key={r.key} className="p-3 flex items-center justify-between gap-3">
+                                <div className="min-w-0">
+                                  <p className="text-xs font-semibold truncate">{r.label}</p>
+                                  <p className="text-[10px] text-muted-foreground">
+                                    {r.count} захиалга · борлуулалт {formatPrice(r.product)} · хүргэлт {formatPrice(r.delivery)}
+                                  </p>
+                                </div>
+                                <p className="text-sm font-extrabold shrink-0">{formatPrice(r.total)}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+
+                      <button
+                        onClick={() => setTab("orders")}
+                        className="w-full rounded-xl bg-secondary hover:bg-secondary/80 text-xs font-medium py-2.5 transition-colors"
+                      >
+                        Захиалгууд руу очих
+                      </button>
+                    </div>
+                  )}
                 </div>
+
               </section>
 
               {/* Хэмжээ */}
