@@ -112,6 +112,7 @@ const AdminPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAdmin, isModerator, isSeller, loading: authLoading, rolesLoading, authError } = useAuth();
   const hasAdminAccess = isAdmin || isModerator || isSeller;
+  const [revenueOpen, setRevenueOpen] = useState(false);
   const [tab, setTab] = useState<Tab>(() => {
     if (isReportRoute) return "report";
     const t = searchParams.get("tab") as Tab | null;
