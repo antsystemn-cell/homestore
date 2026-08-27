@@ -364,7 +364,7 @@ export default function SmartSizeFinder({
             className="h-11 rounded-xl font-bold w-full justify-center gap-1.5 shadow-md shadow-primary/20 transition-transform duration-150 hover:scale-[1.02] active:scale-[0.97]"
           >
             <Sparkles className="h-4 w-4" />
-            Размер сонгоход тусалъя
+            Размер сонгох
           </Button>
           <Button
             variant="outline"
