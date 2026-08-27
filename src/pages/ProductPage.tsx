@@ -815,17 +815,6 @@ const ProductPage = () => {
               </div>
             )}
 
-            {isElleSportBrand && product.sizes && product.sizes.length > 0 && (
-              <SmartSizeFinder
-                className="px-4 md:px-0 pt-3 md:hidden"
-                productId={product.id}
-                productCode={product.productCode}
-                sizes={product.sizes}
-                selectedSize={selectedSize}
-                onSelectSize={(s) => setSelectedSize(s)}
-                onRecommend={(s) => setRecommendedSize(s)}
-              />
-            )}
 
 
           </div>
@@ -875,6 +864,18 @@ const ProductPage = () => {
                 </span>
                 <FlashSaleCountdown endsAt={flashSale.ends_at} />
               </div>
+            )}
+
+            {isElleSportBrand && product.sizes && product.sizes.length > 0 && (
+              <SmartSizeFinder
+                className=""
+                productId={product.id}
+                productCode={product.productCode}
+                sizes={product.sizes}
+                selectedSize={selectedSize}
+                onSelectSize={(s) => setSelectedSize(s)}
+                onRecommend={(s) => setRecommendedSize(s)}
+              />
             )}
 
 
@@ -1024,17 +1025,6 @@ const ProductPage = () => {
               </div>
             )}
 
-            {isElleSportBrand && product.sizes && product.sizes.length > 0 && (
-              <SmartSizeFinder
-                className="hidden md:block"
-                productId={product.id}
-                productCode={product.productCode}
-                sizes={product.sizes}
-                selectedSize={selectedSize}
-                onSelectSize={(s) => setSelectedSize(s)}
-                onRecommend={(s) => setRecommendedSize(s)}
-              />
-            )}
 
             {isElleSportBrand && product.sizes && product.sizes.length > 0 && (
               <div className="hidden md:flex items-start gap-2.5 rounded-xl border border-amber-300/70 bg-amber-50 p-3">
