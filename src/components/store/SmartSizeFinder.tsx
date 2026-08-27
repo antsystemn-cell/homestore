@@ -81,6 +81,8 @@ export default function SmartSizeFinder({
   const [open, setOpen] = useState(false);
   const [chartOpen, setChartOpen] = useState(false);
   const [step, setStep] = useState(1);
+  const [dir, setDir] = useState(1);
+  const [computing, setComputing] = useState(false);
   const [height, setHeight] = useState<string>("");
   const [weight, setWeight] = useState<string>("");
   const [fit, setFit] = useState<FitPreference>("regular");
@@ -187,6 +189,7 @@ export default function SmartSizeFinder({
 
   // ---- actions ------------------------------------------------------------
   const openFinder = () => {
+    setDir(1);
     setStep(result ? 4 : 1);
     setOpen(true);
     logEvent("size_finder_opened");
@@ -225,6 +228,7 @@ export default function SmartSizeFinder({
       return;
     }
     logEvent("height_entered", { height_cm: h });
+    setDir(1);
     setStep(2);
   };
 
@@ -235,13 +239,19 @@ export default function SmartSizeFinder({
       return;
     }
     logEvent("weight_entered", { weight_kg: w });
+    setDir(1);
     setStep(3);
   };
 
   const chooseFit = (value: FitPreference) => {
     setFit(value);
     logEvent("fit_selected", { fit_preference: value });
-    compute(value);
+    setComputing(true);
+    window.setTimeout(() => {
+      compute(value);
+      setDir(1);
+      setComputing(false);
+    }, 650);
   };
 
   const applySize = (size: string) => {
