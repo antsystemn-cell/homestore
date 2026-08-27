@@ -807,6 +807,15 @@ const ProductPage = () => {
             )}
 
             {isElleSportBrand && product.sizes && product.sizes.length > 0 && (
+              <div className="mx-4 md:mx-0 md:hidden flex items-start gap-2.5 rounded-xl border border-amber-300/70 bg-amber-50 p-3">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                <p className="text-xs leading-relaxed text-amber-900">
+                  Хэрэглэгч та размер хэмжээгээ сайн харж сонголт хийнэ үү. Хэрвээ сонголт буруу болсон тохиолдолд хэмжээ, размер солих зардалыг хэрэглэгч бүрэн хариуцна. <span className="font-semibold">(Буцаалт байхгүй)</span>
+                </p>
+              </div>
+            )}
+
+            {isElleSportBrand && product.sizes && product.sizes.length > 0 && (
               <SmartSizeFinder
                 className="px-4 md:px-0 pt-3 md:hidden"
                 productId={product.id}
