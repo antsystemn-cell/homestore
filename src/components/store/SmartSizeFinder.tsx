@@ -358,10 +358,10 @@ export default function SmartSizeFinder({
           </div>
         )}
 
-        <div className="relative mt-3 flex flex-col sm:flex-row gap-2">
+        <div className="relative mt-3 flex flex-col gap-2">
           <Button
             onClick={openFinder}
-            className="h-11 rounded-xl font-bold flex-1 gap-1.5 shadow-md shadow-primary/20 transition-transform duration-150 hover:scale-[1.02] active:scale-[0.97]"
+            className="h-11 rounded-xl font-bold w-full justify-center gap-1.5 shadow-md shadow-primary/20 transition-transform duration-150 hover:scale-[1.02] active:scale-[0.97]"
           >
             <Sparkles className="h-4 w-4" />
             Размер сонгоход тусалъя
@@ -369,7 +369,7 @@ export default function SmartSizeFinder({
           <Button
             variant="outline"
             onClick={() => setChartOpen(true)}
-            className="h-11 rounded-xl font-semibold flex-1 gap-2 bg-background/70"
+            className="h-11 rounded-xl font-semibold w-full justify-center gap-2 bg-background/70"
           >
             <ClipboardList className="h-4 w-4" />
             Албан ёсны хэмжээ
