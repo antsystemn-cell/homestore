@@ -504,9 +504,9 @@ export default function SmartSizeFinder({
                     <button
                       key={w}
                       onClick={() => setWeight(String(w))}
-                      className={`h-11 rounded-xl text-sm font-bold border-2 transition-all active:scale-95 ${
+                      className={`h-11 rounded-xl text-sm font-bold border-2 transition-all duration-150 active:scale-95 hover:-translate-y-0.5 hover:shadow-sm ${
                         Number(weight) === w
-                          ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30"
+                          ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30 scale-[1.03]"
                           : "border-border bg-background hover:border-primary/40"
                       }`}
                     >
@@ -523,20 +523,21 @@ export default function SmartSizeFinder({
 
             {step === 3 && (
               <>
-                <div className="grid grid-cols-3 gap-2.5">
+                <div className="grid grid-cols-3 gap-2.5 ssf-stagger">
                   {FIT_OPTIONS.map((o) => (
                     <button
                       key={o.value}
                       onClick={() => chooseFit(o.value)}
-                      className={`h-24 rounded-2xl border-2 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 ${
+                      disabled={computing}
+                      className={`h-24 rounded-2xl border-2 flex flex-col items-center justify-center gap-1.5 transition-all duration-150 active:scale-95 hover:-translate-y-0.5 hover:shadow-md disabled:opacity-60 disabled:pointer-events-none ${
                         fit === o.value
                           ? "border-primary bg-primary/[0.08] shadow-sm"
                           : "border-border bg-background hover:border-primary/40"
                       }`}
                     >
                       <span
-                        className={`grid h-8 w-8 place-items-center rounded-full transition-colors ${
-                          fit === o.value ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+                        className={`grid h-8 w-8 place-items-center rounded-full transition-all duration-200 ${
+                          fit === o.value ? "bg-primary text-primary-foreground scale-110" : "bg-secondary text-muted-foreground"
                         }`}
                       >
                         <Shirt className="h-4 w-4" />
