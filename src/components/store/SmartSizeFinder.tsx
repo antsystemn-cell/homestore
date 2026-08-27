@@ -43,7 +43,12 @@ interface Props {
   onSelectSize: (size: string) => void;
   onRecommend?: (size: string) => void;
   className?: string;
+  /** Increment to open the finder modal programmatically. */
+  openSignal?: number;
+  /** Called after the user applies a size from the finder. */
+  onSizeApplied?: (size: string) => void;
 }
+
 
 const HEIGHT_QUICK = [150, 155, 160, 165, 170, 175, 180];
 const WEIGHT_QUICK = [45, 50, 55, 60, 65, 70, 75, 80];
