@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-type Tab = "stats" | "report" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "welcome-showcase" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "coupon-usage" | "easyrewards" | "flash-sales" | "reels" | "settings" | "bonus" | "branches" | "returns" | "branding";
+type Tab = "stats" | "report" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "welcome-showcase" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "size-guide" | "spin" | "referral" | "promotions" | "coupon-usage" | "easyrewards" | "flash-sales" | "reels" | "settings" | "bonus" | "branches" | "returns" | "branding";
 
 const AdminSkeleton = ({ tab }: { tab: Tab }) => {
   const renderStatsSkeleton = () => (
