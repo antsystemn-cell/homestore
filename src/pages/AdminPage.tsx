@@ -18,6 +18,7 @@ import RecommendationSettingsManager from "@/components/admin/RecommendationSett
 import LoyaltySettingsManager from "@/components/admin/LoyaltySettingsManager";
 import ReminderSettingsManager from "@/components/admin/ReminderSettingsManager";
 import ReviewsManager from "@/components/admin/ReviewsManager";
+import SizeGuideManager from "@/components/admin/SizeGuideManager";
 import SpinSettingsManager from "@/components/admin/SpinSettingsManager";
 import EasyRewardsManager from "@/components/admin/EasyRewardsManager";
 import ReferralManager from "@/components/admin/ReferralManager";
@@ -62,9 +63,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { PrintChecklistModal } from "@/components/admin/PrintChecklistModal";
 
-type Tab = "stats" | "report" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "welcome-showcase" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "spin" | "referral" | "promotions" | "coupon-usage" | "easyrewards" | "flash-sales" | "reels" | "settings" | "bonus" | "branches" | "returns" | "branding";
+type Tab = "stats" | "report" | "tracking" | "products" | "orders" | "users" | "drivers" | "categories" | "brands" | "delivery" | "delivery-portal" | "payments" | "banner" | "announcements" | "welcome-showcase" | "collections" | "chatbot" | "analytics" | "diagnostics" | "stocklog" | "recommendations" | "loyalty" | "reminders" | "reviews" | "size-guide" | "spin" | "referral" | "promotions" | "coupon-usage" | "easyrewards" | "flash-sales" | "reels" | "settings" | "bonus" | "branches" | "returns" | "branding";
 
-const SETTINGS_TABS: Tab[] = ["branding", "categories", "brands", "delivery", "payments", "banner", "announcements", "welcome-showcase", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "reminders", "reviews", "flash-sales", "reels", "drivers", "branches", "returns"];
+const SETTINGS_TABS: Tab[] = ["branding", "categories", "brands", "delivery", "payments", "banner", "announcements", "welcome-showcase", "collections", "analytics", "diagnostics", "stocklog", "recommendations", "reminders", "reviews", "size-guide", "flash-sales", "reels", "drivers", "branches", "returns"];
 const BONUS_TABS: Tab[] = ["loyalty", "spin", "referral", "promotions", "coupon-usage", "easyrewards"];
 
 
@@ -116,7 +117,7 @@ const AdminPage = () => {
   const [tab, setTab] = useState<Tab>(() => {
     if (isReportRoute) return "report";
     const t = searchParams.get("tab") as Tab | null;
-    const valid: Tab[] = ["stats", "report", "tracking", "products", "orders", "users", "drivers", "categories", "brands", "delivery", "delivery-portal", "payments", "banner", "announcements", "welcome-showcase", "collections", "chatbot", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "spin", "referral", "promotions", "coupon-usage", "easyrewards", "flash-sales", "reels", "settings", "bonus", "branches", "returns", "branding"];
+    const valid: Tab[] = ["stats", "report", "tracking", "products", "orders", "users", "drivers", "categories", "brands", "delivery", "delivery-portal", "payments", "banner", "announcements", "welcome-showcase", "collections", "chatbot", "analytics", "diagnostics", "stocklog", "recommendations", "loyalty", "reminders", "reviews", "size-guide", "spin", "referral", "promotions", "coupon-usage", "easyrewards", "flash-sales", "reels", "settings", "bonus", "branches", "returns", "branding"];
     return t && valid.includes(t) ? t : "stats";
   });
 
@@ -2032,6 +2033,7 @@ const AdminPage = () => {
     { id: "recommendations", label: "Зөвлөмжийн жинлүүр", icon: Sparkles },
     { id: "reminders", label: "Санамжийн SMS", icon: MessageCircle },
     { id: "reviews", label: "Сэтгэгдэл", icon: Star },
+    { id: "size-guide", label: "Размер туслах", icon: Ruler },
     { id: "flash-sales", label: "Flash Sale", icon: Sparkles },
     { id: "reels", label: "Reels удирдах", icon: PlayCircle },
     { id: "drivers", label: "Жолоочид", icon: Truck },
@@ -5847,6 +5849,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
           {tab === "reminders" && <ReminderSettingsManager />}
 
           {tab === "reviews" && <ReviewsManager />}
+          {tab === "size-guide" && <SizeGuideManager />}
 
           {tab === "spin" && <SpinSettingsManager />}
 
