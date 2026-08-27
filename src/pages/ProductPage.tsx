@@ -789,6 +789,9 @@ const ProductPage = () => {
                         }`}
                       >
                         <span>{size}</span>
+                        {recommendedSize === size && (
+                          <span className="text-[9px] font-bold text-primary leading-none mt-0.5">✓ Санал</span>
+                        )}
                         {sizeQty !== null && (
                           <span className={`text-[10px] font-normal mt-0.5 ${
                             isSoldOut ? "text-destructive/70" : sizeQty <= 3 ? "text-destructive" : "text-muted-foreground/70"
@@ -997,6 +1000,9 @@ const ProductPage = () => {
                         }`}
                       >
                         <span>{size}</span>
+                        {recommendedSize === size && (
+                          <span className="text-[9px] font-bold text-primary leading-none mt-0.5">✓ Санал</span>
+                        )}
                         {sizeQty !== null && (
                           <span className={`text-[10px] font-normal mt-0.5 ${isSoldOut ? "text-destructive/70" : sizeQty <= 3 ? "text-destructive" : "text-muted-foreground/70"}`}>
                             {isSoldOut ? "Дууссан" : `${sizeQty} ширхэг`}
@@ -1331,6 +1337,9 @@ const ProductPage = () => {
                         }`}
                       >
                         <span>{size}</span>
+                        {recommendedSize === size && (
+                          <span className="text-[9px] font-bold text-primary leading-none mt-0.5">✓ Санал</span>
+                        )}
                         {sizeQty !== null && (
                           <span className={`text-[10px] font-normal mt-0.5 ${
                             isSoldOut ? "text-destructive/70" : sizeQty <= 3 ? "text-destructive" : "text-muted-foreground/70"

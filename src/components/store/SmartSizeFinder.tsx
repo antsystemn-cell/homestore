@@ -28,6 +28,7 @@ interface Props {
   sizes?: string[];
   selectedSize?: string | null;
   onSelectSize: (size: string) => void;
+  onRecommend?: (size: string) => void;
   className?: string;
 }
 
@@ -52,6 +53,7 @@ export default function SmartSizeFinder({
   sizes,
   selectedSize,
   onSelectSize,
+  onRecommend,
   className,
 }: Props) {
   const { user } = useAuth();
@@ -185,6 +187,7 @@ export default function SmartSizeFinder({
     });
     setResult(res);
     setStep(4);
+    onRecommend?.(res.recommendedSize);
     logEvent("size_recommended", {
       recommended_size: res.recommendedSize,
       height_cm: h,
