@@ -251,7 +251,7 @@ export default function SmartSizeFinder({
       compute(value);
       setDir(1);
       setComputing(false);
-    }, 650);
+    }, 900);
   };
 
   const applySize = (size: string) => {
@@ -301,22 +301,33 @@ export default function SmartSizeFinder({
   return (
     <div className={className}>
       <style>{`
-        @keyframes ssf-in-r { from { opacity: 0; transform: translateX(32px); } to { opacity: 1; transform: translateX(0); } }
-        @keyframes ssf-in-l { from { opacity: 0; transform: translateX(-32px); } to { opacity: 1; transform: translateX(0); } }
-        @keyframes ssf-pop { 0% { opacity: 0; transform: scale(0.5); } 70% { transform: scale(1.06); } 100% { opacity: 1; transform: scale(1); } }
-        @keyframes ssf-fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes ssf-dot { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
-        .ssf-anim-r { animation: ssf-in-r 0.34s cubic-bezier(0.22, 1, 0.36, 1); }
-        .ssf-anim-l { animation: ssf-in-l 0.34s cubic-bezier(0.22, 1, 0.36, 1); }
-        .ssf-pop { animation: ssf-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+        @keyframes ssf-in-r { from { opacity: 0; transform: translateX(56px) scale(0.97); } to { opacity: 1; transform: translateX(0) scale(1); } }
+        @keyframes ssf-in-l { from { opacity: 0; transform: translateX(-56px) scale(0.97); } to { opacity: 1; transform: translateX(0) scale(1); } }
+        @keyframes ssf-pop { 0% { opacity: 0; transform: scale(0.4) rotate(-8deg); } 65% { transform: scale(1.12) rotate(2deg); } 100% { opacity: 1; transform: scale(1) rotate(0deg); } }
+        @keyframes ssf-fade-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes ssf-dot { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1.15); opacity: 1; } }
+        @keyframes ssf-bar { 0% { transform: translateX(-100%); } 100% { transform: translateX(320%); } }
+        @keyframes ssf-ring { 0% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.35); } 100% { box-shadow: 0 0 0 18px hsl(var(--primary) / 0); } }
+        .ssf-anim-r { animation: ssf-in-r 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
+        .ssf-anim-l { animation: ssf-in-l 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
+        .ssf-anim-r > *, .ssf-anim-l > * { animation: ssf-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        .ssf-anim-r > *:nth-child(2), .ssf-anim-l > *:nth-child(2) { animation-delay: 0.07s; }
+        .ssf-anim-r > *:nth-child(3), .ssf-anim-l > *:nth-child(3) { animation-delay: 0.14s; }
+        .ssf-anim-r > *:nth-child(4), .ssf-anim-l > *:nth-child(4) { animation-delay: 0.21s; }
+        .ssf-pop { animation: ssf-pop 0.62s cubic-bezier(0.34, 1.56, 0.64, 1) both, ssf-ring 1.4s ease-out 0.5s 2; }
         .ssf-fade-up { animation: ssf-fade-up 0.4s ease-out both; }
-        .ssf-stagger > * { animation: ssf-fade-up 0.4s ease-out both; }
-        .ssf-stagger > *:nth-child(2) { animation-delay: 0.06s; }
-        .ssf-stagger > *:nth-child(3) { animation-delay: 0.12s; }
+        .ssf-stagger > * { animation: ssf-fade-up 0.45s ease-out both; }
+        .ssf-stagger > *:nth-child(2) { animation-delay: 0.09s; }
+        .ssf-stagger > *:nth-child(3) { animation-delay: 0.18s; }
         .ssf-load-dot { animation: ssf-dot 1.1s ease-in-out infinite; }
         .ssf-load-dot:nth-child(2) { animation-delay: 0.15s; }
         .ssf-load-dot:nth-child(3) { animation-delay: 0.3s; }
+        .ssf-bar { animation: ssf-bar 1.1s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .ssf-anim-r, .ssf-anim-l, .ssf-anim-r > *, .ssf-anim-l > *, .ssf-pop, .ssf-fade-up, .ssf-stagger > *, .ssf-load-dot, .ssf-bar { animation: none !important; }
+        }
       `}</style>
+
       {/* --------------------------- Trigger card ---------------------------- */}
       <div className="relative overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.07] via-secondary/50 to-accent/10 p-4">
         <div className="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
@@ -420,7 +431,11 @@ export default function SmartSizeFinder({
                       <span className="ssf-load-dot inline-block">.</span>
                     </span>
                   </p>
+                  <div className="h-1.5 w-40 overflow-hidden rounded-full bg-primary/15">
+                    <div className="ssf-bar h-full w-1/3 rounded-full bg-primary" />
+                  </div>
                   <p className="text-[11px] text-muted-foreground">Өндөр, жин, өмсгөлийг харьцаулж байна</p>
+
                 </div>
               </div>
             )}
