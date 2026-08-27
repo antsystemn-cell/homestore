@@ -193,10 +193,6 @@ export default function SmartSizeFinder({
     return seen;
   }, [guides]);
 
-  useEffect(() => {
-    if (openSignal && openSignal > 0) openFinder();
-  }, [openSignal]);
-
   if (!config || guides.length === 0) return null;
 
   // ---- actions ------------------------------------------------------------
@@ -206,6 +202,10 @@ export default function SmartSizeFinder({
     setOpen(true);
     logEvent("size_finder_opened");
   };
+
+  useEffect(() => {
+    if (openSignal && openSignal > 0) openFinder();
+  }, [openSignal]);
 
 
   const compute = (fitPref: FitPreference) => {
@@ -269,6 +269,7 @@ export default function SmartSizeFinder({
 
   const applySize = (size: string) => {
     onSelectSize(size);
+    onSizeApplied?.(size);
     logEvent("size_selected", {
       recommended_size: result?.recommendedSize ?? null,
       selected_size: size,

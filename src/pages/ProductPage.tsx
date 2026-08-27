@@ -274,6 +274,7 @@ const ProductPage = () => {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [recommendedSize, setRecommendedSize] = useState<string | null>(null);
+  const [sizeFinderOpenSignal, setSizeFinderOpenSignal] = useState(0);
   const [selectedGiftPackageId, setSelectedGiftPackageId] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [brandName, setBrandName] = useState<string | null>(null);
@@ -777,7 +778,7 @@ const ProductPage = () => {
                         key={size}
                         onClick={() => {
                           userInteractedRef.current = true;
-                          if (!isSoldOut) setSelectedSize(selectedSize === size ? null : size);
+                          if (!isSoldOut) setSizeFinderOpenSignal((value) => value + 1);
                         }}
                         disabled={isSoldOut}
                         className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-colors flex flex-col items-center leading-tight min-w-[64px] ${
@@ -873,7 +874,9 @@ const ProductPage = () => {
                 productCode={product.productCode}
                 sizes={product.sizes}
                 selectedSize={selectedSize}
+                openSignal={sizeFinderOpenSignal}
                 onSelectSize={(s) => setSelectedSize(s)}
+                onSizeApplied={(s) => setSelectedSize(s)}
                 onRecommend={(s) => setRecommendedSize(s)}
               />
             )}
@@ -998,7 +1001,7 @@ const ProductPage = () => {
                         key={size}
                         onClick={() => {
                           userInteractedRef.current = true;
-                          if (!isSoldOut) setSelectedSize(selectedSize === size ? null : size);
+                          if (!isSoldOut) setSizeFinderOpenSignal((value) => value + 1);
                         }}
                         disabled={isSoldOut}
                         className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-colors flex flex-col items-center leading-tight min-w-[64px] ${
