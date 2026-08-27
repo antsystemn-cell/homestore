@@ -1343,7 +1343,10 @@ const ProductPage = () => {
                         key={size}
                         onClick={() => {
                           userInteractedRef.current = true;
-                          if (!isSoldOut) setSizeFinderOpenSignal((value) => value + 1);
+                          if (!isSoldOut) {
+                            setSheetOpen(false);
+                            setSizeFinderOpenSignal((value) => value + 1);
+                          }
                         }}
                         disabled={isSoldOut}
                         className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-colors flex flex-col items-center leading-tight min-w-[64px] ${
