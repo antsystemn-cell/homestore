@@ -300,6 +300,23 @@ export default function SmartSizeFinder({
 
   return (
     <div className={className}>
+      <style>{`
+        @keyframes ssf-in-r { from { opacity: 0; transform: translateX(32px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes ssf-in-l { from { opacity: 0; transform: translateX(-32px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes ssf-pop { 0% { opacity: 0; transform: scale(0.5); } 70% { transform: scale(1.06); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes ssf-fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes ssf-dot { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+        .ssf-anim-r { animation: ssf-in-r 0.34s cubic-bezier(0.22, 1, 0.36, 1); }
+        .ssf-anim-l { animation: ssf-in-l 0.34s cubic-bezier(0.22, 1, 0.36, 1); }
+        .ssf-pop { animation: ssf-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+        .ssf-fade-up { animation: ssf-fade-up 0.4s ease-out both; }
+        .ssf-stagger > * { animation: ssf-fade-up 0.4s ease-out both; }
+        .ssf-stagger > *:nth-child(2) { animation-delay: 0.06s; }
+        .ssf-stagger > *:nth-child(3) { animation-delay: 0.12s; }
+        .ssf-load-dot { animation: ssf-dot 1.1s ease-in-out infinite; }
+        .ssf-load-dot:nth-child(2) { animation-delay: 0.15s; }
+        .ssf-load-dot:nth-child(3) { animation-delay: 0.3s; }
+      `}</style>
       {/* --------------------------- Trigger card ---------------------------- */}
       <div className="relative overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.07] via-secondary/50 to-accent/10 p-4">
         <div className="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
@@ -333,7 +350,7 @@ export default function SmartSizeFinder({
         <div className="relative mt-3 flex flex-col sm:flex-row gap-2">
           <Button
             onClick={openFinder}
-            className="h-11 rounded-xl font-bold flex-1 gap-1.5 shadow-md shadow-primary/20"
+            className="h-11 rounded-xl font-bold flex-1 gap-1.5 shadow-md shadow-primary/20 transition-transform duration-150 hover:scale-[1.02] active:scale-[0.97]"
           >
             <Sparkles className="h-4 w-4" />
             Размер сонгоход тусалъя
