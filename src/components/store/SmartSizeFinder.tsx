@@ -342,7 +342,7 @@ export default function SmartSizeFinder({
               Танд аль размер тохирох вэ?
             </p>
             <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">
-              Зөвхөн өндөр, жингөө оруулаад 30 секундэд мэдээрэй
+              Зөвхөн өндөр, жингээ оруулаад өөрийн хэмжээгээ мэдээрэй
             </p>
           </div>
         </div>
