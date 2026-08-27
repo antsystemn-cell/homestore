@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { getSessionToken } from "@/lib/tracking";
@@ -433,8 +433,8 @@ export default function SmartSizeFinder({
 
             {step === 1 && (
               <>
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <div className="relative group">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors duration-200 group-focus-within:text-primary">
                     <MoveVertical className="h-5 w-5" />
                   </div>
                   <Input
@@ -443,9 +443,9 @@ export default function SmartSizeFinder({
                     value={height}
                     onChange={(e) => setHeight(e.target.value)}
                     placeholder="165"
-                    className="h-16 rounded-2xl pl-12 pr-14 text-center text-3xl font-black tracking-wide border-2 focus-visible:border-primary"
+                    className="h-16 rounded-2xl pl-12 pr-14 text-center text-3xl font-black tracking-wide border-2 transition-all duration-200 focus-visible:border-primary focus-visible:shadow-lg focus-visible:shadow-primary/15"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground transition-colors duration-200 group-focus-within:text-primary">
                     см
                   </span>
                 </div>
