@@ -81,6 +81,8 @@ export default function SmartSizeFinder({
   const [open, setOpen] = useState(false);
   const [chartOpen, setChartOpen] = useState(false);
   const [step, setStep] = useState(1);
+  const [dir, setDir] = useState(1);
+  const [computing, setComputing] = useState(false);
   const [height, setHeight] = useState<string>("");
   const [weight, setWeight] = useState<string>("");
   const [fit, setFit] = useState<FitPreference>("regular");
@@ -187,6 +189,7 @@ export default function SmartSizeFinder({
 
   // ---- actions ------------------------------------------------------------
   const openFinder = () => {
+    setDir(1);
     setStep(result ? 4 : 1);
     setOpen(true);
     logEvent("size_finder_opened");
@@ -225,6 +228,7 @@ export default function SmartSizeFinder({
       return;
     }
     logEvent("height_entered", { height_cm: h });
+    setDir(1);
     setStep(2);
   };
 
@@ -235,13 +239,19 @@ export default function SmartSizeFinder({
       return;
     }
     logEvent("weight_entered", { weight_kg: w });
+    setDir(1);
     setStep(3);
   };
 
   const chooseFit = (value: FitPreference) => {
     setFit(value);
     logEvent("fit_selected", { fit_preference: value });
-    compute(value);
+    setComputing(true);
+    window.setTimeout(() => {
+      compute(value);
+      setDir(1);
+      setComputing(false);
+    }, 650);
   };
 
   const applySize = (size: string) => {
@@ -290,6 +300,23 @@ export default function SmartSizeFinder({
 
   return (
     <div className={className}>
+      <style>{`
+        @keyframes ssf-in-r { from { opacity: 0; transform: translateX(32px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes ssf-in-l { from { opacity: 0; transform: translateX(-32px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes ssf-pop { 0% { opacity: 0; transform: scale(0.5); } 70% { transform: scale(1.06); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes ssf-fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes ssf-dot { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+        .ssf-anim-r { animation: ssf-in-r 0.34s cubic-bezier(0.22, 1, 0.36, 1); }
+        .ssf-anim-l { animation: ssf-in-l 0.34s cubic-bezier(0.22, 1, 0.36, 1); }
+        .ssf-pop { animation: ssf-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+        .ssf-fade-up { animation: ssf-fade-up 0.4s ease-out both; }
+        .ssf-stagger > * { animation: ssf-fade-up 0.4s ease-out both; }
+        .ssf-stagger > *:nth-child(2) { animation-delay: 0.06s; }
+        .ssf-stagger > *:nth-child(3) { animation-delay: 0.12s; }
+        .ssf-load-dot { animation: ssf-dot 1.1s ease-in-out infinite; }
+        .ssf-load-dot:nth-child(2) { animation-delay: 0.15s; }
+        .ssf-load-dot:nth-child(3) { animation-delay: 0.3s; }
+      `}</style>
       {/* --------------------------- Trigger card ---------------------------- */}
       <div className="relative overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.07] via-secondary/50 to-accent/10 p-4">
         <div className="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
@@ -323,7 +350,7 @@ export default function SmartSizeFinder({
         <div className="relative mt-3 flex flex-col sm:flex-row gap-2">
           <Button
             onClick={openFinder}
-            className="h-11 rounded-xl font-bold flex-1 gap-1.5 shadow-md shadow-primary/20"
+            className="h-11 rounded-xl font-bold flex-1 gap-1.5 shadow-md shadow-primary/20 transition-transform duration-150 hover:scale-[1.02] active:scale-[0.97]"
           >
             <Sparkles className="h-4 w-4" />
             Размер сонгоход тусалъя
@@ -348,8 +375,8 @@ export default function SmartSizeFinder({
           <div className="flex items-center justify-between px-5 pt-4">
             {step > 1 && step < 4 ? (
               <button
-                onClick={() => setStep(step - 1)}
-                className="grid h-9 w-9 -ml-2 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                onClick={() => { setDir(-1); setStep(step - 1); }}
+                className="grid h-9 w-9 -ml-2 place-items-center rounded-full text-muted-foreground transition-all duration-150 hover:bg-secondary hover:text-foreground active:scale-90"
               >
                 <ArrowLeft className="h-5 w-5" />
               </button>
@@ -375,7 +402,28 @@ export default function SmartSizeFinder({
             <span className="h-9 w-9" />
           </div>
 
-          <div className="px-5 pb-5 pt-2 space-y-5">
+          <div
+            key={step}
+            className={`px-5 pb-5 pt-2 space-y-5 relative ${dir === 1 ? "ssf-anim-r" : "ssf-anim-l"}`}
+          >
+            {computing && (
+              <div className="absolute inset-0 z-10 grid place-items-center rounded-b-3xl bg-background/80 backdrop-blur-sm ssf-fade-up">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="grid h-14 w-14 place-items-center rounded-full bg-primary/10">
+                    <Loader2 className="h-7 w-7 animate-spin text-primary" />
+                  </div>
+                  <p className="text-sm font-bold text-foreground">
+                    Танд тохирох размер тооцоолж байна
+                    <span className="inline-flex ml-1 gap-0.5">
+                      <span className="ssf-load-dot inline-block">.</span>
+                      <span className="ssf-load-dot inline-block">.</span>
+                      <span className="ssf-load-dot inline-block">.</span>
+                    </span>
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">Өндөр, жин, өмсгөлийг харьцаулж байна</p>
+                </div>
+              </div>
+            )}
             {step < 4 && (
               <div className="text-center space-y-1">
                 <h3 className="text-xl font-black tracking-tight">{STEP_META[step - 1].title}</h3>
@@ -385,8 +433,8 @@ export default function SmartSizeFinder({
 
             {step === 1 && (
               <>
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <div className="relative group">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors duration-200 group-focus-within:text-primary">
                     <MoveVertical className="h-5 w-5" />
                   </div>
                   <Input
@@ -395,20 +443,20 @@ export default function SmartSizeFinder({
                     value={height}
                     onChange={(e) => setHeight(e.target.value)}
                     placeholder="165"
-                    className="h-16 rounded-2xl pl-12 pr-14 text-center text-3xl font-black tracking-wide border-2 focus-visible:border-primary"
+                    className="h-16 rounded-2xl pl-12 pr-14 text-center text-3xl font-black tracking-wide border-2 transition-all duration-200 focus-visible:border-primary focus-visible:shadow-lg focus-visible:shadow-primary/15"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground transition-colors duration-200 group-focus-within:text-primary">
                     см
                   </span>
                 </div>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-4 gap-2 ssf-stagger">
                   {HEIGHT_QUICK.map((h) => (
                     <button
                       key={h}
                       onClick={() => setHeight(String(h))}
-                      className={`h-11 rounded-xl text-sm font-bold border-2 transition-all active:scale-95 ${
+                      className={`h-11 rounded-xl text-sm font-bold border-2 transition-all duration-150 active:scale-95 hover:-translate-y-0.5 hover:shadow-sm ${
                         Number(height) === h
-                          ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30"
+                          ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30 scale-[1.03]"
                           : "border-border bg-background hover:border-primary/40"
                       }`}
                     >
@@ -417,9 +465,9 @@ export default function SmartSizeFinder({
                   ))}
                   <button
                     onClick={() => setHeight("180")}
-                    className={`h-11 rounded-xl text-sm font-bold border-2 transition-all active:scale-95 ${
+                    className={`h-11 rounded-xl text-sm font-bold border-2 transition-all duration-150 active:scale-95 hover:-translate-y-0.5 hover:shadow-sm ${
                       Number(height) >= 180
-                        ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30"
+                        ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30 scale-[1.03]"
                         : "border-border bg-background hover:border-primary/40"
                     }`}
                   >
@@ -435,8 +483,8 @@ export default function SmartSizeFinder({
 
             {step === 2 && (
               <>
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <div className="relative group">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors duration-200 group-focus-within:text-primary">
                     <Scale className="h-5 w-5" />
                   </div>
                   <Input
@@ -445,20 +493,20 @@ export default function SmartSizeFinder({
                     value={weight}
                     onChange={(e) => setWeight(e.target.value)}
                     placeholder="60"
-                    className="h-16 rounded-2xl pl-12 pr-14 text-center text-3xl font-black tracking-wide border-2 focus-visible:border-primary"
+                    className="h-16 rounded-2xl pl-12 pr-14 text-center text-3xl font-black tracking-wide border-2 transition-all duration-200 focus-visible:border-primary focus-visible:shadow-lg focus-visible:shadow-primary/15"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground transition-colors duration-200 group-focus-within:text-primary">
                     кг
                   </span>
                 </div>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-4 gap-2 ssf-stagger">
                   {WEIGHT_QUICK.map((w) => (
                     <button
                       key={w}
                       onClick={() => setWeight(String(w))}
-                      className={`h-11 rounded-xl text-sm font-bold border-2 transition-all active:scale-95 ${
+                      className={`h-11 rounded-xl text-sm font-bold border-2 transition-all duration-150 active:scale-95 hover:-translate-y-0.5 hover:shadow-sm ${
                         Number(weight) === w
-                          ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30"
+                          ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30 scale-[1.03]"
                           : "border-border bg-background hover:border-primary/40"
                       }`}
                     >
@@ -475,20 +523,21 @@ export default function SmartSizeFinder({
 
             {step === 3 && (
               <>
-                <div className="grid grid-cols-3 gap-2.5">
+                <div className="grid grid-cols-3 gap-2.5 ssf-stagger">
                   {FIT_OPTIONS.map((o) => (
                     <button
                       key={o.value}
                       onClick={() => chooseFit(o.value)}
-                      className={`h-24 rounded-2xl border-2 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 ${
+                      disabled={computing}
+                      className={`h-24 rounded-2xl border-2 flex flex-col items-center justify-center gap-1.5 transition-all duration-150 active:scale-95 hover:-translate-y-0.5 hover:shadow-md disabled:opacity-60 disabled:pointer-events-none ${
                         fit === o.value
                           ? "border-primary bg-primary/[0.08] shadow-sm"
                           : "border-border bg-background hover:border-primary/40"
                       }`}
                     >
                       <span
-                        className={`grid h-8 w-8 place-items-center rounded-full transition-colors ${
-                          fit === o.value ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+                        className={`grid h-8 w-8 place-items-center rounded-full transition-all duration-200 ${
+                          fit === o.value ? "bg-primary text-primary-foreground scale-110" : "bg-secondary text-muted-foreground"
                         }`}
                       >
                         <Shirt className="h-4 w-4" />
@@ -501,7 +550,7 @@ export default function SmartSizeFinder({
                 <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
                   Сонголт хийхэд шууд үр дүн харагдана. Анхдагч нь “Энгийн”.
                 </p>
-                <Button variant="outline" onClick={() => chooseFit("regular")} className="w-full h-11 rounded-xl font-semibold">
+                <Button variant="outline" onClick={() => chooseFit("regular")} disabled={computing} className="w-full h-11 rounded-xl font-semibold">
                   Энгийнээр үргэлжлүүлэх
                 </Button>
               </>
@@ -510,12 +559,12 @@ export default function SmartSizeFinder({
             {step === 4 && result && (
               <div className="space-y-5">
                 {/* Result hero */}
-                <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-b from-primary/[0.08] to-transparent px-5 pt-6 pb-5 text-center">
+                <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-b from-primary/[0.08] to-transparent px-5 pt-6 pb-5 text-center ssf-fade-up">
                   <div className="pointer-events-none absolute -top-16 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full bg-primary/15 blur-3xl" />
                   <p className="relative text-[10px] font-extrabold uppercase tracking-[0.2em] text-primary">
                     Танд санал болгож буй размер
                   </p>
-                  <div className="relative mx-auto my-4 grid h-24 w-24 place-items-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/30 ring-4 ring-primary/15">
+                  <div className="ssf-pop relative mx-auto my-4 grid h-24 w-24 place-items-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/30 ring-4 ring-primary/15">
                     <span className="text-4xl font-black tracking-tight">{result.recommendedSize}</span>
                   </div>
                   <p className="relative text-[12px] text-foreground/80 leading-relaxed max-w-[280px] mx-auto">
@@ -530,7 +579,7 @@ export default function SmartSizeFinder({
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="grid grid-cols-3 gap-2 text-center ssf-stagger">
                   {[
                     { k: "Өндөр", v: `${clampHeight(Number(height))} см` },
                     { k: "Жин", v: `${clampWeight(Number(weight))} кг` },
@@ -559,7 +608,7 @@ export default function SmartSizeFinder({
                       <button
                         key={s}
                         onClick={() => applySize(s)}
-                        className={`relative min-w-[56px] h-12 px-4 rounded-xl border-2 text-sm font-extrabold transition-all active:scale-95 ${
+                        className={`relative min-w-[56px] h-12 px-4 rounded-xl border-2 text-sm font-extrabold transition-all duration-150 active:scale-95 hover:-translate-y-0.5 hover:shadow-sm ${
                           s === result.recommendedSize
                             ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/25"
                             : selectedSize === s
@@ -590,7 +639,7 @@ export default function SmartSizeFinder({
                   <Button
                     variant="outline"
                     className="flex-1 h-11 rounded-xl font-semibold gap-1.5"
-                    onClick={() => setStep(1)}
+                    onClick={() => { setDir(-1); setStep(1); }}
                   >
                     <RotateCcw className="h-4 w-4" />
                     Дахин тооцох
