@@ -431,7 +431,11 @@ export default function SmartSizeFinder({
                       <span className="ssf-load-dot inline-block">.</span>
                     </span>
                   </p>
+                  <div className="h-1.5 w-40 overflow-hidden rounded-full bg-primary/15">
+                    <div className="ssf-bar h-full w-1/3 rounded-full bg-primary" />
+                  </div>
                   <p className="text-[11px] text-muted-foreground">Өндөр, жин, өмсгөлийг харьцаулж байна</p>
+
                 </div>
               </div>
             )}
