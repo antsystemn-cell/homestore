@@ -251,7 +251,7 @@ export default function SmartSizeFinder({
       compute(value);
       setDir(1);
       setComputing(false);
-    }, 650);
+    }, 900);
   };
 
   const applySize = (size: string) => {
