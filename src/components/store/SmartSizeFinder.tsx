@@ -483,8 +483,8 @@ export default function SmartSizeFinder({
 
             {step === 2 && (
               <>
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <div className="relative group">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors duration-200 group-focus-within:text-primary">
                     <Scale className="h-5 w-5" />
                   </div>
                   <Input
@@ -493,13 +493,13 @@ export default function SmartSizeFinder({
                     value={weight}
                     onChange={(e) => setWeight(e.target.value)}
                     placeholder="60"
-                    className="h-16 rounded-2xl pl-12 pr-14 text-center text-3xl font-black tracking-wide border-2 focus-visible:border-primary"
+                    className="h-16 rounded-2xl pl-12 pr-14 text-center text-3xl font-black tracking-wide border-2 transition-all duration-200 focus-visible:border-primary focus-visible:shadow-lg focus-visible:shadow-primary/15"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground transition-colors duration-200 group-focus-within:text-primary">
                     кг
                   </span>
                 </div>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-4 gap-2 ssf-stagger">
                   {WEIGHT_QUICK.map((w) => (
                     <button
                       key={w}
