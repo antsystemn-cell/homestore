@@ -1848,6 +1848,53 @@ export type Database = {
         }
         Relationships: []
       }
+      product_size_guides: {
+        Row: {
+          created_at: string
+          id: string
+          measurement_type: string
+          measurement_value: number
+          product_id: string
+          size: string
+          sort_order: number
+          source: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          measurement_type: string
+          measurement_value: number
+          product_id: string
+          size: string
+          sort_order?: number
+          source?: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          measurement_type?: string
+          measurement_value?: number
+          product_id?: string
+          size?: string
+          sort_order?: number
+          source?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_size_guides_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           average_reorder_days: number | null
@@ -2549,6 +2596,118 @@ export type Database = {
         }
         Relationships: []
       }
+      size_finder_events: {
+        Row: {
+          confidence: string | null
+          created_at: string
+          event_type: string
+          fit_preference: string | null
+          height_cm: number | null
+          id: string
+          metadata: Json
+          product_id: string | null
+          recommended_size: string | null
+          selected_size: string | null
+          session_token: string | null
+          user_id: string | null
+          weight_kg: number | null
+        }
+        Insert: {
+          confidence?: string | null
+          created_at?: string
+          event_type: string
+          fit_preference?: string | null
+          height_cm?: number | null
+          id?: string
+          metadata?: Json
+          product_id?: string | null
+          recommended_size?: string | null
+          selected_size?: string | null
+          session_token?: string | null
+          user_id?: string | null
+          weight_kg?: number | null
+        }
+        Update: {
+          confidence?: string | null
+          created_at?: string
+          event_type?: string
+          fit_preference?: string | null
+          height_cm?: number | null
+          id?: string
+          metadata?: Json
+          product_id?: string | null
+          recommended_size?: string | null
+          selected_size?: string | null
+          session_token?: string | null
+          user_id?: string | null
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "size_finder_events_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      size_recommendation_config: {
+        Row: {
+          algorithm_version: string
+          category: string
+          chart_image_url: string | null
+          created_at: string
+          enabled: boolean
+          fit_type: string
+          height_weight_rules: Json
+          id: string
+          material: string | null
+          product_id: string
+          score_weights: Json
+          stretch_level: string
+          updated_at: string
+        }
+        Insert: {
+          algorithm_version?: string
+          category?: string
+          chart_image_url?: string | null
+          created_at?: string
+          enabled?: boolean
+          fit_type?: string
+          height_weight_rules?: Json
+          id?: string
+          material?: string | null
+          product_id: string
+          score_weights?: Json
+          stretch_level?: string
+          updated_at?: string
+        }
+        Update: {
+          algorithm_version?: string
+          category?: string
+          chart_image_url?: string | null
+          created_at?: string
+          enabled?: boolean
+          fit_type?: string
+          height_weight_rules?: Json
+          id?: string
+          material?: string | null
+          product_id?: string
+          score_weights?: Json
+          stretch_level?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "size_recommendation_config_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       spin_balances: {
         Row: {
           available_spins: number
@@ -2894,6 +3053,36 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_size_profiles: {
+        Row: {
+          created_at: string
+          height_cm: number | null
+          id: string
+          preferred_fit: string
+          updated_at: string
+          user_id: string
+          weight_kg: number | null
+        }
+        Insert: {
+          created_at?: string
+          height_cm?: number | null
+          id?: string
+          preferred_fit?: string
+          updated_at?: string
+          user_id: string
+          weight_kg?: number | null
+        }
+        Update: {
+          created_at?: string
+          height_cm?: number | null
+          id?: string
+          preferred_fit?: string
+          updated_at?: string
+          user_id?: string
+          weight_kg?: number | null
         }
         Relationships: []
       }
