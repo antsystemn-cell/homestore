@@ -43,7 +43,12 @@ interface Props {
   onSelectSize: (size: string) => void;
   onRecommend?: (size: string) => void;
   className?: string;
+  /** Increment to open the finder modal programmatically. */
+  openSignal?: number;
+  /** Called after the user applies a size from the finder. */
+  onSizeApplied?: (size: string) => void;
 }
+
 
 const HEIGHT_QUICK = [150, 155, 160, 165, 170, 175, 180];
 const WEIGHT_QUICK = [45, 50, 55, 60, 65, 70, 75, 80];
@@ -74,11 +79,14 @@ export default function SmartSizeFinder({
   onSelectSize,
   onRecommend,
   className,
+  openSignal,
+  onSizeApplied,
 }: Props) {
   const { user } = useAuth();
   const [config, setConfig] = useState<SizeConfig | null>(null);
   const [guides, setGuides] = useState<GuideRow[]>([]);
   const [open, setOpen] = useState(false);
+
   const [chartOpen, setChartOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [dir, setDir] = useState(1);
@@ -185,8 +193,6 @@ export default function SmartSizeFinder({
     return seen;
   }, [guides]);
 
-  if (!config || guides.length === 0) return null;
-
   // ---- actions ------------------------------------------------------------
   const openFinder = () => {
     setDir(1);
@@ -194,6 +200,18 @@ export default function SmartSizeFinder({
     setOpen(true);
     logEvent("size_finder_opened");
   };
+
+  useEffect(() => {
+    if (openSignal && openSignal > 0) {
+      setDir(1);
+      setStep(result ? 4 : 1);
+      setOpen(true);
+      logEvent("size_finder_opened");
+    }
+  }, [openSignal]);
+
+  if (!config || guides.length === 0) return null;
+
 
   const compute = (fitPref: FitPreference) => {
     const h = clampHeight(Number(height));
@@ -256,6 +274,7 @@ export default function SmartSizeFinder({
 
   const applySize = (size: string) => {
     onSelectSize(size);
+    onSizeApplied?.(size);
     logEvent("size_selected", {
       recommended_size: result?.recommendedSize ?? null,
       selected_size: size,
