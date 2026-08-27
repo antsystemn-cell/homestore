@@ -579,7 +579,7 @@ export default function SmartSizeFinder({
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="grid grid-cols-3 gap-2 text-center ssf-stagger">
                   {[
                     { k: "Өндөр", v: `${clampHeight(Number(height))} см` },
                     { k: "Жин", v: `${clampWeight(Number(weight))} кг` },
@@ -608,7 +608,7 @@ export default function SmartSizeFinder({
                       <button
                         key={s}
                         onClick={() => applySize(s)}
-                        className={`relative min-w-[56px] h-12 px-4 rounded-xl border-2 text-sm font-extrabold transition-all active:scale-95 ${
+                        className={`relative min-w-[56px] h-12 px-4 rounded-xl border-2 text-sm font-extrabold transition-all duration-150 active:scale-95 hover:-translate-y-0.5 hover:shadow-sm ${
                           s === result.recommendedSize
                             ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/25"
                             : selectedSize === s
