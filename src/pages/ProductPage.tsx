@@ -1036,6 +1036,15 @@ const ProductPage = () => {
               />
             )}
 
+            {isElleSportBrand && product.sizes && product.sizes.length > 0 && (
+              <div className="hidden md:flex items-start gap-2.5 rounded-xl border border-amber-300/70 bg-amber-50 p-3">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                <p className="text-xs leading-relaxed text-amber-900">
+                  Хэрэглэгч та размер хэмжээгээ сайн харж сонголт хийнэ үү. Хэрвээ сонголт буруу болсон тохиолдолд хэмжээ, размер солих зардалыг хэрэглэгч бүрэн хариуцна. <span className="font-semibold">(Буцаалт байхгүй)</span>
+                </p>
+              </div>
+            )}
+
             <div className="hidden md:flex flex-col gap-3">
               <Button variant="outline" size="lg" disabled={isOutOfStock} className="flex-1 gap-2 rounded-xl h-14 text-base font-semibold" onClick={() => openPurchase("cart")}>
                 <ShoppingCart className="h-5 w-5" />
