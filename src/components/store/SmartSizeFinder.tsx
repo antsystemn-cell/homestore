@@ -375,8 +375,8 @@ export default function SmartSizeFinder({
           <div className="flex items-center justify-between px-5 pt-4">
             {step > 1 && step < 4 ? (
               <button
-                onClick={() => setStep(step - 1)}
-                className="grid h-9 w-9 -ml-2 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                onClick={() => { setDir(-1); setStep(step - 1); }}
+                className="grid h-9 w-9 -ml-2 place-items-center rounded-full text-muted-foreground transition-all duration-150 hover:bg-secondary hover:text-foreground active:scale-90"
               >
                 <ArrowLeft className="h-5 w-5" />
               </button>
@@ -402,7 +402,28 @@ export default function SmartSizeFinder({
             <span className="h-9 w-9" />
           </div>
 
-          <div className="px-5 pb-5 pt-2 space-y-5">
+          <div
+            key={step}
+            className={`px-5 pb-5 pt-2 space-y-5 relative ${dir === 1 ? "ssf-anim-r" : "ssf-anim-l"}`}
+          >
+            {computing && (
+              <div className="absolute inset-0 z-10 grid place-items-center rounded-b-3xl bg-background/80 backdrop-blur-sm ssf-fade-up">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="grid h-14 w-14 place-items-center rounded-full bg-primary/10">
+                    <Loader2 className="h-7 w-7 animate-spin text-primary" />
+                  </div>
+                  <p className="text-sm font-bold text-foreground">
+                    Танд тохирох размер тооцоолж байна
+                    <span className="inline-flex ml-1 gap-0.5">
+                      <span className="ssf-load-dot inline-block">.</span>
+                      <span className="ssf-load-dot inline-block">.</span>
+                      <span className="ssf-load-dot inline-block">.</span>
+                    </span>
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">Өндөр, жин, өмсгөлийг харьцаулж байна</p>
+                </div>
+              </div>
+            )}
             {step < 4 && (
               <div className="text-center space-y-1">
                 <h3 className="text-xl font-black tracking-tight">{STEP_META[step - 1].title}</h3>
