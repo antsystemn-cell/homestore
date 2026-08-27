@@ -639,7 +639,7 @@ export default function SmartSizeFinder({
                   <Button
                     variant="outline"
                     className="flex-1 h-11 rounded-xl font-semibold gap-1.5"
-                    onClick={() => setStep(1)}
+                    onClick={() => { setDir(-1); setStep(1); }}
                   >
                     <RotateCcw className="h-4 w-4" />
                     Дахин тооцох
