@@ -407,6 +407,10 @@ const ProductPage = () => {
       toast.error("Энэ бараа дууссан байна");
       return;
     }
+    if (isElleSportBrand && hasSizes && !selectedSize) {
+      setSizeFinderOpenSignal((value) => value + 1);
+      return;
+    }
     if (needsSelection()) {
       setSheetIntent(intent);
       setSheetOpen(true);
@@ -1337,7 +1341,10 @@ const ProductPage = () => {
                     return (
                       <button
                         key={size}
-                        onClick={() => !isSoldOut && setSelectedSize(selectedSize === size ? null : size)}
+                        onClick={() => {
+                          userInteractedRef.current = true;
+                          if (!isSoldOut) setSizeFinderOpenSignal((value) => value + 1);
+                        }}
                         disabled={isSoldOut}
                         className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-colors flex flex-col items-center leading-tight min-w-[64px] ${
                           selectedSize === size

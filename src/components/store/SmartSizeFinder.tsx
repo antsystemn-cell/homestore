@@ -193,8 +193,6 @@ export default function SmartSizeFinder({
     return seen;
   }, [guides]);
 
-  if (!config || guides.length === 0) return null;
-
   // ---- actions ------------------------------------------------------------
   const openFinder = () => {
     setDir(1);
@@ -204,8 +202,15 @@ export default function SmartSizeFinder({
   };
 
   useEffect(() => {
-    if (openSignal && openSignal > 0) openFinder();
+    if (openSignal && openSignal > 0) {
+      setDir(1);
+      setStep(result ? 4 : 1);
+      setOpen(true);
+      logEvent("size_finder_opened");
+    }
   }, [openSignal]);
+
+  if (!config || guides.length === 0) return null;
 
 
   const compute = (fitPref: FitPreference) => {
