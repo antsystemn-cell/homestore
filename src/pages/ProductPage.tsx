@@ -20,6 +20,7 @@ import { useFlashSaleFor } from "@/hooks/useFlashSales";
 import FlashSaleCountdown from "@/components/store/FlashSaleCountdown";
 import { supabase } from "@/integrations/supabase/client";
 import { getColorHex } from "@/lib/colorMap";
+import SmartSizeFinder from "@/components/store/SmartSizeFinder";
 
 
 const ProductRatingSummary = ({ productId }: { productId: string }) => {
@@ -272,6 +273,7 @@ const ProductPage = () => {
   const [activeImg, setActiveImg] = useState(0);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [recommendedSize, setRecommendedSize] = useState<string | null>(null);
   const [selectedGiftPackageId, setSelectedGiftPackageId] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [brandName, setBrandName] = useState<string | null>(null);
@@ -801,6 +803,18 @@ const ProductPage = () => {
               </div>
             )}
 
+            {isElleSportBrand && product.sizes && product.sizes.length > 0 && (
+              <SmartSizeFinder
+                className="px-4 md:px-0 pt-3 md:hidden"
+                productId={product.id}
+                productCode={product.productCode}
+                sizes={product.sizes}
+                selectedSize={selectedSize}
+                onSelectSize={(s) => setSelectedSize(s)}
+                onRecommend={(s) => setRecommendedSize(s)}
+              />
+            )}
+
 
           </div>
 
@@ -993,6 +1007,18 @@ const ProductPage = () => {
                   })}
                 </div>
               </div>
+            )}
+
+            {isElleSportBrand && product.sizes && product.sizes.length > 0 && (
+              <SmartSizeFinder
+                className="hidden md:block"
+                productId={product.id}
+                productCode={product.productCode}
+                sizes={product.sizes}
+                selectedSize={selectedSize}
+                onSelectSize={(s) => setSelectedSize(s)}
+                onRecommend={(s) => setRecommendedSize(s)}
+              />
             )}
 
             <div className="hidden md:flex flex-col gap-3">
