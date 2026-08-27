@@ -585,12 +585,6 @@ export default function SmartSizeFinder({
                   <p className="relative text-[12px] text-foreground/80 leading-relaxed max-w-[280px] mx-auto">
                     {result.explanation}
                   </p>
-                  {conf && (
-                    <span className={`relative mt-3 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-bold ${conf.chip}`}>
-                      <span className={`h-2 w-2 rounded-full ${conf.dot}`} />
-                      Итгэлцэл: {conf.label}
-                    </span>
-                  )}
                 </div>
 
                 {/* Stats */}
