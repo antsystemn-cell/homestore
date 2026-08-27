@@ -79,11 +79,14 @@ export default function SmartSizeFinder({
   onSelectSize,
   onRecommend,
   className,
+  openSignal,
+  onSizeApplied,
 }: Props) {
   const { user } = useAuth();
   const [config, setConfig] = useState<SizeConfig | null>(null);
   const [guides, setGuides] = useState<GuideRow[]>([]);
   const [open, setOpen] = useState(false);
+
   const [chartOpen, setChartOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [dir, setDir] = useState(1);
