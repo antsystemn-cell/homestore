@@ -449,14 +449,14 @@ export default function SmartSizeFinder({
                     см
                   </span>
                 </div>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-4 gap-2 ssf-stagger">
                   {HEIGHT_QUICK.map((h) => (
                     <button
                       key={h}
                       onClick={() => setHeight(String(h))}
-                      className={`h-11 rounded-xl text-sm font-bold border-2 transition-all active:scale-95 ${
+                      className={`h-11 rounded-xl text-sm font-bold border-2 transition-all duration-150 active:scale-95 hover:-translate-y-0.5 hover:shadow-sm ${
                         Number(height) === h
-                          ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30"
+                          ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30 scale-[1.03]"
                           : "border-border bg-background hover:border-primary/40"
                       }`}
                     >
@@ -465,9 +465,9 @@ export default function SmartSizeFinder({
                   ))}
                   <button
                     onClick={() => setHeight("180")}
-                    className={`h-11 rounded-xl text-sm font-bold border-2 transition-all active:scale-95 ${
+                    className={`h-11 rounded-xl text-sm font-bold border-2 transition-all duration-150 active:scale-95 hover:-translate-y-0.5 hover:shadow-sm ${
                       Number(height) >= 180
-                        ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30"
+                        ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30 scale-[1.03]"
                         : "border-border bg-background hover:border-primary/40"
                     }`}
                   >
