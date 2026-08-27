@@ -193,6 +193,10 @@ export default function SmartSizeFinder({
     return seen;
   }, [guides]);
 
+  useEffect(() => {
+    if (openSignal && openSignal > 0) openFinder();
+  }, [openSignal]);
+
   if (!config || guides.length === 0) return null;
 
   // ---- actions ------------------------------------------------------------
@@ -202,6 +206,7 @@ export default function SmartSizeFinder({
     setOpen(true);
     logEvent("size_finder_opened");
   };
+
 
   const compute = (fitPref: FitPreference) => {
     const h = clampHeight(Number(height));
