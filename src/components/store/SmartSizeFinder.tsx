@@ -550,7 +550,7 @@ export default function SmartSizeFinder({
                 <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
                   Сонголт хийхэд шууд үр дүн харагдана. Анхдагч нь “Энгийн”.
                 </p>
-                <Button variant="outline" onClick={() => chooseFit("regular")} className="w-full h-11 rounded-xl font-semibold">
+                <Button variant="outline" onClick={() => chooseFit("regular")} disabled={computing} className="w-full h-11 rounded-xl font-semibold">
                   Энгийнээр үргэлжлүүлэх
                 </Button>
               </>
@@ -559,12 +559,12 @@ export default function SmartSizeFinder({
             {step === 4 && result && (
               <div className="space-y-5">
                 {/* Result hero */}
-                <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-b from-primary/[0.08] to-transparent px-5 pt-6 pb-5 text-center">
+                <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-b from-primary/[0.08] to-transparent px-5 pt-6 pb-5 text-center ssf-fade-up">
                   <div className="pointer-events-none absolute -top-16 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full bg-primary/15 blur-3xl" />
                   <p className="relative text-[10px] font-extrabold uppercase tracking-[0.2em] text-primary">
                     Танд санал болгож буй размер
                   </p>
-                  <div className="relative mx-auto my-4 grid h-24 w-24 place-items-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/30 ring-4 ring-primary/15">
+                  <div className="ssf-pop relative mx-auto my-4 grid h-24 w-24 place-items-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/30 ring-4 ring-primary/15">
                     <span className="text-4xl font-black tracking-tight">{result.recommendedSize}</span>
                   </div>
                   <p className="relative text-[12px] text-foreground/80 leading-relaxed max-w-[280px] mx-auto">
