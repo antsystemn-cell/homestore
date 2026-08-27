@@ -6,7 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Ruler, ArrowLeft, Check, ClipboardList, Loader2 } from "lucide-react";
+import {
+  Ruler,
+  ArrowLeft,
+  Check,
+  ClipboardList,
+  Loader2,
+  Sparkles,
+  ChevronRight,
+  RotateCcw,
+  Save,
+  MoveVertical,
+  Scale,
+  Shirt,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   recommendSize,
@@ -42,10 +55,16 @@ const FIT_OPTIONS: { value: FitPreference; label: string; hint: string }[] = [
 ];
 
 const CONFIDENCE_UI = {
-  high: { dot: "🟢", label: "Өндөр" },
-  medium: { dot: "🟡", label: "Дунд" },
-  low: { dot: "🔴", label: "Бага" },
+  high: { dot: "bg-primary", label: "Өндөр", chip: "border-primary/30 bg-primary/10 text-primary" },
+  medium: { dot: "bg-accent", label: "Дунд", chip: "border-accent/50 bg-accent/15 text-foreground" },
+  low: { dot: "bg-destructive", label: "Бага", chip: "border-destructive/30 bg-destructive/10 text-destructive" },
 } as const;
+
+const STEP_META = [
+  { title: "Таны өндөр хэд вэ?", sub: "Сантиметрээр оруулна уу" },
+  { title: "Таны жин хэд вэ?", sub: "Килограммаар оруулна уу" },
+  { title: "Ямар өмсгөлд дуртай вэ?", sub: "Сонголтоо дармагц үр дүн гарна" },
+];
 
 export default function SmartSizeFinder({
   productId,
@@ -267,27 +286,52 @@ export default function SmartSizeFinder({
   };
 
   const progress = Math.min(step, 3);
+  const conf = result ? CONFIDENCE_UI[result.confidence] : null;
 
   return (
     <div className={className}>
-      <div className="rounded-2xl border border-border bg-secondary/40 p-3 space-y-2">
-        <div className="flex items-center gap-2">
-          <Ruler className="h-4 w-4 text-primary" />
-          <p className="text-[13px] font-bold text-foreground">📏 Танд аль размер тохирох вэ?</p>
+      {/* --------------------------- Trigger card ---------------------------- */}
+      <div className="relative overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.07] via-secondary/50 to-accent/10 p-4">
+        <div className="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-12 -left-8 h-28 w-28 rounded-full bg-accent/20 blur-2xl" />
+
+        <div className="relative flex items-center gap-3">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/25">
+            <Ruler className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[13px] font-extrabold text-foreground leading-tight">
+              Танд аль размер тохирох вэ?
+            </p>
+            <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">
+              Зөвхөн өндөр, жингөө оруулаад 30 секундэд мэдээрэй
+            </p>
+          </div>
         </div>
+
         {result && (
-          <p className="text-[11px] font-semibold text-primary">
-            Санал болгож буй размер: {result.recommendedSize}
-          </p>
+          <div className="relative mt-3 flex items-center gap-2 rounded-xl bg-background/70 border border-primary/20 px-3 py-2">
+            <span className="grid h-6 w-6 place-items-center rounded-full bg-primary text-primary-foreground text-[11px] font-black">
+              {result.recommendedSize}
+            </span>
+            <p className="text-[11px] font-semibold text-foreground">
+              Сүүлийн санал: <span className="text-primary font-extrabold">{result.recommendedSize}</span>
+            </p>
+          </div>
         )}
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button onClick={openFinder} className="h-11 rounded-xl font-bold flex-1">
+
+        <div className="relative mt-3 flex flex-col sm:flex-row gap-2">
+          <Button
+            onClick={openFinder}
+            className="h-11 rounded-xl font-bold flex-1 gap-1.5 shadow-md shadow-primary/20"
+          >
+            <Sparkles className="h-4 w-4" />
             Размер сонгоход тусалъя
           </Button>
           <Button
             variant="outline"
             onClick={() => setChartOpen(true)}
-            className="h-11 rounded-xl font-semibold flex-1 gap-2"
+            className="h-11 rounded-xl font-semibold flex-1 gap-2 bg-background/70"
           >
             <ClipboardList className="h-4 w-4" />
             Албан ёсны хэмжээ
@@ -297,51 +341,75 @@ export default function SmartSizeFinder({
 
       {/* --------------------------- Finder modal --------------------------- */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md rounded-2xl p-0 gap-0 overflow-hidden">
-          <div className="flex items-center justify-between px-4 pt-4">
+        <DialogContent className="max-w-md rounded-3xl p-0 gap-0 overflow-hidden border-primary/15">
+          {/* gradient header strip */}
+          <div className="h-1.5 w-full bg-gradient-to-r from-primary via-accent to-primary" />
+
+          <div className="flex items-center justify-between px-5 pt-4">
             {step > 1 && step < 4 ? (
-              <button onClick={() => setStep(step - 1)} className="p-1 -ml-1 text-muted-foreground">
+              <button
+                onClick={() => setStep(step - 1)}
+                className="grid h-9 w-9 -ml-2 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              >
                 <ArrowLeft className="h-5 w-5" />
               </button>
-            ) : <span />}
-            {step < 4 && (
-              <span className="text-xs font-bold text-muted-foreground">{progress} / 3</span>
+            ) : <span className="h-9 w-9" />}
+
+            {step < 4 ? (
+              <div className="flex items-center gap-1.5">
+                {[1, 2, 3].map((n) => (
+                  <span
+                    key={n}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      n === step ? "w-7 bg-primary" : n < step ? "w-1.5 bg-primary/40" : "w-1.5 bg-border"
+                    }`}
+                  />
+                ))}
+              </div>
+            ) : (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-primary">
+                <Sparkles className="h-3 w-3" />
+                Үр дүн
+              </span>
             )}
+            <span className="h-9 w-9" />
           </div>
 
-          {step < 4 && (
-            <div className="px-4 pt-3">
-              <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
-                <div
-                  className="h-full bg-primary transition-all duration-300"
-                  style={{ width: `${(progress / 3) * 100}%` }}
-                />
+          <div className="px-5 pb-5 pt-2 space-y-5">
+            {step < 4 && (
+              <div className="text-center space-y-1">
+                <h3 className="text-xl font-black tracking-tight">{STEP_META[step - 1].title}</h3>
+                <p className="text-xs text-muted-foreground font-medium">{STEP_META[step - 1].sub}</p>
               </div>
-            </div>
-          )}
+            )}
 
-          <div className="p-4 space-y-4">
             {step === 1 && (
               <>
-                <h3 className="text-lg font-bold">Таны өндөр хэд вэ?</h3>
-                <div className="flex items-center gap-2">
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    <MoveVertical className="h-5 w-5" />
+                  </div>
                   <Input
                     type="number"
                     inputMode="numeric"
                     value={height}
                     onChange={(e) => setHeight(e.target.value)}
                     placeholder="165"
-                    className="h-14 text-lg font-bold rounded-xl"
+                    className="h-16 rounded-2xl pl-12 pr-14 text-center text-3xl font-black tracking-wide border-2 focus-visible:border-primary"
                   />
-                  <span className="text-base font-semibold text-muted-foreground">см</span>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">
+                    см
+                  </span>
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                   {HEIGHT_QUICK.map((h) => (
                     <button
                       key={h}
                       onClick={() => setHeight(String(h))}
-                      className={`h-11 rounded-xl text-sm font-bold border-2 transition-colors ${
-                        Number(height) === h ? "border-primary bg-primary/10 text-primary" : "border-border bg-background"
+                      className={`h-11 rounded-xl text-sm font-bold border-2 transition-all active:scale-95 ${
+                        Number(height) === h
+                          ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30"
+                          : "border-border bg-background hover:border-primary/40"
                       }`}
                     >
                       {h}
@@ -349,68 +417,88 @@ export default function SmartSizeFinder({
                   ))}
                   <button
                     onClick={() => setHeight("180")}
-                    className="h-11 rounded-xl text-sm font-bold border-2 border-border bg-background"
+                    className={`h-11 rounded-xl text-sm font-bold border-2 transition-all active:scale-95 ${
+                      Number(height) >= 180
+                        ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30"
+                        : "border-border bg-background hover:border-primary/40"
+                    }`}
                   >
                     180+
                   </button>
                 </div>
-                <Button onClick={nextFromHeight} className="w-full h-12 rounded-xl font-bold">
+                <Button onClick={nextFromHeight} className="w-full h-12 rounded-xl font-bold gap-1.5 shadow-md shadow-primary/20">
                   Үргэлжлүүлэх
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
               </>
             )}
 
             {step === 2 && (
               <>
-                <h3 className="text-lg font-bold">Таны жин хэд вэ?</h3>
-                <div className="flex items-center gap-2">
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    <Scale className="h-5 w-5" />
+                  </div>
                   <Input
                     type="number"
                     inputMode="numeric"
                     value={weight}
                     onChange={(e) => setWeight(e.target.value)}
                     placeholder="60"
-                    className="h-14 text-lg font-bold rounded-xl"
+                    className="h-16 rounded-2xl pl-12 pr-14 text-center text-3xl font-black tracking-wide border-2 focus-visible:border-primary"
                   />
-                  <span className="text-base font-semibold text-muted-foreground">кг</span>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">
+                    кг
+                  </span>
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                   {WEIGHT_QUICK.map((w) => (
                     <button
                       key={w}
                       onClick={() => setWeight(String(w))}
-                      className={`h-11 rounded-xl text-sm font-bold border-2 transition-colors ${
-                        Number(weight) === w ? "border-primary bg-primary/10 text-primary" : "border-border bg-background"
+                      className={`h-11 rounded-xl text-sm font-bold border-2 transition-all active:scale-95 ${
+                        Number(weight) === w
+                          ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30"
+                          : "border-border bg-background hover:border-primary/40"
                       }`}
                     >
                       {w}
                     </button>
                   ))}
                 </div>
-                <Button onClick={nextFromWeight} className="w-full h-12 rounded-xl font-bold">
+                <Button onClick={nextFromWeight} className="w-full h-12 rounded-xl font-bold gap-1.5 shadow-md shadow-primary/20">
                   Үргэлжлүүлэх
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
               </>
             )}
 
             {step === 3 && (
               <>
-                <h3 className="text-lg font-bold">Та хувцсаа ямар байдлаар өмсөх дуртай вэ?</h3>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-2.5">
                   {FIT_OPTIONS.map((o) => (
                     <button
                       key={o.value}
                       onClick={() => chooseFit(o.value)}
-                      className={`h-20 rounded-xl border-2 flex flex-col items-center justify-center gap-1 transition-colors ${
-                        fit === o.value ? "border-primary bg-primary/10" : "border-border bg-background"
+                      className={`h-24 rounded-2xl border-2 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 ${
+                        fit === o.value
+                          ? "border-primary bg-primary/[0.08] shadow-sm"
+                          : "border-border bg-background hover:border-primary/40"
                       }`}
                     >
-                      <span className="text-sm font-bold">{o.label}</span>
-                      <span className="text-[10px] text-muted-foreground">{o.hint}</span>
+                      <span
+                        className={`grid h-8 w-8 place-items-center rounded-full transition-colors ${
+                          fit === o.value ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+                        }`}
+                      >
+                        <Shirt className="h-4 w-4" />
+                      </span>
+                      <span className="text-sm font-extrabold">{o.label}</span>
+                      <span className="text-[10px] text-muted-foreground font-medium">{o.hint}</span>
                     </button>
                   ))}
                 </div>
-                <p className="text-[11px] text-muted-foreground text-center">
+                <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
                   Сонголт хийхэд шууд үр дүн харагдана. Анхдагч нь “Энгийн”.
                 </p>
                 <Button variant="outline" onClick={() => chooseFit("regular")} className="w-full h-11 rounded-xl font-semibold">
@@ -420,88 +508,121 @@ export default function SmartSizeFinder({
             )}
 
             {step === 4 && result && (
-              <div className="space-y-4">
-                <div className="rounded-2xl bg-primary/10 border-2 border-primary/30 p-4 text-center space-y-1">
-                  <p className="text-xs font-bold uppercase tracking-wider text-primary">
-                    🎯 Танд санал болгож буй размер
+              <div className="space-y-5">
+                {/* Result hero */}
+                <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-b from-primary/[0.08] to-transparent px-5 pt-6 pb-5 text-center">
+                  <div className="pointer-events-none absolute -top-16 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full bg-primary/15 blur-3xl" />
+                  <p className="relative text-[10px] font-extrabold uppercase tracking-[0.2em] text-primary">
+                    Танд санал болгож буй размер
                   </p>
-                  <p className="text-5xl font-black text-primary leading-none py-1">
-                    {result.recommendedSize}
+                  <div className="relative mx-auto my-4 grid h-24 w-24 place-items-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/30 ring-4 ring-primary/15">
+                    <span className="text-4xl font-black tracking-tight">{result.recommendedSize}</span>
+                  </div>
+                  <p className="relative text-[12px] text-foreground/80 leading-relaxed max-w-[280px] mx-auto">
+                    {result.explanation}
                   </p>
-                  <p className="text-[12px] text-foreground/80 leading-relaxed">{result.explanation}</p>
+                  {conf && (
+                    <span className={`relative mt-3 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-bold ${conf.chip}`}>
+                      <span className={`h-2 w-2 rounded-full ${conf.dot}`} />
+                      Итгэлцэл: {conf.label}
+                    </span>
+                  )}
                 </div>
 
+                {/* Stats */}
                 <div className="grid grid-cols-3 gap-2 text-center">
                   {[
                     { k: "Өндөр", v: `${clampHeight(Number(height))} см` },
                     { k: "Жин", v: `${clampWeight(Number(weight))} кг` },
                     { k: "Өмсгөл", v: FIT_OPTIONS.find((f) => f.value === result.fitPreference)?.label || "Энгийн" },
                   ].map((x) => (
-                    <div key={x.k} className="rounded-xl bg-secondary/60 py-2">
-                      <p className="text-[10px] uppercase font-bold text-muted-foreground">{x.k}</p>
-                      <p className="text-sm font-bold">{x.v}</p>
+                    <div key={x.k} className="rounded-2xl border border-border bg-secondary/50 py-2.5">
+                      <p className="text-[9px] uppercase tracking-wider font-extrabold text-muted-foreground">{x.k}</p>
+                      <p className="text-sm font-extrabold mt-0.5">{x.v}</p>
                     </div>
                   ))}
                 </div>
 
-                <div className="flex items-center justify-center gap-2 text-xs font-semibold">
-                  <span>Итгэлцлийн түвшин:</span>
-                  <span>{CONFIDENCE_UI[result.confidence].dot} {CONFIDENCE_UI[result.confidence].label}</span>
-                </div>
-
                 {previousSize && (
-                  <p className="text-[12px] text-center font-medium text-muted-foreground">
+                  <div className="flex items-center justify-center gap-2 rounded-xl bg-secondary/60 px-3 py-2 text-[12px] font-semibold text-muted-foreground">
                     {previousSize === result.recommendedSize
-                      ? `🎯 ${result.recommendedSize} размер — таны өмнөх сонголттой тохирч байна.`
-                      : `Таны өмнөх сонголт: ${previousSize}. Энэ бүтээгдэхүүний эсгүүр өмнөх сонголтоос өөр байна.`}
-                  </p>
+                      ? `${result.recommendedSize} размер — таны өмнөх сонголттой тохирч байна`
+                      : `Таны өмнөх сонголт: ${previousSize} — энэ бараанд ${result.recommendedSize} тохирно`}
+                  </div>
                 )}
 
-                <div className="flex flex-wrap justify-center gap-2">
-                  {availableSizes.map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => applySize(s)}
-                      className={`min-w-[56px] h-11 px-3 rounded-xl border-2 text-sm font-bold transition-colors ${
-                        s === result.recommendedSize
-                          ? "border-primary bg-primary/10 text-primary"
-                          : selectedSize === s
-                          ? "border-foreground"
-                          : "border-border"
-                      }`}
-                    >
-                      {s}
-                    </button>
-                  ))}
+                {/* Size picker */}
+                <div className="space-y-2">
+                  <p className="text-[11px] font-bold text-muted-foreground text-center">Өөр размер сонгох бол:</p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {availableSizes.map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => applySize(s)}
+                        className={`relative min-w-[56px] h-12 px-4 rounded-xl border-2 text-sm font-extrabold transition-all active:scale-95 ${
+                          s === result.recommendedSize
+                            ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                            : selectedSize === s
+                            ? "border-foreground bg-foreground/5"
+                            : "border-border bg-background hover:border-primary/40"
+                        }`}
+                      >
+                        {s}
+                        {s === result.recommendedSize && (
+                          <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-accent px-1.5 py-px text-[8px] font-black uppercase tracking-wide text-accent-foreground shadow-sm">
+                            Санал
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <Button
                   onClick={() => applySize(result.recommendedSize)}
-                  className="w-full h-12 rounded-xl font-bold gap-2"
+                  className="w-full h-12 rounded-xl font-bold gap-2 shadow-md shadow-primary/25"
                 >
                   <Check className="h-4 w-4" />
                   {result.recommendedSize} размер сонгох
                 </Button>
 
                 <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1 h-11 rounded-xl font-semibold" onClick={() => setStep(1)}>
-                    Дахин тооцоолох
+                  <Button
+                    variant="outline"
+                    className="flex-1 h-11 rounded-xl font-semibold gap-1.5"
+                    onClick={() => setStep(1)}
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    Дахин тооцох
                   </Button>
                   <Button
                     variant="outline"
-                    className="flex-1 h-11 rounded-xl font-semibold"
+                    className="flex-1 h-11 rounded-xl font-semibold gap-1.5"
                     onClick={saveProfile}
                     disabled={saving || savedProfile}
                   >
-                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : savedProfile ? "Хадгалагдсан" : "Өндөр, жингээ хадгалах"}
+                    {saving ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : savedProfile ? (
+                      <>
+                        <Check className="h-4 w-4" />
+                        Хадгалагдсан
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4" />
+                        Хэмжээгээ хадгалах
+                      </>
+                    )}
                   </Button>
                 </div>
 
                 <button
                   onClick={() => { setOpen(false); setChartOpen(true); }}
-                  className="w-full text-[12px] font-semibold text-primary underline underline-offset-2"
+                  className="mx-auto flex items-center gap-1.5 text-[12px] font-bold text-primary hover:underline underline-offset-2"
                 >
-                  📋 Албан ёсны хэмжээний хүснэгт харах
+                  <ClipboardList className="h-3.5 w-3.5" />
+                  Албан ёсны хэмжээний хүснэгт харах
                 </button>
 
                 <p className="text-[10px] text-muted-foreground text-center leading-relaxed">
@@ -515,33 +636,56 @@ export default function SmartSizeFinder({
 
       {/* --------------------------- Official chart -------------------------- */}
       <Sheet open={chartOpen} onOpenChange={setChartOpen}>
-        <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
+        <SheetContent side="bottom" className="rounded-t-3xl max-h-[85vh] overflow-y-auto">
+          <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-border" />
           <SheetHeader className="text-left">
-            <SheetTitle className="text-base">📋 ELLE Sport-ийн албан ёсны хэмжээ</SheetTitle>
+            <SheetTitle className="flex items-center gap-2 text-base font-black">
+              <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary">
+                <ClipboardList className="h-4 w-4" />
+              </span>
+              ELLE Sport-ийн албан ёсны хэмжээ
+            </SheetTitle>
           </SheetHeader>
-          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mt-2">
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-muted-foreground mt-2">
             Бүтээгдэхүүний хэмжээс
           </p>
-          <div className="mt-3 overflow-x-auto rounded-xl border border-border">
+          <div className="mt-3 overflow-x-auto rounded-2xl border border-border shadow-sm">
             <table className="w-full text-sm">
-              <thead className="bg-secondary/60">
-                <tr>
-                  <th className="px-3 py-2 text-left text-[11px] font-bold uppercase">Хэмжээс</th>
+              <thead>
+                <tr className="bg-primary/[0.07]">
+                  <th className="px-3 py-2.5 text-left text-[10px] font-extrabold uppercase tracking-wider text-primary">
+                    Хэмжээс
+                  </th>
                   {guideSizes.map((s) => (
-                    <th key={s} className="px-3 py-2 text-center text-[11px] font-bold uppercase">{s}</th>
+                    <th
+                      key={s}
+                      className={`px-3 py-2.5 text-center text-[10px] font-extrabold uppercase tracking-wider ${
+                        result?.recommendedSize === s ? "text-primary bg-primary/10" : "text-primary"
+                      }`}
+                    >
+                      {s}
+                      {result?.recommendedSize === s && (
+                        <span className="block text-[8px] font-black normal-case tracking-normal">← Санал</span>
+                      )}
+                    </th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {guideTypes.map((t) => (
-                  <tr key={t}>
-                    <td className="px-3 py-2 font-semibold text-[12px]">{measurementLabel(t)}</td>
+                {guideTypes.map((t, i) => (
+                  <tr key={t} className={i % 2 === 1 ? "bg-secondary/40" : ""}>
+                    <td className="px-3 py-2.5 font-bold text-[12px]">{measurementLabel(t)}</td>
                     {guideSizes.map((s) => {
                       const row = guides.find(
                         (g) => g.measurement_type === t && String(g.size).toUpperCase() === s,
                       );
                       return (
-                        <td key={s} className="px-3 py-2 text-center text-[12px]">
+                        <td
+                          key={s}
+                          className={`px-3 py-2.5 text-center text-[12px] font-medium ${
+                            result?.recommendedSize === s ? "bg-primary/10 font-bold text-primary" : ""
+                          }`}
+                        >
                           {row ? `${row.measurement_value} ${row.unit || "cm"}` : "—"}
                         </td>
                       );
@@ -552,14 +696,22 @@ export default function SmartSizeFinder({
             </table>
           </div>
           {config.material && (
-            <p className="mt-3 text-[12px] text-muted-foreground">
-              <span className="font-semibold text-foreground">Материал:</span> {config.material}
-            </p>
+            <div className="mt-3 flex items-start gap-2 rounded-xl bg-secondary/60 px-3 py-2.5">
+              <Shirt className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <p className="text-[12px] text-muted-foreground">
+                <span className="font-bold text-foreground">Материал:</span> {config.material}
+              </p>
+            </div>
           )}
           {config.chart_image_url && (
-            <img src={config.chart_image_url} alt="ELLE Sport хэмжээний хүснэгт" className="mt-3 w-full rounded-xl" loading="lazy" />
+            <img
+              src={config.chart_image_url}
+              alt="ELLE Sport хэмжээний хүснэгт"
+              className="mt-3 w-full rounded-2xl border border-border"
+              loading="lazy"
+            />
           )}
-          <p className="mt-3 mb-4 text-[11px] text-muted-foreground leading-relaxed">
+          <p className="mt-3 mb-4 rounded-xl bg-accent/15 border border-accent/30 px-3 py-2 text-[11px] text-muted-foreground leading-relaxed">
             Эдгээр нь хувцасны өөрийн хэмжээс бөгөөд хүний биеийн хэмжээс биш.
           </p>
         </SheetContent>
