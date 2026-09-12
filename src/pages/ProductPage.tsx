@@ -1151,7 +1151,7 @@ const ProductPage = () => {
 
       </div>
 
-      <div className="fixed bottom-20 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border p-3 safe-bottom flex gap-2 md:hidden z-50">
+      <div className="fixed bottom-16 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border p-3 pb-16 safe-bottom flex gap-2 md:hidden z-50">
         <button
           onClick={() => toggleWishlist(product)}
           className={`flex items-center justify-center w-12 h-14 rounded-2xl border-2 transition-all ${

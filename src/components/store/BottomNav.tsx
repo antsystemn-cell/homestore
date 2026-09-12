@@ -39,19 +39,14 @@ const BottomNav = () => {
           const isProductPage = pathname.startsWith("/product/");
 
           if (isReels) {
-            // On product detail pages the sticky action bar sits just above the
-            // nav, so reduce the protrusion to avoid a collision — but keep the
-            // FAB at full size so it never looks shrunk vs. other pages.
-            const protrude = isProductPage ? "-top-3" : "-top-6";
-            const mt = isProductPage ? "-mt-3" : "-mt-6";
             return (
               <button
                 key={t.path}
                 onClick={() => navigate(t.path)}
-                className={`relative flex flex-col items-center justify-end flex-1 ${mt}`}
+                className="relative flex flex-col items-center justify-end flex-1 -mt-6"
                 aria-label="Reels"
               >
-                <span className={`absolute inset-x-0 ${protrude} flex justify-center pointer-events-none`}>
+                <span className="absolute inset-x-0 -top-6 flex justify-center pointer-events-none">
                   <span className="relative flex h-14 w-14 items-center justify-center">
                     {/* pulsing halo */}
                     <span className="absolute inset-0 rounded-full bg-sale/40 animate-ping" />
