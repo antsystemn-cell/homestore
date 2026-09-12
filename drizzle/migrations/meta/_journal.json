@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1789195279052,
+      "tag": "0000_auto_send_delivery_on_fulfillment_statuses",
+      "breakpoints": true
+    }
+  ]
+}
