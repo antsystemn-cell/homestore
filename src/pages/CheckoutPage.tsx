@@ -561,6 +561,24 @@ const CheckoutPage = () => {
     if (id) setOrderId(id);
   };
 
+  // Бэлэн мөнгө — хүргэлтээр төлөх
+  const handleCashOrder = async () => {
+    if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return; }
+    if (isGuestCheckout && !name.trim()) { toast.error("Нэр заавал бөглөнө үү"); return; }
+    if (deliveryOptions.length > 0 && !selectedDelivery) { toast.error("Хүргэлтийн сонголт хийнэ үү"); return; }
+    if (!/^\d{8}$/.test(phone.trim())) { toast.error("Утасны дугаар 8 оронтой байх ёстой"); return; }
+
+    setSubmitting(true);
+    const id = await createOrder("unpaid", "cash");
+    setSubmitting(false);
+    if (id) {
+      setOrderId(id);
+      firePurchase("cash");
+      clearCart();
+      setOrdered(true);
+    }
+  };
+
   const handleOmniWaySuccess = () => {
     firePurchase("omniway");
     clearCart();
