@@ -4,6 +4,7 @@
  * - lead_scores-ийг шинэчилнэ (cold/warm/hot)
  */
 import { supabase } from "@/integrations/supabase/client";
+import { fbTrack, fbTrackCustom, CURRENCY } from "@/lib/metaPixel";
 
 const TOKEN_KEY = "es_session_token";
 const RETURNING_KEY = "es_returning";
@@ -121,7 +122,34 @@ export interface TrackPayload {
   metadata?: Record<string, unknown>;
 }
 
+/** analytics event -> Meta Pixel стандарт event */
+const PIXEL_MAP: Record<string, string> = {
+  page_view: "PageView",
+  product_view: "ViewContent",
+  category_view: "ViewCategory",
+  add_to_cart: "AddToCart",
+  add_to_wishlist: "AddToWishlist",
+  checkout_start: "InitiateCheckout",
+  invoice_create: "AddPaymentInfo",
+  purchase: "Purchase",
+  search: "Search",
+};
+
+function sendToPixel(eventType: string, payload: TrackPayload) {
+  const params: Record<string, unknown> = {
+    currency: CURRENCY,
+    ...(payload.product_id ? { content_ids: [payload.product_id], content_type: "product" } : {}),
+    ...(payload.category ? { content_category: payload.category } : {}),
+    ...(payload.value != null ? { value: payload.value } : {}),
+    ...(payload.metadata ?? {}),
+  };
+  const standard = PIXEL_MAP[eventType];
+  if (standard) fbTrack(standard, params);
+  else fbTrackCustom(eventType, params);
+}
+
 export async function track(eventType: string, payload: TrackPayload = {}) {
+  sendToPixel(eventType, payload);
   try {
     const session = await ensureSession();
     if (!session) return;

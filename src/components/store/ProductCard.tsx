@@ -7,6 +7,7 @@ import { transformImage, buildSrcSet } from "@/lib/imageUrl";
 import { useProductStat } from "@/hooks/useProductStat";
 import { useFlashSaleFor } from "@/hooks/useFlashSales";
 import FlashSaleCountdown from "./FlashSaleCountdown";
+import { fbTrackCustom } from "@/lib/metaPixel";
 
 
 
@@ -14,6 +15,8 @@ interface Props {
   product: Product;
   /** Set true for the first ~4 cards above the fold to preload eagerly with high priority. */
   priority?: boolean;
+  /** Хаанаас гарсан бол (жишээ: "similar", "cart"), Facebook-д санал болгосон барааны даралт хянана. */
+  source?: string;
 }
 
 const RatingRow = ({ productId }: { productId: string }) => {
@@ -28,7 +31,7 @@ const RatingRow = ({ productId }: { productId: string }) => {
   );
 };
 
-const ProductCard = React.memo(({ product, priority = false }: Props) => {
+const ProductCard = React.memo(({ product, priority = false, source }: Props) => {
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -84,11 +87,19 @@ const ProductCard = React.memo(({ product, priority = false }: Props) => {
       swipedRef.current = false;
       return;
     }
+    if (source) {
+      fbTrackCustom("RecommendationClick", {
+        source,
+        content_ids: [product.id],
+        content_name: product.name,
+        content_type: "product",
+      });
+    }
     if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
       e.preventDefault();
       navigate(productUrl);
     }
-  }, [navigate, productUrl]);
+  }, [navigate, productUrl, source, product.id, product.name]);
 
   const baseImage = product.thumbnail || product.image || "/placeholder.svg";
 

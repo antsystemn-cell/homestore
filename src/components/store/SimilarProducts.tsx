@@ -138,7 +138,7 @@ const SimilarProducts = ({ seed, brandName }: Props) => {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {items.slice(0, 8).map((p) => (
-          <ProductCard key={p.id} product={p} />
+          <ProductCard key={p.id} product={p} source="similar_products" />
         ))}
       </div>
     </section>
