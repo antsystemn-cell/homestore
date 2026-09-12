@@ -23,7 +23,7 @@ import AddressSelector from "@/components/store/AddressSelector";
 import omniwayLogo from "@/assets/omniway-logo.png.asset.json";
 
 
-type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket" | "sono" | "omniway" | "card";
+type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket" | "sono" | "omniway";
 
 const CheckoutPage = () => {
   const { items, cartTotal, clearCart } = useCart();
@@ -436,17 +436,6 @@ const CheckoutPage = () => {
     return data.id;
   };
 
-  const handleCardOrder = async () => {
-    setSubmitting(true);
-    // For now, treat card as "unpaid" order that admin confirms, 
-    // or you could integrate a Stripe/Paddle etc here.
-    const id = await createOrder("unpaid", "card");
-    if (id) {
-      clearCart();
-      setOrdered(true);
-    }
-    setSubmitting(false);
-  };
 
   const handleStorepayStart = async () => {
     if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return; }
