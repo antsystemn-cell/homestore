@@ -1151,7 +1151,7 @@ const ProductPage = () => {
 
       </div>
 
-      <div className="fixed bottom-16 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border pt-3 px-3 pb-16 flex gap-2 md:hidden z-50">
+      <div className={`fixed bottom-16 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border pt-3 px-3 pb-16 flex gap-2 md:hidden z-50 transition-opacity ${sheetOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
         <button
           onClick={() => toggleWishlist(product)}
           className={`flex items-center justify-center w-12 h-14 rounded-2xl border-2 transition-all ${
@@ -1182,7 +1182,7 @@ const ProductPage = () => {
             </SheetTitle>
           </SheetHeader>
 
-          <div className="px-5 pb-5 space-y-5">
+          <div className="px-5 pb-28 space-y-5">
             {/* Product summary */}
             <div className="flex gap-3 items-center pb-3 border-b border-border">
               <img
