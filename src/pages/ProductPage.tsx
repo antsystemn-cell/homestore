@@ -1182,7 +1182,7 @@ const ProductPage = () => {
             </SheetTitle>
           </SheetHeader>
 
-          <div className="px-5 pb-5 space-y-5">
+          <div className="px-5 pb-28 space-y-5">
             {/* Product summary */}
             <div className="flex gap-3 items-center pb-3 border-b border-border">
               <img
