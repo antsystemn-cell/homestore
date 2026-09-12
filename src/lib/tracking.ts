@@ -4,6 +4,7 @@
  * - lead_scores-ийг шинэчилнэ (cold/warm/hot)
  */
 import { supabase } from "@/integrations/supabase/client";
+import { fbTrack, fbTrackCustom, CURRENCY } from "@/lib/metaPixel";
 
 const TOKEN_KEY = "es_session_token";
 const RETURNING_KEY = "es_returning";
