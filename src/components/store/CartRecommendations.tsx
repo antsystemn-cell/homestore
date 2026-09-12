@@ -58,7 +58,7 @@ const CartRecommendations = ({ items, weights }: Props) => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-0 md:gap-5">
         {recs.map((p) => (
           <ErrorBoundary key={p.id}>
-            <ProductCard product={p} />
+            <ProductCard product={p} source="cart_recommendations" />
           </ErrorBoundary>
         ))}
       </div>

@@ -7,6 +7,7 @@ import { transformImage, buildSrcSet } from "@/lib/imageUrl";
 import { useProductStat } from "@/hooks/useProductStat";
 import { useFlashSaleFor } from "@/hooks/useFlashSales";
 import FlashSaleCountdown from "./FlashSaleCountdown";
+import { fbTrackCustom } from "@/lib/metaPixel";
 
 
 
