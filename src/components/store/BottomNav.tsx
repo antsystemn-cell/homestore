@@ -39,34 +39,19 @@ const BottomNav = () => {
           const isProductPage = pathname.startsWith("/product/");
 
           if (isReels) {
-            // On product detail pages, render a flat inline variant so the
-            // protruding FAB doesn't collide with the sticky action bar above.
-            if (isProductPage) {
-              return (
-                <button
-                  key={t.path}
-                  onClick={() => navigate(t.path)}
-                  className="relative flex flex-col items-center justify-center gap-0.5 flex-1"
-                  aria-label="Reels"
-                >
-                  <div className="relative flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-tr from-fuchsia-600 via-rose-500 to-amber-400 shadow-sm">
-                    <Icon className="h-4 w-4 text-white" strokeWidth={2.25} />
-                    <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-card" />
-                  </div>
-                  <span className="text-[10px] font-bold bg-gradient-to-r from-fuchsia-600 via-rose-500 to-amber-500 bg-clip-text text-transparent">
-                    Reels
-                  </span>
-                </button>
-              );
-            }
+            // On product detail pages the sticky action bar sits just above the
+            // nav, so reduce the protrusion to avoid a collision — but keep the
+            // FAB at full size so it never looks shrunk vs. other pages.
+            const protrude = isProductPage ? "-top-3" : "-top-6";
+            const mt = isProductPage ? "-mt-3" : "-mt-6";
             return (
               <button
                 key={t.path}
                 onClick={() => navigate(t.path)}
-                className="relative flex flex-col items-center justify-end flex-1 -mt-6"
+                className={`relative flex flex-col items-center justify-end flex-1 ${mt}`}
                 aria-label="Reels"
               >
-                <span className="absolute inset-x-0 -top-6 flex justify-center pointer-events-none">
+                <span className={`absolute inset-x-0 ${protrude} flex justify-center pointer-events-none`}>
                   <span className="relative flex h-14 w-14 items-center justify-center">
                     {/* pulsing halo */}
                     <span className="absolute inset-0 rounded-full bg-sale/40 animate-ping" />
