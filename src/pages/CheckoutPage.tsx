@@ -1234,6 +1234,17 @@ const CheckoutPage = () => {
                 </Button>
               )}
 
+              {paymentMethod === "cash" && !isViewingExistingOrder && !ordered && (
+                <Button
+                  className="w-full h-12 text-base rounded-xl mt-2 gap-2"
+                  disabled={submitting}
+                  onClick={handleCashOrder}
+                >
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Banknote className="h-4 w-4" />}
+                  {submitting ? "Үүсгэж байна..." : `Бэлнээр төлөх — ${formatPrice(grandTotal)}`}
+                </Button>
+              )}
+
               {paymentMethod === "omniway" && orderId && !ordered && (
                 <Button
                   variant="outline"
