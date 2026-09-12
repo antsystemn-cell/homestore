@@ -14,6 +14,8 @@ interface Props {
   product: Product;
   /** Set true for the first ~4 cards above the fold to preload eagerly with high priority. */
   priority?: boolean;
+  /** Хаанаас гарсан бол (жишээ: "similar", "cart"), Facebook-д санал болгосон барааны даралт хянана. */
+  source?: string;
 }
 
 const RatingRow = ({ productId }: { productId: string }) => {
