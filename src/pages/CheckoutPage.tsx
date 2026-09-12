@@ -2,7 +2,7 @@ import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/data/products";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Lock, Loader2, Truck, CreditCard, Copy, UserPlus, QrCode, Wallet } from "lucide-react";
+import { CheckCircle, Lock, Loader2, Truck, CreditCard, Copy, UserPlus, QrCode, Wallet, Banknote } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
@@ -561,6 +561,24 @@ const CheckoutPage = () => {
     if (id) setOrderId(id);
   };
 
+  // Бэлэн мөнгө — хүргэлтээр төлөх
+  const handleCashOrder = async () => {
+    if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return; }
+    if (isGuestCheckout && !name.trim()) { toast.error("Нэр заавал бөглөнө үү"); return; }
+    if (deliveryOptions.length > 0 && !selectedDelivery) { toast.error("Хүргэлтийн сонголт хийнэ үү"); return; }
+    if (!/^\d{8}$/.test(phone.trim())) { toast.error("Утасны дугаар 8 оронтой байх ёстой"); return; }
+
+    setSubmitting(true);
+    const id = await createOrder("unpaid", "cash");
+    setSubmitting(false);
+    if (id) {
+      setOrderId(id);
+      firePurchase("cash");
+      clearCart();
+      setOrdered(true);
+    }
+  };
+
   const handleOmniWaySuccess = () => {
     firePurchase("omniway");
     clearCart();
@@ -886,6 +904,30 @@ const CheckoutPage = () => {
                   </div>
                 </label>
 
+                {/* Бэлэн мөнгө */}
+                <label
+                  className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    paymentMethod === "cash"
+                      ? "border-primary bg-primary/5 shadow-sm"
+                      : "border-border hover:border-muted-foreground/30"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="cash"
+                    checked={paymentMethod === "cash"}
+                    onChange={() => setPaymentMethod("cash")}
+                    className="w-4 h-4 accent-primary"
+                  />
+                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Banknote className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-foreground">Бэлэн мөнгө</p>
+                    <p className="text-xs text-muted-foreground">Бараа хүлээн авахдаа бэлнээр төлөх</p>
+                  </div>
+                </label>
 
               </div>
             </div>
@@ -1189,6 +1231,17 @@ const CheckoutPage = () => {
                 >
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <QrCode className="h-4 w-4" />}
                   {submitting ? "Үүсгэж байна..." : `OmniWay-ээр төлөх — ${formatPrice(grandTotal)}`}
+                </Button>
+              )}
+
+              {paymentMethod === "cash" && !isViewingExistingOrder && !ordered && (
+                <Button
+                  className="w-full h-12 text-base rounded-xl mt-2 gap-2"
+                  disabled={submitting}
+                  onClick={handleCashOrder}
+                >
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Banknote className="h-4 w-4" />}
+                  {submitting ? "Үүсгэж байна..." : `Бэлнээр төлөх — ${formatPrice(grandTotal)}`}
                 </Button>
               )}
 
