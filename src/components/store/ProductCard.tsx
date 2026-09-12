@@ -30,7 +30,7 @@ const RatingRow = ({ productId }: { productId: string }) => {
   );
 };
 
-const ProductCard = React.memo(({ product, priority = false }: Props) => {
+const ProductCard = React.memo(({ product, priority = false, source }: Props) => {
   const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
