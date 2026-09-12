@@ -86,11 +86,19 @@ const ProductCard = React.memo(({ product, priority = false, source }: Props) =>
       swipedRef.current = false;
       return;
     }
+    if (source) {
+      fbTrackCustom("RecommendationClick", {
+        source,
+        content_ids: [product.id],
+        content_name: product.name,
+        content_type: "product",
+      });
+    }
     if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
       e.preventDefault();
       navigate(productUrl);
     }
-  }, [navigate, productUrl]);
+  }, [navigate, productUrl, source, product.id, product.name]);
 
   const baseImage = product.thumbnail || product.image || "/placeholder.svg";
 
