@@ -23,7 +23,7 @@ import AddressSelector from "@/components/store/AddressSelector";
 import omniwayLogo from "@/assets/omniway-logo.png.asset.json";
 
 
-type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket" | "sono" | "omniway" | "card";
+type PaymentMethod = "cash" | "storepay" | "qpay" | "pocket" | "sono" | "omniway";
 
 const CheckoutPage = () => {
   const { items, cartTotal, clearCart } = useCart();
@@ -436,17 +436,6 @@ const CheckoutPage = () => {
     return data.id;
   };
 
-  const handleCardOrder = async () => {
-    setSubmitting(true);
-    // For now, treat card as "unpaid" order that admin confirms, 
-    // or you could integrate a Stripe/Paddle etc here.
-    const id = await createOrder("unpaid", "card");
-    if (id) {
-      clearCart();
-      setOrdered(true);
-    }
-    setSubmitting(false);
-  };
 
   const handleStorepayStart = async () => {
     if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return; }
@@ -879,30 +868,6 @@ const CheckoutPage = () => {
                   </div>
                 </label>
 
-                {/* Card Payment */}
-                <label
-                  className={`flex items-center gap-3 p-3 md:p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    paymentMethod === "card"
-                      ? "border-primary bg-primary/5 shadow-sm"
-                      : "border-border hover:border-muted-foreground/30"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="card"
-                    checked={paymentMethod === "card"}
-                    onChange={() => setPaymentMethod("card")}
-                    className="w-4 h-4 accent-[hsl(var(--primary))]"
-                  />
-                  <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
-                    <CreditCard className="h-5 w-5 text-primary-foreground" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-foreground">Карт / Card</p>
-                    <p className="text-xs text-muted-foreground">Дебит болон Кредит карт</p>
-                  </div>
-                </label>
 
               </div>
             </div>
@@ -1153,16 +1118,6 @@ const CheckoutPage = () => {
               </div>
 
               {/* Action button */}
-              {paymentMethod === "card" && !(orderId || isViewingExistingOrder) && !isViewingExistingOrder && (
-                <Button
-                  className="w-full h-12 text-base rounded-xl mt-2 gap-2"
-                  disabled={submitting}
-                  onClick={handleCardOrder}
-                >
-                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
-                  {submitting ? "Илгээж байна..." : `Захиалга өгөх — ${formatPrice(grandTotal)}`}
-                </Button>
-              )}
 
               {paymentMethod === "storepay" && !(orderId || isViewingExistingOrder) && !isViewingExistingOrder && (
                 <Button
