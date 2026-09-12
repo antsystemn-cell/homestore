@@ -36,35 +36,62 @@ const BottomNav = () => {
           const active = isActive(t.path);
           const Icon = t.icon;
           const isReels = t.path === "/reels";
-          const isProductPage = pathname.startsWith("/product/");
+          const isHomePage = pathname === "/";
+          const isReelsActive = pathname === "/reels" || pathname.startsWith("/reels/");
 
           if (isReels) {
+            // Big protruding gradient FAB only on the home page.
+            // Everywhere else render a compact inline icon like the other tabs.
+            if (isHomePage) {
+              return (
+                <button
+                  key={t.path}
+                  onClick={() => navigate(t.path)}
+                  className="relative flex flex-col items-center justify-end flex-1 -mt-6"
+                  aria-label="Reels"
+                >
+                  <span className="absolute inset-x-0 -top-6 flex justify-center pointer-events-none">
+                    <span className="relative flex h-14 w-14 items-center justify-center">
+                      {/* pulsing halo */}
+                      <span className="absolute inset-0 rounded-full bg-sale/40 animate-ping" />
+                      <span className="absolute -inset-1 rounded-full bg-gradient-to-tr from-fuchsia-500 via-rose-500 to-amber-400 blur-[6px] opacity-70" />
+                      {/* solid gradient button */}
+                      <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-fuchsia-600 via-rose-500 to-amber-400 shadow-[0_8px_24px_-4px_rgba(244,63,94,0.6)] ring-4 ring-card">
+                        <Icon className="h-7 w-7 text-white drop-shadow" strokeWidth={2.25} />
+                      </span>
+                      {/* LIVE dot */}
+                      <span className="absolute top-0 right-0 flex h-3 w-3">
+                        <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75" />
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500 ring-2 ring-card" />
+                      </span>
+                    </span>
+                  </span>
+                  <span
+                    className={`mb-1.5 text-[10px] font-extrabold tracking-wide bg-gradient-to-r from-fuchsia-600 via-rose-500 to-amber-500 bg-clip-text text-transparent`}
+                  >
+                    Reels
+                  </span>
+                </button>
+              );
+            }
             return (
               <button
                 key={t.path}
                 onClick={() => navigate(t.path)}
-                className="relative flex flex-col items-center justify-end flex-1 -mt-6"
+                className="relative flex flex-col items-center justify-center gap-0.5 flex-1 transition-colors"
                 aria-label="Reels"
               >
-                <span className="absolute inset-x-0 -top-6 flex justify-center pointer-events-none">
-                  <span className="relative flex h-14 w-14 items-center justify-center">
-                    {/* pulsing halo */}
-                    <span className="absolute inset-0 rounded-full bg-sale/40 animate-ping" />
-                    <span className="absolute -inset-1 rounded-full bg-gradient-to-tr from-fuchsia-500 via-rose-500 to-amber-400 blur-[6px] opacity-70" />
-                    {/* solid gradient button */}
-                    <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-fuchsia-600 via-rose-500 to-amber-400 shadow-[0_8px_24px_-4px_rgba(244,63,94,0.6)] ring-4 ring-card">
-                      <Icon className="h-7 w-7 text-white drop-shadow" strokeWidth={2.25} />
-                    </span>
-                    {/* LIVE dot */}
-                    <span className="absolute top-0 right-0 flex h-3 w-3">
-                      <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75" />
-                      <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500 ring-2 ring-card" />
-                    </span>
-                  </span>
-                </span>
                 <span
-                  className={`mb-1.5 text-[10px] font-extrabold tracking-wide bg-gradient-to-r from-fuchsia-600 via-rose-500 to-amber-500 bg-clip-text text-transparent`}
-                >
+                  className={`absolute top-0 left-1/2 -translate-x-1/2 h-0.5 rounded-full transition-all ${
+                    isReelsActive ? "w-8 bg-sale" : "w-0 bg-transparent"
+                  }`}
+                  aria-hidden
+                />
+                <div className="relative flex h-5 w-5 items-center justify-center rounded-md bg-gradient-to-tr from-fuchsia-600 via-rose-500 to-amber-400 shadow-sm">
+                  <Icon className="h-3.5 w-3.5 text-white" strokeWidth={2.25} />
+                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-card" />
+                </div>
+                <span className={`text-[10px] ${isReelsActive ? "font-bold bg-gradient-to-r from-fuchsia-600 via-rose-500 to-amber-500 bg-clip-text text-transparent" : "font-medium text-muted-foreground"}`}>
                   Reels
                 </span>
               </button>
