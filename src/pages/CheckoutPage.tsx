@@ -14,6 +14,7 @@ import QPayPayment from "@/components/store/QPayPayment";
 import PocketPayment from "@/components/store/PocketPayment";
 import SonoPayment from "@/components/store/SonoPayment";
 import OmniWayPayment from "@/components/store/OmniWayPayment";
+import { fbTrack, CURRENCY } from "@/lib/metaPixel";
 import { track, attachLeadContact } from "@/lib/tracking";
 import { useBundleFreeDelivery } from "@/lib/bundleDelivery";
 import { hasFreeDeliveryProduct } from "@/lib/freeDeliveryProducts";
@@ -437,6 +438,18 @@ const CheckoutPage = () => {
   };
 
 
+  // Facebook Pixel - amjilttai hudaldan avalt
+  const firePurchase = (pm: string) => {
+    fbTrack("Purchase", {
+      value: grandTotal,
+      currency: CURRENCY,
+      content_type: "product",
+      content_ids: items.map((i) => i.product.id),
+      num_items: items.reduce((s, i) => s + i.quantity, 0),
+      payment_method: pm,
+    });
+  };
+
   const handleStorepayStart = async () => {
     if (!phone.trim() || !address.trim()) { toast.error("Утас, хаяг заавал бөглөнө үү"); return; }
     if (isGuestCheckout && !name.trim()) { toast.error("Нэр заавал бөглөнө үү"); return; }
@@ -452,6 +465,7 @@ const CheckoutPage = () => {
   };
 
   const handleStorepaySuccess = () => {
+    firePurchase("storepay");
     clearCart();
     setOrdered(true);
   };
@@ -476,6 +490,7 @@ const CheckoutPage = () => {
   };
 
   const handleQPaySuccess = () => {
+    firePurchase("qpay");
     clearCart();
     setOrdered(true);
   };
@@ -500,6 +515,7 @@ const CheckoutPage = () => {
   };
 
   const handlePocketSuccess = () => {
+    firePurchase("pocket");
     clearCart();
     setOrdered(true);
   };
@@ -523,6 +539,7 @@ const CheckoutPage = () => {
   };
 
   const handleSonoSuccess = () => {
+    firePurchase("sono");
     clearCart();
     setOrdered(true);
   };
@@ -545,6 +562,7 @@ const CheckoutPage = () => {
   };
 
   const handleOmniWaySuccess = () => {
+    firePurchase("omniway");
     clearCart();
     setOrdered(true);
   };
