@@ -135,7 +135,16 @@ const PIXEL_MAP: Record<string, string> = {
   search: "Search",
 };
 
+let firstPageViewSkipped = false;
+
 function sendToPixel(eventType: string, payload: TrackPayload) {
+  // index.html дээрх анхны PageView-тэй давхцахаас сэргийлнэ
+  if (eventType === "page_view") {
+    if (!firstPageViewSkipped) {
+      firstPageViewSkipped = true;
+      return;
+    }
+  }
   const params: Record<string, unknown> = {
     currency: CURRENCY,
     ...(payload.product_id ? { content_ids: [payload.product_id], content_type: "product" } : {}),
