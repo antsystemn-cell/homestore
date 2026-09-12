@@ -21,6 +21,7 @@ import {
   Shirt,
 } from "lucide-react";
 import { toast } from "sonner";
+import { fbTrackCustom } from "@/lib/metaPixel";
 import {
   recommendSize,
   seedConfig,
