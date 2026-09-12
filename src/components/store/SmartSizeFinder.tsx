@@ -161,6 +161,11 @@ export default function SmartSizeFinder({
 
   const logEvent = useCallback(
     (event_type: string, extra: Record<string, any> = {}) => {
+      // Facebook Pixel — размер сонголтын үйлдлүүд
+      fbTrackCustom(
+        `SizeFinder_${event_type}`,
+        { content_ids: [productId], content_type: "product", ...extra },
+      );
       supabase
         .from("size_finder_events" as any)
         .insert({
