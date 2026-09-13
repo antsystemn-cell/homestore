@@ -4497,15 +4497,15 @@ const AdminPage = () => {
           {tab === "orders" && (
             <div className="space-y-3">
               {/* Manual external order */}
-              <div className="flex items-center justify-between gap-3 flex-wrap">
-                <p className="text-xs text-muted-foreground">
+              <div className="space-y-3 md:flex md:items-center md:justify-between md:gap-3 md:space-y-0">
+                <p className="text-xs leading-relaxed text-muted-foreground">
                   Facebook, утас гэх мэт сувгаар орж ирсэн борлуулалтыг "Захиалга оруулах" товчоор бүртгэнэ үү.
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
                   <button
                     onClick={handleRefresh}
                     disabled={refreshing}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary text-sm font-medium hover:bg-secondary/80 transition-colors disabled:opacity-50"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-secondary px-3 py-2 text-xs font-medium transition-colors hover:bg-secondary/80 disabled:opacity-50 sm:min-h-0 sm:text-sm"
                     title="Захиалга шинэчлэх"
                   >
                     <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
@@ -4513,7 +4513,7 @@ const AdminPage = () => {
                   </button>
                   <button
                     onClick={() => navigate("/quick-order")}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary text-sm font-medium hover:bg-secondary/80 transition-colors"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-secondary px-3 py-2 text-xs font-medium transition-colors hover:bg-secondary/80 sm:min-h-0 sm:text-sm"
                     title="Хурдан захиалга (AI/дуут оролт)"
                   >
                     <Zap className="h-4 w-4" />
@@ -4525,15 +4525,15 @@ const AdminPage = () => {
                       navigator.clipboard?.writeText(url).catch(() => {});
                       toast.success("Гар утасны линк хуулагдлаа: " + url);
                     }}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary text-sm font-medium hover:bg-secondary/80 transition-colors"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-secondary px-3 py-2 text-xs font-medium transition-colors hover:bg-secondary/80 sm:min-h-0 sm:text-sm"
                     title="Гар утсаар нээх линк хуулах (/admin/manual-order)"
                   >
                     <Smartphone className="h-4 w-4" />
-                    <span className="hidden sm:inline">Утасны линк</span>
+                    <span>Утасны линк</span>
                   </button>
                   <button
                     onClick={() => { resetManualForm(); setShowManualOrder(true); }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow hover:opacity-90 transition-opacity"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2 text-xs font-bold text-primary-foreground shadow transition-opacity hover:opacity-90 sm:min-h-0 sm:px-4 sm:text-sm"
                   >
                     <Plus className="h-4 w-4" />
                     Захиалга оруулах
@@ -4674,28 +4674,28 @@ const AdminPage = () => {
                 return (
                   <>
                     {/* Sub-tabs: Идэвхтэй / Хүргэлтэнд өгсөн, төлбөр ороогүй / Хүргэгдсэн */}
-                    <div className="bg-card rounded-xl border border-border p-2 overflow-x-auto no-scrollbar">
-                      <div className="flex items-center gap-2 min-w-max">
+                    <div className="rounded-xl border border-border bg-card p-2">
+                      <div className="grid grid-cols-3 gap-1.5 md:flex md:items-center md:gap-2">
                         <button
                           type="button"
                           onClick={() => { setOrdersSubTab("active"); setBulkSelected(new Set()); }}
-                          className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${ordersSubTab === "active" ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}
+                          className={`inline-flex min-w-0 items-center justify-center gap-1 px-2 py-2.5 text-center text-[10px] font-bold leading-tight transition-all rounded-lg md:rounded-full md:px-4 md:text-xs md:whitespace-nowrap ${ordersSubTab === "active" ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}
                         >
                           <Package className="h-3.5 w-3.5" />
-                          Идэвхтэй захиалга <span className="ml-0.5 opacity-80">({activeCount})</span>
+                          <span><span className="md:hidden">Идэвхтэй</span><span className="hidden md:inline">Идэвхтэй захиалга</span> <span className="opacity-80">({activeCount})</span></span>
                         </button>
                         <button
                           type="button"
                           onClick={() => { setOrdersSubTab("unpaid_delivery"); setBulkSelected(new Set()); }}
-                          className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${ordersSubTab === "unpaid_delivery" ? "bg-amber-500 text-white shadow-md shadow-amber-500/25" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}
+                          className={`inline-flex min-w-0 items-center justify-center gap-1 px-2 py-2.5 text-center text-[10px] font-bold leading-tight transition-all rounded-lg md:rounded-full md:px-4 md:text-xs md:whitespace-nowrap ${ordersSubTab === "unpaid_delivery" ? "bg-amber-500 text-primary-foreground shadow-md shadow-amber-500/25" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}
                         >
                           <AlertCircle className="h-3.5 w-3.5" />
-                          Хүргэлтэнд өгсөн, төлбөр ороогүй <span className="ml-0.5 opacity-80">({unpaidDeliveryCount})</span>
+                          <span><span className="md:hidden">Төлбөргүй</span><span className="hidden md:inline">Хүргэлтэнд өгсөн, төлбөр ороогүй</span> <span className="opacity-80">({unpaidDeliveryCount})</span></span>
                         </button>
                         <button
                           type="button"
                           onClick={() => { setOrdersSubTab("delivered"); setBulkSelected(new Set()); }}
-                          className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${ordersSubTab === "delivered" ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/25" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}
+                          className={`inline-flex min-w-0 items-center justify-center gap-1 px-2 py-2.5 text-center text-[10px] font-bold leading-tight transition-all rounded-lg md:rounded-full md:px-4 md:text-xs md:whitespace-nowrap ${ordersSubTab === "delivered" ? "bg-emerald-500 text-primary-foreground shadow-md shadow-emerald-500/25" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}
                         >
                           <Truck className="h-3.5 w-3.5" />
                           Дууссан <span className="ml-0.5 opacity-80">({deliveredCount})</span>
@@ -4733,8 +4733,8 @@ const AdminPage = () => {
                     <div className="bg-card rounded-xl border border-border p-3 md:p-4 space-y-2">
 
 
-                      <div className="flex items-center justify-between gap-3 flex-wrap">
-                        <div className="flex items-center gap-3">
+                      <div className="space-y-3 md:flex md:items-center md:justify-between md:gap-3 md:space-y-0">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                           <Checkbox
                             checked={allChecked ? true : someChecked ? "indeterminate" : false}
                             onCheckedChange={toggleAll}
@@ -4747,7 +4747,7 @@ const AdminPage = () => {
                             {bulkSelected.size} захиалга сонгосон
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 flex-wrap">
+                        <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center">
                           <Button
                             type="button"
                             size="sm"
@@ -4781,7 +4781,7 @@ const AdminPage = () => {
                               }
                             }}
                             disabled={bulkSelected.size === 0}
-                            className="gap-1.5"
+                            className="h-auto min-h-10 w-full justify-center gap-1.5 whitespace-normal px-2 text-[11px] leading-tight md:w-auto md:min-h-0 md:px-3 md:text-xs"
                             title="Сонгосон захиалгуудыг 70x80mm босоо PDF (хаяг + утас + бараа) болгож татах"
                           >
                             <FileSpreadsheet className="h-4 w-4" />
@@ -4801,7 +4801,7 @@ const AdminPage = () => {
                               setBulkSelected(new Set(todayIds));
                               toast.success(`Өнөөдрийн ${todayIds.length} захиалга сонгогдлоо`);
                             }}
-                            className="gap-1.5"
+                            className="h-auto min-h-10 w-full justify-center gap-1.5 whitespace-normal px-2 text-[11px] leading-tight md:w-auto md:min-h-0 md:px-3 md:text-xs"
                             title="Өнөөдөр үүсгэсэн бүх захиалгыг сонгох"
                           >
                             <Calendar className="h-4 w-4" />
@@ -4818,7 +4818,7 @@ const AdminPage = () => {
                               handlePrintRequest(chosen);
                             }}
                             disabled={bulkSelected.size === 0}
-                            className="gap-1.5"
+                            className="h-auto min-h-10 w-full justify-center gap-1.5 whitespace-normal px-2 text-[11px] leading-tight md:w-auto md:min-h-0 md:px-3 md:text-xs"
                           >
                             <FileText className="h-4 w-4" />
                             Хэвлэх ({bulkSelected.size})
@@ -4838,7 +4838,7 @@ const AdminPage = () => {
                               setBulkDeliverDialog({ orderIds: validIds, driverId: "" });
                             }}
                             disabled={bulkSelected.size === 0}
-                            className="gap-1.5 bg-violet-600 hover:bg-violet-700 text-white"
+                            className="h-auto min-h-10 w-full justify-center gap-1.5 whitespace-normal bg-violet-600 px-2 text-[11px] leading-tight text-primary-foreground hover:bg-violet-700 md:w-auto md:min-h-0 md:px-3 md:text-xs"
                             title="Сонгосон бүх захиалгыг нэг жолоочид өгөх"
                           >
                             <Truck className="h-4 w-4" />
@@ -4857,8 +4857,8 @@ const AdminPage = () => {
                       return (
                         <div key={o.id} className={`bg-card rounded-xl border overflow-hidden ${(o.payment_status !== "confirmed" && o.payment_status !== "paid" && o.payment_method !== "exchange") ? "border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.2)]" : "border-border"}`}>
                           {/* Order header - clickable */}
-                          <div className="flex items-stretch">
-                            <div className="flex items-center pl-3" onClick={(e) => e.stopPropagation()}>
+                          <div className="grid grid-cols-[auto_minmax(0,1fr)] md:flex md:items-stretch">
+                            <div className="flex items-start pl-3 pt-4 md:items-center md:pt-0" onClick={(e) => e.stopPropagation()}>
                               <Checkbox
                                 checked={isChecked}
                                 onCheckedChange={(v) => {
@@ -4873,7 +4873,7 @@ const AdminPage = () => {
                             </div>
                             <button
                               onClick={() => setExpandedOrderId(isExpanded ? null : o.id)}
-                              className="flex-1 flex items-center gap-3 p-4 text-left hover:bg-secondary/30 transition-colors"
+                              className="min-w-0 p-3 text-left transition-colors hover:bg-secondary/30 md:flex md:flex-1 md:items-center md:gap-3 md:p-4"
                             >
 
                       <div className="flex-1 min-w-0">
@@ -4900,7 +4900,7 @@ const AdminPage = () => {
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                           <span className="font-semibold text-foreground">{formatPrice(o.total)}</span>
                           <span>{o.phone || "—"}</span>
                           <span>{new Date(o.created_at).toLocaleDateString("mn-MN")} {new Date(o.created_at).toLocaleTimeString("mn-MN", { hour: "2-digit", minute: "2-digit" })}</span>
@@ -4953,7 +4953,8 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                         )}
                       </div>
                       {/* Хүргэлт дууссан мэдээллийг 'Хүргэгдсэн' дэд таб руу шилжүүлсэн */}
-                      <div className="flex items-center gap-2">
+                      </button>
+                      <div className="col-span-2 flex items-center justify-end gap-1 border-t border-border/70 px-3 py-2 md:col-span-1 md:border-0 md:pr-3">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -4973,7 +4974,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                             ].join("\t");
                             navigator.clipboard.writeText(clipText).then(() => toast.success("Excel-д хуулагдлаа")).catch(() => toast.error("Хуулж чадсангүй"));
                           }}
-                          className="p-2 rounded-lg hover:bg-primary/10 text-primary transition-colors"
+                          className="flex min-h-10 min-w-10 items-center justify-center rounded-lg text-primary transition-colors hover:bg-primary/10"
                           title="Excel-д хуулах"
                         >
                           📋
@@ -4982,7 +4983,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                           <button
                             onClick={(e) => { e.stopPropagation(); openOrderInPortal(o); }}
                             disabled={openingPortal === o.id}
-                            className="p-2 rounded-lg hover:bg-primary/10 text-primary transition-colors disabled:opacity-50"
+                            className="flex min-h-10 min-w-10 items-center justify-center rounded-lg text-primary transition-colors hover:bg-primary/10 disabled:opacity-50"
                             title="Хүргэлтийн порталаар харах"
                           >
                             {openingPortal === o.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
@@ -5014,7 +5015,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                                 }).catch(console.error);
                               }
                             }}
-                            className={`p-2 rounded-lg transition-colors ${(o.payment_status === "confirmed" || o.payment_status === "paid") ? "hover:bg-amber-500/10 text-amber-600" : "hover:bg-emerald-500/10 text-emerald-600"}`}
+                            className={`flex min-h-10 min-w-10 items-center justify-center rounded-lg transition-colors ${(o.payment_status === "confirmed" || o.payment_status === "paid") ? "hover:bg-amber-500/10 text-amber-600" : "hover:bg-emerald-500/10 text-emerald-600"}`}
                             title={(o.payment_status === "confirmed" || o.payment_status === "paid") ? "Төлөгдөөгүй гэж тэмдэглэх" : "Төлбөр орсон гэж тэмдэглэх"}
                           >
                             <BadgeCheck className="h-4 w-4" />
@@ -5023,20 +5024,26 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                         {o.status === "cancelled" && isAdmin && (
                           <button
                             onClick={(e) => { e.stopPropagation(); setDeleteOrderTarget({ id: o.id }); }}
-                            className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"
+                            className="flex min-h-10 min-w-10 items-center justify-center rounded-lg text-destructive transition-colors hover:bg-destructive/10"
                             title="Устгах"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
                         )}
-                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                        <button
+                          type="button"
+                          onClick={() => setExpandedOrderId(isExpanded ? null : o.id)}
+                          className="flex min-h-10 min-w-10 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary"
+                          aria-label={isExpanded ? "Захиалгыг хураах" : "Захиалгыг дэлгэрүүлэх"}
+                        >
+                          <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                        </button>
                       </div>
-                    </button>
                   </div>
 
                     {/* Expanded details */}
                     {isExpanded && (
-                      <div className="border-t border-border p-4 space-y-4">
+                      <div className="space-y-4 border-t border-border p-3 md:p-4">
                         {/* Status timeline */}
                         <OrderStatusTimeline orderId={o.id} currentStatus={o.status} />
                         {/* Order items */}
@@ -5061,7 +5068,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                               const upd = (patch: Record<string, any>) => updateOrderItemLocal(o.id, idx, patch);
                               return (
                               <div key={idx} className="bg-secondary/30 rounded-lg p-2">
-                                <div className="flex items-center gap-3">
+                                <div className="flex flex-wrap items-center gap-2 md:flex-nowrap md:gap-3">
                                   {item.image && <img src={item.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-secondary" />}
                                   <div className="flex-1 min-w-0">
                                     <p className="text-xs font-medium truncate">{item.name}</p>
@@ -5072,7 +5079,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                                       {(item.product_code || item.color || item.size) ? " · " : ""}x{item.quantity}
                                     </p>
                                   </div>
-                                  <span className="text-xs font-bold">{formatPrice(item.price * item.quantity)}</span>
+                                   <span className="ml-auto text-xs font-bold md:ml-0">{formatPrice(item.price * item.quantity)}</span>
                                   {isAdmin && (
                                     <>
                                       <button
@@ -5483,7 +5490,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                           <select
                             value={o.status}
                             onChange={(e) => updateOrderStatus(o.id, e.target.value)}
-                            className={`text-xs font-bold px-3 py-2 rounded-xl border border-border cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 ${statusColors[o.status] || "bg-secondary text-muted-foreground"}`}
+                            className={`w-full cursor-pointer rounded-xl border border-border px-3 py-3 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 md:w-auto md:py-2 ${statusColors[o.status] || "bg-secondary text-muted-foreground"}`}
                           >
                             {Object.entries(statusLabels).map(([value, label]) => (
                               <option key={value} value={value}>{label}</option>
