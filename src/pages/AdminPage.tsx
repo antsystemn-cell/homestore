@@ -7010,12 +7010,12 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
               )}
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="grid grid-cols-1 gap-2 pt-2 sm:grid-cols-2">
               <button
                 type="button"
                 onClick={() => setDeliverDialog(null)}
                 disabled={savingDeliverDialog}
-                className="px-4 py-2 rounded-lg text-sm font-semibold bg-secondary hover:bg-secondary/70 disabled:opacity-50"
+                className="min-h-11 w-full rounded-lg bg-secondary px-4 py-2 text-sm font-semibold hover:bg-secondary/70 disabled:opacity-50"
               >
                 Болих
               </button>
@@ -7023,7 +7023,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                 type="button"
                 onClick={confirmDeliverDispatch}
                 disabled={savingDeliverDialog || !deliverDialog.driverId}
-                className="px-4 py-2 rounded-lg text-sm font-bold bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-50 inline-flex items-center gap-2"
+                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-bold text-primary-foreground hover:bg-violet-700 disabled:opacity-50"
               >
                 {savingDeliverDialog ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Truck className="h-3.5 w-3.5" />}
                 {deliverDialog.reassign ? "Жолооч солих" : "Хүргэлтэнд гаргах"}
@@ -7089,12 +7089,12 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
               </div>
             )}
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="grid grid-cols-1 gap-2 pt-2 sm:grid-cols-2">
               <button
                 type="button"
                 onClick={() => setBulkDeliverDialog(null)}
                 disabled={!!bulkDispatchProgress}
-                className="px-4 py-2 rounded-lg text-sm font-semibold bg-secondary hover:bg-secondary/70 disabled:opacity-50"
+                className="min-h-11 w-full rounded-lg bg-secondary px-4 py-2 text-sm font-semibold hover:bg-secondary/70 disabled:opacity-50"
               >
                 Болих
               </button>
@@ -7102,7 +7102,7 @@ o.delivery_status === "out_for_delivery" ? "Хүргэлтэнд" :
                 type="button"
                 onClick={confirmBulkDeliverDispatch}
                 disabled={!!bulkDispatchProgress || !bulkDeliverDialog.driverId}
-                className="px-4 py-2 rounded-lg text-sm font-bold bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-50 inline-flex items-center gap-2"
+                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-bold text-primary-foreground hover:bg-violet-700 disabled:opacity-50"
               >
                 {bulkDispatchProgress ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Truck className="h-3.5 w-3.5" />}
                 {bulkDispatchProgress ? "Илгээж байна..." : `${bulkDeliverDialog.orderIds.length} захиалга илгээх`}
