@@ -8,6 +8,13 @@
       "when": 1789195279052,
       "tag": "0000_auto_send_delivery_on_fulfillment_statuses",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789359829278,
+      "tag": "0001_add_temporarily_out_of_stock_flag",
+      "breakpoints": true
     }
   ]
 }
