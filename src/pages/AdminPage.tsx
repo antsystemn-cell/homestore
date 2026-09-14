@@ -4286,11 +4286,17 @@ const AdminPage = () => {
                       ))}
                     </div>
                   )}
-                  <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-secondary/30">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center gap-3 p-3 rounded-xl border border-border bg-secondary/30">
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
                       <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="rounded accent-primary" />
                       <span className={form.is_active ? "text-foreground font-medium" : "text-destructive font-medium"}>
                         {form.is_active ? "✅ Идэвхтэй" : "⛔ Идэвхгүй (дэлгүүрт харагдахгүй)"}
+                      </span>
+                    </label>
+                    <label className="flex items-center gap-2 text-sm cursor-pointer sm:ml-auto">
+                      <input type="checkbox" checked={form.is_temporarily_out} onChange={(e) => setForm({ ...form, is_temporarily_out: e.target.checked })} className="rounded accent-amber-500" />
+                      <span className={form.is_temporarily_out ? "text-amber-600 font-medium" : "text-muted-foreground font-medium"}>
+                        {form.is_temporarily_out ? "⏳ Түр дууссан" : "Түр дууссан (тэмдэглэх)"}
                       </span>
                     </label>
                   </div>
