@@ -411,6 +411,7 @@ const AdminPage = () => {
     stock_quantity: 0,
     variant_stock: {} as Record<string, number>,
     average_reorder_days: 0,
+    is_temporarily_out: false,
   });
   const [newColor, setNewColor] = useState("");
   const [newSize, setNewSize] = useState("");
@@ -864,7 +865,7 @@ const AdminPage = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from("products").select("id, name, price, original_price, image_url, thumbnail_url, category, sales, is_new, is_on_sale, is_bogo, has_gift, gift_name, is_active, discount, product_code, slug, brand_id, stock_quantity, variant_stock, colors, sizes, created_at").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("products").select("id, name, price, original_price, image_url, thumbnail_url, category, sales, is_new, is_on_sale, is_bogo, has_gift, gift_name, is_active, is_temporarily_out, discount, product_code, slug, brand_id, stock_quantity, variant_stock, colors, sizes, created_at").order("created_at", { ascending: false });
       if (error) throw error;
       setProducts(data || []);
     } catch (error) {
@@ -1695,7 +1696,7 @@ const AdminPage = () => {
   };
 
   const resetForm = () => {
-    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, is_bogo: false, has_gift: false, gift_name: "", gifts: [], gift_packages: [], is_active: true, product_code: "", slug: "", specifications: [], detail_media: [], brand_id: "", colors: [], sizes: [], stock_quantity: 0, variant_stock: {}, average_reorder_days: 0 });
+    setForm({ name: "", description: "", price: 0, original_price: 0, image_url: "", category: "general", discount: 0, is_new: false, is_on_sale: false, is_bogo: false, has_gift: false, gift_name: "", gifts: [], gift_packages: [], is_active: true, is_temporarily_out: false, product_code: "", slug: "", specifications: [], detail_media: [], brand_id: "", colors: [], sizes: [], stock_quantity: 0, variant_stock: {}, average_reorder_days: 0 });
     setNewColor(""); setNewSize("");
     setEditId(null);
     setShowForm(false);
@@ -1751,6 +1752,7 @@ const AdminPage = () => {
         : [],
       gift_name: form.has_gift ? ((form.gift_packages || [])[0]?.name || (form.gifts || []).filter(g => g && (g.name || "").trim())[0]?.name?.trim() || null) : null,
       is_active: form.is_active,
+      is_temporarily_out: form.is_temporarily_out,
       product_code: form.product_code || null,
       slug: form.slug.trim() || cyrillicToLatinSlug(form.name),
       specifications: form.specifications.filter(s => s.key.trim() && s.value.trim()),
@@ -1853,7 +1855,7 @@ const AdminPage = () => {
       name: p.name, description: full.description || "", price: p.price,
       original_price: p.original_price || 0, image_url: p.image_url || "",
       category: p.category, discount: p.discount || 0,
-      is_new: p.is_new, is_on_sale: p.is_on_sale, is_bogo: p.is_bogo || false, has_gift: p.has_gift || false, gift_name: p.gift_name || "", gifts: giftsArr, gift_packages: pkgArr, is_active: p.is_active !== false,
+      is_new: p.is_new, is_on_sale: p.is_on_sale, is_bogo: p.is_bogo || false, has_gift: p.has_gift || false, gift_name: p.gift_name || "", gifts: giftsArr, gift_packages: pkgArr, is_active: p.is_active !== false, is_temporarily_out: p.is_temporarily_out === true,
       product_code: p.product_code || "",
       slug: p.slug || "",
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
@@ -1914,6 +1916,7 @@ const AdminPage = () => {
       gifts: dupGifts,
       gift_packages: dupPkgs,
       is_active: p.is_active !== false,
+      is_temporarily_out: false, // хуулбар үүсгэхдээ түр дууссан тэмдгийг арилгана
       product_code: "", // clear SKU — must be unique
       slug: "",          // auto-generated on save
       specifications: specs.map((s: any) => ({ key: s.key || "", value: s.value || "" })),
