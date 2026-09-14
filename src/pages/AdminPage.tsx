@@ -4368,6 +4368,7 @@ const AdminPage = () => {
                               <div className="min-w-0">
                                 <span className="text-sm font-medium block truncate max-w-[200px]">{p.name}</span>
                                 {p.is_new && <span className="text-[10px] bg-blue-500/10 text-blue-600 px-1.5 py-0.5 rounded-full font-medium">Шинэ</span>}
+                                {p.is_temporarily_out && <span className="text-[10px] bg-amber-500/15 text-amber-600 px-1.5 py-0.5 rounded-full font-medium">⏳ Түр дууссан</span>}
                                 {p.is_active === false && <span className="text-[10px] bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full font-medium">Идэвхгүй</span>}
                               </div>
                             </div>
@@ -4457,9 +4458,10 @@ const AdminPage = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold truncate">{p.name}</p>
-                      <div className="flex items-center gap-2 mt-0.5">
+                      <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                         <p className="text-xs font-bold">{formatPrice(p.price)}</p>
                         {p.discount > 0 && <span className="text-[10px] text-destructive font-bold">-{p.discount}%</span>}
+                        {p.is_temporarily_out && <span className="text-[10px] bg-amber-500/15 text-amber-600 px-1.5 py-0.5 rounded-full font-medium">⏳ Түр дууссан</span>}
                       </div>
                     </div>
                     <a
