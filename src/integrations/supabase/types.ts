@@ -1919,6 +1919,7 @@ export type Database = {
           is_bogo: boolean | null
           is_new: boolean | null
           is_on_sale: boolean | null
+          is_temporarily_out: boolean
           name: string
           original_price: number | null
           price: number
@@ -1958,6 +1959,7 @@ export type Database = {
           is_bogo?: boolean | null
           is_new?: boolean | null
           is_on_sale?: boolean | null
+          is_temporarily_out?: boolean
           name: string
           original_price?: number | null
           price: number
@@ -1997,6 +1999,7 @@ export type Database = {
           is_bogo?: boolean | null
           is_new?: boolean | null
           is_on_sale?: boolean | null
+          is_temporarily_out?: boolean
           name?: string
           original_price?: number | null
           price?: number
